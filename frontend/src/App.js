@@ -21,7 +21,7 @@ import MatchesPage from './pages/Matches/MatchesPage';
 import ActivityPage from './pages/Activity/ActivityPage';
 import ActivitiesPage from './pages/Activity/ActivitiesPage';
 import LogActivityPage from './pages/Activity/LogActivityPage';
-import LiveTrackingPage from './pages/Activity/LiveTrackingPage';
+// import LiveTrackingPage from './pages/Activity/LiveTrackingPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import ChallengesPage from './pages/Challenges/ChallengesPage';
 import CreateChallengePage from './pages/Challenges/CreateChallengePage';

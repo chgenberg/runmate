@@ -8,7 +8,7 @@ import {
   User, 
   Activity, 
   Trophy, 
-  Hash,
+  // Hash,
   ArrowRight
 } from 'lucide-react';
 import api from '../../services/api';

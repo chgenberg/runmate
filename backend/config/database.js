@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/runmate', {
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/runmate';
+    console.log('DEBUG: MONGODB_URI environment variable:', process.env.MONGODB_URI ? 'SET' : 'NOT SET');
+    console.log('DEBUG: Using MongoDB URI:', mongoUri.substring(0, 50) + '...');
+    
+    const conn = await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

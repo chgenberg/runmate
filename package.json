@@ -1,0 +1,31 @@
+{
+  "name": "runmate-app",
+  "version": "1.0.0",
+  "description": "Tinder-like social app for runners and cyclists with Strava-inspired features",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "keywords": [
+    "running",
+    "cycling",
+    "social",
+    "matching",
+    "fitness",
+    "community"
+  ],
+  "author": "RunMate Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "ics": "^3.8.1"
+  }
+}

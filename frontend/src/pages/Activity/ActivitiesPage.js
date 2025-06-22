@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Footprints, ChevronRight, Repeat, Target, MapPin, Mountain, 
     Plus, Navigation, Calendar, Timer, TrendingUp,
-    Zap, Award, Filter, ArrowUpDown, Activity
+    Zap, Award, Filter, Activity
 } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';

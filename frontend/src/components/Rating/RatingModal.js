@@ -17,7 +17,6 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const RatingModal = ({ isOpen, onClose, participant, event }) => {
-  const [step, setStep] = useState(1); // 1: Rating, 2: Report (optional)
   const [rating, setRating] = useState(5);
   const [selectedCategories, setSelectedCategories] = useState({});
   const [comment, setComment] = useState('');

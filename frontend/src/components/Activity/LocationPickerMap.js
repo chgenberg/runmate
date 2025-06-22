@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
 const LocationPicker = ({ onLocationSelect }) => {
   const [position, setPosition] = useState(null);
 
-  const map = useMapEvents({
+  useMapEvents({
     click(e) {
       setPosition(e.latlng);
       onLocationSelect(e.latlng);

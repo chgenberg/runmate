@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Clock, Users, Sparkles, ArrowRight, Activity, Star, TrendingUp } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, ArrowRight } from 'lucide-react';
 import UserRatingProfile from '../Rating/UserRatingProfile';
 
 const formatPace = (secondsPerKm) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Calendar, MapPin, Clock, Bell } from 'lucide-react';
+import { Star, Calendar, Clock, Bell } from 'lucide-react';
 import api from '../../services/api';
 import RatingModal from './RatingModal';
 import moment from 'moment';

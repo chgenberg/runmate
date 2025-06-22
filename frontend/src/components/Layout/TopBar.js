@@ -3,7 +3,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { 
   BellIcon, 
-  MagnifyingGlassIcon, 
   UserIcon,
   Bars3Icon
 } from '@heroicons/react/24/outline';

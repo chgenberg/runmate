@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Star, 
@@ -21,11 +21,8 @@ const UserRatingProfile = ({ userId, compact = false }) => {
   const [ratings, setRatings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchRatingData();
-  }, [userId]);
-
-  const fetchRatingData = async () => {
+  const fetchRatingData = useCallback(async () => {
+    if (!userId) return;
     setIsLoading(true);
     try {
       const [statsResponse, ratingsResponse] = await Promise.all([
@@ -40,7 +37,11 @@ const UserRatingProfile = ({ userId, compact = false }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    fetchRatingData();
+  }, [fetchRatingData]);
 
   const categories = [
     { key: 'punctual', label: 'Kom i tid', icon: Clock, color: 'blue' },

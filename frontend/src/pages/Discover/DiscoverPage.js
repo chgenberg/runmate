@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, PlusCircle, Search, Compass, MapPin, Calendar, Clock, Users, Sparkles, TrendingUp } from 'lucide-react';
+import { Filter, PlusCircle, Search, Compass, Sparkles, TrendingUp } from 'lucide-react';
 import api from '../../services/api';
 import RunEventCard from '../../components/RunEvents/RunEventCard';
-import UserRatingProfile from '../../components/Rating/UserRatingProfile';
 import toast from 'react-hot-toast';
 import FilterPanel from '../../components/Discover/FilterPanel';
 

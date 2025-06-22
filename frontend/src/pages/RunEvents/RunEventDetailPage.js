@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Zap, Check, X, Edit, Trash2, Send, LogOut, Loader2, MessageSquare, Download, Sparkles, Activity, Shield, UserPlus } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Zap, Check, X, Edit, Trash2, LogOut, Loader2, MessageSquare, Download, Sparkles, Activity, Shield, UserPlus } from 'lucide-react';
 import { createEvent } from 'ics';
 import EventMap from '../../components/Activity/EventMap';
 import { EventLoader } from '../../components/Layout/LoadingSpinner';

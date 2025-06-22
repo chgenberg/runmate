@@ -11,7 +11,6 @@ import {
   Target,
   Trophy,
   Users,
-  Award,
   Activity,
   Star,
   ArrowUp,
@@ -19,7 +18,6 @@ import {
   Wind,
   Zap
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import moment from 'moment';
 import 'moment/locale/sv'; // for Swedish locale

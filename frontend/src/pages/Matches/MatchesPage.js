@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Send, MessageSquare, ArrowLeft, Users, Clock, Search, Sparkles, Activity, MoreVertical, Phone, Video, Smile } from 'lucide-react';
+import { Send, MessageSquare, ArrowLeft, Users, Search, MoreVertical, Phone, Video, Smile } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';

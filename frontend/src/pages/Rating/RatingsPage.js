@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Star, 
-  Trophy, 
-  Award, 
-  TrendingUp, 
+  Trophy,
+  TrendingUp,
   Clock, 
-  Calendar,
-  MapPin,
   ChevronRight,
   Sparkles,
   Crown,
@@ -18,11 +15,8 @@ import {
   Users,
   CheckCircle,
   Brain,
-  ThumbsUp,
-  Target,
   Activity
 } from 'lucide-react';
-import PendingRatings from '../../components/Rating/PendingRatings';
 import UserRatingProfile from '../../components/Rating/UserRatingProfile';
 import RatingModal from '../../components/Rating/RatingModal';
 import { useAuth } from '../../contexts/AuthContext';

@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Trophy, 
   Crown, 
   Award, 
   Medal, 
   TrendingUp, 
-  MapPin, 
-  Filter,
-  Calendar,
-  Users,
-  Target,
+  MapPin,
   Activity,
   Star,
   Globe,
   ChevronDown,
   X
 } from 'lucide-react';
-import api from '../../services/api';
-import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 // Dummy data för topplistan
@@ -145,10 +139,7 @@ const swedishMunicipalities = [
 ];
 
 const LeaderboardPage = () => {
-  const { user } = useAuth();
   const [leaderboard, setLeaderboard] = useState(dummyLeaderboard);
-  const [currentUserRank, setCurrentUserRank] = useState({ rank: 15, points: 1650 });
-  const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({
     type: 'points', // points, level, distance
     timeframe: 'all', // week, month, all
@@ -225,16 +216,6 @@ const LeaderboardPage = () => {
             <div>
               <h1 className="text-4xl font-black mb-2">🏆 Topplistan</h1>
               <p className="text-xl text-white/90 mb-6">Se hur du mäter dig mot andra löpare</p>
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 backdrop-blur rounded-2xl px-6 py-3 border border-white/30">
-                  <p className="text-sm text-white/80">Din position</p>
-                  <p className="text-2xl font-black">#{currentUserRank.rank}</p>
-                </div>
-                <div className="bg-white/20 backdrop-blur rounded-2xl px-6 py-3 border border-white/30">
-                  <p className="text-sm text-white/80">Dina poäng</p>
-                  <p className="text-2xl font-black">{currentUserRank.points}</p>
-                </div>
-              </div>
             </div>
             <div className="text-6xl">🏃‍♂️</div>
           </div>

@@ -1,19 +1,18 @@
 import axios from 'axios';
 
-// Production API URL - Updated 2025-06-22 to fix localhost issue
-// Build timestamp: 2025-06-22 20:12:00
-const API_BASE_URL = 'https://runmate-production.up.railway.app/api';
+// PRODUCTION API CONFIGURATION - FORCE NEW BUILD 2025-06-22
+const PRODUCTION_API_URL = 'https://runmate-production.up.railway.app/api';
 
-// Create axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
+// Create axios instance with production URL
+const apiClient = axios.create({
+  baseURL: PRODUCTION_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 // Request interceptor to add auth token
-api.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -27,7 +26,7 @@ api.interceptors.request.use(
 );
 
 // Response interceptor to handle auth errors
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -44,4 +43,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+export default apiClient; 

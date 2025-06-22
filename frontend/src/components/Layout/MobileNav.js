@@ -35,32 +35,27 @@ const MobileNav = () => {
       name: 'Matches',
       href: '/app/matches',
       icon: MessageSquare,
-    },
-    {
-      name: 'Inställningar',
-      href: '/app/settings',
-      icon: Settings,
     }
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 md:hidden">
-      <div className="grid grid-cols-6 h-16">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 md:hidden safe-area-bottom">
+      <div className="grid grid-cols-5">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.href}
             end // Important for the dashboard link to not stay active
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center pt-2 pb-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-primary-600' : 'text-gray-500 hover:text-primary-600'
+              `flex flex-col items-center justify-center pt-2 pb-2 text-xs font-medium transition-colors min-h-[60px] ${
+                isActive ? 'text-primary-600 bg-primary-50' : 'text-gray-500 hover:text-primary-600 active:bg-gray-50'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <item.icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
-                <span className="mt-1">{item.name}</span>
+                <item.icon className="h-6 w-6 mb-1" strokeWidth={isActive ? 2.5 : 2} />
+                <span className="text-[10px]">{item.name}</span>
               </>
             )}
           </NavLink>

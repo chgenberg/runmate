@@ -1,6 +1,19 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Get JWT secret with validation
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    console.warn('JWT_SECRET is not set or too short. Using fallback secret in development only.');
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET must be set in production');
+    }
+    return 'dev-secret-change-this-in-production-minimum-32-characters';
+  }
+  return secret;
+};
+
 // Protect routes - verify JWT token
 const protect = async (req, res, next) => {
   let token;
@@ -12,7 +25,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
 
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+      const decoded = jwt.verify(token, getJwtSecret());
 
       // Get user from token
       req.user = await User.findById(decoded.id).select('-password');
@@ -32,24 +45,39 @@ const protect = async (req, res, next) => {
         });
       }
 
-      // Update last active timestamp
-      req.user.lastActive = new Date();
-      await req.user.save();
+      // Update last active timestamp (only once per minute to reduce DB writes)
+      const lastUpdate = req.user.lastActive;
+      const now = new Date();
+      if (!lastUpdate || now - lastUpdate > 60000) { // 1 minute
+        req.user.lastActive = now;
+        await req.user.save();
+      }
 
       next();
     } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token'
+        });
+      } else if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          message: 'Token expired',
+          code: 'TOKEN_EXPIRED'
+        });
+      }
+      
       console.error('Token verification error:', error);
       return res.status(401).json({
         success: false,
         message: 'Not authorized, token failed'
       });
     }
-  }
-
-  if (!token) {
+  } else {
     return res.status(401).json({
       success: false,
-      message: 'Not authorized, no token'
+      message: 'Not authorized, no token provided'
     });
   }
 };
@@ -73,14 +101,15 @@ const premium = (req, res, next) => {
   } else {
     res.status(403).json({
       success: false,
-      message: 'Premium subscription required'
+      message: 'Premium subscription required',
+      code: 'PREMIUM_REQUIRED'
     });
   }
 };
 
 // Generate JWT token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback-secret', {
+  return jwt.sign({ id }, getJwtSecret(), {
     expiresIn: process.env.JWT_EXPIRE || '7d',
   });
 };
@@ -88,8 +117,18 @@ const generateToken = (id) => {
 // Rate limiting for auth endpoints
 const authRateLimit = require('express-rate-limit')({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 requests per windowMs for auth (increased for development)
+  max: process.env.NODE_ENV === 'production' ? 5 : 50, // 5 requests in production, 50 in development
   message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful requests
+});
+
+// Rate limiting for general API
+const apiRateLimit = require('express-rate-limit')({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // 1000 requests per 15 minutes
+  message: 'Too many requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -99,5 +138,6 @@ module.exports = {
   admin,
   premium,
   generateToken,
-  authRateLimit
+  authRateLimit,
+  apiRateLimit
 }; 

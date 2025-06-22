@@ -32,6 +32,19 @@ const refreshStravaToken = async (user) => {
   }
 };
 
+// Map Strava activity types to our sport types
+const mapStravaActivityType = (stravaType) => {
+  const typeMap = {
+    'Run': 'running',
+    'Ride': 'cycling',
+    'VirtualRun': 'running',
+    'VirtualRide': 'cycling',
+    'Walk': 'running', // Map walks to running category
+    'Hike': 'running'  // Map hikes to running category
+  };
+  return typeMap[stravaType] || null;
+};
+
 // @desc    Sync user's Strava activities
 // @route   POST /api/strava/sync
 // @access  Private
@@ -60,7 +73,9 @@ router.post('/sync', protect, async (req, res) => {
       headers: { Authorization: `Bearer ${user.stravaAccessToken}` },
     });
 
-    const response = await stravaApi.get('/athlete/activities?per_page=50');
+    // Get activities from the last 30 days by default
+    const after = req.query.after || Math.floor((Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000);
+    const response = await stravaApi.get(`/athlete/activities?after=${after}&per_page=100`);
     const stravaActivities = response.data;
 
     if (!stravaActivities || stravaActivities.length === 0) {
@@ -68,38 +83,99 @@ router.post('/sync', protect, async (req, res) => {
     }
 
     let syncedCount = 0;
-    for (const stravaActivity of stravaActivities) {
-      // We only care about runs
-      if (stravaActivity.type !== 'Run') continue;
-      
-      const existingActivity = await Activity.findOne({ user: user._id, stravaActivityId: stravaActivity.id });
-      if (existingActivity) continue;
+    let skippedCount = 0;
+    const errors = [];
 
-      // Create new activity in our DB
-      await Activity.create({
-        user: user._id,
-        stravaActivityId: stravaActivity.id,
-        title: stravaActivity.name,
-        sportType: 'running',
-        distance: stravaActivity.distance / 1000, // Convert meters to km
-        duration: stravaActivity.moving_time, // In seconds
-        date: new Date(stravaActivity.start_date),
-        pace: stravaActivity.average_speed > 0 ? 1000 / stravaActivity.average_speed : 0, // m/s to s/km
-        elevationGain: stravaActivity.total_elevation_gain,
-        map: {
-          summary_polyline: stravaActivity.map.summary_polyline,
-        },
-      });
-      syncedCount++;
+    for (const stravaActivity of stravaActivities) {
+      try {
+        // Map activity type
+        const sportType = mapStravaActivityType(stravaActivity.type);
+        if (!sportType) {
+          skippedCount++;
+          continue;
+        }
+        
+        // Check if activity already exists
+        const existingActivity = await Activity.findOne({ 
+          user: user._id, 
+          stravaActivityId: stravaActivity.id.toString() 
+        });
+        
+        if (existingActivity) {
+          skippedCount++;
+          continue;
+        }
+
+        // Calculate pace (minutes per km)
+        let pace = null;
+        if (stravaActivity.distance > 0 && stravaActivity.moving_time > 0) {
+          const speedKmh = (stravaActivity.distance / 1000) / (stravaActivity.moving_time / 3600);
+          pace = speedKmh > 0 ? 60 / speedKmh : null;
+        }
+
+        // Create new activity in our DB
+        await Activity.create({
+          user: user._id,
+          stravaActivityId: stravaActivity.id.toString(),
+          title: stravaActivity.name || `${stravaActivity.type} Activity`,
+          sportType: sportType,
+          distance: stravaActivity.distance / 1000, // Convert meters to km
+          duration: stravaActivity.moving_time, // In seconds
+          date: new Date(stravaActivity.start_date),
+          pace: pace,
+          elevationGain: stravaActivity.total_elevation_gain || 0,
+          averageHeartRate: stravaActivity.average_heartrate || null,
+          maxHeartRate: stravaActivity.max_heartrate || null,
+          calories: stravaActivity.calories || null,
+          location: stravaActivity.location_city || stravaActivity.location_state || 'Unknown',
+          map: stravaActivity.map ? {
+            summary_polyline: stravaActivity.map.summary_polyline,
+          } : null,
+          weather: {
+            temperature: stravaActivity.average_temp || null,
+          }
+        });
+        syncedCount++;
+      } catch (error) {
+        console.error(`Error syncing activity ${stravaActivity.id}:`, error.message);
+        errors.push({ activityId: stravaActivity.id, error: error.message });
+      }
     }
     
-    console.log(`Synced ${syncedCount} new activities for user ${user.id}`);
-    res.json({ success: true, message: `Successfully synced ${syncedCount} new activities.`, synced: syncedCount });
+    console.log(`Synced ${syncedCount} new activities, skipped ${skippedCount} for user ${user.id}`);
+    
+    const syncResponse = {
+      success: true,
+      message: `Successfully synced ${syncedCount} new activities.`,
+      synced: syncedCount,
+      skipped: skippedCount,
+      total: stravaActivities.length
+    };
+    
+    if (errors.length > 0) {
+      syncResponse.errors = errors;
+    }
+    
+    res.json(syncResponse);
 
   } catch (error) {
     console.error('Error syncing Strava activities:', error.response ? error.response.data : error.message);
     res.status(500).json({ success: false, message: 'Failed to sync activities from Strava.' });
   }
+});
+
+// @desc    Get Strava auth URL
+// @route   GET /api/strava/auth-url
+// @access  Private
+router.get('/auth-url', protect, (req, res) => {
+  const authUrl = `https://www.strava.com/oauth/authorize?` +
+    `client_id=${STRAVA_CLIENT_ID}&` +
+    `response_type=code&` +
+    `redirect_uri=${encodeURIComponent(STRAVA_REDIRECT_URI)}&` +
+    `approval_prompt=force&` +
+    `scope=read,activity:read_all`;
+    
+  res.json({ success: true, authUrl });
 });
 
 module.exports = router; 

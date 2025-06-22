@@ -443,6 +443,19 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  
+  .safe-area-x {
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+  
   /* Responsive text */
   .text-responsive {
     @apply text-sm sm:text-base lg:text-lg;

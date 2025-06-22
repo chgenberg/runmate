@@ -1,6 +1,6 @@
 {
   "name": "runmate-frontend",
-  "version": "0.2.9",
+  "version": "0.3.1",
   "private": true,
   "homepage": ".",
   "dependencies": {
@@ -41,7 +41,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -11,9 +11,10 @@ CADDY_VERSION = "2.7.6"
 # Install Caddy - following Railway's exact pattern
 cmds = [
     "curl -fsSLo caddy.tar.gz \"https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_linux_amd64.tar.gz\"",
-    "tar -xzf caddy.tar.gz caddy",
+    "tar -xzf caddy.tar.gz",
     "chmod +x caddy",
-    "ls -la caddy"
+    "mv caddy /usr/local/bin/caddy",
+    "caddy version"
 ]
 
 [phases.install]
@@ -21,9 +22,12 @@ cmds = [
 cmds = ["npm ci --production=false"]
 
 [phases.build]
-# Build the React app
-cmds = ["npm run build"]
+# Build the React app and copy Caddyfile
+cmds = [
+    "npm run build",
+    "cp Caddyfile build/Caddyfile"
+]
 
 [start]
-# Use Caddy to serve the built React app with explicit path
-cmd = "/app/caddy run --config /app/Caddyfile --adapter caddyfile 2>&1" 
+# Use Caddy to serve the built React app
+cmd = "cd build && caddy run --config Caddyfile --adapter caddyfile 2>&1" 

@@ -12,8 +12,9 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    birthDate: '',
-    sports: [],
+    dateOfBirth: '',
+    gender: '',
+    sportTypes: [],
     activityLevel: '',
     location: '',
     bio: ''
@@ -35,9 +36,9 @@ const RegisterPage = () => {
   const handleSportToggle = (sport) => {
     setFormData(prev => ({
       ...prev,
-      sports: prev.sports.includes(sport)
-        ? prev.sports.filter(s => s !== sport)
-        : [...prev.sports, sport]
+      sportTypes: prev.sportTypes.includes(sport)
+        ? prev.sportTypes.filter(s => s !== sport)
+        : [...prev.sportTypes, sport]
     }));
   };
 
@@ -67,7 +68,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.sports.length === 0) {
+    if (formData.sportTypes.length === 0) {
       toast.error('Välj minst en träningstyp');
       return;
     }
@@ -90,9 +91,9 @@ const RegisterPage = () => {
     }
   };
 
-  const calculateAge = (birthDate) => {
+  const calculateAge = (dateOfBirth) => {
     const today = new Date();
-    const birth = new Date(birthDate);
+    const birth = new Date(dateOfBirth);
     return today.getFullYear() - birth.getFullYear();
   };
 
@@ -242,18 +243,36 @@ const RegisterPage = () => {
                   </label>
                   <input
                     type="date"
-                    name="birthDate"
+                    name="dateOfBirth"
                     required
-                    value={formData.birthDate}
+                    value={formData.dateOfBirth}
                     onChange={handleChange}
                     max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   />
-                  {formData.birthDate && (
+                  {formData.dateOfBirth && (
                     <p className="mt-1 text-sm text-gray-500">
-                      Ålder: {calculateAge(formData.birthDate)} år
+                      Ålder: {calculateAge(formData.dateOfBirth)} år
                     </p>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Kön *
+                  </label>
+                  <select
+                    name="gender"
+                    required
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Välj kön</option>
+                    <option value="male">Man</option>
+                    <option value="female">Kvinna</option>
+                    <option value="other">Annat</option>
+                  </select>
                 </div>
 
                 <div>
@@ -305,16 +324,16 @@ const RegisterPage = () => {
                       >
                         <input
                           type="checkbox"
-                          checked={formData.sports.includes(sport.id)}
+                          checked={formData.sportTypes.includes(sport.id)}
                           onChange={() => handleSportToggle(sport.id)}
                           className="sr-only"
                         />
                         <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                          formData.sports.includes(sport.id)
+                          formData.sportTypes.includes(sport.id)
                             ? 'bg-primary-500 border-primary-500'
                             : 'border-gray-300'
                         }`}>
-                          {formData.sports.includes(sport.id) && (
+                          {formData.sportTypes.includes(sport.id) && (
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
@@ -334,8 +353,9 @@ const RegisterPage = () => {
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { id: 'beginner', label: 'Nybörjare', desc: 'Tränar sporadiskt' },
-                      { id: 'intermediate', label: 'Mellannivå', desc: '2-3 ggr/vecka' },
-                      { id: 'advanced', label: 'Avancerad', desc: '4-5 ggr/vecka' },
+                      { id: 'recreational', label: 'Mellannivå', desc: '2-3 ggr/vecka' },
+                      { id: 'serious', label: 'Seriös', desc: '4-5 ggr/vecka' },
+                      { id: 'competitive', label: 'Tävling', desc: '6+ ggr/vecka' },
                       { id: 'elite', label: 'Elite', desc: 'Daglig träning' }
                     ].map((level) => (
                       <button

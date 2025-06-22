@@ -1,1 +1,0 @@
-"use strict";"undefined"!==typeof process&&"production"!==process.env.NODE_ENV?module.exports=require("./index.cjs.development.cjs"):module.exports=require("./index.cjs.production.min.cjs");

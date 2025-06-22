@@ -3,7 +3,7 @@ const axios = require('axios');
 const { protect } = require('../middleware/auth');
 const User = require('../models/User');
 const Activity = require('../models/Activity');
-const { STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET } = require('../config/strava');
+const { STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REDIRECT_URI } = require('../config/strava');
 
 const router = express.Router();
 

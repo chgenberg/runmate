@@ -429,6 +429,22 @@ const SettingsPage = () => {
     }
   };
 
+  const handleStravaConnect = async () => {
+    try {
+      // Get auth URL from backend with JWT token
+      const response = await api.get('/strava/auth-url');
+      if (response.data.success) {
+        // Redirect to Strava auth URL
+        window.location.href = response.data.authUrl;
+      } else {
+        toast.error('Kunde inte starta Strava-anslutning');
+      }
+    } catch (error) {
+      console.error('Strava connect error:', error);
+      toast.error('Fel vid anslutning till Strava');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 relative">
       <AnimatedBackground />
@@ -761,15 +777,15 @@ const SettingsPage = () => {
                         </motion.button>
                     </div>
                   ) : (
-                    <motion.a 
-                      href={`${process.env.REACT_APP_SERVER_URL || 'https://runmate-production.up.railway.app'}/api/auth/strava`} 
+                    <motion.button 
+                      onClick={handleStravaConnect}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap inline-block"
+                      className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap"
                     >
                       <LinkIcon className="w-4 h-4" />
                       <span>Anslut till Strava</span>
-                    </motion.a>
+                    </motion.button>
                   )}
                 </div>
               </SettingsCard>

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 // Production API URL - Updated 2025-06-22 to fix localhost issue
+// Build timestamp: 2025-06-22 20:12:00
 const API_BASE_URL = 'https://runmate-production.up.railway.app/api';
 
 // Create axios instance

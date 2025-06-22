@@ -57,7 +57,7 @@ const challengeSchema = new mongoose.Schema({
     enum: ['public', 'private', 'friends_only'],
     default: 'public'
   },
-  joinCode: { type: String, unique: true, sparse: true },
+  joinCode: { type: String, sparse: true },
   requiresApproval: { type: Boolean, default: false },
   
   // Progress tracking
@@ -144,7 +144,7 @@ challengeSchema.index({ status: 1, startDate: 1 });
 challengeSchema.index({ creator: 1 });
 challengeSchema.index({ 'participants.user': 1 });
 challengeSchema.index({ visibility: 1, status: 1 });
-challengeSchema.index({ joinCode: 1 });
+challengeSchema.index({ joinCode: 1 }, { unique: true, sparse: true });
 
 // Methods
 challengeSchema.methods.addParticipant = function(userId) {

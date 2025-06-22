@@ -1,0 +1,13 @@
+0 verbose cli /Users/christophergenberg/.nvm/versions/node/v20.19.2/bin/node /Users/christophergenberg/.nvm/versions/node/v20.19.2/bin/npm
+1 info using npm@10.8.2
+2 info using node@v20.19.2
+3 silly config load:file:/Users/christophergenberg/.nvm/versions/node/v20.19.2/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/christophergenberg/Desktop/RUN/frontend/.npmrc
+5 silly config load:file:/Users/christophergenberg/.npmrc
+6 silly config load:file:/Users/christophergenberg/.nvm/versions/node/v20.19.2/etc/npmrc
+7 verbose title npm start
+8 verbose argv "start"
+9 verbose logfile logs-max:10 dir:/Users/christophergenberg/Desktop/RUN/frontend/.npm/_logs/2025-06-22T13_37_46_664Z-
+10 verbose logfile /Users/christophergenberg/Desktop/RUN/frontend/.npm/_logs/2025-06-22T13_37_46_664Z-debug-0.log
+11 silly logfile done cleaning log files
+12 http fetch GET 200 https://registry.npmjs.org/npm 203ms

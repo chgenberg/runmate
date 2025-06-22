@@ -6,10 +6,7 @@ const connectDB = async () => {
     console.log('DEBUG: MONGODB_URI environment variable:', process.env.MONGODB_URI ? 'SET' : 'NOT SET');
     console.log('DEBUG: Using MongoDB URI:', mongoUri.substring(0, 50) + '...');
     
-    const conn = await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const conn = await mongoose.connect(mongoUri);
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

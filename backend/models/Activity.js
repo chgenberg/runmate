@@ -54,8 +54,7 @@ const activitySchema = new mongoose.Schema({
       default: 'Point'
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
-      index: '2dsphere'
+      type: [Number] // [longitude, latitude]
     },
     name: String // e.g., "Central Park, NYC"
   },

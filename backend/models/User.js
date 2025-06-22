@@ -52,8 +52,7 @@ const userSchema = new mongoose.Schema({
     city: String,
     country: String,
     coordinates: {
-      type: [Number], // [longitude, latitude]
-      index: '2dsphere'
+      type: [Number] // [longitude, latitude]
     }
   },
   

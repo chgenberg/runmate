@@ -34,6 +34,9 @@ import LeaderboardPage from './pages/Leaderboard/LeaderboardPage';
 // Landing Page
 import LandingPage from './pages/Landing/LandingPage';
 
+// Force cache refresh
+console.log('App Version:', new Date().toISOString());
+
 // Component to redirect authenticated users away from public pages
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();

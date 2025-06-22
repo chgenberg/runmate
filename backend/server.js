@@ -43,6 +43,7 @@ const io = socketIo(server, {
   cors: {
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
+      "https://fabulous-sparkle-production.up.railway.app",
       "http://localhost:3001",
       "http://localhost:3002",
       "http://localhost:3003",
@@ -80,6 +81,7 @@ app.use(compression());
 app.use(cors({
   origin: [
     process.env.CLIENT_URL || "http://localhost:3000",
+    "https://fabulous-sparkle-production.up.railway.app",
     "http://localhost:3001",
     "http://localhost:3002",
     "http://localhost:3003",

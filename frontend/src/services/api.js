@@ -1,10 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api` : 'https://runmate-production.up.railway.app/api';
-
-// Debug log to verify API URL
-console.log('API_BASE_URL:', API_BASE_URL);
-console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+const API_BASE_URL = 'https://runmate-production.up.railway.app/api';
 
 // Create axios instance
 const api = axios.create({

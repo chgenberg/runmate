@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "RunMate backend deployment",
   "scripts": {
-    "start": "cd backend && npm start",
+    "start": "echo 'Starting backend...' && cd backend && echo 'Changed to backend directory' && ls -la && echo 'About to run npm start' && npm start",
     "install": "cd backend && npm install"
   },
   "engines": {

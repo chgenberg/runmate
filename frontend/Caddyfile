@@ -20,18 +20,15 @@
         format json # set access log format to json mode
     }
     
-    # health check for railway
-    rewrite /health /*
-    
     # serve from the 'build' folder (Create React App builds into the 'build' folder)
     root * build
     
     # enable gzipping responses
     encode gzip
     
-    # serve files from 'build'
-    file_server
-    
     # if path doesn't exist, redirect it to 'index.html' for client side routing
     try_files {path} /index.html
+    
+    # serve files from 'build'
+    file_server
 } 

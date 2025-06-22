@@ -1,6 +1,6 @@
 {
-  "name": "runmate-backend",
-  "version": "1.0.1",
+  "name": "runmate-frontend",
+  "version": "0.2.8",
   "description": "RunMate backend deployment",
   "private": true,
   "scripts": {

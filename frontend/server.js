@@ -35,13 +35,27 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  console.log('Health check requested');
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    buildFiles: {
+      hasJS: true,
+      hasCSS: true,
+      port: process.env.PORT || 3000
+    }
+  });
 });
 
 // Handle React routing, return all requests to React app
 app.get('*', (req, res) => {
   console.log('Request for:', req.url);
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  console.log('User-Agent:', req.get('User-Agent'));
+  
+  // Send index.html for all routes (React Router will handle routing)
+  const indexPath = path.join(__dirname, 'build', 'index.html');
+  console.log('Serving index.html from:', indexPath);
+  res.sendFile(indexPath);
 });
 
 app.listen(port, '0.0.0.0', (err) => {

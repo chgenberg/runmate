@@ -1,18 +1,12 @@
 {
   "name": "runmate-backend",
   "version": "1.0.1",
-  "description": "RunMate backend API",
-  "main": "backend/server.js",
+  "description": "RunMate backend deployment",
+  "private": true,
   "scripts": {
-    "start": "cd backend && npm start",
-    "dev": "cd backend && npm run dev",
-    "install": "cd backend && npm install"
+    "start": "cd backend && npm start"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "keywords": ["running", "social", "backend", "api"],
-  "author": "Christopher Genberg",
-  "license": "MIT",
-  "dependencies": {}
+  }
 }

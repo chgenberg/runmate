@@ -12,8 +12,8 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (user) {
-      // Connect to socket server using environment variable or fallback
-      const socketUrl = process.env.REACT_APP_SERVER_URL || 'https://runmate-production.up.railway.app';
+      // Temporarily hardcode the URL to fix the immediate issue
+      const socketUrl = 'https://runmate-production.up.railway.app';
       const newSocket = io(socketUrl);
       
       newSocket.on('connect', () => {

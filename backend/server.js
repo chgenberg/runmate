@@ -77,19 +77,9 @@ app.use(express.urlencoded({ extended: false }));
 // Compression
 app.use(compression());
 
-// CORS
+// CORS - Temporarily allow all origins for debugging
 app.use(cors({
-  origin: [
-    process.env.CLIENT_URL || "http://localhost:3000",
-    "https://fabulous-sparkle-production.up.railway.app",
-    "http://localhost:3001",
-    "http://localhost:3002",
-    "http://localhost:3003",
-    "http://localhost:3004",
-    "http://localhost:3005",
-    "http://localhost:3006",
-    "http://192.168.1.74:3005"
-  ],
+  origin: true, // Allow all origins temporarily
   credentials: true
 }));
 

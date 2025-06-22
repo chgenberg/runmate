@@ -1,8 +1,0 @@
-# Simple nixpacks.toml for React deployment
-providers = ["node"]
-
-[phases.build]
-cmds = ["npm run build"]
-
-[start]
-cmd = "npx serve -s build -l 3000" 

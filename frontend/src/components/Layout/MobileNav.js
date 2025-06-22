@@ -5,7 +5,6 @@ import {
   Compass,
   List,
   MessageSquare,
-  Settings,
   Award
 } from 'lucide-react';
 

@@ -140,7 +140,7 @@ const ActivityPage = () => {
                 <div className="card">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-4">
                         {activity.photos.map((photo, index) => (
-                            <img key={index} src={`http://localhost:8000/${photo}`} alt={`Aktivitetsbild ${index + 1}`} className="rounded-lg object-cover w-full h-40" />
+                            <img key={index} src={`https://runmate-production.up.railway.app/${photo}`} alt={`Aktivitetsbild ${index + 1}`} className="rounded-lg object-cover w-full h-40" />
                         ))}
                     </div>
                 </div>

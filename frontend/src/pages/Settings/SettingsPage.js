@@ -762,7 +762,7 @@ const SettingsPage = () => {
                     </div>
                   ) : (
                     <motion.a 
-                      href={`${process.env.REACT_APP_SERVER_URL || 'http://localhost:8000'}/api/auth/strava`} 
+                      href={`${process.env.REACT_APP_SERVER_URL || 'https://runmate-production.up.railway.app'}/api/auth/strava`} 
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap inline-block"

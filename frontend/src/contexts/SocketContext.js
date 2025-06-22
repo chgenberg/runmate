@@ -13,7 +13,7 @@ export function SocketProvider({ children }) {
   useEffect(() => {
     if (user) {
       // Connect to socket server
-      const newSocket = io(process.env.REACT_APP_SERVER_URL || 'http://localhost:8000');
+      const newSocket = io(process.env.REACT_APP_SERVER_URL || 'https://runmate-production.up.railway.app');
       
       newSocket.on('connect', () => {
         setIsConnected(true);

@@ -2,10 +2,8 @@
 nixPkgs = ['nodejs_22', 'npm-9_x']
 
 [phases.install]
+dependsOn = ['setup']
 cmds = ['cd backend && npm install --production=false']
-
-[phases.build]
-cmds = ['echo "Backend ready - no build step needed"']
 
 [start]
 cmd = 'cd backend && npm start'

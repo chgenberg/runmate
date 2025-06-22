@@ -230,7 +230,7 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 8000;
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
   console.log(`RunMate server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(`API URL: http://localhost:${PORT}/api`);
   console.log(`Local network: http://192.168.1.74:${PORT}/api`);

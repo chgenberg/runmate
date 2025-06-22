@@ -155,12 +155,28 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn btn-primary w-full btn-lg group"
+                className={`btn btn-primary w-full btn-lg group relative overflow-hidden ${isLoading ? 'cursor-not-allowed' : ''}`}
               >
                 {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="spinner mr-2"></div>
-                    Loggar in...
+                  <div className="flex items-center justify-center relative z-10">
+                    {/* Main spinner */}
+                    <div className="relative mr-3">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="absolute top-0 left-0 w-5 h-5 border-2 border-transparent border-t-white/60 rounded-full animate-spin" style={{animationDuration: '0.8s', animationDirection: 'reverse'}}></div>
+                    </div>
+                    
+                    {/* Animated dots */}
+                    <div className="flex items-center space-x-1">
+                      <span className="text-white font-medium">Loggar in</span>
+                      <div className="flex space-x-1">
+                        <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                        <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                        <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                      </div>
+                    </div>
+                    
+                    {/* Background shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-slow"></div>
                   </div>
                 ) : (
                   <>

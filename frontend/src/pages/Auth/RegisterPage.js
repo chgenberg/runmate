@@ -401,9 +401,32 @@ const RegisterPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+                  className={`flex-1 px-4 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 relative overflow-hidden ${isLoading ? 'cursor-not-allowed' : ''}`}
                 >
-                  {isLoading ? 'Skapar konto...' : 'Skapa konto'}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center relative z-10">
+                      {/* Main spinner */}
+                      <div className="relative mr-3">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="absolute top-0 left-0 w-5 h-5 border-2 border-transparent border-t-white/60 rounded-full animate-spin" style={{animationDuration: '0.8s', animationDirection: 'reverse'}}></div>
+                      </div>
+                      
+                      {/* Animated dots */}
+                      <div className="flex items-center space-x-1">
+                        <span className="text-white font-medium">Skapar konto</span>
+                        <div className="flex space-x-1">
+                          <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                          <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                          <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                        </div>
+                      </div>
+                      
+                      {/* Background shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-slow"></div>
+                    </div>
+                  ) : (
+                    'Skapa konto'
+                  )}
                 </button>
               )}
             </div>

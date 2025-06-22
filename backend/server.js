@@ -43,6 +43,8 @@ const io = socketIo(server, {
   cors: {
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
+      "https://happy-love-production.up.railway.app",
+      "https://humble-radiance-production.up.railway.app",
       "https://fabulous-sparkle-production.up.railway.app",
       "http://localhost:3001",
       "http://localhost:3002",

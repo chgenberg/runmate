@@ -4,9 +4,31 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 
+const fs = require('fs');
+
 console.log('Starting server...');
 console.log('Port:', port);
 console.log('Build directory:', path.join(__dirname, 'build'));
+
+// Check if build directory exists and list contents
+const buildDir = path.join(__dirname, 'build');
+if (fs.existsSync(buildDir)) {
+  console.log('✅ Build directory exists');
+  const files = fs.readdirSync(buildDir);
+  console.log('Build directory contents:', files);
+  
+  // Check for static folder
+  const staticDir = path.join(buildDir, 'static');
+  if (fs.existsSync(staticDir)) {
+    console.log('✅ Static directory exists');
+    const staticFiles = fs.readdirSync(staticDir);
+    console.log('Static directory contents:', staticFiles);
+  } else {
+    console.log('❌ Static directory missing');
+  }
+} else {
+  console.log('❌ Build directory does not exist!');
+}
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'build')));

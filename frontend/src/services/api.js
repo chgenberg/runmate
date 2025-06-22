@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-// PRODUCTION API CONFIGURATION - FORCE NEW BUILD 2025-06-22
-const PRODUCTION_API_URL = 'https://runmate-production.up.railway.app/api';
+// Use environment variable or fallback to production URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://runmate-production.up.railway.app/api';
 
-// Create axios instance with production URL
+// Create axios instance
 const apiClient = axios.create({
-  baseURL: PRODUCTION_API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,6 +1,8 @@
 # nixpacks.toml
 # https://nixpacks.com/docs/configuration/file
 
+providers = ["nodejs"]
+
 [variables]
 # Set the node version
 NODE_VERSION = "18"
@@ -10,24 +12,20 @@ CADDY_VERSION = "2.7.6"
 [phases.setup]
 # Install Caddy - following Railway's exact pattern
 cmds = [
-    "curl -fsSLo caddy.tar.gz \"https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_linux_amd64.tar.gz\"",
-    "tar -xzf caddy.tar.gz",
-    "chmod +x caddy",
-    "mv caddy /usr/local/bin/caddy",
-    "caddy version"
+    "export CADDY_VERSION=2.7.6 && wget \"https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_linux_amd64.tar.gz\" -O caddy.tar.gz && tar -xzf caddy.tar.gz caddy && mv caddy /usr/local/bin/"
 ]
 
 [phases.install]
 # Install dependencies
-cmds = ["npm ci --production=false"]
+cmds = ["npm install"]
 
 [phases.build]
 # Build the React app and copy Caddyfile
 cmds = [
-    "npm run build",
+    "GENERATE_SOURCEMAP=false react-scripts build",
     "cp Caddyfile build/Caddyfile"
 ]
 
 [start]
 # Use Caddy to serve the built React app
-cmd = "cd build && caddy run --config Caddyfile --adapter caddyfile 2>&1" 
+cmd = "cd build && caddy run --config Caddyfile" 

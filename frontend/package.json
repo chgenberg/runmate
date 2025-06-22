@@ -42,7 +42,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false CI=false react-scripts build",
     "serve": "node server.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

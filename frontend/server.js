@@ -30,6 +30,13 @@ if (fs.existsSync(buildDir)) {
   console.log('❌ Build directory does not exist!');
 }
 
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  next();
+});
+
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -58,10 +65,12 @@ app.get('*', (req, res) => {
   res.sendFile(indexPath);
 });
 
-app.listen(port, '0.0.0.0', (err) => {
+app.listen(port, (err) => {
   if (err) {
     console.error('Server failed to start:', err);
     process.exit(1);
   }
-  console.log(`✅ Server running on http://0.0.0.0:${port}`);
+  console.log(`✅ Server running on port ${port}`);
+  console.log(`✅ Health endpoint: http://localhost:${port}/health`);
+  console.log(`✅ App endpoint: http://localhost:${port}/`);
 }); 

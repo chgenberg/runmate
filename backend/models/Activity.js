@@ -151,7 +151,7 @@ const activitySchema = new mongoose.Schema({
   // Data Source
   source: {
     type: String,
-    enum: ['manual', 'strava', 'garmin', 'polar', 'fitbit', 'app'],
+    enum: ['manual', 'strava', 'garmin', 'polar', 'fitbit', 'app', 'apple_health'],
     default: 'manual'
   },
   sourceId: String, // ID from external service

@@ -7,13 +7,16 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
+import { Heart } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
+import AppleHealthSyncModal from './AppleHealthSyncModal';
 
 const TopBar = () => {
   const { user } = useAuth();
   const { isConnected } = useSocket();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAppleHealthSync, setShowAppleHealthSync] = useState(false);
 
   const notifications = [
     {
@@ -58,6 +61,19 @@ const TopBar = () => {
 
         {/* Right Side Icons */}
         <div className="flex items-center space-x-4">
+          {/* Apple Health Sync Button */}
+          <button
+            onClick={() => setShowAppleHealthSync(true)}
+            className="group relative p-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl hover:shadow-lg transition-all transform hover:scale-105 animate-pulse-subtle"
+          >
+            <Heart className="h-5 w-5 text-white" />
+            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Synka Apple Health
+            </span>
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-ping"></span>
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full"></span>
+          </button>
+
           {/* Connection Status - Only show on desktop */}
           <div className="hidden lg:flex items-center">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -125,6 +141,12 @@ const TopBar = () => {
           </button>
         </div>
       </div>
+
+      {/* Apple Health Sync Modal */}
+      <AppleHealthSyncModal 
+        isOpen={showAppleHealthSync} 
+        onClose={() => setShowAppleHealthSync(false)} 
+      />
     </div>
   );
 };

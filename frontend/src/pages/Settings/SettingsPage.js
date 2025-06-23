@@ -20,11 +20,7 @@ import AppleHealthSync from '../../components/Settings/AppleHealthSync';
 const SettingsPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [stravaConnected, setStravaConnected] = useState(false);
-  const [appleHealthConnected] = useState(false);
   const [showAppleHealthSync, setShowAppleHealthSync] = useState(false);
-  const [garminConnected] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState({
     matches: true,
@@ -36,79 +32,12 @@ const SettingsPage = () => {
   const [locationEnabled, setLocationEnabled] = useState(true);
 
   useEffect(() => {
-    // Check for Strava success/error in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const stravaStatus = urlParams.get('strava');
-    
-    if (stravaStatus === 'success') {
-      alert('🎉 Strava har anslutits framgångsrikt!');
-      setStravaConnected(true);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (stravaStatus === 'error') {
-      alert('❌ Ett fel uppstod vid anslutning till Strava. Försök igen.');
-    }
-    
-    // Check if Strava is connected by making API call
-    const checkStravaStatus = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const response = await fetch('https://staging-runmate-backend-production.up.railway.app/api/users/profile', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
-            if (userData.user?.stravaId) {
-              setStravaConnected(true);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error checking Strava status:', error);
-      }
-    };
-    
-    checkStravaStatus();
-    
     // Load saved preferences
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setDarkMode(savedDarkMode);
-  }, [user]);
+  }, []);
 
-  const handleStravaConnect = async () => {
-    setLoading(true);
-    
-    if (!user?.id) {
-      console.error('No user ID found');
-      alert('Du måste vara inloggad för att ansluta till Strava.');
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      // Use the alternative endpoint that bypasses JWT token issues
-      const stravaAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/auth/strava/${user.id}`;
-      console.log('Redirecting to Strava auth with user ID:', user.id);
-      
-      // Create a temporary anchor element and click it
-      const link = document.createElement('a');
-      link.href = stravaAuthUrl;
-      link.target = '_self'; // Same tab
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-    } catch (error) {
-      console.error('Error connecting to Strava:', error);
-      alert('Ett fel uppstod vid anslutning till Strava.');
-      setLoading(false);
-    }
-  };
+
 
   const handleToggleDarkMode = () => {
     const newDarkMode = !darkMode;
@@ -122,26 +51,7 @@ const SettingsPage = () => {
     setShowAppleHealthSync(true);
   };
 
-  const handleGarminConnect = () => {
-    setLoading(true);
-    
-    if (!user?.id) {
-      console.error('No user ID found');
-      alert('Du måste vara inloggad för att ansluta till Garmin.');
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      // Redirect to Garmin OAuth
-      const garminAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/integrations/garmin/auth`;
-      window.location.href = garminAuthUrl;
-    } catch (error) {
-      console.error('Error connecting to Garmin:', error);
-      alert('Ett fel uppstod vid anslutning till Garmin.');
-      setLoading(false);
-    }
-  };
+
 
   const handleLogout = async () => {
     await logout();
@@ -165,27 +75,11 @@ const SettingsPage = () => {
       items: [
         {
           icon: Activity,
-          label: 'Strava',
-          action: handleStravaConnect,
-          value: stravaConnected ? 'Ansluten' : 'Koppla till Strava',
-          highlight: !stravaConnected,
-          status: stravaConnected ? 'connected' : 'disconnected'
-        },
-        {
-          icon: Activity,
-          label: 'Apple Watch',
+          label: 'Apple Health',
           action: handleAppleHealthConnect,
-          value: appleHealthConnected ? 'Ansluten' : 'Koppla till Apple Health',
-          highlight: !appleHealthConnected,
-          status: appleHealthConnected ? 'connected' : 'disconnected'
-        },
-        {
-          icon: Activity,
-          label: 'Garmin',
-          action: handleGarminConnect,
-          value: garminConnected ? 'Ansluten' : 'Koppla till Garmin',
-          highlight: !garminConnected,
-          status: garminConnected ? 'connected' : 'disconnected'
+          value: showAppleHealthSync ? 'Konfigurerad' : 'Konfigurera Apple Health',
+          highlight: !showAppleHealthSync,
+          status: showAppleHealthSync ? 'connected' : 'disconnected'
         }
       ]
     },
@@ -276,29 +170,7 @@ const SettingsPage = () => {
 
       {/* Settings Content */}
       <div className="pb-20 md:pb-8">
-        {/* Strava Connect CTA - Only show if not connected */}
-        {!stravaConnected && (
-          <div className="mx-4 mt-4 p-4 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl shadow-lg animate-slide-up">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Activity className="w-5 h-5 text-white" />
-                  <h3 className="font-semibold text-white">Koppla till Strava</h3>
-                </div>
-                <p className="text-sm text-white/80">
-                  Synka dina löppass automatiskt
-                </p>
-              </div>
-              <button
-                onClick={handleStravaConnect}
-                disabled={loading}
-                className="px-4 py-2 bg-white text-primary-600 font-medium rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 disabled:opacity-50"
-              >
-                {loading ? 'Ansluter...' : 'Anslut'}
-              </button>
-            </div>
-          </div>
-        )}
+
 
         {/* Settings Sections */}
         <div className="mt-6 space-y-6">

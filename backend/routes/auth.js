@@ -471,31 +471,6 @@ router.get('/strava', protectWithQueryToken, (req, res) => {
   res.redirect(stravaAuthorizeUrl);
 });
 
-// @desc    Redirect to Strava for authentication (alternative route with user ID)
-// @route   GET /api/auth/strava/:userId
-// @access  Public (temporary solution for JWT issues)
-router.get('/strava/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    // Verify user exists
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    console.log('Direct Strava auth for user:', user.email);
-    
-    // Include user ID in state parameter to identify user after callback
-    const state = Buffer.from(JSON.stringify({ userId: user._id })).toString('base64');
-    const stravaAuthorizeUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${STRAVA_REDIRECT_URI}&approval_prompt=force&scope=read,activity:read_all&state=${state}`;
-    res.redirect(stravaAuthorizeUrl);
-  } catch (error) {
-    console.error('Error in direct Strava auth:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
 // @desc    Callback URL for Strava authentication
 // @route   GET /api/auth/strava/callback
 // @access  Public (accessed via redirect from Strava)
@@ -583,8 +558,39 @@ router.get('/strava/callback', async (req, res) => {
       success: false, 
       message: 'Server error during Strava connection',
       error: error.message,
-      details: error.response?.data || 'No additional details'
+      details: error.response?.data || 'No additional details',
+      stack: error.stack,
+      stravaConfig: {
+        clientId: STRAVA_CLIENT_ID,
+        hasClientSecret: !!STRAVA_CLIENT_SECRET,
+        redirectUri: STRAVA_REDIRECT_URI
+      }
     });
+  }
+  });
+
+// @desc    Redirect to Strava for authentication (alternative route with user ID)
+// @route   GET /api/auth/strava/:userId
+// @access  Public (temporary solution for JWT issues)
+router.get('/strava/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Verify user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    console.log('Direct Strava auth for user:', user.email);
+    
+    // Include user ID in state parameter to identify user after callback
+    const state = Buffer.from(JSON.stringify({ userId: user._id })).toString('base64');
+    const stravaAuthorizeUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${STRAVA_REDIRECT_URI}&approval_prompt=force&scope=read,activity:read_all&state=${state}`;
+    res.redirect(stravaAuthorizeUrl);
+  } catch (error) {
+    console.error('Error in direct Strava auth:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

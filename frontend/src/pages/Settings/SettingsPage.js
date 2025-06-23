@@ -46,7 +46,7 @@ const SettingsPage = () => {
     setLoading(true);
     try {
       // Redirect to backend auth endpoint which will handle Strava OAuth
-      window.location.href = `${process.env.REACT_APP_API_URL || 'https://staging-runmate-backend-production.up.railway.app/api'}/auth/strava`;
+      window.location.href = `${process.env.REACT_APP_API_URL || 'https://staging-runmate-backend-production.up.railway.app'}/api/auth/strava`;
     } catch (error) {
       console.error('Error connecting to Strava:', error);
     } finally {

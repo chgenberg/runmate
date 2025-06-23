@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Temporarily hardcode the URL to fix the immediate issue
-const API_BASE_URL = 'https://runmate-production.up.railway.app/api';
+// Update to use staging server where our new endpoints are deployed
+const API_BASE_URL = 'https://staging-runmate-backend-production.up.railway.app/api';
 
 // Create axios instance with timeout
 const apiClient = axios.create({

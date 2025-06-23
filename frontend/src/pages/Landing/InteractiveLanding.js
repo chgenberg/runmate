@@ -206,7 +206,13 @@ const InteractiveLanding = () => {
           className="flex space-x-6 overflow-x-auto scrollbar-hide px-8 py-8 scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {filteredUsers.map((user, index) => (
+          {filteredUsers.length === 0 ? (
+            <div className="w-full text-center py-20">
+              <p className="text-xl text-gray-500 mb-4">Inga användare att visa för denna kategori</p>
+              <p className="text-gray-400">Prova att välja "Alla" kategorin ovan</p>
+            </div>
+          ) : (
+            filteredUsers.map((user, index) => (
             <motion.div
               key={user._id}
               initial={{ opacity: 0, y: 20 }}
@@ -289,7 +295,8 @@ const InteractiveLanding = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          ))
+          )}
         </div>
       </div>
 

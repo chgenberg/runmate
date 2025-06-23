@@ -27,10 +27,10 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50/20 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-x-hidden">
       {/* Navigation */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'glass-card border-b border-white/20' : 'bg-transparent'
+        scrolled ? 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm' : 'bg-white/90 backdrop-blur-sm'
       }`}>
         <div className="container-responsive">
           <div className="flex justify-between items-center py-4">
@@ -69,7 +69,7 @@ const LandingPage = () => {
       {mobileMenuOpen && (
         <div className="mobile-menu">
           <div className="mobile-menu-backdrop" onClick={() => setMobileMenuOpen(false)} />
-          <div className="mobile-menu-panel">
+          <div className="mobile-menu-panel bg-white">
             <div className="p-6 space-y-6">
               <div className="flex items-center space-x-3 mb-8">
                 <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
@@ -156,13 +156,13 @@ const LandingPage = () => {
             
             <div className="relative animate-slide-left">
               <div className="relative z-10 perspective-1000">
-                <div className="glass-card p-2 rounded-3xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <div className="bg-white/95 backdrop-blur-md border border-white/30 shadow-xl p-2 rounded-3xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
                   <img 
                     src="/lopning2.png" 
                     alt="People running together" 
                     className="w-full rounded-2xl object-cover h-96"
                   />
-                  <div className="absolute bottom-6 left-6 right-6 glass-card rounded-xl p-4">
+                  <div className="absolute bottom-6 left-6 right-6 bg-black/80 backdrop-blur-md border border-white/20 shadow-lg rounded-xl p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-semibold text-white">Emma & Marcus</div>

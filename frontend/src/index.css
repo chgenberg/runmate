@@ -236,11 +236,11 @@
   
   /* Glass morphism base */
   .glass-card {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
+    @apply bg-white/95 backdrop-blur-md border border-white/30 shadow-lg;
   }
   
   .btn-glass {
-    @apply glass-card text-gray-700 hover:bg-white/90 focus:ring-gray-300 transform hover:scale-[1.02] active:scale-[0.98];
+    @apply bg-white/95 backdrop-blur-md border border-white/30 shadow-lg text-gray-700 hover:bg-white focus:ring-gray-300 transform hover:scale-[1.02] active:scale-[0.98];
   }
   
   .btn-ghost {
@@ -253,12 +253,12 @@
   }
   
   .card-glass {
-    @apply glass-card rounded-2xl hover:bg-white/90 transition-all duration-200;
+    @apply bg-white/95 backdrop-blur-md border border-white/30 shadow-lg rounded-2xl hover:bg-white transition-all duration-200;
   }
   
   /* Input Components */
   .input {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-300 bg-white/50 backdrop-blur-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all duration-200 placeholder-gray-400;
+    @apply w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all duration-200 placeholder-gray-400;
   }
   
   .input-error {
@@ -266,7 +266,7 @@
   }
   
   .input-glass {
-    @apply glass-card border-white/20 focus:bg-white/90;
+    @apply bg-white/95 backdrop-blur-md border border-white/30 shadow-lg focus:bg-white;
   }
   
   /* Navigation */

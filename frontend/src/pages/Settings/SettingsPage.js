@@ -15,7 +15,6 @@ import {
   Activity,
   Check
 } from 'lucide-react';
-import api from '../../services/api';
 
 const SettingsPage = () => {
   const { user, logout } = useAuth();

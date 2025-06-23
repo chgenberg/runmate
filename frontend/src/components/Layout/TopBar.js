@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
+import { useNavigate } from 'react-router-dom';
 import { 
   BellIcon, 
-  UserIcon,
-  Bars3Icon
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
 import GlobalSearch from './GlobalSearch';
@@ -12,6 +12,7 @@ import GlobalSearch from './GlobalSearch';
 const TopBar = () => {
   const { user } = useAuth();
   const { isConnected } = useSocket();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const notifications = [
@@ -41,17 +42,17 @@ const TopBar = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 shadow-sm">
       <div className="flex items-center justify-between h-16">
-        {/* Mobile Menu Button */}
-        <div className="lg:hidden">
-          <button className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">
-            <Bars3Icon className="h-6 w-6" />
-          </button>
+        {/* Logo/Brand for mobile */}
+        <div className="lg:hidden flex items-center">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+            RunMate
+          </h1>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 max-w-lg mx-4">
+        {/* Search Bar - Hidden on mobile, shown on larger screens */}
+        <div className="hidden lg:flex flex-1 max-w-lg mx-4">
           <GlobalSearch />
         </div>
 
@@ -108,17 +109,20 @@ const TopBar = () => {
           </div>
 
           {/* Profile Picture */}
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            {user?.profilePicture ? (
+          <button
+            onClick={() => navigate('/app/profile')}
+            className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all transform hover:scale-105"
+          >
+            {user?.profileImage ? (
               <img 
-                src={user.profilePicture} 
+                src={user.profileImage} 
                 alt="Profil" 
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover border-2 border-white"
               />
             ) : (
-              <UserIcon className="w-4 h-4 text-gray-600" />
+              <UserIcon className="w-5 h-5 text-white" />
             )}
-          </div>
+          </button>
         </div>
       </div>
     </div>

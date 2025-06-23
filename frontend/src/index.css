@@ -531,6 +531,16 @@
     display: none;
   }
   
+  /* Scrollbar hide for mobile nav */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
   /* Touch Gestures */
   .touch-manipulation {
     touch-action: manipulation;

@@ -21,6 +21,8 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
+  const [appleHealthConnected, setAppleHealthConnected] = useState(false);
+  const [garminConnected, setGarminConnected] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState({
     matches: true,
@@ -113,6 +115,42 @@ const SettingsPage = () => {
     // Here you would apply dark mode to the app
   };
 
+  const handleAppleHealthConnect = async () => {
+    if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+      // iOS 13+ permission request
+      const permission = await DeviceMotionEvent.requestPermission();
+      if (permission === 'granted') {
+        // Connect to Apple Health
+        setAppleHealthConnected(true);
+        alert('🍎 Apple Health ansluten! (Demo)');
+      }
+    } else {
+      // Fallback for web/Android
+      alert('🍎 Apple Health är endast tillgänglig på iOS-enheter');
+    }
+  };
+
+  const handleGarminConnect = () => {
+    setLoading(true);
+    
+    if (!user?.id) {
+      console.error('No user ID found');
+      alert('Du måste vara inloggad för att ansluta till Garmin.');
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      // Redirect to Garmin OAuth
+      const garminAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/integrations/garmin/auth`;
+      window.location.href = garminAuthUrl;
+    } catch (error) {
+      console.error('Error connecting to Garmin:', error);
+      alert('Ett fel uppstod vid anslutning till Garmin.');
+      setLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/');
@@ -140,6 +178,22 @@ const SettingsPage = () => {
           value: stravaConnected ? 'Ansluten' : 'Koppla till Strava',
           highlight: !stravaConnected,
           status: stravaConnected ? 'connected' : 'disconnected'
+        },
+        {
+          icon: Activity,
+          label: 'Apple Watch',
+          action: handleAppleHealthConnect,
+          value: appleHealthConnected ? 'Ansluten' : 'Koppla till Apple Health',
+          highlight: !appleHealthConnected,
+          status: appleHealthConnected ? 'connected' : 'disconnected'
+        },
+        {
+          icon: Activity,
+          label: 'Garmin',
+          action: handleGarminConnect,
+          value: garminConnected ? 'Ansluten' : 'Koppla till Garmin',
+          highlight: !garminConnected,
+          status: garminConnected ? 'connected' : 'disconnected'
         }
       ]
     },

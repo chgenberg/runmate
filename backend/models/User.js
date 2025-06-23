@@ -311,6 +311,32 @@ const userSchema = new mongoose.Schema({
   stravaTokenExpiresAt: {
     type: Number, // Store as a Unix timestamp (seconds)
   },
+
+  // Apple Health Integration Fields
+  appleHealthConnected: {
+    type: Boolean,
+    default: false
+  },
+  appleHealthLastSync: {
+    type: Date,
+    default: null
+  },
+
+  // Garmin Integration Fields
+  garminAccessToken: {
+    type: String,
+  },
+  garminAccessTokenSecret: {
+    type: String,
+  },
+  garminConnected: {
+    type: Boolean,
+    default: false
+  },
+  garminLastSync: {
+    type: Date,
+    default: null
+  },
   
   // Push Notification Fields
   pushSubscription: {

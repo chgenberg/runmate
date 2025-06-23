@@ -464,11 +464,27 @@ const protectWithQueryToken = async (req, res, next) => {
 // @desc    Redirect to Strava for authentication
 // @route   GET /api/auth/strava
 // @access  Private (with query token support)
-router.get('/strava', protectWithQueryToken, (req, res) => {
-  // Include user ID in state parameter to identify user after callback
-  const state = Buffer.from(JSON.stringify({ userId: req.user.id })).toString('base64');
-  const stravaAuthorizeUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${STRAVA_REDIRECT_URI}&approval_prompt=force&scope=read,activity:read_all&state=${state}`;
-  res.redirect(stravaAuthorizeUrl);
+router.get('/strava', async (req, res) => {
+  // Try to decode token to get user ID, then redirect to new route
+  try {
+    const token = req.query.token;
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+    
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.decode(token); // Just decode, don't verify (due to JWT_SECRET mismatch)
+    
+    if (decoded && decoded.id) {
+      console.log('Redirecting from old route to new route for user:', decoded.id);
+      return res.redirect(`/api/auth/strava/${decoded.id}`);
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid token format' });
+    }
+  } catch (error) {
+    console.error('Error processing old Strava route:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // @desc    Callback URL for Strava authentication

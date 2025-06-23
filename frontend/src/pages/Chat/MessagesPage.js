@@ -4,16 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, 
   Search, 
-  Users, 
-  TrendingUp, 
   Star,
   MapPin,
   Plus,
   Check,
-  CheckCheck,
-  Sparkles,
-  Heart,
-  Zap
+  CheckCheck
 } from 'lucide-react';
 import api from '../../services/api';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
@@ -25,9 +20,10 @@ const MessagesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { socket } = useSocket();
+  
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [onlineUsers, setOnlineUsers] = useState([]);
 
@@ -49,6 +45,22 @@ const MessagesPage = () => {
     fetchChats(); // Refresh chat list
   }, [fetchChats]);
 
+  const handleMessageRead = useCallback((data) => {
+    setChats(prev => prev.map(chat => 
+      chat._id === data.chatId 
+        ? { ...chat, unreadCount: Math.max(0, (chat.unreadCount || 0) - 1) }
+        : chat
+    ));
+  }, []);
+
+  const handleUserOnline = useCallback((userId) => {
+    setOnlineUsers(prev => [...prev.filter(id => id !== userId), userId]);
+  }, []);
+
+  const handleUserOffline = useCallback((userId) => {
+    setOnlineUsers(prev => prev.filter(id => id !== userId));
+  }, []);
+
   useEffect(() => {
     fetchChats();
     
@@ -65,365 +77,236 @@ const MessagesPage = () => {
         socket.off('user_offline');
       };
     }
-  }, [socket, fetchChats, handleNewMessage]);
-
-  const handleMessageRead = (data) => {
-    setChats(prev => prev.map(chat => 
-      chat._id === data.chatId 
-        ? { ...chat, lastMessage: { ...chat.lastMessage, read: true } }
-        : chat
-    ));
-  };
-
-  const handleUserOnline = (userId) => {
-    setOnlineUsers(prev => [...prev, userId]);
-  };
-
-  const handleUserOffline = (userId) => {
-    setOnlineUsers(prev => prev.filter(id => id !== userId));
-  };
-
-  const getOtherUser = (chat) => {
-    return chat.participants.find(p => p._id !== user?._id);
-  };
-
-  const getLastMessage = (chat) => {
-    if (chat.lastMessage) {
-      return chat.lastMessage;
-    }
-    return null;
-  };
-
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
-    
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-    } else if (diffInHours < 48) {
-      return 'Igår';
-    } else {
-      return date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
-    }
-  };
+  }, [socket, fetchChats, handleNewMessage, handleMessageRead, handleUserOnline, handleUserOffline]);
 
   const filteredChats = chats.filter(chat => {
-    const otherUser = getOtherUser(chat);
-    const matchesSearch = otherUser?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         otherUser?.lastName?.toLowerCase().includes(searchQuery.toLowerCase());
+    const otherUser = chat.participants.find(p => p._id !== user.id);
+    const matchesSearch = !searchTerm || 
+      otherUser?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      otherUser?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      chat.lastMessage?.content?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (activeFilter === 'unread') {
-      return matchesSearch && chat.unreadCount > 0;
-    }
-    return matchesSearch;
+    const matchesFilter = activeFilter === 'all' || 
+      (activeFilter === 'unread' && chat.unreadCount > 0);
+    
+    return matchesSearch && matchesFilter;
   });
 
-  const ChatItem = ({ chat, index }) => {
-    const otherUser = getOtherUser(chat);
-    const lastMessage = getLastMessage(chat);
-    const isOnline = onlineUsers.includes(otherUser?._id);
+  const formatTime = (timestamp) => {
+    const now = new Date();
+    const messageTime = new Date(timestamp);
+    const diffInHours = (now - messageTime) / (1000 * 60 * 60);
     
-    if (!otherUser) return null;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: index * 0.05 }}
-        whileHover={{ x: 10 }}
-        className="relative overflow-hidden"
-        onClick={() => navigate(`/app/messages/${chat._id}`)}
-      >
-        <div className="p-4 hover:bg-gradient-to-r hover:from-orange-50 hover:to-transparent cursor-pointer transition-all border-b border-gray-100 group">
-          <div className="flex items-center gap-4">
-            <motion.div 
-              className="relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400 }}
-            >
-              <ProfileAvatar user={otherUser} size="lg" />
-              {/* Online indicator */}
-              <AnimatePresence>
-                {isOnline && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"
-                  >
-                    <span className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-50"></span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-semibold text-gray-900 truncate flex items-center gap-2">
-                  {otherUser.firstName} {otherUser.lastName}
-                  {otherUser.isPremium && (
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                  )}
-                </h3>
-                {lastMessage && (
-                  <span className="text-xs text-gray-500 flex-shrink-0">
-                    {formatTime(lastMessage.timestamp)}
-                  </span>
-                )}
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  {lastMessage ? (
-                    <p className="text-sm text-gray-600 truncate flex items-center gap-1">
-                      {lastMessage.sender._id === user?._id && (
-                        <span className="text-gray-500">Du:</span>
-                      )}
-                      {lastMessage.type === 'emoji' ? (
-                        <span className="text-base">{lastMessage.content}</span>
-                      ) : (
-                        lastMessage.content
-                      )}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-gray-400 italic">Säg hej! 👋</p>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2 ml-3">
-                  {lastMessage?.sender._id === user?._id && (
-                    <div className="text-gray-400">
-                      {lastMessage.read ? (
-                        <CheckCheck className="w-4 h-4 text-blue-500" />
-                      ) : (
-                        <Check className="w-4 h-4" />
-                      )}
-                    </div>
-                  )}
-                  {chat.unreadCount > 0 && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 font-semibold"
-                    >
-                      {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-              
-              {/* User info tags */}
-              <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {otherUser.location?.city || 'Sverige'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3" />
-                  {otherUser.runningLevel || 'Nybörjare'}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Hover effect */}
-          <div className="absolute inset-y-0 right-0 w-1 bg-gradient-to-b from-orange-500 to-red-500 transform scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
-        </div>
-      </motion.div>
-    );
+    if (diffInHours < 24) {
+      return messageTime.toLocaleTimeString('sv-SE', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } else {
+      return messageTime.toLocaleDateString('sv-SE', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="inline-block"
-          >
-            <MessageCircle className="w-16 h-16 text-orange-500" />
-          </motion.div>
-          <p className="mt-4 text-gray-600 font-medium">Laddar meddelanden...</p>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-100"
+        className="bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 sticky top-0 z-10"
       >
-        <div className="px-4 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                Meddelanden
-                <MessageCircle className="w-8 h-8 text-orange-500" />
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                {chats.length} konversationer
-              </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Meddelanden</h1>
+            <p className="text-sm text-gray-500">Chatta med andra löpare</p>
+          </div>
+          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <Plus className="h-5 w-5 text-gray-600" />
+          </button>
+        </div>
+        
+        {/* Search */}
+        <div className="mt-4 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Sök meddelanden..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          />
+        </div>
+        
+        {/* Filter tabs */}
+        <div className="flex mt-4 bg-gray-100 rounded-full p-1">
+          {[
+            { key: 'all', label: 'Alla' },
+            { key: 'unread', label: 'Olästa' }
+          ].map((filter) => (
+            <button
+              key={filter.key}
+              onClick={() => setActiveFilter(filter.key)}
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all ${
+                activeFilter === filter.key
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Stats */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="p-4"
+      >
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 text-center border border-gray-100">
+            <div className="text-lg font-bold text-gray-900">{filteredChats.length}</div>
+            <div className="text-xs text-gray-500">Konversationer</div>
+          </div>
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 text-center border border-gray-100">
+            <div className="text-lg font-bold text-blue-600">
+              {filteredChats.filter(chat => chat.unreadCount > 0).length}
             </div>
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/app/discover')}
-              className="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold"
-            >
-              <Plus className="w-5 h-5" />
-              Ny konversation
-            </motion.button>
+            <div className="text-xs text-gray-500">Olästa</div>
           </div>
-          
-          {/* Search */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Sök konversationer..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
-            />
-          </div>
-          
-          {/* Filters */}
-          <div className="flex items-center gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveFilter('all')}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                activeFilter === 'all' 
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Alla
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveFilter('unread')}
-              className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${
-                activeFilter === 'unread' 
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Olästa
-              {chats.filter(c => c.unreadCount > 0).length > 0 && (
-                <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                  {chats.filter(c => c.unreadCount > 0).length}
-                </span>
-              )}
-            </motion.button>
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 text-center border border-gray-100">
+            <div className="text-lg font-bold text-green-600">{onlineUsers.length}</div>
+            <div className="text-xs text-gray-500">Online</div>
           </div>
         </div>
       </motion.div>
 
       {/* Chat List */}
-      <div className="bg-white">
-        {filteredChats.length === 0 ? (
+      <div className="px-4 pb-4">
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
+        ) : filteredChats.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20 px-4"
+            className="text-center py-12"
           >
-            <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-orange-100 to-red-100 rounded-full mb-6">
-              <MessageCircle className="w-16 h-16 text-orange-500" />
+            <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-full p-6 mx-auto mb-4 w-fit">
+              <MessageCircle className="h-12 w-12 text-blue-500" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">
-              {searchQuery ? 'Inga resultat 🔍' : 'Inga meddelanden än 💬'}
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {searchTerm ? 'Inga meddelanden hittades' : 'Inga meddelanden ännu'}
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              {searchQuery 
-                ? 'Prova att söka efter något annat eller börja en ny konversation' 
-                : 'Börja chatta med andra löpare för att bygga ditt nätverk och hitta nya löpvänner!'
+            <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+              {searchTerm 
+                ? 'Försök med ett annat sökord'
+                : 'Börja chatta med andra löpare för att se dina konversationer här'
               }
             </p>
-            {!searchQuery && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/app/discover')}
-                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  Upptäck löpare
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/app/community')}
-                  className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl hover:border-gray-300 transition-all flex items-center gap-2 font-semibold"
-                >
-                  <Users className="w-5 h-5" />
-                  Gå med i community
-                </motion.button>
-              </div>
+            {!searchTerm && (
+              <button
+                onClick={() => navigate('/app/discover')}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all"
+              >
+                Upptäck löpare
+              </button>
             )}
           </motion.div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ staggerChildren: 0.05 }}
-          >
-            {filteredChats.map((chat, index) => (
-              <ChatItem key={chat._id} chat={chat} index={index} />
-            ))}
-          </motion.div>
+          <div className="space-y-2">
+            <AnimatePresence>
+              {filteredChats.map((chat, index) => {
+                const otherUser = chat.participants.find(p => p._id !== user.id);
+                const isOnline = onlineUsers.includes(otherUser?._id);
+                
+                return (
+                  <motion.div
+                    key={chat._id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => navigate(`/app/messages/${chat._id}`)}
+                    className="bg-white/60 backdrop-blur-sm border border-gray-100 rounded-xl p-4 hover:bg-white/80 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <ProfileAvatar 
+                          user={otherUser} 
+                          size="md"
+                          showOnlineStatus={true}
+                        />
+                        {chat.unreadCount > 0 && (
+                          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-gray-900 truncate flex items-center space-x-2">
+                            <span>{otherUser?.firstName} {otherUser?.lastName}</span>
+                            {otherUser?.isPremium && (
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                            )}
+                          </h3>
+                          <div className="flex items-center space-x-2">
+                            {isOnline && (
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            )}
+                            <span className="text-xs text-gray-500">
+                              {chat.lastMessage ? formatTime(chat.lastMessage.createdAt) : ''}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-1">
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <MapPin className="h-3 w-3" />
+                            <span className="truncate">{otherUser?.location?.city || 'Okänd plats'}</span>
+                            <span>•</span>
+                            <span className="truncate">{otherUser?.runningLevel || 'Nybörjare'}</span>
+                          </div>
+                        </div>
+                        
+                        {chat.lastMessage && (
+                          <div className="flex items-center justify-between mt-2">
+                            <p className={`text-sm truncate ${
+                              chat.unreadCount > 0 ? 'font-medium text-gray-900' : 'text-gray-500'
+                            }`}>
+                              {chat.lastMessage.sender === user.id ? 'Du: ' : ''}
+                              {chat.lastMessage.content}
+                            </p>
+                            <div className="flex items-center space-x-1 ml-2">
+                              {chat.lastMessage.sender === user.id && (
+                                <>
+                                  {chat.lastMessage.readBy?.includes(otherUser?._id) ? (
+                                    <CheckCheck className="h-3 w-3 text-blue-500" />
+                                  ) : (
+                                    <Check className="h-3 w-3 text-gray-400" />
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
         )}
       </div>
-      
-      {/* Quick stats */}
-      {chats.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white/50 backdrop-blur-sm"
-        >
-          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-2">
-                <MessageCircle className="w-6 h-6 text-orange-600" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{chats.length}</p>
-              <p className="text-sm text-gray-600">Konversationer</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-2">
-                <Heart className="w-6 h-6 text-blue-600" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {chats.filter(c => c.unreadCount > 0).length}
-              </p>
-              <p className="text-sm text-gray-600">Olästa</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
-                <Zap className="w-6 h-6 text-green-600" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {onlineUsers.length}
-              </p>
-              <p className="text-sm text-gray-600">Online nu</p>
-            </div>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 };

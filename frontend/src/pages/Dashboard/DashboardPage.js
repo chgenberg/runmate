@@ -13,8 +13,6 @@ import {
   Users,
   Activity,
   Star,
-  ArrowUp,
-  ArrowDown,
   Wind,
   Zap
 } from 'lucide-react';

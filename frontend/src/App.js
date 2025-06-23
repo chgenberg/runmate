@@ -42,6 +42,11 @@ import EventsPage from './pages/Events/EventsPage';
 
 // Community Page
 import CommunityPage from './pages/Community/CommunityPage';
+import CommunityRoomPage from './pages/Community/CommunityRoomPage';
+
+// Chat Pages
+import MessagesPage from './pages/Chat/MessagesPage';
+import ChatPage from './pages/Chat/ChatPage';
 
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
@@ -96,8 +101,8 @@ function App() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="matches" element={<MatchesPage />} />
-              <Route path="chat" element={<MatchesPage />} />
-              <Route path="chat/:chatId" element={<MatchesPage />} />
+              <Route path="messages" element={<MessagesPage />} />
+              <Route path="messages/:chatId" element={<ChatPage />} />
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="log-activity" element={<LogActivityPage />} />
               <Route path="activity/:id" element={<ActivityPage />} />
@@ -112,6 +117,7 @@ function App() {
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="community" element={<CommunityPage />} />
+              <Route path="community/:roomId" element={<CommunityRoomPage />} />
             </Route>
             
             {/* Catch all route */}

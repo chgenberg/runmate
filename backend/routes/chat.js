@@ -32,6 +32,65 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// Create or find a chat and send initial message
+router.post('/create', auth, async (req, res) => {
+  try {
+    const { participantId, initialMessage } = req.body;
+    
+    if (participantId === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot create chat with yourself'
+      });
+    }
+    
+    if (!initialMessage || initialMessage.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Initial message cannot be empty'
+      });
+    }
+    
+    // Find or create direct chat
+    const chat = await Chat.findOrCreateDirectChat(req.user._id, participantId);
+    
+    // Add the initial message
+    await chat.addMessage(req.user._id, initialMessage.trim(), 'text');
+    
+    // Get the chat with populated data
+    await chat.populate('participants', 'firstName lastName profilePhoto email');
+    await chat.populate('messages.sender', 'firstName lastName profilePhoto');
+    
+    // Emit to WebSocket for real-time updates
+    if (req.io) {
+      req.io.to(`user_${participantId}`).emit('new_message', {
+        chatId: chat._id,
+        message: chat.messages[chat.messages.length - 1],
+        chat: {
+          _id: chat._id,
+          lastMessage: chat.lastMessage,
+          lastActivity: chat.lastActivity
+        }
+      });
+    }
+    
+    res.json({
+      success: true,
+      chatId: chat._id,
+      chat: {
+        ...chat.toObject(),
+        unreadCount: chat.getUnreadCount(req.user._id)
+      }
+    });
+  } catch (error) {
+    console.error('Error creating chat:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while creating chat' 
+    });
+  }
+});
+
 // Get or create a direct chat with another user
 router.post('/direct/:userId', auth, async (req, res) => {
   try {

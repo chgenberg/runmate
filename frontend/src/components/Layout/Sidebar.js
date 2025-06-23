@@ -14,7 +14,8 @@ import {
   PlusSquare,
   Award,
   Star,
-  Calendar
+  Calendar,
+  MessageCircle
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -43,7 +44,13 @@ const Sidebar = () => {
       name: 'Löpvänner',
       href: '/app/matches',
       icon: Users,
-      description: 'Hitta och chatta med löpare'
+      description: 'Hitta löpare'
+    },
+    {
+      name: 'Meddelanden',
+      href: '/app/messages',
+      icon: MessageCircle,
+      description: 'Chatta med löpare'
     },
     {
       name: 'Löprundor',

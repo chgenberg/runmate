@@ -157,22 +157,28 @@ const DashboardPage = () => {
       setSelectedMember(member);
       setShowMessageModal(true);
     } else if (action === 'like') {
-      // Handle like action
-      toast.success(`Du gillade ${member.firstName}!`);
+      // Handle like action - only show one toast
+      console.log('Liked:', member.firstName);
     }
   };
 
   const sendMessage = async () => {
     try {
-      await api.post('/chat/message', {
-        recipientId: selectedMember._id,
-        message: message
+      // Create or find existing chat with the user
+      const response = await api.post('/chat/create', {
+        participantId: selectedMember._id,
+        initialMessage: message.trim()
       });
-      toast.success('Meddelande skickat!');
-      setShowMessageModal(false);
-      setMessage('');
-      setSelectedMember(null);
+      
+      if (response.data.success) {
+        // Navigate to the chat
+        navigate(`/app/messages/${response.data.chatId}`);
+        setShowMessageModal(false);
+        setMessage('');
+        setSelectedMember(null);
+      }
     } catch (error) {
+      console.error('Error creating chat:', error);
       toast.error('Kunde inte skicka meddelandet');
     }
   };

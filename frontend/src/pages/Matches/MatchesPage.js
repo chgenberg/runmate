@@ -68,17 +68,21 @@ const MatchesPage = () => {
         if (!message.trim() || !selectedUser) return;
         
         try {
-            await api.post('/chat/message', {
-                recipientId: selectedUser._id,
-                message: message.trim()
+            // Create or find existing chat with the user
+            const response = await api.post('/chat/create', {
+                participantId: selectedUser._id,
+                initialMessage: message.trim()
             });
             
-            toast.success('Meddelande skickat!');
-            setShowMessageModal(false);
-            setMessage('');
-            setSelectedUser(null);
+            if (response.data.success) {
+                // Navigate to the chat
+                navigate(`/app/messages/${response.data.chatId}`);
+                setShowMessageModal(false);
+                setMessage('');
+                setSelectedUser(null);
+            }
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error creating chat:', error);
             toast.error('Kunde inte skicka meddelande');
         }
     };

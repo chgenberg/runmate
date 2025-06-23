@@ -8,7 +8,9 @@ import {
   Award,
   Trophy,
   User,
-  Calendar
+  Calendar,
+  MessageCircle,
+  MessageSquare
 } from 'lucide-react';
 
 const MobileNav = () => {
@@ -27,6 +29,16 @@ const MobileNav = () => {
       name: 'Vänner',
       href: '/app/matches',
       icon: Users,
+    },
+    {
+      name: 'Chatt',
+      href: '/app/messages',
+      icon: MessageCircle,
+    },
+    {
+      name: 'Community',
+      href: '/app/community',
+      icon: MessageSquare,
     },
     {
       name: 'Rundor',

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, X, MapPin, Activity, Star, Loader, Heart, Trophy, TrendingUp, Send, ChevronLeft } from 'lucide-react';
+import { MessageSquare, X, MapPin, Activity, Star, Heart, Trophy, TrendingUp, Send, ChevronLeft } from 'lucide-react';
 import api from '../../services/api';
 import { AnimatePresence, motion } from 'framer-motion';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
@@ -10,148 +10,28 @@ const MatchesPage = () => {
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
-    const [page, setPage] = useState(1);
     const [showMessageModal, setShowMessageModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [message, setMessage] = useState('');
     const [removingUsers, setRemovingUsers] = useState(new Set());
-    
-    const observer = useRef();
-    const lastUserRef = useCallback(node => {
-        if (loadingMore) return;
-        if (observer.current) observer.current.disconnect();
-        
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore && !loading) {
-                setPage(prevPage => prevPage + 1);
-            }
-        });
-        
-        if (node) observer.current.observe(node);
-    }, [loadingMore, hasMore, loading]);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get(`/users/discover?page=1&limit=20`);
-            setUsers(response.data.users || generateMockUsers());
-            // For mock data, always keep hasMore as true for continuous scrolling
-            setHasMore(response.data.users ? response.data.hasMore !== false : true);
-            setPage(1);
+            const response = await api.get('/users/discover');
+            setUsers(response.data.users || []);
         } catch (error) {
             console.error('Error fetching users:', error);
-            // Use mock data on error and keep hasMore as true
-            setUsers(generateMockUsers());
-            setHasMore(true);
+            setUsers([]);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    const fetchMoreUsers = useCallback(async () => {
-        if (loadingMore) return;
-        setLoadingMore(true);
-        try {
-            const response = await api.get(`/users/discover?page=${page}&limit=20`);
-            const newUsers = response.data.users || generateMockUsers(page * 20);
-            setUsers(prev => [...prev, ...newUsers]);
-            // For mock data, always keep hasMore as true for continuous scrolling
-            setHasMore(response.data.users ? response.data.hasMore !== false : true);
-        } catch (error) {
-            console.error('Error fetching more users:', error);
-            // Add more mock users and keep hasMore as true
-            setUsers(prev => [...prev, ...generateMockUsers(page * 20)]);
-            setHasMore(true);
-        } finally {
-            setLoadingMore(false);
-        }
-    }, [page, loadingMore]);
-
     useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
-
-    useEffect(() => {
-        if (page > 1) {
-            fetchMoreUsers();
-        }
-    }, [fetchMoreUsers, page]);
-
-    const generateMockUsers = (offset = 0) => {
-        const cities = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Lund', 'Linköping', 'Västerås', 'Örebro', 'Norrköping', 'Helsingborg'];
-        const motivations = [
-            'Älskar att springa i soluppgången',
-            'Tränar för mitt första maraton',
-            'Löpning är min meditation',
-            'Jagar alltid nya PB',
-            'Social löpare som gillar sällskap',
-            'Naturälskare som föredrar trail',
-            'Intervallträning är mitt fokus',
-            'Springer för att hålla mig i form',
-            'Löpning ger mig energi för dagen',
-            'Tränar för Stockholm Marathon'
-        ];
-        
-        const firstNames = ['Emma', 'Marcus', 'Sara', 'Johan', 'Anna', 'Erik', 'Lisa', 'David', 'Maria', 'Alexander', 'Johanna', 'Niklas', 'Elin', 'Fredrik', 'Petra'];
-        const lastNames = ['Andersson', 'Berg', 'Lindqvist', 'Nilsson', 'Svensson', 'Johansson', 'Karlsson', 'Persson', 'Gustafsson', 'Pettersson'];
-        
-        const profilePictures = [
-            'https://images.unsplash.com/photo-1494790108755-2616b612b64c?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&auto=format'
-        ];
-        
-        return Array.from({ length: 20 }, (_, i) => {
-            const userIndex = offset + i;
-            return {
-                _id: `mock-${userIndex}`,
-                firstName: firstNames[userIndex % firstNames.length],
-                lastName: lastNames[userIndex % lastNames.length],
-                age: 22 + (userIndex % 25),
-                location: cities[userIndex % cities.length],
-                pace: `${4 + (userIndex % 3)}:${15 + (userIndex % 45)}`,
-                bio: motivations[userIndex % motivations.length],
-                profilePicture: profilePictures[userIndex % profilePictures.length],
-                rating: 3.5 + (userIndex % 15) / 10,
-                matchPercentage: 65 + (userIndex % 35),
-                totalDistance: 50 + userIndex * 25,
-                totalRuns: 10 + userIndex * 3,
-                weeklyKm: 15 + (userIndex % 50),
-                personalBests: {
-                    '5k': `${17 + userIndex % 12}:${10 + userIndex % 50}`,
-                    '10k': `${36 + userIndex % 25}:${10 + userIndex % 50}`,
-                    'halfMarathon': userIndex % 4 === 0 ? `1:${30 + userIndex % 30}:${10 + userIndex % 50}` : null
-                },
-                runningTypes: ['Långdistans', 'Trail', 'Intervaller', 'Tempo', 'Fartlek', 'Backlöpning'].slice(0, 2 + (userIndex % 4)),
-                achievements: [
-                    { icon: '🏃', title: 'Första 10K', date: '2023-05-15' },
-                    { icon: '🏆', title: 'Halvmaraton', date: '2023-09-20' },
-                    { icon: '⭐', title: '100 träningspass', date: '2023-11-01' },
-                    { icon: '🎯', title: 'Personligt rekord', date: '2023-12-01' }
-                ].slice(0, 1 + (userIndex % 4)),
-                backgroundPattern: [
-                    'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50',
-                    'bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50',
-                    'bg-gradient-to-br from-pink-50 via-rose-50 to-red-50',
-                    'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50',
-                    'bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-50',
-                    'bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50',
-                    'bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50',
-                    'bg-gradient-to-br from-lime-50 via-green-50 to-emerald-50'
-                ][userIndex % 8]
-            };
-        });
-    };
 
     const handleRemoveUser = async (userId) => {
         setRemovingUsers(prev => new Set(prev).add(userId));
@@ -203,12 +83,11 @@ const MatchesPage = () => {
         }
     };
 
-    const UserCard = ({ user, isLast }) => {
+    const UserCard = ({ user }) => {
         const isRemoving = removingUsers.has(user._id);
         
         return (
             <motion.div
-                ref={isLast ? lastUserRef : null}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ 
                     opacity: isRemoving ? 0 : 1, 
@@ -353,20 +232,13 @@ const MatchesPage = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <AnimatePresence>
-                            {users.map((user, index) => (
+                            {users.map((user) => (
                                 <UserCard 
                                     key={user._id} 
-                                    user={user} 
-                                    isLast={index === users.length - 1}
+                                    user={user}
                                 />
                             ))}
                         </AnimatePresence>
-                    </div>
-                )}
-                
-                {loadingMore && (
-                    <div className="flex justify-center py-8">
-                        <Loader className="w-8 h-8 animate-spin text-orange-500" />
                     </div>
                 )}
             </div>

@@ -334,9 +334,14 @@ const LeaderboardPage = () => {
                       {/* Profile */}
                       <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                         <img 
-                          src={runner.profilePhoto || `https://ui-avatars.com/api/?name=${runner.firstName}+${runner.lastName}&background=random`}
+                          src={runner.profilePhoto || runner.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(runner.firstName || 'User')}+${encodeURIComponent(runner.lastName || '')}&background=random`}
                           alt={runner.firstName}
                           className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover ring-2 md:ring-4 ring-white shadow-lg flex-shrink-0"
+                          onError={(e) => {
+                            if (!e.target.src.includes('ui-avatars.com')) {
+                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(runner.firstName || 'User')}+${encodeURIComponent(runner.lastName || '')}&background=random`;
+                            }
+                          }}
                         />
                         <div className="min-w-0 flex-1">
                           <h3 className="text-base md:text-xl font-bold text-gray-900 truncate">

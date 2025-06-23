@@ -15,6 +15,7 @@ import {
   Crown
 } from 'lucide-react';
 import api from '../../services/api';
+import ProfileAvatar from '../common/ProfileAvatar';
 
 const UserRatingProfile = ({ userId, compact = false }) => {
   const [stats, setStats] = useState(null);
@@ -241,10 +242,10 @@ const UserRatingProfile = ({ userId, compact = false }) => {
                 transition={{ delay: index * 0.1 }}
                 className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl"
               >
-                <img
-                  src={rating.rater.profilePhoto || `https://ui-avatars.com/api/?name=${rating.rater.firstName}+${rating.rater.lastName}&background=random`}
-                  alt={rating.rater.firstName}
-                  className="w-10 h-10 rounded-full object-cover"
+                <ProfileAvatar 
+                  user={rating.rater}
+                  size="medium"
+                  className="w-10 h-10"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">

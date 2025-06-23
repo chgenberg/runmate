@@ -12,9 +12,12 @@ const ProfileAvatar = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  // Handle user prop
-  const profileSrc = src || user?.profilePicture;
+  // Handle user prop - check multiple possible properties
+  const profileSrc = src || user?.profilePicture || user?.profilePhoto;
   const displayName = alt !== 'Profile' ? alt : (user ? `${user.firstName} ${user.lastName}` : 'Profile');
+
+  // Only use real profile pictures, no generated avatars
+  const finalSrc = profileSrc && !profileSrc.includes('ui-avatars.com') ? profileSrc : null;
 
   // Size mappings
   const sizeClasses = {
@@ -24,7 +27,8 @@ const ProfileAvatar = ({
     large: 'w-16 h-16',
     xl: 'w-24 h-24',
     xlarge: 'w-24 h-24',
-    xxlarge: 'w-32 h-32'
+    xxlarge: 'w-32 h-32',
+    '2xl': 'w-32 h-32'
   };
 
   const iconSizes = {
@@ -34,13 +38,14 @@ const ProfileAvatar = ({
     large: 'w-8 h-8',
     xl: 'w-12 h-12',
     xlarge: 'w-12 h-12',
-    xxlarge: 'w-16 h-16'
+    xxlarge: 'w-16 h-16',
+    '2xl': 'w-16 h-16'
   };
 
-  const baseClasses = `${sizeClasses[size]} rounded-full flex items-center justify-center ${className}`;
+  const baseClasses = `${sizeClasses[size] || sizeClasses.medium} rounded-full flex items-center justify-center ${className}`;
 
-  // Show fallback if no image, image failed, or still loading
-  const showFallback = !profileSrc || imageError || !imageLoaded;
+  // Show fallback if no real image, image failed, or still loading
+  const showFallback = !finalSrc || imageError || !imageLoaded;
 
   return (
     <div className={`relative ${baseClasses}`}>
@@ -49,15 +54,15 @@ const ProfileAvatar = ({
         className={`${baseClasses} ${fallbackColor} ${showFallback ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
         style={{ position: showFallback ? 'relative' : 'absolute', inset: showFallback ? 'auto' : '0' }}
       >
-        <User className={`${iconSizes[size]} text-gray-500`} />
+        <User className={`${iconSizes[size] || iconSizes.medium} text-gray-500`} />
       </div>
       
-      {/* Real image - only render if we have a source */}
-      {profileSrc && !profileSrc.includes('ui-avatars.com') && (
+      {/* Real image - render only if we have a real profile picture */}
+      {finalSrc && (
         <img 
-          src={profileSrc} 
+          src={finalSrc} 
           alt={displayName}
-          className={`${sizeClasses[size]} rounded-full object-cover ${className} ${imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
+          className={`${sizeClasses[size] || sizeClasses.medium} rounded-full object-cover ${className} ${imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
           style={{ position: imageLoaded && !imageError ? 'relative' : 'absolute', inset: imageLoaded && !imageError ? 'auto' : '0' }}
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, MapPin, Activity, Star, ChevronLeft, ChevronRight, Users, Sparkles } from 'lucide-react';
 import api from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import ProfileAvatar from '../../components/common/ProfileAvatar';
 
 const InteractiveLanding = () => {
   const navigate = useNavigate();
@@ -225,9 +226,14 @@ const InteractiveLanding = () => {
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden">
                   <img 
-                    src={user.profilePicture || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&size=400`}
+                    src={user.profilePicture || user.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}+${encodeURIComponent(user.lastName || '')}&size=400&background=random`}
                     alt={`${user.firstName} ${user.lastName}`}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      if (!e.target.src.includes('ui-avatars.com')) {
+                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}+${encodeURIComponent(user.lastName || '')}&size=400&background=random`;
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                   

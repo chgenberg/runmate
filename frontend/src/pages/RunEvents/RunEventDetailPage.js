@@ -410,9 +410,14 @@ const RunEventDetailPage = () => {
                                                     >
                                                         <div className="relative">
                                                             <img 
-                                                                src={p.profilePhoto || `https://ui-avatars.com/api/?name=${p.firstName}+${p.lastName}&background=random`} 
+                                                                src={p.profilePhoto || p.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.firstName || 'User')}+${encodeURIComponent(p.lastName || '')}&background=random`} 
                                                                 alt={`${p.firstName} ${p.lastName}`} 
                                                                 className="w-14 h-14 rounded-xl object-cover shadow-md group-hover:shadow-lg transition-shadow"
+                                                                onError={(e) => {
+                                                                    if (!e.target.src.includes('ui-avatars.com')) {
+                                                                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.firstName || 'User')}+${encodeURIComponent(p.lastName || '')}&background=random`;
+                                                                    }
+                                                                }}
                                                             />
                                                             {p._id === event.host._id && (
                                                                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
@@ -525,9 +530,14 @@ const RunEventDetailPage = () => {
                                     <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Arrangör</h4>
                                     <Link to={`/app/profile/${event.host._id}`} className="flex items-center gap-4 group">
                                         <img 
-                                            src={event.host.profilePhoto || `https://ui-avatars.com/api/?name=${event.host.firstName}+${event.host.lastName}&background=random`} 
+                                            src={event.host.profilePhoto || event.host.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.host.firstName || 'User')}+${encodeURIComponent(event.host.lastName || '')}&background=random`} 
                                             alt={event.host.firstName} 
                                             className="w-16 h-16 rounded-2xl object-cover shadow-md group-hover:shadow-lg transition-shadow"
+                                            onError={(e) => {
+                                                if (!e.target.src.includes('ui-avatars.com')) {
+                                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(event.host.firstName || 'User')}+${encodeURIComponent(event.host.lastName || '')}&background=random`;
+                                                }
+                                            }}
                                         />
                                         <div className="flex-1">
                                             <p className="font-bold text-lg text-gray-900 group-hover:text-red-600 transition-colors">

@@ -132,6 +132,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ratings', ratingsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/integrations', require('./routes/integrations'));
+app.use('/api/health', require('./routes/health'));
 // app.use('/api/notifications', notificationRoutes); // Temporarily disabled
 
 // Socket.io real-time functionality

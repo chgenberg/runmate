@@ -15,13 +15,15 @@ import {
   Activity,
   Check
 } from 'lucide-react';
+import AppleHealthSync from '../../components/Settings/AppleHealthSync';
 
 const SettingsPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
-  const [appleHealthConnected, setAppleHealthConnected] = useState(false);
+  const [appleHealthConnected] = useState(false);
+  const [showAppleHealthSync, setShowAppleHealthSync] = useState(false);
   const [garminConnected] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState({
@@ -116,18 +118,8 @@ const SettingsPage = () => {
   };
 
   const handleAppleHealthConnect = async () => {
-    if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
-      // iOS 13+ permission request
-      const permission = await DeviceMotionEvent.requestPermission();
-      if (permission === 'granted') {
-        // Connect to Apple Health
-        setAppleHealthConnected(true);
-        alert('🍎 Apple Health ansluten! (Demo)');
-      }
-    } else {
-      // Fallback for web/Android
-      alert('🍎 Apple Health är endast tillgänglig på iOS-enheter');
-    }
+    // Simply show the Apple Health sync component
+    setShowAppleHealthSync(true);
   };
 
   const handleGarminConnect = () => {
@@ -377,6 +369,13 @@ const SettingsPage = () => {
               </div>
             </div>
           ))}
+
+          {/* Apple Health Sync Component */}
+          {showAppleHealthSync && (
+            <div className="px-4">
+              <AppleHealthSync />
+            </div>
+          )}
 
           {/* Logout Button */}
           <div className="px-4 pt-4">

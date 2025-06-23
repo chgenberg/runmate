@@ -32,10 +32,44 @@ const SettingsPage = () => {
   const [locationEnabled, setLocationEnabled] = useState(true);
 
   useEffect(() => {
-    // Check if Strava is connected
-    if (user?.stravaId) {
+    // Check for Strava success/error in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const stravaStatus = urlParams.get('strava');
+    
+    if (stravaStatus === 'success') {
+      alert('🎉 Strava har anslutits framgångsrikt!');
       setStravaConnected(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (stravaStatus === 'error') {
+      alert('❌ Ett fel uppstod vid anslutning till Strava. Försök igen.');
     }
+    
+    // Check if Strava is connected by making API call
+    const checkStravaStatus = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await fetch('https://staging-runmate-backend-production.up.railway.app/api/users/profile', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            if (userData.user?.stravaId) {
+              setStravaConnected(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking Strava status:', error);
+      }
+    };
+    
+    checkStravaStatus();
     
     // Load saved preferences
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';

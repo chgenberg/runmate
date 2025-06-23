@@ -534,16 +534,8 @@ router.get('/strava/callback', async (req, res) => {
     await user.save();
     console.log('Successfully saved Strava data for user:', user.email);
 
-    // Return success response instead of redirect for better debugging
-    res.json({
-      success: true,
-      message: 'Strava account connected successfully',
-      athlete: {
-        id: athlete.id,
-        firstname: athlete.firstname,
-        lastname: athlete.lastname
-      }
-    });
+    // Redirect user back to the frontend settings page with success
+    res.redirect(`https://staging-rummate-frontend-production.up.railway.app/app/settings?strava=success`);
 
   } catch (error) {
     console.error('Detailed error during Strava token exchange:');

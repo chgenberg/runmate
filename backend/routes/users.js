@@ -108,8 +108,13 @@ router.post('/profile/photo', auth, upload.single('photo'), async (req, res) => 
       return res.status(404).json({ message: 'Användare inte funnen' });
     }
 
-    // Add new photo to the beginning of the array
-    const photoUrl = `/uploads/photos/${req.file.filename}`;
+    // Create full URL for the photo
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://staging-runmate-backend-production.up.railway.app'
+      : `http://localhost:${process.env.PORT || 8000}`;
+    
+    const photoUrl = `${baseUrl}/uploads/photos/${req.file.filename}`;
+    
     user.photos = user.photos || [];
     user.photos.unshift(photoUrl);
 
@@ -118,17 +123,19 @@ router.post('/profile/photo', auth, upload.single('photo'), async (req, res) => 
       user.photos = user.photos.slice(0, 6);
     }
 
-    // Set as profile picture if it's the first photo
-    if (!user.profilePicture) {
-      user.profilePicture = photoUrl;
-    }
+    // Set as profile picture if it's the first photo or update existing
+    user.profilePicture = photoUrl;
+    
+    // Also set profilePhoto for backward compatibility
+    user.profilePhoto = photoUrl;
 
     await user.save();
 
     res.json({
       message: 'Foto uppladdat',
       photo: photoUrl,
-      photos: user.photos
+      photos: user.photos,
+      profilePicture: photoUrl
     });
   } catch (error) {
     console.error('Error uploading photo:', error);
@@ -157,7 +164,9 @@ router.delete('/profile/photo/:photoIndex', auth, async (req, res) => {
 
     // Update profile picture if it was the deleted photo
     if (user.profilePicture === removedPhoto) {
-      user.profilePicture = user.photos.length > 0 ? user.photos[0] : null;
+      const newProfilePicture = user.photos.length > 0 ? user.photos[0] : null;
+      user.profilePicture = newProfilePicture;
+      user.profilePhoto = newProfilePicture; // For backward compatibility
     }
 
     await user.save();

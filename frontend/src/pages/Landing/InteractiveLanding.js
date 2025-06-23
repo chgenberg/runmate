@@ -4,6 +4,7 @@ import { Heart, MapPin, Activity, Star, ChevronLeft, ChevronRight, Users, Sparkl
 import api from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
+import { getFullImageUrl } from '../../services/api';
 
 const InteractiveLanding = () => {
   const navigate = useNavigate();
@@ -226,7 +227,7 @@ const InteractiveLanding = () => {
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden">
                   <img 
-                    src={user.profilePicture || user.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}+${encodeURIComponent(user.lastName || '')}&size=400&background=random`}
+                    src={getFullImageUrl(user.profilePicture || user.profilePhoto) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}+${encodeURIComponent(user.lastName || '')}&size=400&background=random`}
                     alt={`${user.firstName} ${user.lastName}`}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {

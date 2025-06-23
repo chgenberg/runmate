@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from 'lucide-react';
+import { getProfilePictureUrl } from '../../services/api';
 
 const ProfileAvatar = ({ 
   user,
@@ -12,12 +13,10 @@ const ProfileAvatar = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  // Handle user prop - check multiple possible properties
-  const profileSrc = src || user?.profilePicture || user?.profilePhoto;
   const displayName = alt !== 'Profile' ? alt : (user ? `${user.firstName} ${user.lastName}` : 'Profile');
 
-  // Only use real profile pictures, no generated avatars
-  const finalSrc = profileSrc && !profileSrc.includes('ui-avatars.com') ? profileSrc : null;
+  // Get the profile picture URL using the helper function
+  const finalSrc = src || getProfilePictureUrl(user);
 
   // Size mappings
   const sizeClasses = {
@@ -65,7 +64,10 @@ const ProfileAvatar = ({
           className={`${sizeClasses[size] || sizeClasses.medium} rounded-full object-cover ${className} ${imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
           style={{ position: imageLoaded && !imageError ? 'relative' : 'absolute', inset: imageLoaded && !imageError ? 'auto' : '0' }}
           onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
+          onError={() => {
+            console.log('Image failed to load:', finalSrc);
+            setImageError(true);
+          }}
         />
       )}
     </div>

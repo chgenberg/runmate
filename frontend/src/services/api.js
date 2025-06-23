@@ -51,4 +51,38 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Helper function to convert relative image URLs to full backend URLs
+export const getFullImageUrl = (imageSrc) => {
+  if (!imageSrc) return null;
+  
+  // Skip ui-avatars.com URLs and other external URLs
+  if (imageSrc.includes('ui-avatars.com') || imageSrc.includes('unsplash.com') || imageSrc.includes('images.')) {
+    return imageSrc;
+  }
+  
+  // If it's already a full URL, return as is
+  if (imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
+    return imageSrc;
+  }
+  
+  // If it's a relative URL starting with /uploads, convert to full backend URL
+  if (imageSrc.startsWith('/uploads/')) {
+    const backendUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://staging-runmate-backend-production.up.railway.app'
+      : 'http://localhost:8000';
+    return `${backendUrl}${imageSrc}`;
+  }
+  
+  return imageSrc;
+};
+
+// Helper function to get profile picture with fallback
+export const getProfilePictureUrl = (user) => {
+  const profileSrc = user?.profilePicture || user?.profilePhoto;
+  const fullUrl = getFullImageUrl(profileSrc);
+  
+  // Return the full URL if it exists and is not a ui-avatars URL, otherwise return null for fallback
+  return fullUrl && !fullUrl.includes('ui-avatars.com') ? fullUrl : null;
+};
+
 export default apiClient; 

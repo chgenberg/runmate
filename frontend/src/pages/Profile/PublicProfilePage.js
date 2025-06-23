@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Activity, Star, Heart, ArrowLeft } from 'lucide-react';
 import api from '../../services/api';
 import { motion } from 'framer-motion';
+import { getFullImageUrl } from '../../services/api';
 
 const PublicProfilePage = () => {
   const { userId } = useParams();
@@ -109,7 +110,7 @@ const PublicProfilePage = () => {
             <div className="absolute bottom-0 left-0 right-0 p-8">
               <div className="flex items-end space-x-6">
                 <img 
-                  src={user.profilePicture || user.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}+${encodeURIComponent(user.lastName || '')}&size=200&background=random`}
+                  src={getFullImageUrl(user.profilePicture || user.profilePhoto) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}+${encodeURIComponent(user.lastName || '')}&size=200&background=random`}
                   alt={`${user.firstName} ${user.lastName}`}
                   className="w-32 h-32 rounded-2xl border-4 border-white shadow-lg object-cover"
                   onError={(e) => {

@@ -7,6 +7,7 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 import { MapPin, Activity, Clock, Target, Trophy, Calendar, Zap } from 'lucide-react';
+import { getFullImageUrl } from '../../services/api';
 
 const SwipeCard = ({ user, isNext = false }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -79,8 +80,8 @@ const SwipeCard = ({ user, isNext = false }) => {
   };
 
   const currentPhoto = user.photos && user.photos.length > 0 
-    ? user.photos[currentPhotoIndex] 
-    : user.profilePhoto || user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}&size=800&background=random`;
+    ? getFullImageUrl(user.photos[currentPhotoIndex]) || user.photos[currentPhotoIndex]
+    : getFullImageUrl(user.profilePhoto || user.profilePicture) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}&size=800&background=random`;
 
   return (
     <motion.div

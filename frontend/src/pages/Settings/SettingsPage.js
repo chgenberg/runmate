@@ -45,38 +45,17 @@ const SettingsPage = () => {
   const handleStravaConnect = async () => {
     setLoading(true);
     
-    // Get the JWT token from localStorage
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No auth token found');
+    if (!user?.id) {
+      console.error('No user ID found');
+      alert('Du måste vara inloggad för att ansluta till Strava.');
       setLoading(false);
       return;
     }
     
     try {
-      // First, let's test if the token is valid by making a simple API call
-      const response = await fetch('https://staging-runmate-backend-production.up.railway.app/api/users/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.status === 401) {
-        // Token is invalid, user needs to log in again
-        alert('Din session har gått ut. Du behöver logga in igen för att ansluta till Strava.');
-        await logout();
-        navigate('/login');
-        return;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Failed to verify token');
-      }
-      
-      // Token is valid, proceed with Strava connection
-      const stravaAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/auth/strava?token=${token}`;
-      console.log('Redirecting to:', stravaAuthUrl);
+      // Use the alternative endpoint that bypasses JWT token issues
+      const stravaAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/auth/strava/${user.id}`;
+      console.log('Redirecting to Strava auth with user ID:', user.id);
       
       // Create a temporary anchor element and click it
       const link = document.createElement('a');
@@ -88,7 +67,7 @@ const SettingsPage = () => {
       
     } catch (error) {
       console.error('Error connecting to Strava:', error);
-      alert('Ett fel uppstod. Försök logga ut och logga in igen.');
+      alert('Ett fel uppstod vid anslutning till Strava.');
       setLoading(false);
     }
   };

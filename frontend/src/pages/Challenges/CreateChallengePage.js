@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinnerFullScreen } from '../../components/Layout/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
 // Popular cities with their coordinates for route generation
 const popularCities = [
@@ -149,10 +150,14 @@ const CreateChallengePage = () => {
         })
       };
       
+      console.log('Creating challenge with data:', challengeData);
       const response = await api.post('/challenges', challengeData);
+      toast.success('Utmaning skapad!');
       navigate(`/app/challenges/${response.data._id}`);
     } catch (err) {
       console.error('Error creating challenge:', err);
+      const errorMessage = err.response?.data?.message || 'Kunde inte skapa utmaning';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

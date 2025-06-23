@@ -55,6 +55,7 @@ const io = socketIo(server, {
       "https://happy-love-production.up.railway.app",
       "https://humble-radiance-production.up.railway.app",
       "https://fabulous-sparkle-production.up.railway.app",
+      "https://staging-runmate-frontend-production.up.railway.app",
       "http://localhost:3001",
       "http://localhost:3002",
       "http://localhost:3003",

@@ -1,5 +1,5 @@
-const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID || '165013';
-const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET || '1c663ec9225b652aa6dcb5d49c5c45c6aec2b80e';
+const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID || '165590';
+const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET || '485a867db527a267f59ed24076d6ee513040abec';
 // Use environment variable first, fallback to staging URL for this deployment
 const STRAVA_REDIRECT_URI = process.env.STRAVA_REDIRECT_URI || 'https://staging-rummate-frontend-production.up.railway.app/api/strava/callback';
 

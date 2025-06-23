@@ -42,7 +42,7 @@ const SettingsPage = () => {
     setDarkMode(savedDarkMode);
   }, [user]);
 
-  const handleStravaConnect = () => {
+  const handleStravaConnect = async () => {
     setLoading(true);
     
     // Get the JWT token from localStorage
@@ -53,17 +53,44 @@ const SettingsPage = () => {
       return;
     }
     
-    // Create a direct link to backend auth endpoint with token
-    const stravaAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/auth/strava?token=${token}`;
-    console.log('Redirecting to:', stravaAuthUrl);
-    
-    // Create a temporary anchor element and click it
-    const link = document.createElement('a');
-    link.href = stravaAuthUrl;
-    link.target = '_self'; // Same tab
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // First, let's test if the token is valid by making a simple API call
+      const response = await fetch('https://staging-runmate-backend-production.up.railway.app/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.status === 401) {
+        // Token is invalid, user needs to log in again
+        alert('Din session har gått ut. Du behöver logga in igen för att ansluta till Strava.');
+        await logout();
+        navigate('/login');
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify token');
+      }
+      
+      // Token is valid, proceed with Strava connection
+      const stravaAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/auth/strava?token=${token}`;
+      console.log('Redirecting to:', stravaAuthUrl);
+      
+      // Create a temporary anchor element and click it
+      const link = document.createElement('a');
+      link.href = stravaAuthUrl;
+      link.target = '_self'; // Same tab
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error('Error connecting to Strava:', error);
+      alert('Ett fel uppstod. Försök logga ut och logga in igen.');
+      setLoading(false);
+    }
   };
 
   const handleToggleDarkMode = () => {

@@ -8,7 +8,7 @@ const getEnvironment = () => {
 const environment = getEnvironment();
 const BACKEND_URL = process.env.BACKEND_URL || {
   development: 'http://localhost:8000',
-  staging: 'https://runmate-backend-production.up.railway.app',
+  staging: 'https://staging-runmate-backend-production.up.railway.app',
   production: 'https://runmate-backend-production.up.railway.app'
 }[environment];
 

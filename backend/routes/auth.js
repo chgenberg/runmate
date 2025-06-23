@@ -420,10 +420,36 @@ router.delete('/deactivate', protect, async (req, res) => {
   }
 });
 
+// Custom middleware to handle token from query parameter for Strava OAuth
+const protectWithQueryToken = async (req, res, next) => {
+  let token;
+
+  // Check for token in query parameter first (for OAuth redirect)
+  if (req.query.token) {
+    token = req.query.token;
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    // Standard header check
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Not authorized, no token provided' });
+  }
+
+  try {
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id).select('-password');
+    next();
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
+  }
+};
+
 // @desc    Redirect to Strava for authentication
 // @route   GET /api/auth/strava
-// @access  Private
-router.get('/strava', protect, (req, res) => {
+// @access  Private (with query token support)
+router.get('/strava', protectWithQueryToken, (req, res) => {
   // Include user ID in state parameter to identify user after callback
   const state = Buffer.from(JSON.stringify({ userId: req.user.id })).toString('base64');
   const stravaAuthorizeUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${STRAVA_REDIRECT_URI}&approval_prompt=force&scope=read,activity:read_all&state=${state}`;

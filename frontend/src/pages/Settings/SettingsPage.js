@@ -45,8 +45,16 @@ const SettingsPage = () => {
   const handleStravaConnect = () => {
     setLoading(true);
     
-    // Create a direct link to backend auth endpoint
-    const stravaAuthUrl = 'https://staging-runmate-backend-production.up.railway.app/api/auth/strava';
+    // Get the JWT token from localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No auth token found');
+      setLoading(false);
+      return;
+    }
+    
+    // Create a direct link to backend auth endpoint with token
+    const stravaAuthUrl = `https://staging-runmate-backend-production.up.railway.app/api/auth/strava?token=${token}`;
     console.log('Redirecting to:', stravaAuthUrl);
     
     // Create a temporary anchor element and click it

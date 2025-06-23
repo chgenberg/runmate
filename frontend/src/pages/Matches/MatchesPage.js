@@ -87,6 +87,15 @@ const MatchesPage = () => {
             'Naturälskare som föredrar trail'
         ];
         
+        const profilePictures = [
+            'https://images.unsplash.com/photo-1494790108755-2616b612b64c?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&auto=format'
+        ];
+        
         return Array.from({ length: 20 }, (_, i) => ({
             _id: `mock-${offset + i}`,
             firstName: ['Emma', 'Marcus', 'Sara', 'Johan', 'Anna', 'Erik'][i % 6],
@@ -95,7 +104,7 @@ const MatchesPage = () => {
             location: cities[i % cities.length],
             pace: `${4 + (i % 3)}:${30 + (i % 30)}`,
             bio: motivations[i % motivations.length],
-            profilePicture: null,
+            profilePicture: profilePictures[i % profilePictures.length],
             rating: 4 + (i % 10) / 10,
             matchPercentage: 70 + (i % 30),
             totalDistance: 100 + i * 50,

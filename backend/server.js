@@ -135,6 +135,7 @@ app.use('/api/ratings', ratingsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/integrations', require('./routes/integrations'));
 app.use('/api/health', require('./routes/health'));
+app.use('/api/community', require('./routes/community'));
 // app.use('/api/notifications', notificationRoutes); // Temporarily disabled
 
 // Socket.io real-time functionality
@@ -158,6 +159,18 @@ io.on('connection', (socket) => {
   socket.on('leave_chat', (chatId) => {
     socket.leave(`chat_${chatId}`);
     console.log(`User ${socket.userId} left chat ${chatId}`);
+  });
+
+  // Join community room
+  socket.on('join_room', (roomId) => {
+    socket.join(`room_${roomId}`);
+    console.log(`User ${socket.userId} joined community room ${roomId}`);
+  });
+
+  // Leave community room
+  socket.on('leave_room', (roomId) => {
+    socket.leave(`room_${roomId}`);
+    console.log(`User ${socket.userId} left community room ${roomId}`);
   });
 
   // Handle typing indicators

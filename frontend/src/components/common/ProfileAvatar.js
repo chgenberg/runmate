@@ -19,6 +19,7 @@ const ProfileAvatar = ({
     medium: 'w-10 h-10',
     md: 'w-12 h-12',
     large: 'w-16 h-16',
+    xl: 'w-24 h-24',
     xlarge: 'w-24 h-24',
     xxlarge: 'w-32 h-32'
   };
@@ -28,6 +29,7 @@ const ProfileAvatar = ({
     medium: 'w-5 h-5',
     md: 'w-6 h-6',
     large: 'w-8 h-8',
+    xl: 'w-12 h-12',
     xlarge: 'w-12 h-12',
     xxlarge: 'w-16 h-16'
   };

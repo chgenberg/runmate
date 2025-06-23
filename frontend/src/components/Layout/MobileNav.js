@@ -9,7 +9,6 @@ import {
   Trophy,
   User,
   Settings,
-  MapPin,
   Calendar
 } from 'lucide-react';
 
@@ -49,11 +48,6 @@ const MobileNav = () => {
       name: 'Profil',
       href: '/app/profile',
       icon: User,
-    },
-    {
-      name: 'Egna Event',
-      href: '/app/runs',
-      icon: MapPin,
     },
     {
       name: 'Event',

@@ -235,22 +235,22 @@ const ProfilePage = () => {
                 </div>
                 
                 {/* Quick Stats - Focus on Distance & Points */}
-                <div className="grid grid-cols-4 gap-4 mt-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-6">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.totalDistance}</p>
-                    <p className="text-sm text-gray-600">km totalt</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{profileData.stats.totalDistance}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">km totalt</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-orange-600">8420</p>
-                    <p className="text-sm text-gray-600">Poäng</p>
+                    <p className="text-xl sm:text-2xl font-bold text-orange-600">8420</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Poäng</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.totalRuns}</p>
-                    <p className="text-sm text-gray-600">Löppass</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{profileData.stats.totalRuns}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Löppass</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.averagePace}</p>
-                    <p className="text-sm text-gray-600">Snitt-tempo</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{profileData.stats.averagePace}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Snitt-tempo</p>
                   </div>
                 </div>
               </div>
@@ -332,13 +332,13 @@ const ProfilePage = () => {
                   <Trophy className="w-5 h-5 mr-2 text-orange-500" />
                   Personliga rekord
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   {Object.entries(profileData.personalBests).map(([distance, time]) => (
-                    <div key={distance} className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 text-center">
-                      <p className="text-sm text-gray-600 mb-1">
+                    <div key={distance} className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-3 md:p-4 text-center">
+                      <p className="text-xs md:text-sm text-gray-600 mb-1 truncate">
                         {distance === 'halfMarathon' ? 'Halvmara' : distance.toUpperCase()}
                       </p>
-                      <p className="text-xl font-bold text-gray-900">{time || '-'}</p>
+                      <p className="text-lg md:text-xl font-bold text-gray-900 truncate">{time || '-'}</p>
                     </div>
                   ))}
                 </div>

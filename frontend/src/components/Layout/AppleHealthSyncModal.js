@@ -44,7 +44,12 @@ const AppleHealthSyncModal = ({ isOpen, onClose }) => {
     
     if (!isIOS) {
       setSyncStatus('error');
-      toast.error('Apple Health-synk kräver iPhone eller iPad');
+      toast.error('Apple Health-synk kräver iPhone eller iPad', {
+        position: 'top-center',
+        style: {
+          marginTop: '60px'
+        }
+      });
       return;
     }
 
@@ -58,7 +63,12 @@ const AppleHealthSyncModal = ({ isOpen, onClose }) => {
         averageHeartRate: 145
       });
       
-      toast.success('🎉 Synkronisering lyckades!');
+      toast.success('🎉 Synkronisering lyckades!', {
+        position: 'top-center',
+        style: {
+          marginTop: '60px'
+        }
+      });
       
       // Reset after 3 seconds
       setTimeout(() => {
@@ -79,7 +89,13 @@ const AppleHealthSyncModal = ({ isOpen, onClose }) => {
           Stäng
         </button>
       </div>
-    ), { duration: 8000 });
+    ), { 
+      duration: 8000,
+      position: 'top-center',
+      style: {
+        marginTop: '60px'
+      }
+    });
   };
 
   const formatLastSync = (dateString) => {
@@ -107,13 +123,14 @@ const AppleHealthSyncModal = ({ isOpen, onClose }) => {
           />
 
           {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", damping: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-6 bg-white rounded-3xl shadow-2xl z-50"
-          >
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 mx-auto my-auto"
+            >
             {/* Close button */}
             <button
               onClick={onClose}
@@ -257,7 +274,8 @@ const AppleHealthSyncModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
             )}
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

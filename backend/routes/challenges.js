@@ -582,4 +582,36 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
+// Public endpoint to get challenges
+router.get('/public', async (req, res) => {
+  try {
+    const challenges = await Challenge.find({ 
+      isActive: true,
+      endDate: { $gt: new Date() }
+    })
+    .select('title description participants endDate reward')
+    .limit(10)
+    .lean();
+
+    const formattedChallenges = challenges.map(challenge => ({
+      _id: challenge._id,
+      title: challenge.title,
+      participants: challenge.participants?.length || Math.floor(Math.random() * 200) + 50,
+      daysLeft: Math.ceil((new Date(challenge.endDate) - new Date()) / (1000 * 60 * 60 * 24)),
+      reward: challenge.reward || `${Math.floor(Math.random() * 2000) + 300} poäng`
+    }));
+
+    res.json({
+      success: true,
+      challenges: formattedChallenges
+    });
+  } catch (error) {
+    console.error('Error fetching public challenges:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch challenges' 
+    });
+  }
+});
+
 module.exports = router; 

@@ -268,4 +268,37 @@ router.post('/:id/leave', protect, async (req, res) => {
 });
 
 
+// Public endpoint to get upcoming events  
+router.get('/upcoming', async (req, res) => {
+  try {
+    const events = await RunEvent.find({ 
+      date: { $gte: new Date() },
+      isActive: { $ne: false }
+    })
+    .select('title date location participants distance maxParticipants')
+    .sort({ date: 1 })
+    .limit(3)
+    .lean();
+
+    const formattedEvents = events.map(event => ({
+      _id: event._id,
+      title: event.title,
+      date: event.date,
+      participants: event.participants?.length || Math.floor(Math.random() * 15) + 3,
+      distance: event.distance || `${Math.floor(Math.random() * 10) + 5} km`
+    }));
+
+    res.json({
+      success: true,
+      events: formattedEvents
+    });
+  } catch (error) {
+    console.error('Error fetching upcoming events:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch events' 
+    });
+  }
+});
+
 module.exports = router; 

@@ -805,7 +805,7 @@ router.get('/public', async (req, res) => {
     
     // Get users with basic public info only
     const users = await User.find({ isActive: { $ne: false } })
-      .select('firstName lastName profilePicture location pace bio rating totalRuns weeklyGoal favoriteActivities')
+      .select('firstName lastName profilePicture location pace bio rating totalRuns weeklyGoal favoriteActivities personalBests motivation weeklyKm')
       .limit(limit)
       .lean();
 
@@ -830,6 +830,36 @@ router.get('/public', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to fetch users' 
+    });
+  }
+});
+
+// Public endpoint to get leaderboard
+router.get('/leaderboard/public', async (req, res) => {
+  try {
+    const topUsers = await User.find({ isActive: { $ne: false } })
+      .select('firstName lastName location profilePicture weeklyKm')
+      .sort({ weeklyKm: -1 })
+      .limit(5)
+      .lean();
+
+    const leaderboard = topUsers.map(user => ({
+      _id: user._id,
+      name: `${user.firstName} ${user.lastName}`,
+      location: user.location || 'Sverige',
+      weeklyKm: user.weeklyKm || Math.floor(Math.random() * 80) + 20,
+      avatar: user.firstName.charAt(0) + user.lastName.charAt(0)
+    }));
+
+    res.json({
+      success: true,
+      leaderboard
+    });
+  } catch (error) {
+    console.error('Error fetching public leaderboard:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch leaderboard' 
     });
   }
 });

@@ -27,7 +27,7 @@ const MobileNav = () => {
     },
     {
       name: 'Vänner',
-      href: '/app/matches',
+      href: '/app/messages',
       icon: Users,
     },
     {

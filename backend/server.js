@@ -56,6 +56,7 @@ const io = socketIo(server, {
       "https://humble-radiance-production.up.railway.app",
       "https://fabulous-sparkle-production.up.railway.app",
       "https://staging-runmate-frontend-production.up.railway.app",
+      "https://staging-rummate-frontend-production.up.railway.app",
       "http://localhost:3001",
       "http://localhost:3002",
       "http://localhost:3003",
@@ -63,7 +64,8 @@ const io = socketIo(server, {
       "http://localhost:3005",
       "http://localhost:3006"
     ],
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 

@@ -1,253 +1,335 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Calendar, Target, Users, Globe, Lock, Info,
-  Trophy, Clock, TrendingUp, Flag, CheckCircle, Plus,
-  Sparkles, ChevronRight, AlertCircle
+  ArrowLeft, Calendar, Target, Users, Globe, Lock, Trophy, Clock, MapPin,
+  Plus, Sparkles, ChevronRight, AlertCircle
 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingSpinnerFullScreen } from '../../components/Layout/LoadingSpinner';
+
+// Popular cities with their coordinates for route generation
+const popularCities = [
+  { id: 'stockholm', name: 'Stockholm', lat: 59.3293, lng: 18.0686, emoji: '🏛️' },
+  { id: 'gothenburg', name: 'Göteborg', lat: 57.7089, lng: 11.9746, emoji: '⚓' },
+  { id: 'malmo', name: 'Malmö', lat: 55.6050, lng: 13.0038, emoji: '🌉' },
+  { id: 'uppsala', name: 'Uppsala', lat: 59.8586, lng: 17.6389, emoji: '🎓' },
+  { id: 'linkoping', name: 'Linköping', lat: 58.4108, lng: 15.6214, emoji: '✈️' },
+  { id: 'orebro', name: 'Örebro', lat: 59.2753, lng: 15.2134, emoji: '🏰' },
+  { id: 'vasteras', name: 'Västerås', lat: 59.6099, lng: 16.5448, emoji: '⚡' },
+  { id: 'helsingborg', name: 'Helsingborg', lat: 56.0465, lng: 12.6945, emoji: '🚢' },
+  { id: 'norrkoping', name: 'Norrköping', lat: 58.5877, lng: 16.1924, emoji: '🏭' },
+  { id: 'jonkoping', name: 'Jönköping', lat: 57.7826, lng: 14.1618, emoji: '🏞️' }
+];
 
 const challengeTypes = [
   { 
+    id: 'route_race', 
+    label: 'Ruttrace', 
+    icon: MapPin, 
+    unit: 'km', 
+    description: 'Tävla på en specifik rutt',
+    gradient: 'from-primary-500 to-secondary-500',
+    bgColor: 'bg-red-50',
+    borderColor: 'border-red-200'
+  },
+  { 
     id: 'distance', 
-    label: 'Distans', 
+    label: 'Total distans', 
     icon: Target, 
     unit: 'km', 
-    description: 'Tävla om vem som springer längst.',
+    description: 'Vem springer längst totalt',
     gradient: 'from-blue-500 to-cyan-500',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200'
   },
   { 
     id: 'time', 
-    label: 'Tid', 
+    label: 'Träningstid', 
     icon: Clock, 
-    unit: 'hours', 
-    description: 'Samla så många träningstimmar som möjligt.',
+    unit: 'timmar', 
+    description: 'Samla träningstimmar',
     gradient: 'from-purple-500 to-pink-500',
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200'
-  },
-  { 
-    id: 'activities', 
-    label: 'Aktiviteter', 
-    icon: Flag, 
-    unit: 'activities', 
-    description: 'Flest antal genomförda pass vinner.',
-    gradient: 'from-green-500 to-emerald-500',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200'
-  },
-  { 
-    id: 'elevation', 
-    label: 'Höjdmeter', 
-    icon: TrendingUp, 
-    unit: 'meters', 
-    description: 'Samla flest höjdmeter under perioden.',
-    gradient: 'from-orange-500 to-red-500',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200'
-  },
+  }
 ];
 
 const CreateChallengePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    type: 'distance',
+    type: 'route_race',
+    selectedCity: 'stockholm',
+    routeDistance: 5,
     goal: {
-      target: 100,
+      target: 5,
       unit: 'km',
       isCollective: false,
     },
-    startDate: new Date(Date.now() + 60000), // Start 1 minute from now
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    startDate: new Date(Date.now() + 60000),
+    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     visibility: 'public',
     maxParticipants: 50,
-    allowedActivityTypes: ['running', 'walking', 'cycling'] // Add default allowed activities
+    allowedActivityTypes: ['running']
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleGoalChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      goal: { ...prev.goal, [name]: name === 'target' ? Number(value) : value }
-    }));
-  };
-  
   const handleTypeChange = (type) => {
     const selectedType = challengeTypes.find(t => t.id === type);
     setFormData(prev => ({
-        ...prev,
-        type,
-        goal: { ...prev.goal, unit: selectedType.unit }
+      ...prev,
+      type,
+      goal: { 
+        ...prev.goal, 
+        unit: selectedType.unit,
+        target: type === 'route_race' ? prev.routeDistance : prev.goal.target
+      }
     }));
+  };
+
+  const handleCityChange = (cityId) => {
+    setFormData(prev => ({ ...prev, selectedCity: cityId }));
+  };
+
+  const handleDistanceChange = (distance) => {
+    setFormData(prev => ({
+      ...prev,
+      routeDistance: distance,
+      goal: {
+        ...prev.goal,
+        target: distance
+      }
+    }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < 3) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    
-    // Validate data
-    if (!formData.title.trim()) {
-      setError('Utmaningen måste ha ett namn');
-      setLoading(false);
-      return;
-    }
-    
-    if (!formData.description.trim()) {
-      setError('Utmaningen måste ha en beskrivning');
-      setLoading(false);
-      return;
-    }
     
     try {
+      const selectedCityData = popularCities.find(c => c.id === formData.selectedCity);
+      
       const challengeData = {
         ...formData,
         startDate: formData.startDate.toISOString(),
         endDate: formData.endDate.toISOString(),
-        creator: user?._id // Add creator field
+        creator: user?._id,
+        // Add route data if it's a route race
+        ...(formData.type === 'route_race' && {
+          route: {
+            city: selectedCityData.name,
+            cityId: selectedCityData.id,
+            coordinates: {
+              lat: selectedCityData.lat,
+              lng: selectedCityData.lng
+            },
+            distance: formData.routeDistance
+          }
+        })
       };
-      
-      console.log('Sending challenge data:', challengeData); // Debug log
       
       const response = await api.post('/challenges', challengeData);
       navigate(`/app/challenges/${response.data._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Ett fel uppstod. Försök igen.');
-      console.error('Error creating challenge:', err.response?.data || err);
+      console.error('Error creating challenge:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading) {
+    return <LoadingSpinnerFullScreen message="Skapar utmaning..." />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10" />
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse" />
-        
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <button 
-              onClick={() => navigate('/app/challenges')} 
-              className="flex items-center text-gray-600 hover:text-primary mb-8 group font-medium"
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/app/challenges')}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <ArrowLeft size={20} className="mr-2 transition-transform group-hover:-translate-x-2" />
-              Tillbaka till utmaningar
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              <span className="font-medium">Tillbaka</span>
             </button>
             
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1, type: "spring" }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-sm rounded-full mb-6 border border-primary/20"
-            >
-              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-              <span className="text-sm font-bold text-primary">Skapa utmaning</span>
-            </motion.div>
-            
-            <h1 className="text-5xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Skapa en Ny Utmaning
-              </span>
-            </h1>
-            <p className="text-xl text-gray-700 max-w-2xl leading-relaxed">
-              Sätt upp mål, bjud in vänner och börja tävla tillsammans
-            </p>
-          </motion.div>
+            {/* Step indicator */}
+            <div className="flex items-center space-x-2">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    step === currentStep 
+                      ? 'w-8 bg-gradient-primary' 
+                      : step < currentStep 
+                      ? 'bg-primary-500' 
+                      : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Progress Steps - Moved outside form section */}
-      <div className="relative -mt-8 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl shadow-xl p-6 mb-8"
-          >
-            <div className="flex justify-center">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
-                    1
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">Information</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                    2
-                  </div>
-                  <span className="text-sm font-medium text-gray-500">Typ & Mål</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                    3
-                  </div>
-                  <span className="text-sm font-medium text-gray-500">Inställningar</span>
-                </div>
+      {/* Hero */}
+      <div className="px-4 pt-6 pb-4">
+        <div className="text-center animate-slide-up">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-primary rounded-2xl shadow-glow mb-4 animate-pulse-slow">
+            <Trophy className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold gradient-text mb-2">Skapa utmaning</h1>
+          <p className="text-gray-600">
+            {currentStep === 1 && 'Välj typ och plats'}
+            {currentStep === 2 && 'Ställ in detaljer'}
+            {currentStep === 3 && 'Slutför utmaningen'}
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="px-4 pb-20">
+        {/* Step 1: Type and Location */}
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-slide-up">
+            {/* Challenge Type */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h2 className="font-semibold text-gray-900 mb-4">Välj utmaningstyp</h2>
+              <div className="space-y-3">
+                {challengeTypes.map((type) => {
+                  const Icon = type.icon;
+                  const isSelected = formData.type === type.id;
+                  
+                  return (
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => handleTypeChange(type.id)}
+                      className={`w-full p-4 rounded-xl border-2 transition-all ${
+                        isSelected 
+                          ? 'border-primary-500 bg-primary-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${type.gradient} flex items-center justify-center`}>
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <h3 className="font-semibold text-gray-900">{type.label}</h3>
+                          <p className="text-sm text-gray-600">{type.description}</p>
+                        </div>
+                        {isSelected && (
+                          <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </motion.div>
-        </div>
-      </div>
 
-      {/* Form Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <form onSubmit={handleSubmit} className="space-y-8">
-
-          {/* Basic Info */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            transition={{ delay: 0.1 }}
-            className="relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl" />
-            <div className="relative bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Info className="w-6 h-6 text-white" />
+            {/* City Selection (only for route race) */}
+            {formData.type === 'route_race' && (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <h2 className="font-semibold text-gray-900 mb-4">Välj stad för rutten</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {popularCities.map((city) => (
+                    <button
+                      key={city.id}
+                      type="button"
+                      onClick={() => handleCityChange(city.id)}
+                      className={`p-3 rounded-xl border-2 transition-all ${
+                        formData.selectedCity === city.id
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">{city.emoji}</div>
+                      <div className="text-sm font-medium">{city.name}</div>
+                    </button>
+                  ))}
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 ml-4">Grundläggande Information</h2>
+
+                {/* Distance slider */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ruttens längd: {formData.routeDistance} km
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="42"
+                    value={formData.routeDistance}
+                    onChange={(e) => handleDistanceChange(Number(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>1 km</span>
+                    <span>21 km</span>
+                    <span>42 km</span>
+                  </div>
+                </div>
               </div>
-              
-              <div className="space-y-6">
+            )}
+
+            <button
+              type="button"
+              onClick={nextStep}
+              className="w-full btn btn-primary"
+            >
+              Nästa steg
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          </div>
+        )}
+
+        {/* Step 2: Details */}
+        {currentStep === 2 && (
+          <div className="space-y-6 animate-slide-up">
+            {/* Basic Info */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h2 className="font-semibold text-gray-900 mb-4">Information</h2>
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Utmaningens namn
+                    Namn på utmaningen
                   </label>
-                  <input 
-                    type="text" 
-                    name="title" 
-                    placeholder="Ex: Vår-utmaningen 2024" 
-                    value={formData.title} 
-                    onChange={handleInputChange} 
-                    required 
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder-gray-400" 
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Vårens löputmaning"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
                   />
                 </div>
                 
@@ -255,104 +337,38 @@ const CreateChallengePage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Beskrivning
                   </label>
-                  <textarea 
-                    name="description" 
-                    placeholder="Berätta om utmaningen och vad målet är..." 
-                    value={formData.description} 
-                    onChange={handleInputChange} 
-                    required 
-                    rows="4" 
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder-gray-400 resize-none"
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Berätta om utmaningen..."
+                    rows="3"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                    required
                   />
                 </div>
               </div>
             </div>
-          </motion.div>
 
-          {/* Challenge Type */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            transition={{ delay: 0.2 }}
-            className="relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl" />
-            <div className="relative bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 ml-4">Typ av Utmaning</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {challengeTypes.map(type => {
-                  const Icon = type.icon;
-                  const isSelected = formData.type === type.id;
-                  
-                  return (
-                    <motion.div 
-                      key={type.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleTypeChange(type.id)}
-                      className={`relative cursor-pointer p-6 rounded-2xl border-2 transition-all ${
-                        isSelected 
-                          ? `${type.borderColor} ${type.bgColor} shadow-lg` 
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      {isSelected && (
-                        <div className="absolute -top-2 -right-2">
-                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-md">
-                            <CheckCircle className="w-4 h-4 text-white" />
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${type.gradient} flex items-center justify-center mb-4 shadow-lg mx-auto`}>
-                        <Icon className="w-7 h-7 text-white" />
-                      </div>
-                      
-                      <h3 className="font-bold text-gray-900 text-center mb-2">{type.label}</h3>
-                      <p className="text-xs text-gray-600 text-center leading-relaxed">{type.description}</p>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Goal Settings */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            transition={{ delay: 0.3 }}
-            className="relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-xl" />
-            <div className="relative bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Trophy className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 ml-4">Målsättning</h2>
-              </div>
-              
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Goal (only for non-route challenges) */}
+            {formData.type !== 'route_race' && (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <h2 className="font-semibold text-gray-900 mb-4">Mål</h2>
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Målvärde
                     </label>
                     <div className="relative">
-                      <input 
-                        type="number" 
-                        name="target" 
-                        value={formData.goal.target} 
-                        onChange={handleGoalChange}
+                      <input
+                        type="number"
+                        value={formData.goal.target}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          goal: { ...prev.goal, target: Number(e.target.value) }
+                        }))}
                         min="1"
-                        className="w-full pl-4 pr-20 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" 
+                        className="w-full pl-4 pr-20 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-100 px-3 py-1 rounded-lg">
                         <span className="text-sm font-semibold text-gray-700">{formData.goal.unit}</span>
@@ -360,82 +376,72 @@ const CreateChallengePage = () => {
                     </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Måltyp
-                    </label>
-                    <div className="flex gap-3">
-                      <motion.button
-                        type="button"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, isCollective: false }}))}
-                        className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
-                          !formData.goal.isCollective 
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg' 
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        Individuellt
-                      </motion.button>
-                      <motion.button
-                        type="button"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, isCollective: true }}))}
-                        className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
-                          formData.goal.isCollective 
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg' 
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        Gemensamt
-                      </motion.button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <p className="text-sm text-gray-600">
-                      {formData.goal.isCollective 
-                        ? 'Alla deltagare bidrar tillsammans för att nå det gemensamma målet. Perfekt för teamutmaningar!' 
-                        : 'Varje deltagare tävlar individuellt för att nå målet. Bäst för personliga utmaningar!'}
-                    </p>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, isCollective: false }}))}
+                      className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                        !formData.goal.isCollective 
+                          ? 'bg-gradient-primary text-white' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      Individuellt
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, isCollective: true }}))}
+                      className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                        formData.goal.isCollective 
+                          ? 'bg-gradient-primary text-white' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      Gemensamt
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            )}
 
-          {/* Dates & Duration */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            transition={{ delay: 0.4 }}
-            className="relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-xl" />
-            <div className="relative bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 ml-4">Tidsperiod</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="flex-1 btn btn-glass"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Tillbaka
+              </button>
+              <button
+                type="button"
+                onClick={nextStep}
+                className="flex-1 btn btn-primary"
+              >
+                Nästa
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Settings */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-slide-up">
+            {/* Dates */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h2 className="font-semibold text-gray-900 mb-4">Tidsperiod</h2>
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Startdatum
                   </label>
-                  <DatePicker 
-                    selected={formData.startDate} 
-                    onChange={date => setFormData(p => ({...p, startDate: date}))} 
-                    minDate={new Date()} 
+                  <DatePicker
+                    selected={formData.startDate}
+                    onChange={date => setFormData(p => ({...p, startDate: date}))}
+                    minDate={new Date()}
                     dateFormat="yyyy-MM-dd"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
                 
@@ -443,147 +449,116 @@ const CreateChallengePage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Slutdatum
                   </label>
-                  <DatePicker 
-                    selected={formData.endDate} 
-                    onChange={date => setFormData(p => ({...p, endDate: date}))} 
-                    minDate={formData.startDate} 
+                  <DatePicker
+                    selected={formData.endDate}
+                    onChange={date => setFormData(p => ({...p, endDate: date}))}
+                    minDate={formData.startDate}
                     dateFormat="yyyy-MM-dd"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
               </div>
               
-              <div className="mt-6 bg-blue-50 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-blue-600" />
-                  <p className="text-sm font-medium text-blue-900">
-                    Utmaningen pågår i {Math.ceil((formData.endDate - formData.startDate) / (1000 * 60 * 60 * 24))} dagar
+              <div className="mt-4 p-3 bg-primary-50 rounded-xl">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-5 h-5 text-primary-600" />
+                  <p className="text-sm font-medium text-primary-900">
+                    {Math.ceil((formData.endDate - formData.startDate) / (1000 * 60 * 60 * 24))} dagar
                   </p>
                 </div>
               </div>
             </div>
-          </motion.div>
-          
-          {/* Settings */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            transition={{ delay: 0.5 }}
-            className="relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-xl" />
-            <div className="relative bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 ml-4">Inställningar</h2>
+
+            {/* Visibility */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h2 className="font-semibold text-gray-900 mb-4">Synlighet</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(p => ({...p, visibility: 'public'}))}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    formData.visibility === 'public'
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-200'
+                  }`}
+                >
+                  <Globe className="w-6 h-6 mb-2 mx-auto text-gray-700" />
+                  <div className="text-sm font-medium">Publik</div>
+                  <div className="text-xs text-gray-500">Alla kan se</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(p => ({...p, visibility: 'private'}))}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    formData.visibility === 'private'
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-200'
+                  }`}
+                >
+                  <Lock className="w-6 h-6 mb-2 mx-auto text-gray-700" />
+                  <div className="text-sm font-medium">Privat</div>
+                  <div className="text-xs text-gray-500">Endast inbjudna</div>
+                </button>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Synlighet
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setFormData(p => ({...p, visibility: 'public'}))}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.visibility === 'public' 
-                          ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' 
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      <Globe className="w-4 h-4" />
-                      Publik
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setFormData(p => ({...p, visibility: 'private'}))}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.visibility === 'private' 
-                          ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' 
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      <Lock className="w-4 h-4" />
-                      Privat
-                    </motion.button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {formData.visibility === 'public' 
-                      ? 'Alla kan se och gå med i utmaningen' 
-                      : 'Endast med inbjudan kan gå med'}
-                  </p>
+            </div>
+
+            {/* Summary */}
+            <div className="bg-gradient-primary rounded-2xl p-6 text-white">
+              <h3 className="font-semibold mb-3">Sammanfattning</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-white/80">Typ:</span>
+                  <span className="font-medium">{challengeTypes.find(t => t.id === formData.type)?.label}</span>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Max antal deltagare
-                  </label>
-                  <input 
-                    type="number" 
-                    name="maxParticipants" 
-                    value={formData.maxParticipants} 
-                    onChange={handleInputChange} 
-                    min="2"
-                    max="1000"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" 
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Begränsa antalet som kan delta
-                  </p>
+                {formData.type === 'route_race' && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-white/80">Stad:</span>
+                      <span className="font-medium">{popularCities.find(c => c.id === formData.selectedCity)?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/80">Distans:</span>
+                      <span className="font-medium">{formData.routeDistance} km</span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-white/80">Period:</span>
+                  <span className="font-medium">{Math.ceil((formData.endDate - formData.startDate) / (1000 * 60 * 60 * 24))} dagar</span>
                 </div>
               </div>
             </div>
-          </motion.div>
 
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-start gap-3"
-            >
-              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              <p className="text-sm">{error}</p>
-            </motion.div>
-          )}
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.6 }}
-            className="flex justify-center pt-4"
-          >
-            <motion.button 
-              type="submit" 
-              disabled={loading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold px-12 py-5 rounded-3xl shadow-xl hover:shadow-2xl transition-all overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
-                  <span className="relative z-10 text-lg">Skapar utmaning...</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="w-6 h-6 relative z-10" />
-                  <span className="relative z-10 text-lg">Skapa Utmaning</span>
-                  <Sparkles className="w-6 h-6 relative z-10 group-hover:rotate-12 transition-transform" />
-                </>
-              )}
-            </motion.button>
-          </motion.div>
-        </form>
-      </div>
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="flex-1 btn btn-glass"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Tillbaka
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 btn btn-primary"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    Skapar...
+                  </>
+                ) : (
+                  <>
+                    Skapa utmaning
+                    <Sparkles className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </form>
     </div>
   );
 };

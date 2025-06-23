@@ -158,7 +158,7 @@ export function AuthProvider({ children }) {
         }
       });
 
-      toast.success(`Welcome back, ${response.data.user.firstName}!`);
+      // Toast message is shown in LoginPage component instead
       return { success: true };
 
     } catch (error) {

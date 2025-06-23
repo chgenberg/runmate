@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { BoltIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { 
+  Heart, 
+  Eye, 
+  EyeOff, 
+  ArrowRight, 
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  User,
+  Mail,
+  Lock,
+  Zap,
+  Star,
+  Activity
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
@@ -14,12 +28,13 @@ const RegisterPage = () => {
     confirmPassword: '',
     dateOfBirth: '',
     gender: '',
-    sportTypes: [],
+    sportTypes: ['running'], // Default to running
     activityLevel: '',
     location: '',
     bio: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
   const { register } = useAuth();
@@ -30,15 +45,6 @@ const RegisterPage = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }));
-  };
-
-  const handleSportToggle = (sport) => {
-    setFormData(prev => ({
-      ...prev,
-      sportTypes: prev.sportTypes.includes(sport)
-        ? prev.sportTypes.filter(s => s !== sport)
-        : [...prev.sportTypes, sport]
     }));
   };
 
@@ -68,11 +74,6 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.sportTypes.length === 0) {
-      toast.error('Välj minst en träningstyp');
-      return;
-    }
-    
     if (!formData.activityLevel) {
       toast.error('Välj din träningsnivå');
       return;
@@ -98,365 +99,432 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left side - Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
-        <div className="mx-auto w-full max-w-sm lg:w-96">
-          {/* Logo */}
-          <div className="flex items-center mb-8">
-            <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-              <BoltIcon className="w-8 h-8 text-white" />
-            </div>
-            <div className="ml-3">
-              <h1 className="text-2xl font-bold text-gray-900">RunMate</h1>
-              <p className="text-sm text-gray-500">Social träning</p>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-              <span>Steg {step} av 3</span>
-              <span>{Math.round((step / 3) * 100)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(step / 3) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">
-              {step === 1 && 'Skapa ditt konto'}
-              {step === 2 && 'Berätta om dig'}
-              {step === 3 && 'Din träning'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Eller{' '}
-              <Link
-                to="/login"
-                className="font-medium text-primary-600 hover:text-primary-500"
-              >
-                logga in på ditt befintliga konto
-              </Link>
-            </p>
-          </div>
-
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {/* Step 1: Basic Info */}
-            {step === 1 && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Förnamn *
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      required
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Efternamn *
-                    </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      required
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    E-postadress *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Lösenord *
-                  </label>
-                  <div className="mt-1 relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      required
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5 text-gray-400" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Bekräfta lösenord *
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-radial opacity-30 animate-gradient"></div>
+      <div className="absolute top-20 -left-20 w-96 h-96 bg-primary-200 rounded-full filter blur-3xl opacity-20 animate-float"></div>
+      <div className="absolute bottom-20 -right-20 w-96 h-96 bg-secondary-200 rounded-full filter blur-3xl opacity-20 animate-float animation-delay-2000"></div>
+      
+      <div className="min-h-screen flex relative z-10">
+        {/* Mobile header */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-50">
+          <div className="flex items-center justify-between p-4">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <Heart className="w-6 h-6 text-white" />
               </div>
-            )}
-
-            {/* Step 2: Personal Info */}
-            {step === 2 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Födelsedatum *
-                  </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    required
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                    max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  />
-                  {formData.dateOfBirth && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      Ålder: {calculateAge(formData.dateOfBirth)} år
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Kön *
-                  </label>
-                  <select
-                    name="gender"
-                    required
-                    value={formData.gender}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  >
-                    <option value="">Välj kön</option>
-                    <option value="male">Man</option>
-                    <option value="female">Kvinna</option>
-                    <option value="other">Annat</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Plats *
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    required
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="Stockholm, Sverige"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Berätta lite om dig
-                  </label>
-                  <textarea
-                    name="bio"
-                    rows="3"
-                    value={formData.bio}
-                    onChange={handleChange}
-                    placeholder="Vad motiverar dig att träna? Vad letar du efter i en träningspartner?"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Training Preferences */}
-            {step === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Vilka träningstyper gillar du? *
-                  </label>
-                  <div className="space-y-2">
-                    {[
-                      { id: 'running', label: 'Löpning', emoji: '🏃‍♀️' },
-                      { id: 'cycling', label: 'Cykling', emoji: '🚴‍♀️' }
-                    ].map((sport) => (
-                      <label
-                        key={sport.id}
-                        className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.sportTypes.includes(sport.id)}
-                          onChange={() => handleSportToggle(sport.id)}
-                          className="sr-only"
-                        />
-                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                          formData.sportTypes.includes(sport.id)
-                            ? 'bg-primary-500 border-primary-500'
-                            : 'border-gray-300'
-                        }`}>
-                          {formData.sportTypes.includes(sport.id) && (
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-lg mr-2">{sport.emoji}</span>
-                        <span className="font-medium">{sport.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Vilken är din träningsnivå? *
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'beginner', label: 'Nybörjare', desc: 'Tränar sporadiskt' },
-                      { id: 'recreational', label: 'Mellannivå', desc: '2-3 ggr/vecka' },
-                      { id: 'serious', label: 'Seriös', desc: '4-5 ggr/vecka' },
-                      { id: 'competitive', label: 'Tävling', desc: '6+ ggr/vecka' },
-                      { id: 'elite', label: 'Elite', desc: 'Daglig träning' }
-                    ].map((level) => (
-                      <button
-                        key={level.id}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, activityLevel: level.id }))}
-                        className={`p-3 border rounded-lg text-left transition-colors ${
-                          formData.activityLevel === level.id
-                            ? 'bg-primary-500 text-white border-primary-500'
-                            : 'border-gray-200 text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="font-medium">{level.label}</div>
-                        <div className="text-sm opacity-75">{level.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Navigation buttons */}
-            <div className="flex space-x-3">
-              {step > 1 && (
-                <button
-                  type="button"
-                  onClick={handlePrevious}
-                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-                >
-                  Tillbaka
-                </button>
-              )}
-              
-              {step < 3 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-                >
-                  Nästa
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`flex-1 px-4 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 relative overflow-hidden ${isLoading ? 'cursor-not-allowed' : ''}`}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center relative z-10">
-                      {/* Main spinner */}
-                      <div className="relative mr-3">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <div className="absolute top-0 left-0 w-5 h-5 border-2 border-transparent border-t-white/60 rounded-full animate-spin" style={{animationDuration: '0.8s', animationDirection: 'reverse'}}></div>
-                      </div>
-                      
-                      {/* Animated dots */}
-                      <div className="flex items-center space-x-1">
-                        <span className="text-white font-medium">Skapar konto</span>
-                        <div className="flex space-x-1">
-                          <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                          <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                          <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
-                        </div>
-                      </div>
-                      
-                      {/* Background shimmer effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-slow"></div>
-                    </div>
-                  ) : (
-                    'Skapa konto'
-                  )}
-                </button>
-              )}
-            </div>
-          </form>
+              <span className="text-xl font-bold gradient-text">RunMate</span>
+            </Link>
+          </div>
         </div>
-      </div>
 
-      {/* Right side - Hero Image */}
-      <div className="hidden lg:block relative w-0 flex-1">
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary-500 to-primary-500">
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-          <div className="relative h-full flex items-center justify-center p-12">
-            <div className="text-center text-white max-w-md">
-              <h3 className="text-3xl font-bold mb-4">
-                Bli en del av träningscommunityn
-              </h3>
-              <p className="text-lg opacity-90 mb-8">
-                Anslut dig till tusentals löpare och cyklister som redan hittat 
-                sina träningspartners genom RunMate.
+        {/* Main content */}
+        <div className="flex-1 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-20 xl:px-24 mt-16 lg:mt-0">
+          <div className="mx-auto w-full max-w-sm lg:w-96">
+            {/* Desktop Logo */}
+            <div className="hidden lg:flex items-center space-x-3 mb-8 animate-slide-up">
+              <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow animate-pulse-slow">
+                <Heart className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold gradient-text">RunMate</h1>
+                <p className="text-sm text-gray-500">Din sociala träningsapp</p>
+              </div>
+            </div>
+
+            {/* Progress */}
+            <div className="mb-8 animate-slide-up animation-delay-200">
+              <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+                <span className="font-medium">Steg {step} av 3</span>
+                <span className="font-medium">{Math.round((step / 3) * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-200/50 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-primary rounded-full transition-all duration-500 ease-out shadow-glow"
+                  style={{ width: `${(step / 3) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Step content */}
+            <div className="animate-slide-up animation-delay-300">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                {step === 1 && 'Skapa ditt konto'}
+                {step === 2 && 'Berätta om dig'}
+                {step === 3 && 'Din träningsprofil'}
+              </h2>
+              <p className="text-gray-600 mb-8">
+                {step === 1 && 'Kom igång på bara några minuter'}
+                {step === 2 && 'Hjälp oss matcha dig med rätt personer'}
+                {step === 3 && 'Anpassa din träningsupplevelse'}
               </p>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl mb-2">🏃‍♀️</div>
-                  <div className="font-medium">Löpning</div>
-                  <div className="text-sm opacity-75">Hitta löpkompisar</div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6 animate-slide-up animation-delay-400">
+              {/* Step 1: Basic Info */}
+              {step === 1 && (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Förnamn</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          name="firstName"
+                          required
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          placeholder="Anna"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Efternamn</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          name="lastName"
+                          required
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          placeholder="Svensson"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">E-postadress</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        placeholder="anna@exempel.se"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Lösenord</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        required
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        placeholder="Minst 8 tecken"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Bekräfta lösenord</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        placeholder="Upprepa lösenordet"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl mb-2">🚴‍♀️</div>
-                  <div className="font-medium">Cykling</div>
-                  <div className="text-sm opacity-75">Cykelpartners</div>
+              )}
+
+              {/* Step 2: Personal Info */}
+              {step === 2 && (
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Födelsedatum</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        required
+                        value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                        className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    {formData.dateOfBirth && (
+                      <p className="text-sm text-gray-500 flex items-center mt-1">
+                        <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                        Du är {calculateAge(formData.dateOfBirth)} år
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Kön</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: 'male', label: 'Man', emoji: '👨' },
+                        { value: 'female', label: 'Kvinna', emoji: '👩' },
+                        { value: 'other', label: 'Annat', emoji: '🌟' }
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, gender: option.value }))}
+                          className={`p-3 rounded-xl border-2 transition-all transform hover:scale-105 ${
+                            formData.gender === option.value
+                              ? 'border-primary-500 bg-primary-50 shadow-md'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="text-2xl mb-1">{option.emoji}</div>
+                          <div className="text-sm font-medium">{option.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Var tränar du?</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        name="location"
+                        required
+                        value={formData.location}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        placeholder="Stockholm, Sverige"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Berätta om dig (valfritt)</label>
+                    <textarea
+                      name="bio"
+                      rows="3"
+                      value={formData.bio}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                      placeholder="Vad motiverar dig? Vilka mål har du?"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Training Preferences */}
+              {step === 3 && (
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-gray-700">Din träningsnivå</label>
+                    <div className="space-y-3">
+                      {[
+                        { 
+                          id: 'beginner', 
+                          label: 'Nybörjare', 
+                          desc: 'Just börjat eller tränar sporadiskt',
+                          icon: '🌱'
+                        },
+                        { 
+                          id: 'recreational', 
+                          label: 'Motionär', 
+                          desc: 'Tränar regelbundet 2-3 ggr/vecka',
+                          icon: '🏃‍♀️'
+                        },
+                        { 
+                          id: 'serious', 
+                          label: 'Seriös', 
+                          desc: 'Tränar 4-5 ggr/vecka med struktur',
+                          icon: '💪'
+                        },
+                        { 
+                          id: 'competitive', 
+                          label: 'Tävlande', 
+                          desc: 'Tränar för tävlingar och resultat',
+                          icon: '🏆'
+                        }
+                      ].map((level) => (
+                        <button
+                          key={level.id}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, activityLevel: level.id }))}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all transform hover:scale-[1.02] ${
+                            formData.activityLevel === level.id
+                              ? 'border-primary-500 bg-gradient-to-r from-primary-50 to-secondary-50 shadow-md'
+                              : 'border-gray-200 hover:border-gray-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <span className="text-2xl">{level.icon}</span>
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900">{level.label}</div>
+                              <div className="text-sm text-gray-600 mt-0.5">{level.desc}</div>
+                            </div>
+                            {formData.activityLevel === level.id && (
+                              <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Strava Connect Preview */}
+                  <div className="p-4 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl border border-primary-200">
+                    <div className="flex items-center space-x-3">
+                      <Activity className="w-8 h-8 text-primary-600" />
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">Koppla Strava efter registrering</p>
+                        <p className="text-sm text-gray-600">Synka dina aktiviteter automatiskt</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation */}
+              <div className="flex gap-3 pt-2">
+                {step > 1 && (
+                  <button
+                    type="button"
+                    onClick={handlePrevious}
+                    className="flex-1 btn btn-glass group"
+                  >
+                    <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" />
+                    Tillbaka
+                  </button>
+                )}
+                
+                {step < 3 ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="flex-1 btn btn-primary group"
+                  >
+                    Nästa
+                    <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex-1 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
+                        <span>Skapar konto...</span>
+                      </div>
+                    ) : (
+                      <>
+                        Kom igång
+                        <Zap className="w-5 h-5 ml-2" />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Login link */}
+              <p className="text-center text-sm text-gray-600">
+                Har du redan ett konto?{' '}
+                <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                  Logga in här
+                </Link>
+              </p>
+            </form>
+          </div>
+        </div>
+
+        {/* Right side - Desktop only */}
+        <div className="hidden lg:block relative w-0 flex-1">
+          <div className="absolute inset-0 bg-gradient-primary">
+            <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40"></div>
+            <div className="relative h-full flex items-center justify-center p-12">
+              <div className="text-center text-white max-w-md space-y-8 animate-fade-in">
+                <div className="space-y-4">
+                  <h3 className="text-4xl font-bold">
+                    Hitta din löparkompis
+                  </h3>
+                  <p className="text-xl opacity-90 leading-relaxed">
+                    Matcha med löpare i din närhet och nå nya mål tillsammans
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-8 pt-8">
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                      <Heart className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-lg">Smart matchning</div>
+                      <div className="text-sm opacity-80">Hitta löpare på din nivå</div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                      <MapPin className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-lg">Lokala träningspass</div>
+                      <div className="text-sm opacity-80">Upptäck nya löprundor</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8 space-y-4">
+                  <div className="flex items-center justify-center space-x-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-lg italic opacity-90">
+                    "RunMate hjälpte mig hitta den perfekta löpargruppen. 
+                    Nu springer jag 4 gånger i veckan!"
+                  </p>
+                  <div className="flex items-center justify-center space-x-3">
+                    <img 
+                      src="https://ui-avatars.com/api/?name=Emma+Johansson&background=fff&color=6366f1&size=40"
+                      alt="Emma"
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div className="text-left">
+                      <div className="font-medium">Emma Johansson</div>
+                      <div className="text-sm opacity-80">Stockholm</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -58,8 +58,8 @@ const TopBar = () => {
 
         {/* Right Side Icons */}
         <div className="flex items-center space-x-4">
-          {/* Connection Status */}
-          <div className="hidden sm:flex items-center">
+          {/* Connection Status - Only show on desktop */}
+          <div className="hidden lg:flex items-center">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span className="ml-2 text-xs text-gray-500">
               {isConnected ? 'Online' : 'Offline'}

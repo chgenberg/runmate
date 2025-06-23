@@ -19,7 +19,12 @@ import {
   Crown,
   Award,
   Copy,
-  ChevronDown
+  ChevronDown,
+  MapPin,
+  Heart,
+  Plus,
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -33,9 +38,66 @@ import {
   Tooltip,
   Cell
 } from 'recharts';
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingSpinnerFullScreen } from '../../components/Layout/LoadingSpinner';
+import toast from 'react-hot-toast';
+
+// Fix for default markers in Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
+// Popular cities route data (simplified for demo)
+const cityRoutes = {
+  stockholm: {
+    center: [59.3293, 18.0686],
+    zoom: 12,
+    getRoute: (distance) => {
+      // Generate a simple circular route based on distance
+      const baseCoords = [59.3293, 18.0686];
+      const points = [];
+      const numPoints = Math.max(20, distance * 2);
+      const radius = distance / (2 * Math.PI * 111); // Convert km to degrees
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * 2 * Math.PI;
+        points.push([
+          baseCoords[0] + radius * Math.cos(angle),
+          baseCoords[1] + radius * Math.sin(angle) * 1.5
+        ]);
+      }
+      return points;
+    }
+  },
+  gothenburg: {
+    center: [57.7089, 11.9746],
+    zoom: 12,
+    getRoute: (distance) => {
+      const baseCoords = [57.7089, 11.9746];
+      const points = [];
+      const numPoints = Math.max(20, distance * 2);
+      const radius = distance / (2 * Math.PI * 111);
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * 2 * Math.PI;
+        points.push([
+          baseCoords[0] + radius * Math.cos(angle),
+          baseCoords[1] + radius * Math.sin(angle) * 1.5
+        ]);
+      }
+      return points;
+    }
+  },
+  // Add more cities as needed
+};
 
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -214,6 +276,7 @@ const ChallengeDetailPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareButtonRef = useRef(null);
+  const [showAllParticipants, setShowAllParticipants] = useState(false);
 
   const isParticipant = challenge?.participants.some(p => p.user?._id === user?._id && p.isActive);
 
@@ -228,12 +291,12 @@ const ChallengeDetailPage = () => {
       setLeaderboard(leaderboardRes.data);
       setError(null);
     } catch (err) {
-      setError('Kunde inte ladda utmaningsdetaljer.');
-      console.error(err);
+      toast.error('Kunde inte ladda utmaning');
+      navigate('/app/challenges');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, navigate]);
 
   useEffect(() => {
     fetchChallengeData();
@@ -256,18 +319,11 @@ const ChallengeDetailPage = () => {
   const handleJoin = async () => {
     setIsJoining(true);
     try {
-      let joinCode = '';
-      if (challenge.visibility === 'private') {
-        joinCode = prompt('Ange inbjudningskod för att gå med:');
-        if (joinCode === null) {
-            setIsJoining(false);
-            return;
-        }
-      }
-      await api.post(`/challenges/${id}/join`, { joinCode });
+      await api.post(`/challenges/${id}/join`);
+      toast.success('Du har gått med i utmaningen!');
       fetchChallengeData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Kunde inte gå med i utmaningen.');
+      toast.error(err.response?.data?.message || 'Kunde inte gå med');
     } finally {
       setIsJoining(false);
     }
@@ -275,15 +331,16 @@ const ChallengeDetailPage = () => {
   
   const handleLeave = async () => {
     if (window.confirm('Är du säker på att du vill lämna utmaningen?')) {
-        setIsJoining(true);
-        try {
-          await api.post(`/challenges/${id}/leave`);
-          navigate('/app/challenges');
-        } catch (err) {
-          alert(err.response?.data?.message || 'Kunde inte lämna utmaningen.');
-        } finally {
-          setIsJoining(false);
-        }
+      setIsJoining(true);
+      try {
+        await api.post(`/challenges/${id}/leave`);
+        toast.success('Du har lämnat utmaningen');
+        navigate('/app/challenges');
+      } catch (err) {
+        toast.error('Kunde inte lämna utmaningen');
+      } finally {
+        setIsJoining(false);
+      }
     }
   };
 
@@ -329,7 +386,7 @@ const ChallengeDetailPage = () => {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(getChallengeUrl());
-      alert('Länk kopierad till urklipp!');
+      toast.success('Länk kopierad!');
     } catch (err) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -338,7 +395,7 @@ const ChallengeDetailPage = () => {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert('Länk kopierad till urklipp!');
+      toast.success('Länk kopierad!');
     }
     setShowShareMenu(false);
   };
@@ -358,7 +415,10 @@ const ChallengeDetailPage = () => {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) {
+    return <LoadingSpinnerFullScreen message="Laddar utmaning..." />;
+  }
+
   if (error) return <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg m-4">{error}</div>;
   if (!challenge) return null;
 
@@ -397,401 +457,300 @@ const ChallengeDetailPage = () => {
   
   const { value: myProgressValue, percentage: myProgressPercentage } = myProgress();
 
+  const isRouteChallenge = challenge.type === 'route_race' && challenge.route;
+
+  // Get route data if it's a route challenge
+  const routeData = isRouteChallenge && cityRoutes[challenge.route.cityId];
+  const routeCoordinates = routeData?.getRoute(challenge.route.distance) || [];
+
+  // Calculate participant positions on route based on their progress
+  const getParticipantPosition = (participant) => {
+    if (!isRouteChallenge || !routeCoordinates.length) return null;
+    
+    const progress = participant.progress.distance || 0;
+    const totalDistance = challenge.route.distance;
+    const progressPercentage = Math.min(progress / totalDistance, 1);
+    
+    const pointIndex = Math.floor(progressPercentage * (routeCoordinates.length - 1));
+    return routeCoordinates[pointIndex];
+  };
+
+  // Create custom icon for participants
+  const createParticipantIcon = (participant, rank) => {
+    const isMe = participant.user._id === user._id;
+    const color = isMe ? '#ef4444' : rank === 1 ? '#fbbf24' : rank === 2 ? '#9ca3af' : rank === 3 ? '#f97316' : '#6366f1';
+    
+    return L.divIcon({
+      className: 'custom-marker',
+      html: `
+        <div class="relative">
+          <div class="absolute -top-2 -left-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2" style="border-color: ${color}">
+            <img src="https://ui-avatars.com/api/?name=${participant.user.name}&background=${color.substring(1)}&color=fff&size=40" 
+                 class="w-10 h-10 rounded-full" />
+          </div>
+          ${rank <= 3 ? `
+            <div class="absolute -top-3 -right-3 w-6 h-6 bg-${rank === 1 ? 'yellow' : rank === 2 ? 'gray' : 'orange'}-400 rounded-full flex items-center justify-center shadow-md">
+              <span class="text-xs font-bold text-white">${rank}</span>
+            </div>
+          ` : ''}
+        </div>
+      `,
+      iconSize: [48, 48],
+      iconAnchor: [24, 48],
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Hero Header Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5" />
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse" />
-        
-        <div className="relative max-w-7xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }} 
-            animate={{ opacity: 1, y: 0 }}
-            className="px-4 sm:px-6 lg:px-8 pt-8 pb-16"
-          >
-            <button 
-              onClick={() => navigate('/app/challenges')} 
-              className="flex items-center text-gray-600 hover:text-primary mb-8 group font-medium"
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/app/challenges')}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <ArrowLeft size={20} className="mr-2 transition-transform group-hover:-translate-x-2" />
-              Tillbaka till utmaningar
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              <span className="font-medium hidden sm:inline">Tillbaka</span>
             </button>
             
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-              <div className="flex-1">
-                <div className="flex items-start gap-6 mb-6">
-                  <motion.div 
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", delay: 0.1 }}
-                    className="relative"
-                  >
-                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                      <ChallengeIcon className="w-10 h-10 text-white" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </div>
-                  </motion.div>
-                  
-                  <div className="flex-1">
-                    <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-3">
-                      {challenge.title}
-                    </h1>
-                    <p className="text-lg text-gray-600 leading-relaxed">
-                      {challenge.description}
-                    </p>
-                    
-                    {/* Quick Stats */}
-                    <div className="flex flex-wrap gap-4 mt-6">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
-                        <Users className="w-4 h-4 text-primary" />
-                        <span className="font-semibold text-gray-900">{challenge.participants.filter(p => p.isActive).length}</span>
-                        <span className="text-gray-500">deltagare</span>
-                      </div>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        <span className="font-semibold text-gray-900">{daysRemaining}</span>
-                        <span className="text-gray-500">dagar kvar</span>
-                      </div>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
-                        <Target className="w-4 h-4 text-primary" />
-                        <span className="font-semibold text-gray-900">{challenge.goal.target}</span>
-                        <span className="text-gray-500">{challenge.goal.unit}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative">
-                  <motion.button 
-                    ref={shareButtonRef}
-                    onClick={() => setShowShareMenu(!showShareMenu)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 px-5 py-3 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
-                  >
-                    <Share2 size={20} />
-                    <span className="font-medium">Dela</span>
-                    <ChevronDown size={16} className={`transition-transform ${showShareMenu ? 'rotate-180' : ''}`} />
-                  </motion.button>
-                  
-                  <ShareMenu
-                    isOpen={showShareMenu}
-                    onClose={() => setShowShareMenu(false)}
-                    onFacebook={shareToFacebook}
-                    onTwitter={shareToTwitter}
-                    onLinkedIn={shareToLinkedIn}
-                    onWhatsApp={shareToWhatsApp}
-                    onCopy={copyToClipboard}
-                    onNative={shareNative}
-                    buttonRef={shareButtonRef}
-                  />
-                </div>
-                
-                {isParticipant ? (
-                  <motion.button 
-                    onClick={handleLeave} 
-                    disabled={isJoining}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 bg-red-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:bg-red-600 transition-all"
-                  >
-                    <XCircle size={20} />
-                    {isJoining ? 'Lämnar...' : 'Lämna utmaning'}
-                  </motion.button>
-                ) : (
-                  <motion.button 
-                    onClick={handleJoin} 
-                    disabled={isJoining}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-                  >
-                    <CheckCircle size={20} />
-                    {isJoining ? 'Går med...' : 'Gå med i utmaning'}
-                  </motion.button>
-                )}
-              </div>
-            </div>
-          </motion.div>
+            <button
+              onClick={() => setShowShareMenu(true)}
+              className="btn btn-glass btn-sm"
+            >
+              <Share2 className="w-4 h-4 mr-1" />
+              Dela
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto -mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4 sm:p-6 lg:p-8">
-            {/* Left Column - Stats & Progress */}
-            <div className="lg:col-span-1 space-y-6">
-                {/* Progress Card */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-3xl blur-xl" />
-                  <div className="relative bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6">Din Framsteg</h3>
-                    {isParticipant ? (
-                      <div>
-                        <div className="flex justify-center mb-6">
-                          <div className="relative w-40 h-40">
-                            <CircularProgressbar 
-                              value={myProgressPercentage} 
-                              text={`${Math.round(myProgressPercentage)}%`} 
-                              styles={buildStyles({
-                                  rotation: 0.25,
-                                  strokeLinecap: 'round',
-                                  textSize: '24px',
-                                  pathTransitionDuration: 1,
-                                  pathColor: `url(#gradient)`,
-                                  textColor: '#111827',
-                                  trailColor: '#f3f4f6',
-                              })}
-                            />
-                            <svg style={{ height: 0 }}>
-                              <defs>
-                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                  <stop offset="0%" stopColor="#4F46E5" />
-                                  <stop offset="100%" stopColor="#9333EA" />
-                                </linearGradient>
-                              </defs>
-                            </svg>
-                          </div>
-                        </div>
-                        <div className="text-center space-y-2">
-                          <p className="text-4xl font-black text-gray-900">{myProgressValue.toFixed(1)}</p>
-                          <p className="text-lg text-gray-500">av {challenge.goal.target} {challenge.goal.unit}</p>
-                          <div className="pt-4">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full">
-                              <TrendingUp className="w-4 h-4 text-purple-600" />
-                              <span className="text-sm font-semibold text-purple-600">
-                                {challenge.goal.isCollective ? "Gemensamt mål" : "Individuellt mål"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Trophy className="w-10 h-10 text-gray-400" />
-                          </div>
-                          <p className="text-gray-600 font-medium mb-4">Gå med för att börja tävla!</p>
-                          <motion.button 
-                            onClick={handleJoin} 
-                            disabled={isJoining} 
-                            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50" 
-                            whileHover={{ scale: 1.05 }} 
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            <CheckCircle size={20} className="inline-block mr-2"/>
-                            {isJoining ? 'Går med...' : 'Gå med nu'}
-                          </motion.button>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-                
-                {/* Stats Grid */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="grid grid-cols-2 gap-4"
-                >
-                  <StatItem
-                    icon={Target}
-                    label="Mål"
-                    value={challenge.goal.target}
-                    unit={challenge.goal.unit}
-                    color="blue"
-                  />
-                  <StatItem
-                    icon={Calendar}
-                    label="Tid kvar"
-                    value={daysRemaining}
-                    unit="dagar"
-                    color="green"
-                  />
-                  <StatItem
-                    icon={Users}
-                    label="Deltagare"
-                    value={challenge.participants.filter(p=>p.isActive).length}
-                    unit={`av ${challenge.maxParticipants || '∞'}`}
-                    color="purple"
-                  />
-                  <StatItem
-                    icon={BarChart2}
-                    label="Status"
-                    value={challenge.status}
-                    color="orange"
-                    capitalize
-                  />
-                </motion.div>
-                
-                {/* Participants */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6"
-                >
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Aktiva deltagare ({challenge.participants.filter(p=>p.isActive).length})
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                      {challenge.participants.filter(p=>p.isActive).map(p => (
-                        <Link to={`/app/profile/${p.user?._id}`} key={p.user?._id}>
-                          <motion.div
-                            whileHover={{ scale: 1.1, y: -4 }}
-                            className="relative"
-                          >
-                            <img 
-                              src={p.user?.profileImage || `https://ui-avatars.com/api/?name=${p.user?.firstName}+${p.user?.lastName}&background=random&color=fff`} 
-                              alt={p.user?.firstName} 
-                              className="w-14 h-14 rounded-full border-3 border-white shadow-lg"
-                              title={`${p.user?.firstName} ${p.user?.lastName}`}
-                            />
-                            {/* Show rank badge for top 3 */}
-                            {leaderboard.findIndex(l => l.user._id === p.user._id) < 3 && leaderboard.findIndex(l => l.user._id === p.user._id) >= 0 && (
-                              <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md ${
-                                leaderboard.findIndex(l => l.user._id === p.user._id) === 0 ? 'bg-yellow-500' :
-                                leaderboard.findIndex(l => l.user._id === p.user._id) === 1 ? 'bg-gray-400' :
-                                'bg-yellow-700'
-                              }`}>
-                                {leaderboard.findIndex(l => l.user._id === p.user._id) + 1}
-                              </div>
-                            )}
-                          </motion.div>
-                        </Link>
-                      ))}
-                  </div>
-                </motion.div>
+      {/* Hero Section */}
+      <div className="px-4 pt-6 pb-4">
+        <div className="bg-white rounded-2xl shadow-sm p-6 animate-slide-up">
+          <div className="flex items-start space-x-4">
+            <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow animate-pulse-slow">
+              <Trophy className="w-8 h-8 text-white" />
             </div>
             
-            {/* Right Column - Leaderboard */}
-            <div className="lg:col-span-2">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-white backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl p-8"
-              >
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900">Topplista</h3>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full">
-                    <Trophy className="w-4 h-4 text-purple-600" />
-                    <span className="text-sm font-semibold text-purple-600">
-                      {leaderboard.length} deltagare rankas
-                    </span>
-                  </div>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{challenge.title}</h1>
+              <p className="text-gray-600 mb-4">{challenge.description}</p>
+              
+              {/* Stats */}
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center space-x-2 text-sm">
+                  <Users className="w-4 h-4 text-gray-400" />
+                  <span className="font-medium">{challenge.participants.filter(p => p.isActive).length}</span>
+                  <span className="text-gray-500">deltagare</span>
                 </div>
-                
-                {leaderboard.length > 0 ? (
-                  <>
-                    {/* Chart */}
-                    <div className="h-[350px] mb-8 bg-gray-50 rounded-2xl p-4" style={{ minWidth: '300px', minHeight: '350px' }}>
-                      {leaderboard.length > 0 && (
-                        <ResponsiveContainer width="100%" height={300}>
-                          <BarChart 
-                            data={leaderboard.slice(0, 10)} 
-                            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                          >
-                          <defs>
-                            <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#4F46E5" stopOpacity={0.8}/>
-                              <stop offset="95%" stopColor="#9333EA" stopOpacity={0.6}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                          <XAxis 
-                            dataKey="user.firstName" 
-                            stroke="#6b7280" 
-                            fontSize={12}
-                            angle={-45}
-                            textAnchor="end"
-                            height={80}
-                          />
-                          <YAxis 
-                            stroke="#6b7280" 
-                            fontSize={12}
-                            axisLine={false}
-                            tickLine={false}
-                          />
-                          <Tooltip
-                            cursor={{fill: 'rgba(79, 70, 229, 0.08)'}}
-                            content={({ active, payload }) => {
-                              if (active && payload && payload.length) {
-                                const data = payload[0].payload;
-                                return (
-                                  <div className="bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-2xl border border-gray-100">
-                                    <p className="font-bold text-gray-900">{data.user.firstName} {data.user.lastName}</p>
-                                    <p className="text-2xl font-black text-primary mt-1">
-                                      {data.progress.toFixed(1)} {challenge.goal.unit}
-                                    </p>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            }}
-                          />
-                          <Bar 
-                            dataKey="progress" 
-                            fill="url(#colorGradient)" 
-                            radius={[8, 8, 0, 0]}
-                            maxBarSize={50}
-                          >
-                            {leaderboard.slice(0, 10).map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={
-                                  index === 0 ? '#FFC107' : 
-                                  index === 1 ? '#9CA3AF' : 
-                                  index === 2 ? '#CD7F32' : 
-                                  'url(#colorGradient)'
-                                } 
-                              />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                        </ResponsiveContainer>
-                      )}
-                    </div>
-                    
-                    {/* Leaderboard List */}
-                    <div className="space-y-3">
-                      {leaderboard.map((p, index) => (
-                        <LeaderboardItem 
-                          key={p.user._id} 
-                          rank={index + 1} 
-                          user={p.user} 
-                          progress={p.progress} 
-                          unit={challenge.goal.unit} 
-                          isCurrentUser={user?._id === p.user._id}
-                          goal={challenge.goal.target}
-                        />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-16">
-                    <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <BarChart2 className="w-12 h-12 text-gray-400" />
-                    </div>
-                    <p className="text-xl font-semibold text-gray-900 mb-2">Ingen data ännu</p>
-                    <p className="text-gray-600">Bli den första att rapportera framsteg!</p>
-                  </div>
-                )}
-              </motion.div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  <span className="font-medium">{daysRemaining}</span>
+                  <span className="text-gray-500">dagar kvar</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Target className="w-4 h-4 text-gray-400" />
+                  <span className="font-medium">{challenge.goal.target}</span>
+                  <span className="text-gray-500">{challenge.goal.unit}</span>
+                </div>
+              </div>
             </div>
+          </div>
+          
+          {/* Join/Leave Button */}
+          <div className="mt-6">
+            {isParticipant ? (
+              <button
+                onClick={handleLeave}
+                disabled={isJoining}
+                className="w-full btn btn-glass"
+              >
+                Lämna utmaning
+              </button>
+            ) : (
+              <button
+                onClick={handleJoin}
+                disabled={isJoining}
+                className="w-full btn btn-primary"
+              >
+                {isJoining ? 'Går med...' : 'Gå med i utmaning'}
+                <Plus className="w-5 h-5 ml-2" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Map View for Route Challenges */}
+      {isRouteChallenge && routeData && (
+        <div className="px-4 pb-4">
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-slide-up animation-delay-200">
+            <div className="p-4 border-b border-gray-100">
+              <h2 className="font-semibold text-gray-900 flex items-center">
+                <MapPin className="w-5 h-5 mr-2 text-primary-500" />
+                Rutt i {challenge.route.city} - {challenge.route.distance} km
+              </h2>
+            </div>
+            
+            <div className="h-96">
+              <MapContainer
+                center={routeData.center}
+                zoom={routeData.zoom}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                />
+                
+                {/* Draw the route */}
+                <Polyline
+                  positions={routeCoordinates}
+                  color="#ef4444"
+                  weight={4}
+                  opacity={0.8}
+                />
+                
+                {/* Place participant markers */}
+                {leaderboard.slice(0, 10).map((participant, index) => {
+                  const position = getParticipantPosition(participant);
+                  if (!position) return null;
+                  
+                  return (
+                    <Marker
+                      key={participant.user._id}
+                      position={position}
+                      icon={createParticipantIcon(participant, index + 1)}
+                    >
+                      <Popup>
+                        <div className="text-sm">
+                          <div className="font-semibold">{participant.user.name}</div>
+                          <div className="text-gray-600">
+                            {participant.progress.distance || 0} / {challenge.route.distance} km
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+                
+                {/* Start/Finish markers */}
+                <Marker position={routeCoordinates[0]}>
+                  <Popup>Start</Popup>
+                </Marker>
+                <Marker position={routeCoordinates[routeCoordinates.length - 1]}>
+                  <Popup>Mål</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard */}
+      <div className="px-4 pb-20">
+        <div className="bg-white rounded-2xl shadow-sm p-6 animate-slide-up animation-delay-300">
+          <h2 className="font-semibold text-gray-900 mb-4 flex items-center">
+            <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
+            Topplista
+          </h2>
+          
+          <div className="space-y-3">
+            {leaderboard.slice(0, showAllParticipants ? undefined : 5).map((participant, index) => {
+              const rank = index + 1;
+              const isMe = participant.user._id === user._id;
+              const progress = participant.progress.distance || participant.progress.time || participant.progress.activities || 0;
+              const percentage = (progress / challenge.goal.target) * 100;
+              
+              return (
+                <div
+                  key={participant.user._id}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    isMe ? 'border-primary-500 bg-primary-50' : 'border-gray-100 hover:border-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {/* Rank */}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                        rank === 1 ? 'bg-yellow-100 text-yellow-700' :
+                        rank === 2 ? 'bg-gray-100 text-gray-700' :
+                        rank === 3 ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-50 text-gray-600'
+                      }`}>
+                        {rank === 1 ? <Crown className="w-5 h-5" /> : rank}
+                      </div>
+                      
+                      {/* User info */}
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${participant.user.name}&background=6366f1&color=fff`}
+                        alt={participant.user.name}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {participant.user.name}
+                          {isMe && <span className="text-primary-600 ml-1">(Du)</span>}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {progress} / {challenge.goal.target} {challenge.goal.unit}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Progress */}
+                    <div className="text-right">
+                      <p className="font-bold text-lg text-gray-900">{percentage.toFixed(0)}%</p>
+                      {percentage >= 100 && (
+                        <div className="flex items-center text-green-600 text-sm">
+                          <Sparkles className="w-4 h-4 mr-1" />
+                          Klart!
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="mt-3 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isMe ? 'bg-gradient-primary' : 'bg-gradient-to-r from-blue-500 to-purple-500'
+                      }`}
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {leaderboard.length > 5 && (
+            <button
+              onClick={() => setShowAllParticipants(!showAllParticipants)}
+              className="w-full mt-4 py-2 text-center text-primary-600 font-medium hover:text-primary-700 transition-colors"
+            >
+              {showAllParticipants ? 'Visa färre' : `Visa alla ${leaderboard.length} deltagare`}
+              <ChevronRight className={`w-4 h-4 inline-block ml-1 transition-transform ${showAllParticipants ? 'rotate-90' : ''}`} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Share Menu */}
+      {showShareMenu && (
+        <ShareMenu
+          isOpen={showShareMenu}
+          onClose={() => setShowShareMenu(false)}
+          onFacebook={shareToFacebook}
+          onTwitter={shareToTwitter}
+          onLinkedIn={shareToLinkedIn}
+          onWhatsApp={shareToWhatsApp}
+          onCopy={copyToClipboard}
+          onNative={shareNative}
+          buttonRef={shareButtonRef}
+        />
+      )}
     </div>
   );
 };

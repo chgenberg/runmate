@@ -5,27 +5,21 @@ import {
   User, 
   MapPin, 
   Activity,
-  Settings,
   Save,
   X,
   Plus,
   Edit3,
   Target,
-  Clock,
   Trash2,
   Star,
   Trophy,
   Calendar,
-  Heart,
-  Award,
   TrendingUp,
-  ChevronRight,
   Check
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import UserRatingProfile from '../../components/Rating/UserRatingProfile';
-import ProfileAvatar from '../../components/common/ProfileAvatar';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
@@ -60,10 +54,6 @@ const ProfilePage = () => {
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&auto=format',
     'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=400&fit=crop&auto=format'
   ]);
-
-  const sportsOptions = [
-    { id: 'running', name: 'Löpning', icon: '🏃‍♂️' },
-  ];
 
   const activityLevels = [
     { id: 'beginner', name: 'Nybörjare', desc: '1-2 gånger per vecka', color: 'from-green-400 to-green-600' },
@@ -127,13 +117,6 @@ const ProfilePage = () => {
 
   const removePhoto = (index) => {
     setPhotos(photos.filter((_, i) => i !== index));
-  };
-
-  const toggleSport = (sportId) => {
-    if (sportId === 'running') {
-      const newSports = profileData.sports.includes('running') ? [] : ['running'];
-      setProfileData({ ...profileData, sports: newSports });
-    }
   };
 
   const toggleTime = (timeId) => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Calendar, Target, Globe, Lock, Trophy, Clock, MapPin,
+  ArrowLeft, Calendar, Target, Globe, Lock, Trophy, Clock,
   Sparkles, ChevronRight
 } from 'lucide-react';
 import DatePicker from 'react-datepicker';

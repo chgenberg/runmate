@@ -22,7 +22,7 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
   const [appleHealthConnected, setAppleHealthConnected] = useState(false);
-  const [garminConnected, setGarminConnected] = useState(false);
+  const [garminConnected] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState({
     matches: true,

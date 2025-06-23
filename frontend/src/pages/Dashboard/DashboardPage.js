@@ -7,11 +7,9 @@ import {
   Calendar, 
   Trophy, 
   Star, 
-  MessageCircle, 
   X, 
   Check,
   ChevronRight,
-  Heart,
   MapPin,
   Clock,
   Award

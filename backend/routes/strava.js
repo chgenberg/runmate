@@ -204,4 +204,132 @@ router.get('/callback', (req, res) => {
   });
 });
 
+// @desc    Handle Strava webhook subscription verification
+// @route   GET /api/strava/webhook
+// @access  Public
+router.get('/webhook', (req, res) => {
+  // Strava sends a verification challenge when setting up webhooks
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+  
+  console.log('Strava webhook verification:', { mode, token, challenge });
+  
+  // Verify token (you can set this to any value you want)
+  if (mode === 'subscribe' && token === 'RUNMATE_STRAVA_WEBHOOK_TOKEN') {
+    console.log('Webhook verified successfully');
+    res.json({ "hub.challenge": challenge });
+  } else {
+    console.log('Webhook verification failed');
+    res.status(403).json({ error: 'Forbidden' });
+  }
+});
+
+// @desc    Handle Strava webhook events (new activities)
+// @route   POST /api/strava/webhook
+// @access  Public
+router.post('/webhook', async (req, res) => {
+  try {
+    console.log('Strava webhook event received:', req.body);
+    
+    const { object_type, object_id, aspect_type, owner_id, subscription_id } = req.body;
+    
+    // Only process activity creation events
+    if (object_type === 'activity' && aspect_type === 'create') {
+      console.log(`New activity created: ${object_id} by athlete ${owner_id}`);
+      
+      // Find user by Strava athlete ID
+      const user = await User.findOne({ stravaId: owner_id.toString() });
+      if (!user) {
+        console.log(`User with Strava ID ${owner_id} not found`);
+        return res.status(200).json({ message: 'User not found, ignoring event' });
+      }
+      
+      // Check if token needs refresh
+      const now = Math.floor(Date.now() / 1000);
+      if (user.stravaTokenExpiresAt < now + 3600) {
+        try {
+          await refreshStravaToken(user);
+        } catch (error) {
+          console.error('Failed to refresh token for webhook sync:', error.message);
+          return res.status(200).json({ message: 'Token refresh failed' });
+        }
+      }
+      
+      // Fetch the specific activity from Strava
+      try {
+        const stravaApi = axios.create({
+          baseURL: 'https://www.strava.com/api/v3',
+          headers: { Authorization: `Bearer ${user.stravaAccessToken}` },
+        });
+        
+        const activityResponse = await stravaApi.get(`/activities/${object_id}`);
+        const stravaActivity = activityResponse.data;
+        
+        // Map activity type
+        const sportType = mapStravaActivityType(stravaActivity.type);
+        if (!sportType) {
+          console.log(`Unsupported activity type: ${stravaActivity.type}`);
+          return res.status(200).json({ message: 'Unsupported activity type' });
+        }
+        
+        // Check if activity already exists
+        const existingActivity = await Activity.findOne({ 
+          user: user._id, 
+          stravaActivityId: stravaActivity.id.toString() 
+        });
+        
+        if (existingActivity) {
+          console.log(`Activity ${object_id} already exists`);
+          return res.status(200).json({ message: 'Activity already exists' });
+        }
+        
+        // Calculate pace
+        let pace = null;
+        if (stravaActivity.distance > 0 && stravaActivity.moving_time > 0) {
+          const speedKmh = (stravaActivity.distance / 1000) / (stravaActivity.moving_time / 3600);
+          pace = speedKmh > 0 ? 60 / speedKmh : null;
+        }
+        
+        // Create new activity
+        const newActivity = await Activity.create({
+          user: user._id,
+          stravaActivityId: stravaActivity.id.toString(),
+          title: stravaActivity.name || `${stravaActivity.type} Activity`,
+          sportType: sportType,
+          distance: stravaActivity.distance / 1000,
+          duration: stravaActivity.moving_time,
+          date: new Date(stravaActivity.start_date),
+          pace: pace,
+          elevationGain: stravaActivity.total_elevation_gain || 0,
+          averageHeartRate: stravaActivity.average_heartrate || null,
+          maxHeartRate: stravaActivity.max_heartrate || null,
+          calories: stravaActivity.calories || null,
+          location: stravaActivity.location_city || stravaActivity.location_state || 'Unknown',
+          map: stravaActivity.map ? {
+            summary_polyline: stravaActivity.map.summary_polyline,
+          } : null,
+          weather: {
+            temperature: stravaActivity.average_temp || null,
+          }
+        });
+        
+        console.log(`Successfully synced activity ${object_id} for user ${user.id}`);
+        
+        // TODO: You could also send a push notification to the user here
+        
+      } catch (error) {
+        console.error(`Error fetching activity ${object_id}:`, error.response ? error.response.data : error.message);
+      }
+    }
+    
+    // Always respond with 200 to acknowledge the webhook
+    res.status(200).json({ message: 'Webhook processed' });
+    
+  } catch (error) {
+    console.error('Error processing Strava webhook:', error);
+    res.status(200).json({ message: 'Error processed' }); // Still return 200 to avoid retries
+  }
+});
+
 module.exports = router; 

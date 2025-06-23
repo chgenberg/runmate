@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Zap
 } from 'lucide-react';
+import ProfileAvatar from '../../components/common/ProfileAvatar';
 import api from '../../services/api';
 
 const SuperLanding = () => {
@@ -243,11 +244,6 @@ const SuperLanding = () => {
                 >
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
                     <div className="relative h-32 bg-gradient-to-br from-orange-400 to-red-400">
-                      <img 
-                        src={member.profilePicture}
-                        alt={member.firstName}
-                        className="absolute bottom-0 left-6 w-24 h-24 rounded-full border-4 border-white"
-                      />
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
                         <div className="flex items-center space-x-1">
                           <Star className="w-4 h-4 text-yellow-500 fill-current" />
@@ -256,13 +252,22 @@ const SuperLanding = () => {
                       </div>
                     </div>
                     
-                    <div className="p-6 pt-8">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
-                        {member.firstName} {member.lastName?.charAt(0)}.
-                      </h3>
-                      <div className="flex items-center text-gray-600 text-sm mb-4">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {member.location || 'Sverige'}
+                    <div className="p-6">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <ProfileAvatar 
+                          user={member} 
+                          size="md"
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-bold text-gray-900 truncate">
+                            {member.firstName} {member.lastName?.charAt(0)}.
+                          </h3>
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{member.location || 'Sverige'}</span>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="space-y-3 mb-4">

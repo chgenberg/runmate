@@ -95,26 +95,61 @@ const DiscoverPage = () => {
         </div>
       </div>
 
-      {/* Stats Banner */}
+      {/* Enhanced Stats Banner */}
       <div className="px-4 pt-4">
-        <div className="bg-gradient-primary rounded-2xl p-4 shadow-lg animate-slide-up">
-          <div className="flex items-center justify-between">
-            <div className="text-white">
-              <div className="flex items-center space-x-2 mb-1">
-                <MapPin className="w-5 h-5" />
-                <h2 className="font-semibold">Löprundor nära dig</h2>
+        <div className="relative overflow-hidden bg-gradient-to-br from-orange-400 via-red-400 to-pink-500 rounded-3xl shadow-xl animate-slide-up">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
+            <div className="absolute top-1/2 right-0 w-24 h-24 bg-white rounded-full translate-x-12 -translate-y-12"></div>
+            <div className="absolute bottom-0 left-1/3 w-20 h-20 bg-white rounded-full translate-y-10"></div>
+          </div>
+          
+          {/* Running Figure Background */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+              <path d="M13.5,5.5C14.59,5.5 15.5,4.59 15.5,3.5S14.59,1.5 13.5,1.5S11.5,2.41 11.5,3.5S12.41,5.5 13.5,5.5M9.89,19.38L10.89,15L13,17V23H15V15.5L12.89,13.5L13.5,10.5C14.79,12 16.79,13 19,13V11C17.09,11 15.5,10 14.69,8.58L13.69,7.08C13.29,6.38 12.69,6 12,6S10.71,6.38 10.31,7.08L7.5,11.5L9.22,13.22L10.89,10.5L9.89,19.38Z"/>
+            </svg>
+          </div>
+          
+          {/* Content */}
+          <div className="relative p-6">
+            <div className="flex items-center justify-between">
+              <div className="text-white">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <MapPin className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Löprundor nära dig</h2>
+                    <p className="text-sm text-white/90">
+                      Hitta din nästa löpupplevelse
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-white/80">
-                Hitta din nästa löpupplevelse
-              </p>
-            </div>
-            <div className="flex flex-col items-end text-white">
-              <div className="flex items-center space-x-1">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-2xl font-bold">{runEvents.length}</span>
+              
+              <div className="text-center text-white">
+                <div className="flex items-center justify-center space-x-2 mb-1">
+                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-full">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <span className="text-3xl font-bold">{runEvents.length}</span>
+                </div>
+                <span className="text-sm text-white/90 font-medium">aktiva event</span>
               </div>
-              <span className="text-xs text-white/80">aktiva event</span>
             </div>
+            
+            {/* Progress Bar */}
+            <div className="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
+              <div 
+                className="bg-white h-full rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${Math.min((runEvents.length / 10) * 100, 100)}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-white/80 mt-1">
+              {runEvents.length > 0 ? 'Fantastiskt utbud!' : 'Vara första att skapa en runda!'}
+            </p>
           </div>
         </div>
       </div>

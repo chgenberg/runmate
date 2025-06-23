@@ -168,6 +168,11 @@ router.post('/sync', protect, async (req, res) => {
 // @route   GET /api/strava/auth-url
 // @access  Private
 router.get('/auth-url', protect, (req, res) => {
+  console.log('=== STRAVA AUTH URL REQUEST ===');
+  console.log('Client ID:', STRAVA_CLIENT_ID);
+  console.log('Redirect URI:', STRAVA_REDIRECT_URI);
+  console.log('Encoded Redirect URI:', encodeURIComponent(STRAVA_REDIRECT_URI));
+  
   const authUrl = `https://www.strava.com/oauth/authorize?` +
     `client_id=${STRAVA_CLIENT_ID}&` +
     `response_type=code&` +
@@ -175,7 +180,28 @@ router.get('/auth-url', protect, (req, res) => {
     `approval_prompt=force&` +
     `scope=read,activity:read_all`;
     
-  res.json({ success: true, authUrl });
+  console.log('Complete Auth URL:', authUrl);
+  console.log('================================');
+    
+  res.json({ success: true, authUrl, redirectUri: STRAVA_REDIRECT_URI });
+});
+
+// @desc    Handle Strava callback (temporary debug route)
+// @route   GET /api/strava/callback
+// @access  Public
+router.get('/callback', (req, res) => {
+  console.log('=== STRAVA CALLBACK RECEIVED ===');
+  console.log('Query params:', req.query);
+  console.log('Full URL:', req.originalUrl);
+  console.log('Host:', req.get('host'));
+  console.log('================================');
+  
+  res.json({ 
+    message: 'Strava callback received successfully!', 
+    query: req.query,
+    host: req.get('host'),
+    url: req.originalUrl
+  });
 });
 
 module.exports = router; 

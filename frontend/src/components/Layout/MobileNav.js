@@ -1,14 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  LayoutDashboard,
+  Home,
+  Users,
   Compass,
   List,
-  MessageSquare,
   Award,
   Trophy,
   User,
-  Settings,
   Calendar
 } from 'lucide-react';
 
@@ -17,27 +16,32 @@ const MobileNav = () => {
     {
       name: 'Hem',
       href: '/app/dashboard',
-      icon: LayoutDashboard,
+      icon: Home,
     },
     {
-      name: 'Upptäck',
-      href: '/app/discover',
-      icon: Compass,
-    },
-    {
-      name: 'Aktiviteter',
+      name: 'Träning',
       href: '/app/activities',
       icon: List,
     },
     {
-      name: 'Utmaningar',
+      name: 'Vänner',
+      href: '/app/matches',
+      icon: Users,
+    },
+    {
+      name: 'Rundor',
+      href: '/app/discover',
+      icon: Compass,
+    },
+    {
+      name: 'Tävling',
       href: '/app/challenges',
       icon: Award,
     },
     {
-      name: 'Matches',
-      href: '/app/matches',
-      icon: MessageSquare,
+      name: 'Event',
+      href: '/app/events',
+      icon: Calendar,
     },
     {
       name: 'Topplista',
@@ -48,16 +52,6 @@ const MobileNav = () => {
       name: 'Profil',
       href: '/app/profile',
       icon: User,
-    },
-    {
-      name: 'Event',
-      href: '/app/events',
-      icon: Calendar,
-    },
-    {
-      name: 'Inställningar',
-      href: '/app/settings',
-      icon: Settings,
     }
   ];
 

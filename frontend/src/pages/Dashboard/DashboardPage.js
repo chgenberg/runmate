@@ -259,11 +259,11 @@ const DashboardPage = () => {
                 >
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
                     <div className="relative h-32 bg-gradient-to-br from-orange-400 to-red-400">
-                      <div className="absolute bottom-0 left-6 transform translate-y-1/2">
+                      <div className="absolute bottom-4 left-6">
                         <ProfileAvatar 
                           src={member.profilePicture}
                           alt={member.firstName}
-                          size="xlarge"
+                          size="large"
                           className="border-4 border-white"
                           fallbackColor="bg-gray-100"
                         />
@@ -276,7 +276,7 @@ const DashboardPage = () => {
                       </div>
                     </div>
                     
-                    <div className="p-6 pt-8">
+                    <div className="p-6 pt-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-1">
                         {member.firstName} {member.lastName?.charAt(0)}.
                       </h3>

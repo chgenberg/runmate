@@ -38,12 +38,14 @@ const MatchesPage = () => {
         try {
             const response = await api.get(`/users/discover?page=1&limit=20`);
             setUsers(response.data.users || generateMockUsers());
-            setHasMore(response.data.hasMore !== false);
+            // For mock data, always keep hasMore as true for continuous scrolling
+            setHasMore(response.data.users ? response.data.hasMore !== false : true);
             setPage(1);
         } catch (error) {
             console.error('Error fetching users:', error);
-            // Use mock data on error
+            // Use mock data on error and keep hasMore as true
             setUsers(generateMockUsers());
+            setHasMore(true);
         } finally {
             setLoading(false);
         }
@@ -56,11 +58,13 @@ const MatchesPage = () => {
             const response = await api.get(`/users/discover?page=${page}&limit=20`);
             const newUsers = response.data.users || generateMockUsers(page * 20);
             setUsers(prev => [...prev, ...newUsers]);
-            setHasMore(response.data.hasMore !== false);
+            // For mock data, always keep hasMore as true for continuous scrolling
+            setHasMore(response.data.users ? response.data.hasMore !== false : true);
         } catch (error) {
             console.error('Error fetching more users:', error);
-            // Add more mock users
+            // Add more mock users and keep hasMore as true
             setUsers(prev => [...prev, ...generateMockUsers(page * 20)]);
+            setHasMore(true);
         } finally {
             setLoadingMore(false);
         }
@@ -77,15 +81,22 @@ const MatchesPage = () => {
     }, [fetchMoreUsers, page]);
 
     const generateMockUsers = (offset = 0) => {
-        const cities = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Lund', 'Linköping'];
+        const cities = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Lund', 'Linköping', 'Västerås', 'Örebro', 'Norrköping', 'Helsingborg'];
         const motivations = [
             'Älskar att springa i soluppgången',
             'Tränar för mitt första maraton',
             'Löpning är min meditation',
             'Jagar alltid nya PB',
             'Social löpare som gillar sällskap',
-            'Naturälskare som föredrar trail'
+            'Naturälskare som föredrar trail',
+            'Intervallträning är mitt fokus',
+            'Springer för att hålla mig i form',
+            'Löpning ger mig energi för dagen',
+            'Tränar för Stockholm Marathon'
         ];
+        
+        const firstNames = ['Emma', 'Marcus', 'Sara', 'Johan', 'Anna', 'Erik', 'Lisa', 'David', 'Maria', 'Alexander', 'Johanna', 'Niklas', 'Elin', 'Fredrik', 'Petra'];
+        const lastNames = ['Andersson', 'Berg', 'Lindqvist', 'Nilsson', 'Svensson', 'Johansson', 'Karlsson', 'Persson', 'Gustafsson', 'Pettersson'];
         
         const profilePictures = [
             'https://images.unsplash.com/photo-1494790108755-2616b612b64c?w=150&h=150&fit=crop&auto=format',
@@ -93,35 +104,53 @@ const MatchesPage = () => {
             'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&auto=format',
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&auto=format',
             'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&auto=format',
-            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&auto=format'
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&auto=format',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&auto=format'
         ];
         
-        return Array.from({ length: 20 }, (_, i) => ({
-            _id: `mock-${offset + i}`,
-            firstName: ['Emma', 'Marcus', 'Sara', 'Johan', 'Anna', 'Erik'][i % 6],
-            lastName: ['Andersson', 'Berg', 'Lindqvist', 'Nilsson', 'Svensson', 'Johansson'][i % 6],
-            age: 25 + (i % 20),
-            location: cities[i % cities.length],
-            pace: `${4 + (i % 3)}:${30 + (i % 30)}`,
-            bio: motivations[i % motivations.length],
-            profilePicture: profilePictures[i % profilePictures.length],
-            rating: 4 + (i % 10) / 10,
-            matchPercentage: 70 + (i % 30),
-            totalDistance: 100 + i * 50,
-            totalRuns: 20 + i * 5,
-            weeklyKm: 20 + (i % 40),
-            personalBests: {
-                '5k': `${18 + i % 10}:${10 + i % 50}`,
-                '10k': `${38 + i % 20}:${10 + i % 50}`,
-                'halfMarathon': i % 3 === 0 ? `1:${35 + i % 20}:${10 + i % 50}` : null
-            },
-            runningTypes: ['Långdistans', 'Trail', 'Intervaller', 'Tempo'].slice(0, 2 + (i % 3)),
-            achievements: [
-                { icon: '🏃', title: 'Första 10K', date: '2023-05-15' },
-                { icon: '🏆', title: 'Halvmaraton', date: '2023-09-20' },
-                { icon: '⭐', title: '100 träningspass', date: '2023-11-01' }
-            ].slice(0, 1 + (i % 3))
-        }));
+        return Array.from({ length: 20 }, (_, i) => {
+            const userIndex = offset + i;
+            return {
+                _id: `mock-${userIndex}`,
+                firstName: firstNames[userIndex % firstNames.length],
+                lastName: lastNames[userIndex % lastNames.length],
+                age: 22 + (userIndex % 25),
+                location: cities[userIndex % cities.length],
+                pace: `${4 + (userIndex % 3)}:${15 + (userIndex % 45)}`,
+                bio: motivations[userIndex % motivations.length],
+                profilePicture: profilePictures[userIndex % profilePictures.length],
+                rating: 3.5 + (userIndex % 15) / 10,
+                matchPercentage: 65 + (userIndex % 35),
+                totalDistance: 50 + userIndex * 25,
+                totalRuns: 10 + userIndex * 3,
+                weeklyKm: 15 + (userIndex % 50),
+                personalBests: {
+                    '5k': `${17 + userIndex % 12}:${10 + userIndex % 50}`,
+                    '10k': `${36 + userIndex % 25}:${10 + userIndex % 50}`,
+                    'halfMarathon': userIndex % 4 === 0 ? `1:${30 + userIndex % 30}:${10 + userIndex % 50}` : null
+                },
+                runningTypes: ['Långdistans', 'Trail', 'Intervaller', 'Tempo', 'Fartlek', 'Backlöpning'].slice(0, 2 + (userIndex % 4)),
+                achievements: [
+                    { icon: '🏃', title: 'Första 10K', date: '2023-05-15' },
+                    { icon: '🏆', title: 'Halvmaraton', date: '2023-09-20' },
+                    { icon: '⭐', title: '100 träningspass', date: '2023-11-01' },
+                    { icon: '🎯', title: 'Personligt rekord', date: '2023-12-01' }
+                ].slice(0, 1 + (userIndex % 4)),
+                backgroundPattern: [
+                    'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50',
+                    'bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50',
+                    'bg-gradient-to-br from-pink-50 via-rose-50 to-red-50',
+                    'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50',
+                    'bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-50',
+                    'bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50',
+                    'bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50',
+                    'bg-gradient-to-br from-lime-50 via-green-50 to-emerald-50'
+                ][userIndex % 8]
+            };
+        });
     };
 
     const handleRemoveUser = async (userId) => {
@@ -192,23 +221,33 @@ const MatchesPage = () => {
                 className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer"
                 onClick={() => handleViewProfile(user)}
             >
-                <div className="relative h-48 bg-gradient-to-br from-orange-400 to-red-500">
+                <div className={`relative h-32 ${user.backgroundPattern || 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
                     {/* Match percentage badge */}
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <span className="text-sm font-bold text-gray-900">{user.matchPercentage}% match</span>
+                    <div className="absolute top-4 right-4">
+                        <div className="bg-white px-3 py-1.5 rounded-full shadow-md">
+                            <span className="text-sm font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                                {user.matchPercentage}% match
+                            </span>
+                        </div>
                     </div>
                     
-                    {/* Profile image */}
-                    <div className="absolute -bottom-12 left-6">
-                        <ProfileAvatar 
-                            user={user} 
-                            size="xl"
-                            className="ring-4 ring-white"
-                        />
+                    {/* Decorative elements */}
+                    <div className="absolute inset-0 overflow-hidden">
+                        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                        <div className="absolute -left-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                     </div>
                 </div>
                 
-                <div className="pt-16 px-6 pb-6">
+                {/* Profile image positioned outside the header */}
+                <div className="px-6 -mt-12">
+                    <ProfileAvatar 
+                        user={user} 
+                        size="xl"
+                        className="ring-4 ring-white shadow-lg mx-auto"
+                    />
+                </div>
+                
+                <div className="pt-8 px-6 pb-6">
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                             <h3 className="text-xl font-bold text-gray-900">

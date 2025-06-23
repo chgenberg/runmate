@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Hash, Users, TrendingUp, Star } from 'lucide-react';
+import { X, MapPin, TrendingUp, Sparkles, Zap, Heart, Trophy } from 'lucide-react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 
@@ -16,12 +16,12 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomCreated }) => {
   const [loading, setLoading] = useState(false);
 
   const categories = [
-    { value: 'general', label: 'Allmänt', icon: Hash },
-    { value: 'location', label: 'Plats', icon: MapPin },
-    { value: 'training', label: 'Träning', icon: TrendingUp },
-    { value: 'events', label: 'Event', icon: Star },
-    { value: 'beginners', label: 'Nybörjare', icon: Users },
-    { value: 'advanced', label: 'Avancerat', icon: TrendingUp }
+    { value: 'general', label: 'Allmänt', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
+    { value: 'location', label: 'Platsbaserat', icon: MapPin, color: 'from-blue-500 to-cyan-500' },
+    { value: 'training', label: 'Träning', icon: Zap, color: 'from-orange-500 to-red-500' },
+    { value: 'events', label: 'Event', icon: Trophy, color: 'from-yellow-500 to-orange-500' },
+    { value: 'beginners', label: 'Nybörjare', icon: Heart, color: 'from-green-500 to-emerald-500' },
+    { value: 'advanced', label: 'Avancerat', icon: TrendingUp, color: 'from-indigo-500 to-purple-500' }
   ];
 
   const handleSubmit = async (e) => {
@@ -101,11 +101,18 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomCreated }) => {
 
               {/* Header */}
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Hash className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">Skapa Community-rum</h2>
-                <p className="text-gray-600 mt-2">Starta en ny löpargrupp</p>
+                <motion.div 
+                  initial={{ rotate: -10 }}
+                  animate={{ rotate: 10 }}
+                  transition={{ repeat: Infinity, repeatType: "reverse", duration: 2 }}
+                  className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                >
+                  <Sparkles className="w-8 h-8 text-white" />
+                </motion.div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Skapa Community-rum
+                </h2>
+                <p className="text-gray-600 mt-2">Starta en ny löpargrupp och hitta likasinnade</p>
               </div>
 
               {/* Form */}

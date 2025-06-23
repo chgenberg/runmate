@@ -40,6 +40,9 @@ import AllMembersPage from './pages/Members/AllMembersPage';
 // Events Page
 import EventsPage from './pages/Events/EventsPage';
 
+// Community Page
+import CommunityPage from './pages/Community/CommunityPage';
+
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
 
@@ -108,7 +111,7 @@ function App() {
               <Route path="ratings" element={<RatingsPage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="events" element={<EventsPage />} />
-              <Route path="community" element={<div className="p-6"><h1 className="text-2xl font-bold">Community - Kommer snart!</h1></div>} />
+              <Route path="community" element={<CommunityPage />} />
             </Route>
             
             {/* Catch all route */}

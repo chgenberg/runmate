@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User } from 'lucide-react';
 
 const ProfileAvatar = ({ 
@@ -9,6 +9,9 @@ const ProfileAvatar = ({
   className = '',
   fallbackColor = 'bg-gray-200'
 }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  
   // Handle user prop
   const profileSrc = src || user?.profilePicture;
   const displayName = alt !== 'Profile' ? alt : (user ? `${user.firstName} ${user.lastName}` : 'Profile');
@@ -36,23 +39,30 @@ const ProfileAvatar = ({
 
   const baseClasses = `${sizeClasses[size]} rounded-full flex items-center justify-center ${className}`;
 
-  if (profileSrc && !profileSrc.includes('ui-avatars.com')) {
-    return (
-      <img 
-        src={profileSrc} 
-        alt={displayName}
-        className={`${sizeClasses[size]} rounded-full object-cover ${className}`}
-        onError={(e) => {
-          e.target.style.display = 'none';
-          e.target.nextSibling.style.display = 'flex';
-        }}
-      />
-    );
-  }
+  // Show fallback if no image, image failed, or still loading
+  const showFallback = !profileSrc || imageError || !imageLoaded;
 
   return (
-    <div className={`${baseClasses} ${fallbackColor}`}>
-      <User className={`${iconSizes[size]} text-gray-500`} />
+    <div className={`relative ${baseClasses}`}>
+      {/* Fallback avatar - always rendered */}
+      <div 
+        className={`${baseClasses} ${fallbackColor} ${showFallback ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
+        style={{ position: showFallback ? 'relative' : 'absolute', inset: showFallback ? 'auto' : '0' }}
+      >
+        <User className={`${iconSizes[size]} text-gray-500`} />
+      </div>
+      
+      {/* Real image - only render if we have a source */}
+      {profileSrc && !profileSrc.includes('ui-avatars.com') && (
+        <img 
+          src={profileSrc} 
+          alt={displayName}
+          className={`${sizeClasses[size]} rounded-full object-cover ${className} ${imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}
+          style={{ position: imageLoaded && !imageError ? 'relative' : 'absolute', inset: imageLoaded && !imageError ? 'auto' : '0' }}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+        />
+      )}
     </div>
   );
 };

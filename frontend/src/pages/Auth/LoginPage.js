@@ -28,7 +28,6 @@ const LoginPage = () => {
 
     try {
       await login({ email: formData.email, password: formData.password });
-      toast.success('Välkommen tillbaka! 🏃‍♀️');
       navigate('/app/dashboard');
     } catch (error) {
       toast.error(error.message || 'Något gick fel vid inloggning');

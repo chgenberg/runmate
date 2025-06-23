@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const CommunityRoom = require('../models/CommunityRoom');
 const CommunityMessage = require('../models/CommunityMessage');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // GET /api/community/rooms - Hämta alla community-rum
-router.get('/rooms', auth, async (req, res) => {
+router.get('/rooms', protect, async (req, res) => {
   try {
     const { category, city, search, page = 1, limit = 20 } = req.query;
     
@@ -51,7 +51,7 @@ router.get('/rooms', auth, async (req, res) => {
 });
 
 // POST /api/community/rooms - Skapa nytt community-rum
-router.post('/rooms', auth, async (req, res) => {
+router.post('/rooms', protect, async (req, res) => {
   try {
     const { title, description, category, location, tags, isPrivate } = req.body;
     
@@ -82,7 +82,7 @@ router.post('/rooms', auth, async (req, res) => {
 });
 
 // GET /api/community/rooms/:id - Hämta specifikt community-rum
-router.get('/rooms/:id', auth, async (req, res) => {
+router.get('/rooms/:id', protect, async (req, res) => {
   try {
     const room = await CommunityRoom.findById(req.params.id)
       .populate('creator', 'name profilePicture')
@@ -105,7 +105,7 @@ router.get('/rooms/:id', auth, async (req, res) => {
 });
 
 // POST /api/community/rooms/:id/join - Gå med i community-rum
-router.post('/rooms/:id/join', auth, async (req, res) => {
+router.post('/rooms/:id/join', protect, async (req, res) => {
   try {
     const room = await CommunityRoom.findById(req.params.id);
     
@@ -135,7 +135,7 @@ router.post('/rooms/:id/join', auth, async (req, res) => {
 });
 
 // POST /api/community/rooms/:id/leave - Lämna community-rum
-router.post('/rooms/:id/leave', auth, async (req, res) => {
+router.post('/rooms/:id/leave', protect, async (req, res) => {
   try {
     const room = await CommunityRoom.findById(req.params.id);
     
@@ -164,7 +164,7 @@ router.post('/rooms/:id/leave', auth, async (req, res) => {
 });
 
 // GET /api/community/rooms/:id/messages - Hämta meddelanden från rum
-router.get('/rooms/:id/messages', auth, async (req, res) => {
+router.get('/rooms/:id/messages', protect, async (req, res) => {
   try {
     const { page = 1, limit = 50 } = req.query;
     
@@ -195,7 +195,7 @@ router.get('/rooms/:id/messages', auth, async (req, res) => {
 });
 
 // POST /api/community/rooms/:id/messages - Skicka meddelande
-router.post('/rooms/:id/messages', auth, async (req, res) => {
+router.post('/rooms/:id/messages', protect, async (req, res) => {
   try {
     const { content, type = 'text', replyTo } = req.body;
     
@@ -230,7 +230,7 @@ router.post('/rooms/:id/messages', auth, async (req, res) => {
 });
 
 // GET /api/community/my-rooms - Hämta användarens rum
-router.get('/my-rooms', auth, async (req, res) => {
+router.get('/my-rooms', protect, async (req, res) => {
   try {
     const rooms = await CommunityRoom.find({
       $or: [

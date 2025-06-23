@@ -207,7 +207,7 @@ const SuperLanding = () => {
               <span className="text-sm text-gray-500">({members.length}+ aktiva)</span>
             </div>
             <button 
-              onClick={() => navigate('/members')}
+              onClick={() => navigate('/app/matches')}
               className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
               <span>Visa alla</span>

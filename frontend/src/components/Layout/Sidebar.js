@@ -13,7 +13,8 @@ import {
   Home,
   PlusSquare,
   Award,
-  Star
+  Star,
+  Calendar
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -27,34 +28,40 @@ const Sidebar = () => {
 
   const navigationItems = [
     {
-      name: 'Översikt',
+      name: 'Hem',
       href: '/app/dashboard',
       icon: Home,
       description: 'Din personliga hubb'
     },
     {
-      name: 'Hitta vänner',
-      href: '/app/discover',
-      icon: Compass,
-      description: 'Upptäck nya löpare'
-    },
-    {
-      name: 'Matcher',
-      href: '/app/matches',
-      icon: Users,
-      description: 'Dina anslutningar'
-    },
-    {
-      name: 'Aktiviteter',
+      name: 'Träningspass',
       href: '/app/activities',
       icon: PlusSquare,
-      description: 'Dina träningspass'
+      description: 'Dina löprundor och statistik'
     },
     {
-      name: 'Utmaningar',
+      name: 'Löpvänner',
+      href: '/app/matches',
+      icon: Users,
+      description: 'Hitta och chatta med löpare'
+    },
+    {
+      name: 'Löprundor',
+      href: '/app/discover',
+      icon: Compass,
+      description: 'Gå med i andras löprundor'
+    },
+    {
+      name: 'Tävlingar',
       href: '/app/challenges',
       icon: Award,
-      description: 'Tävla och ha kul'
+      description: 'Utmaningar och tävlingar'
+    },
+    {
+      name: 'Löpningsevent',
+      href: '/app/events',
+      icon: Calendar,
+      description: 'Officiella maraton och race'
     },
     {
       name: 'Topplistan',
@@ -73,12 +80,6 @@ const Sidebar = () => {
       href: '/app/community',
       icon: List,
       description: 'Grupper och forum'
-    },
-    {
-      name: 'Event',
-      href: '/app/events',
-      icon: List,
-      description: 'Löpningsevent'
     }
   ];
 

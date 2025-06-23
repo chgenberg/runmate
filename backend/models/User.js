@@ -312,6 +312,16 @@ const userSchema = new mongoose.Schema({
     type: Number, // Store as a Unix timestamp (seconds)
   },
   
+  // Push Notification Fields
+  pushSubscription: {
+    type: Object, // Stores the complete push subscription object
+    default: null
+  },
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
+  },
+  
   // Premium Features
   isPremium: {
     type: Boolean,

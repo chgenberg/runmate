@@ -8,9 +8,17 @@ const rateLimit = require('express-rate-limit');
 const http = require('http');
 const socketIo = require('socket.io');
 require('dotenv').config();
+const axios = require('axios');
 
 // Import database connection
 const connectDB = require('./config/database');
+
+// Import models for scheduled tasks
+const User = require('./models/User');
+const Activity = require('./models/Activity');
+
+// Import notification helpers
+const { sendNotificationToUser } = require('./routes/notifications');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -24,6 +32,7 @@ const runEventRoutes = require('./routes/runevents');
 const dashboardRoutes = require('./routes/dashboard');
 const ratingsRoutes = require('./routes/ratings');
 const searchRoutes = require('./routes/search');
+const { router: notificationRoutes } = require('./routes/notifications');
 
 // Import middleware
 const { protect } = require('./middleware/auth');
@@ -103,8 +112,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-
-
 // Make io available to routes
 app.use((req, res, next) => {
   req.io = io;
@@ -123,6 +130,7 @@ app.use('/api/runevents', runEventRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ratings', ratingsRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Socket.io real-time functionality
 io.on('connection', (socket) => {
@@ -210,6 +218,116 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// Auto-sync Strava activities for all connected users every 30 minutes
+const scheduleStravaSync = () => {
+  setInterval(async () => {
+    try {
+      console.log('Running scheduled Strava sync for all users...');
+      
+      // Find all users with Strava connection
+      const connectedUsers = await User.find({
+        stravaId: { $exists: true, $ne: null },
+        stravaAccessToken: { $exists: true, $ne: null }
+      });
+      
+      console.log(`Found ${connectedUsers.length} users with Strava connection`);
+      
+      for (const user of connectedUsers) {
+        try {
+          // Check if token needs refresh
+          const now = Math.floor(Date.now() / 1000);
+          if (user.stravaTokenExpiresAt < now + 3600) {
+            console.log(`Refreshing token for user ${user.id}`);
+            const response = await axios.post('https://www.strava.com/api/v3/oauth/token', {
+              client_id: process.env.STRAVA_CLIENT_ID || '165013',
+              client_secret: process.env.STRAVA_CLIENT_SECRET || '1c663ec9225b652aa6dcb5d49c5c45c6aec2b80e',
+              grant_type: 'refresh_token',
+              refresh_token: user.stravaRefreshToken,
+            });
+
+            const { access_token, refresh_token, expires_at } = response.data;
+            user.stravaAccessToken = access_token;
+            user.stravaRefreshToken = refresh_token;
+            user.stravaTokenExpiresAt = expires_at;
+            await user.save();
+          }
+          
+          // Fetch recent activities (last 2 hours to avoid duplicates)
+          const stravaApi = axios.create({
+            baseURL: 'https://www.strava.com/api/v3',
+            headers: { Authorization: `Bearer ${user.stravaAccessToken}` },
+          });
+          
+          const after = Math.floor((Date.now() - 2 * 60 * 60 * 1000) / 1000); // Last 2 hours
+          const response = await stravaApi.get(`/athlete/activities?after=${after}&per_page=10`);
+          const activities = response.data;
+          
+          let syncedCount = 0;
+          for (const activity of activities) {
+            // Check if activity already exists
+            const existingActivity = await Activity.findOne({ 
+              user: user._id, 
+              stravaActivityId: activity.id.toString() 
+            });
+            
+            if (existingActivity) continue;
+            
+            // Map activity type
+            const typeMap = {
+              'Run': 'running', 'Ride': 'cycling', 'VirtualRun': 'running',
+              'VirtualRide': 'cycling', 'Walk': 'running', 'Hike': 'running'
+            };
+            const sportType = typeMap[activity.type];
+            if (!sportType) continue;
+            
+            // Calculate pace
+            let pace = null;
+            if (activity.distance > 0 && activity.moving_time > 0) {
+              const speedKmh = (activity.distance / 1000) / (activity.moving_time / 3600);
+              pace = speedKmh > 0 ? 60 / speedKmh : null;
+            }
+            
+            // Create activity
+            await Activity.create({
+              user: user._id,
+              stravaActivityId: activity.id.toString(),
+              title: activity.name || `${activity.type} Activity`,
+              sportType: sportType,
+              distance: activity.distance / 1000,
+              duration: activity.moving_time,
+              date: new Date(activity.start_date),
+              pace: pace,
+              elevationGain: activity.total_elevation_gain || 0,
+              averageHeartRate: activity.average_heartrate || null,
+              maxHeartRate: activity.max_heartrate || null,
+              calories: activity.calories || null,
+              location: activity.location_city || activity.location_state || 'Unknown',
+              map: activity.map ? { summary_polyline: activity.map.summary_polyline } : null,
+              weather: { temperature: activity.average_temp || null }
+            });
+            syncedCount++;
+          }
+          
+          if (syncedCount > 0) {
+            console.log(`Auto-synced ${syncedCount} activities for user ${user.id}`);
+          }
+          
+        } catch (error) {
+          console.error(`Auto-sync failed for user ${user.id}:`, error.message);
+        }
+      }
+      
+      console.log('Scheduled Strava sync completed');
+    } catch (error) {
+      console.error('Scheduled Strava sync error:', error.message);
+    }
+  }, 30 * 60 * 1000); // Every 30 minutes
+};
+
+// Start scheduled sync
+console.log('Starting scheduled Strava sync (every 30 minutes)...');
+scheduleStravaSync();
 
 // Error handling middleware
 app.use(errorHandler);

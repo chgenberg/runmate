@@ -8,7 +8,6 @@ import {
   Calendar,
   Users,
   Heart,
-  Clock,
   TrendingUp,
   Sparkles,
   X,

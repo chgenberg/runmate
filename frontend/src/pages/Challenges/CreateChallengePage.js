@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Calendar, Target, Users, Globe, Lock, Trophy, Clock, MapPin,
-  Plus, Sparkles, ChevronRight, AlertCircle
+  ArrowLeft, Calendar, Target, Globe, Lock, Trophy, Clock, MapPin,
+  Sparkles, ChevronRight
 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";

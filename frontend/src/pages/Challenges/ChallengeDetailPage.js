@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { 
@@ -8,37 +8,18 @@ import {
   Target, 
   ArrowLeft, 
   Share2, 
-  BarChart2, 
-  CheckCircle, 
-  XCircle,
   TrendingUp,
   Clock,
   Zap,
   Flag,
   Trophy,
   Crown,
-  Award,
   Copy,
-  ChevronDown,
   ChevronRight,
   MapPin,
-  Heart,
   Plus,
-  Activity,
   Sparkles
 } from 'lucide-react';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Cell
-} from 'recharts';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -99,23 +80,6 @@ const cityRoutes = {
   },
   // Add more cities as needed
 };
-
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-    <div className="relative">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-        className="w-20 h-20 border-4 border-indigo-200 border-t-indigo-600 rounded-full"
-      />
-      <motion.div
-        animate={{ rotate: -360 }}
-        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-        className="absolute inset-0 w-20 h-20 border-4 border-purple-200 border-b-purple-600 rounded-full"
-      />
-    </div>
-  </div>
-);
 
 const ShareMenu = ({ 
   isOpen, 
@@ -423,40 +387,7 @@ const ChallengeDetailPage = () => {
   if (error) return <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg m-4">{error}</div>;
   if (!challenge) return null;
 
-  const getIcon = (type) => {
-    const icons = {
-      'distance': Target,
-      'time': Clock,
-      'elevation': TrendingUp,
-      'activities': Flag,
-      'custom': Zap
-    };
-    return icons[type] || Trophy;
-  };
-
-  const ChallengeIcon = getIcon(challenge.type);
-
   const daysRemaining = Math.max(0, Math.ceil((new Date(challenge.endDate) - new Date()) / (1000 * 60 * 60 * 24)));
-  
-  const myProgress = () => {
-    if (!isParticipant) return { value: 0, percentage: 0 };
-    
-    // Check if myProgress is already calculated from backend
-    if (challenge.myProgress) {
-      return challenge.myProgress;
-    }
-    
-    const participant = challenge.participants.find(p => p.user._id === user._id);
-    if (!participant) return { value: 0, percentage: 0 };
-
-    const metric = challenge.goal.unit.replace('km', 'distance').replace('meters', 'elevation').replace('hours', 'time');
-    const value = participant.progress[metric] || 0;
-    const percentage = Math.min((value / challenge.goal.target) * 100, 100);
-
-    return { value, percentage };
-  };
-  
-  const { value: myProgressValue, percentage: myProgressPercentage } = myProgress();
 
   const isRouteChallenge = challenge.type === 'route_race' && challenge.route;
 
@@ -753,118 +684,6 @@ const ChallengeDetailPage = () => {
         />
       )}
     </div>
-  );
-};
-
-const StatItem = ({ icon: Icon, label, value, unit, color = 'gray', capitalize = false }) => {
-  const colorClasses = {
-    blue: 'from-blue-500 to-cyan-500 text-blue-600 bg-blue-50',
-    green: 'from-green-500 to-emerald-500 text-green-600 bg-green-50',
-    purple: 'from-purple-500 to-pink-500 text-purple-600 bg-purple-50',
-    orange: 'from-orange-500 to-red-500 text-orange-600 bg-orange-50',
-    gray: 'from-gray-500 to-gray-600 text-gray-600 bg-gray-50'
-  };
-
-  const [gradientFrom, gradientTo, textColor, bgColor] = colorClasses[color].split(' ');
-
-  return (
-    <motion.div 
-      whileHover={{ scale: 1.05 }}
-      className={`relative overflow-hidden ${bgColor} p-5 rounded-2xl border border-${color}-100`}
-    >
-      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-full blur-3xl opacity-20`} />
-      <div className="relative">
-        <Icon className={`w-6 h-6 ${textColor} mb-2`} />
-        <p className="text-sm font-medium text-gray-600">{label}</p>
-        <p className={`text-2xl font-bold text-gray-900 ${capitalize ? 'capitalize' : ''}`}>
-          {value}
-          {unit && <span className="text-base font-normal text-gray-500 ml-1">{unit}</span>}
-        </p>
-      </div>
-    </motion.div>
-  );
-};
-
-const LeaderboardItem = ({ rank, user: participantUser, progress, unit, isCurrentUser, goal }) => {
-  const rankIcon = () => {
-    if (rank === 1) return <Crown className="w-8 h-8 text-yellow-500" />;
-    if (rank === 2) return <Award className="w-8 h-8 text-gray-400" />;
-    if (rank === 3) return <Trophy className="w-8 h-8 text-yellow-700" />;
-    return <span className="text-2xl font-black text-gray-400">{rank}</span>;
-  };
-
-  const progressPercentage = Math.min((progress / goal) * 100, 100);
-
-  return (
-    <motion.div 
-      className={`relative flex items-center p-4 rounded-2xl transition-all duration-300 ${
-        isCurrentUser 
-          ? 'bg-gradient-to-r from-primary/10 to-purple-500/10 border-2 border-primary/30' 
-          : rank <= 3 
-            ? 'bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-200' 
-            : 'bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100'
-      }`}
-      whileHover={{ scale: 1.02, x: 4 }}
-    >
-      {/* Rank */}
-      <div className="w-16 text-center mr-4 flex items-center justify-center">
-        {rankIcon()}
-      </div>
-      
-      {/* User Info */}
-      <div className="flex items-center gap-4 flex-1">
-        <div className="relative">
-          <img 
-            src={participantUser?.profileImage || `https://ui-avatars.com/api/?name=${participantUser?.firstName}+${participantUser?.lastName}&background=random&color=fff`} 
-            alt={participantUser?.firstName} 
-            className="w-14 h-14 rounded-full border-3 border-white shadow-lg" 
-          />
-          {isCurrentUser && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-              <CheckCircle className="w-3 h-3 text-white" />
-            </div>
-          )}
-        </div>
-        
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <p className="font-bold text-gray-900 text-lg">{participantUser?.firstName} {participantUser?.lastName}</p>
-            {isCurrentUser && (
-              <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                DU
-              </span>
-            )}
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="mt-2">
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-gray-500">Framsteg</span>
-              <span className="font-semibold text-gray-700">{progressPercentage.toFixed(0)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 relative overflow-hidden">
-              <motion.div 
-                className={`h-full rounded-full ${
-                  rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                  rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-500' :
-                  rank === 3 ? 'bg-gradient-to-r from-yellow-600 to-yellow-800' :
-                  'bg-gradient-to-r from-primary to-purple-600'
-                }`}
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercentage}%` }}
-                transition={{ duration: 1, ease: 'easeOut', delay: rank * 0.1 }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Progress Value */}
-      <div className="text-right ml-6">
-        <p className="text-3xl font-black text-gray-900">{progress.toFixed(1)}</p>
-        <p className="text-sm font-medium text-gray-500">{unit}</p>
-      </div>
-    </motion.div>
   );
 };
 

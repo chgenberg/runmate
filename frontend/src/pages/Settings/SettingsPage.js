@@ -13,9 +13,7 @@ import {
   VolumeX,
   MapPin,
   Activity,
-  Link as LinkIcon,
-  Check,
-  X
+  Check
 } from 'lucide-react';
 import api from '../../services/api';
 

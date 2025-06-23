@@ -83,7 +83,6 @@ const RegisterPage = () => {
 
     try {
       await register(formData);
-      toast.success('Välkommen till RunMate! 🎉');
       navigate('/app/discover');
     } catch (error) {
       toast.error(error.message || 'Något gick fel vid registrering');

@@ -84,7 +84,7 @@ export function AuthProvider({ children }) {
       console.error('Logout error:', error);
     } finally {
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
-      toast.success('Logged out successfully');
+      toast.success('Utloggad!');
     }
   }, [state.token]);
 
@@ -131,7 +131,7 @@ export function AuthProvider({ children }) {
         }
       });
 
-      toast.success('Account created successfully! Welcome to RunMate!');
+      toast.success('Välkommen till RunMate! 🎉');
       return { success: true };
 
     } catch (error) {
@@ -179,7 +179,7 @@ export function AuthProvider({ children }) {
         payload: response.data.user
       });
 
-      toast.success('Profile updated successfully');
+      toast.success('Profil uppdaterad!');
       return { success: true, user: response.data.user };
 
     } catch (error) {
@@ -193,7 +193,7 @@ export function AuthProvider({ children }) {
   const changePassword = async (passwordData) => {
     try {
       await api.put('/auth/change-password', passwordData);
-      toast.success('Password changed successfully');
+      toast.success('Lösenord ändrat!');
       return { success: true };
 
     } catch (error) {

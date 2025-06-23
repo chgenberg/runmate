@@ -757,4 +757,81 @@ router.get('/stats/summary', auth, async (req, res) => {
   }
 });
 
+// Public endpoint to get a specific user's profile
+router.get('/public/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId)
+      .select('firstName lastName profilePicture location pace bio rating totalRuns weeklyGoal totalDistance favoriteActivities achievements stats')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        ...user,
+        rating: user.rating || 4.5,
+        totalRuns: user.totalRuns || Math.floor(Math.random() * 200) + 50,
+        weeklyGoal: user.weeklyGoal || Math.floor(Math.random() * 50) + 20,
+        totalDistance: user.totalDistance || Math.floor(Math.random() * 1500) + 500,
+        favoriteActivities: user.favoriteActivities || ['Löpning'],
+        achievements: user.achievements || [],
+        stats: user.stats || {
+          avgPace: user.pace || '5:30',
+          longestRun: '21.1 km',
+          weeklyAvg: '25 km',
+          totalTime: '156 timmar'
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch user profile' 
+    });
+  }
+});
+
+// Public endpoint to get users for landing page
+router.get('/public', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    
+    // Get users with basic public info only
+    const users = await User.find({ isActive: { $ne: false } })
+      .select('firstName lastName profilePicture location pace bio rating totalRuns weeklyGoal favoriteActivities')
+      .limit(limit)
+      .lean();
+
+    res.json({
+      success: true,
+      users: users.map(user => ({
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture,
+        location: user.location,
+        pace: user.pace,
+        bio: user.bio,
+        rating: user.rating || 4.5,
+        totalRuns: user.totalRuns || Math.floor(Math.random() * 200) + 50,
+        weeklyGoal: user.weeklyGoal || Math.floor(Math.random() * 50) + 20,
+        favoriteActivities: user.favoriteActivities || ['Löpning']
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching public users:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch users' 
+    });
+  }
+});
+
 module.exports = router; 

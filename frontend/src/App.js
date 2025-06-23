@@ -33,7 +33,8 @@ import RatingsPage from './pages/Rating/RatingsPage';
 import LeaderboardPage from './pages/Leaderboard/LeaderboardPage';
 
 // Landing Page
-import LandingPage from './pages/Landing/LandingPage';
+import InteractiveLanding from './pages/Landing/InteractiveLanding';
+import PublicProfilePage from './pages/Profile/PublicProfilePage';
 
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
@@ -71,7 +72,8 @@ function App() {
           />
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+            <Route path="/" element={<PublicRoute><InteractiveLanding /></PublicRoute>} />
+            <Route path="/profile/:userId" element={<PublicRoute><PublicProfilePage /></PublicRoute>} />
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             

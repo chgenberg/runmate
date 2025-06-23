@@ -20,6 +20,7 @@ import {
   Award,
   Copy,
   ChevronDown,
+  ChevronRight,
   MapPin,
   Heart,
   Plus,

@@ -18,7 +18,7 @@ const User = require('./models/User');
 const Activity = require('./models/Activity');
 
 // Import notification helpers
-const { sendNotificationToUser } = require('./routes/notifications');
+// const { sendNotificationToUser } = require('./routes/notifications'); // Temporarily disabled
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -32,7 +32,7 @@ const runEventRoutes = require('./routes/runevents');
 const dashboardRoutes = require('./routes/dashboard');
 const ratingsRoutes = require('./routes/ratings');
 const searchRoutes = require('./routes/search');
-const { router: notificationRoutes } = require('./routes/notifications');
+// const { router: notificationRoutes } = require('./routes/notifications'); // Temporarily disabled
 
 // Import middleware
 const { protect } = require('./middleware/auth');
@@ -130,7 +130,7 @@ app.use('/api/runevents', runEventRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ratings', ratingsRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api/notifications', notificationRoutes);
+// app.use('/api/notifications', notificationRoutes); // Temporarily disabled
 
 // Socket.io real-time functionality
 io.on('connection', (socket) => {

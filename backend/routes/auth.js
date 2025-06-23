@@ -500,19 +500,29 @@ router.get('/strava/:userId', async (req, res) => {
 // @route   GET /api/auth/strava/callback
 // @access  Public (accessed via redirect from Strava)
 router.get('/strava/callback', async (req, res) => {
+  console.log('Strava callback received:', req.query);
+  
   const { code, state } = req.query;
 
   if (!code) {
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/app/settings?strava=error`);
+    console.log('No code provided in Strava callback');
+    return res.status(400).json({ success: false, message: 'No authorization code provided' });
   }
 
   if (!state) {
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/app/settings?strava=error`);
+    console.log('No state provided in Strava callback');
+    return res.status(400).json({ success: false, message: 'No state parameter provided' });
   }
 
   try {
+    console.log('Decoding state:', state);
     // Decode state to get user ID
     const { userId } = JSON.parse(Buffer.from(state, 'base64').toString());
+    console.log('Extracted user ID from state:', userId);
+    
+    console.log('Exchanging code for token with Strava...');
+    console.log('STRAVA_CLIENT_ID:', STRAVA_CLIENT_ID);
+    console.log('STRAVA_CLIENT_SECRET exists:', !!STRAVA_CLIENT_SECRET);
     
     // Exchange authorization code for access token
     const tokenResponse = await axios.post('https://www.strava.com/api/v3/oauth/token', {
@@ -522,6 +532,8 @@ router.get('/strava/callback', async (req, res) => {
       grant_type: 'authorization_code',
     });
 
+    console.log('Token exchange successful:', tokenResponse.status);
+    
     const { 
       access_token, 
       refresh_token, 
@@ -529,27 +541,50 @@ router.get('/strava/callback', async (req, res) => {
       athlete 
     } = tokenResponse.data;
 
+    console.log('Received tokens, athlete ID:', athlete?.id);
+
     // Update the user in your database
     const user = await User.findById(userId);
     if (!user) {
-      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/app/settings?strava=error`);
+      console.log('User not found in database:', userId);
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    console.log('Updating user with Strava data...');
     user.stravaId = athlete.id;
     user.stravaAccessToken = access_token;
     user.stravaRefreshToken = refresh_token;
     user.stravaTokenExpiresAt = expires_at;
     
     await user.save();
+    console.log('Successfully saved Strava data for user:', user.email);
 
-    console.log('Successfully connected Strava account for user:', user.email);
-
-    // Redirect user back to the frontend settings page
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/app/settings?strava=success`);
+    // Return success response instead of redirect for better debugging
+    res.json({
+      success: true,
+      message: 'Strava account connected successfully',
+      athlete: {
+        id: athlete.id,
+        firstname: athlete.firstname,
+        lastname: athlete.lastname
+      }
+    });
 
   } catch (error) {
-    console.error('Error during Strava token exchange:', error.response ? error.response.data : error.message);
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/app/settings?strava=error`);
+    console.error('Detailed error during Strava token exchange:');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error during Strava connection',
+      error: error.message,
+      details: error.response?.data || 'No additional details'
+    });
   }
 });
 

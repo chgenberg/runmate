@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -9,17 +9,14 @@ import {
   Calendar,
   Star,
   MapPin,
-  Activity,
   Target,
   Clock,
   TrendingUp,
   Award,
   Heart,
   X,
-  Check,
   MessageCircle,
-  Zap,
-  Timer
+  Zap
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -38,11 +35,7 @@ const SuperLanding = () => {
   const membersScrollRef = useRef(null);
   const challengesScrollRef = useRef(null);
 
-  useEffect(() => {
-    fetchAllData();
-  }, []);
-
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     try {
       setLoading(true);
       const [membersRes, challengesRes, eventsRes, leaderboardRes] = await Promise.all([
@@ -74,7 +67,11 @@ const SuperLanding = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   const generateMockMembers = () => {
     const mockData = [

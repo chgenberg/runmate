@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -20,13 +20,8 @@ const AllMembersPage = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [message, setMessage] = useState('');
-  const [swipedMembers, setSwipedMembers] = useState(new Set());
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/users/public?limit=50');
@@ -38,7 +33,11 @@ const AllMembersPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   const generateMockMembers = () => {
     const names = [
@@ -84,7 +83,6 @@ const AllMembersPage = () => {
     if (currentIndex >= members.length) return;
     
     const member = members[currentIndex];
-    setSwipedMembers(prev => new Set(prev).add(member._id));
     
     if (action === 'message') {
       setSelectedMember(member);

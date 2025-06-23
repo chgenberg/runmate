@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Trophy, 
   Crown, 
@@ -10,7 +10,12 @@ import {
   Star,
   Globe,
   ChevronDown,
-  X
+  X,
+  Info,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -146,6 +151,7 @@ const LeaderboardPage = () => {
   });
   const [showMunicipalityModal, setShowMunicipalityModal] = useState(false);
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
+  const [showPointsModal, setShowPointsModal] = useState(false);
 
   const formatPace = (secondsPerKm) => {
     const minutes = Math.floor(secondsPerKm / 60);
@@ -269,6 +275,16 @@ const LeaderboardPage = () => {
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <button
+              onClick={() => setShowPointsModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl w-full"
+            >
+              <Info className="w-4 h-4" />
+              Så fungerar poängsystemet
+            </button>
           </div>
         </div>
 
@@ -444,6 +460,194 @@ const LeaderboardPage = () => {
           </motion.div>
         </div>
       )}
+      
+      {/* Points System Modal */}
+      <AnimatePresence>
+        {showPointsModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black">Poängsystemet</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowPointsModal(false)}
+                    className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-white/90 mt-2">Tjäna poäng för varje träningspass</p>
+              </div>
+              
+              {/* Content */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                {/* Base Points */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-orange-500" />
+                    Grundpoäng
+                  </h3>
+                  <div className="bg-orange-50 rounded-2xl p-6 border border-orange-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-black text-orange-600">10 poäng per kilometer</p>
+                        <p className="text-gray-700 mt-1">Varje kilometer du springer ger dig 10 poäng</p>
+                      </div>
+                      <div className="text-5xl">🏃‍♂️</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Distance Bonuses */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    Distansbonusar
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }}
+                      className="bg-green-50 p-4 rounded-xl border border-green-200"
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">🏅</div>
+                        <p className="font-bold text-lg text-green-700">10K Bonus</p>
+                        <p className="text-3xl font-black text-green-600 my-1">+50p</p>
+                        <p className="text-sm text-gray-600">När du springer 10km+</p>
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }}
+                      className="bg-blue-50 p-4 rounded-xl border border-blue-200"
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">🥈</div>
+                        <p className="font-bold text-lg text-blue-700">Halvmaraton</p>
+                        <p className="text-3xl font-black text-blue-600 my-1">+100p</p>
+                        <p className="text-sm text-gray-600">När du springer 21.1km+</p>
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }}
+                      className="bg-purple-50 p-4 rounded-xl border border-purple-200"
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">🥇</div>
+                        <p className="font-bold text-lg text-purple-700">Maraton</p>
+                        <p className="text-3xl font-black text-purple-600 my-1">+200p</p>
+                        <p className="text-sm text-gray-600">När du springer 42.2km+</p>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+                
+                {/* Activity Type Multipliers */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-yellow-500" />
+                    Aktivitetstyp-multiplikatorer
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-yellow-800">Intervallträning</p>
+                          <p className="text-2xl font-black text-yellow-600">1.5x poäng</p>
+                        </div>
+                        <div className="text-3xl">⚡</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-red-50 p-4 rounded-xl border border-red-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-red-800">Tempolöpning</p>
+                          <p className="text-2xl font-black text-red-600">1.3x poäng</p>
+                        </div>
+                        <div className="text-3xl">🔥</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-indigo-800">Backlöpning</p>
+                          <p className="text-2xl font-black text-indigo-600">1.4x poäng</p>
+                        </div>
+                        <div className="text-3xl">⛰️</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-pink-50 p-4 rounded-xl border border-pink-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-pink-800">Tävling</p>
+                          <p className="text-2xl font-black text-pink-600">2.0x poäng</p>
+                        </div>
+                        <div className="text-3xl">🏆</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Time Bonus */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-blue-500" />
+                    Tidsbonus
+                  </h3>
+                  <div className="bg-blue-50 rounded-2xl p-6 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-black text-blue-600">+30 poäng</p>
+                        <p className="text-gray-700 mt-1">När ditt träningspass är längre än 1 timme</p>
+                      </div>
+                      <div className="text-5xl">⏱️</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Examples */}
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Exempel på poängberäkning</h3>
+                  <div className="space-y-3">
+                    <div className="bg-gray-50 p-4 rounded-xl">
+                      <p className="font-semibold text-gray-900">5 km vanlig löpning</p>
+                      <p className="text-gray-600">5 × 10 = <span className="font-bold text-orange-600">50 poäng</span></p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl">
+                      <p className="font-semibold text-gray-900">10 km löpning</p>
+                      <p className="text-gray-600">10 × 10 + 50 (bonus) = <span className="font-bold text-orange-600">150 poäng</span></p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl">
+                      <p className="font-semibold text-gray-900">10 km intervallträning</p>
+                      <p className="text-gray-600">150 × 1.5 = <span className="font-bold text-orange-600">225 poäng</span></p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl">
+                      <p className="font-semibold text-gray-900">Halvmaraton tävling</p>
+                      <p className="text-gray-600">(211 + 100) × 2.0 = <span className="font-bold text-orange-600">622 poäng</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

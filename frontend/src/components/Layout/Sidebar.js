@@ -73,6 +73,12 @@ const Sidebar = () => {
       href: '/app/community',
       icon: List,
       description: 'Grupper och forum'
+    },
+    {
+      name: 'Event',
+      href: '/app/events',
+      icon: List,
+      description: 'Löpningsevent'
     }
   ];
 

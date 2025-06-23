@@ -252,21 +252,21 @@ const SuperLanding = () => {
                       </div>
                     </div>
                     
-                    <div className="p-6">
-                      <div className="flex items-center space-x-3 mb-4">
+                    <div className="p-6 relative -mt-10">
+                      <div className="mb-4">
                         <ProfileAvatar 
                           user={member} 
-                          size="md"
-                          className="flex-shrink-0"
+                          size="lg"
+                          className="mx-auto"
                         />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-gray-900 truncate">
-                            {member.firstName} {member.lastName?.charAt(0)}.
-                          </h3>
-                          <div className="flex items-center text-gray-600 text-sm">
-                            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                            <span className="truncate">{member.location || 'Sverige'}</span>
-                          </div>
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {member.firstName} {member.lastName?.charAt(0)}.
+                        </h3>
+                        <div className="flex items-center justify-center text-gray-600 text-sm mt-1">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          <span>{member.location || 'Sverige'}</span>
                         </div>
                       </div>
 

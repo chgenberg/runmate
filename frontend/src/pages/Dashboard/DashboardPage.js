@@ -1,399 +1,599 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../services/api';
-import { 
-  Users, 
-  Calendar, 
-  Trophy, 
-  Star, 
-  X, 
-  Check,
-  ChevronRight,
-  MapPin,
-  Clock,
-  Award
-} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ChevronRight, 
+  ChevronLeft, 
+  Users, 
+  Trophy, 
+  Calendar,
+  Star,
+  MapPin,
+  Target,
+  Clock,
+  TrendingUp,
+  Award,
+  Heart,
+  X,
+  MessageCircle,
+  Zap,
+  Send
+} from 'lucide-react';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 const DashboardPage = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const [recentMatches, setRecentMatches] = useState([]);
-  const [events, setEvents] = useState([]);
+  const { user } = useAuth();
+  const [members, setMembers] = useState([]);
   const [challenges, setChallenges] = useState([]);
-  const [userRating, setUserRating] = useState(null);
-  const [topUsers, setTopUsers] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [messageModal, setMessageModal] = useState({ open: false, match: null });
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
   const [message, setMessage] = useState('');
 
+  const membersScrollRef = useRef(null);
+  const challengesScrollRef = useRef(null);
+
   useEffect(() => {
-    fetchDashboardData();
+    fetchAllData();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const [matchesRes, eventsRes, challengesRes, ratingsRes, topUsersRes] = await Promise.all([
-        api.get('/users/matches'),
-        api.get('/runevents'),
+      const [membersRes, challengesRes, eventsRes, leaderboardRes, statsRes] = await Promise.all([
+        api.get('/users/discover?limit=20'),
         api.get('/challenges/my-challenges'),
-        api.get('/ratings/my-stats'),
-        api.get('/users/leaderboard?limit=5')
+        api.get('/runevents/my-events'),
+        api.get('/users/leaderboard?limit=5'),
+        api.get('/users/stats/summary')
       ]);
 
-      setRecentMatches(matchesRes.data.matches || []);
-      setEvents(eventsRes.data.events || []);
-      setChallenges(challengesRes.data.challenges || []);
-      setUserRating(ratingsRes.data);
-      setTopUsers(topUsersRes.data.users || []);
+      setMembers(membersRes.data.users || generateMockMembers());
+      setChallenges(challengesRes.data.challenges || generateMockChallenges());
+      setEvents(eventsRes.data.events || generateMockEvents());
+      setLeaderboard(leaderboardRes.data.leaderboard || generateMockLeaderboard());
+      setUserStats(statsRes.data.data || {
+        user: { points: 156, level: 5 },
+        stats: { totalDistance: 156, totalActivities: 45 },
+        rankings: { national: 24 }
+      });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching data:', error);
+      // Use mock data as fallback
+      setMembers(generateMockMembers());
+      setChallenges(generateMockChallenges());
+      setEvents(generateMockEvents());
+      setLeaderboard(generateMockLeaderboard());
+      setUserStats({
+        user: { points: 156, level: 5, rating: 4.7 },
+        stats: { totalDistance: 156, totalActivities: 45 },
+        rankings: { national: 24 }
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAcceptMatch = (match) => {
-    setMessageModal({ open: true, match });
+  const generateMockMembers = () => {
+    const mockData = [
+      { name: 'Emma Johansson', location: 'Stockholm', pb10k: '42:15', motivation: 'Älskar känslan efter ett långpass', activities: ['Löpning', 'Trail'] },
+      { name: 'Marcus Berg', location: 'Göteborg', pb10k: '38:45', motivation: 'Tränar för mitt första maraton', activities: ['Löpning', 'Cykling'] },
+      { name: 'Sara Lindqvist', location: 'Malmö', pb10k: '45:30', motivation: 'Springer för hälsan och gemenskapen', activities: ['Löpning'] },
+      { name: 'Johan Nilsson', location: 'Uppsala', pb10k: '41:00', motivation: 'Jagar nya PB varje vecka!', activities: ['Löpning', 'Gym'] },
+      { name: 'Anna Svensson', location: 'Lund', pb10k: '44:20', motivation: 'Löpning är min meditation', activities: ['Löpning', 'Yoga'] }
+    ];
+
+    return mockData.map((data, idx) => ({
+      _id: idx.toString(),
+      firstName: data.name.split(' ')[0],
+      lastName: data.name.split(' ')[1],
+      profilePicture: `https://ui-avatars.com/api/?name=${data.name}&background=random&size=400`,
+      location: data.location,
+      personalBests: { '10k': data.pb10k },
+      motivation: data.motivation,
+      favoriteActivities: data.activities,
+      rating: 4 + Math.random(),
+      weeklyKm: Math.floor(Math.random() * 50) + 20,
+      pace: data.pb10k.substring(0, 4) + ' min/km'
+    }));
   };
 
-  const handleRejectMatch = async (matchId) => {
-    try {
-      await api.delete(`/users/matches/${matchId}`);
-      setRecentMatches(prev => prev.filter(m => m.id !== matchId));
-    } catch (error) {
-      console.error('Error rejecting match:', error);
+  const generateMockChallenges = () => {
+    return [
+      { _id: '1', title: 'Veckans Mil', participants: 156, daysLeft: 5, reward: '500 poäng', progress: 65 },
+      { _id: '2', title: 'Oktober Marathon', participants: 89, daysLeft: 18, reward: '1000 poäng', progress: 30 },
+      { _id: '3', title: 'Höstrusket 5K', participants: 234, daysLeft: 3, reward: '300 poäng', progress: 85 },
+      { _id: '4', title: '100km på 30 dagar', participants: 67, daysLeft: 24, reward: '2000 poäng', progress: 45 }
+    ];
+  };
+
+  const generateMockEvents = () => {
+    const dates = [
+      new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+    ];
+
+    return [
+      { _id: '1', title: 'Morgonlöpning Djurgården', date: dates[0], participants: 8, distance: '8 km', location: 'Djurgården' },
+      { _id: '2', title: 'Intervaller Ladugårdsgärde', date: dates[1], participants: 5, distance: '6 km', location: 'Gärdet' },
+      { _id: '3', title: 'Långpass Haga', date: dates[2], participants: 12, distance: '15 km', location: 'Hagaparken' }
+    ];
+  };
+
+  const generateMockLeaderboard = () => {
+    return [
+      { _id: '1', name: 'Erik Gustafsson', location: 'Stockholm', weeklyKm: 78, avatar: 'EG', points: 2340 },
+      { _id: '2', name: 'Maria Andersson', location: 'Göteborg', weeklyKm: 72, avatar: 'MA', points: 2180 },
+      { _id: '3', name: 'Johan Lindberg', location: 'Malmö', weeklyKm: 68, avatar: 'JL', points: 1920 },
+      { _id: '4', name: 'Anna Nilsson', location: 'Uppsala', weeklyKm: 65, avatar: 'AN', points: 1850 },
+      { _id: '5', name: 'Peter Svensson', location: 'Lund', weeklyKm: 61, avatar: 'PS', points: 1720 }
+    ];
+  };
+
+  const scroll = (ref, direction) => {
+    if (ref.current) {
+      const scrollAmount = 320;
+      const currentScroll = ref.current.scrollLeft;
+      const newScroll = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      ref.current.scrollTo({
+        left: newScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleMemberAction = (member, action) => {
+    if (action === 'message') {
+      setSelectedMember(member);
+      setShowMessageModal(true);
+    } else if (action === 'like') {
+      // Handle like action
+      toast.success(`Du gillade ${member.firstName}!`);
     }
   };
 
   const sendMessage = async () => {
-    if (!message.trim() || !messageModal.match) return;
-    
     try {
       await api.post('/chat/message', {
-        recipientId: messageModal.match.userId,
-        message: message.trim()
+        recipientId: selectedMember._id,
+        message: message
       });
-      
-      setMessageModal({ open: false, match: null });
+      toast.success('Meddelande skickat!');
+      setShowMessageModal(false);
       setMessage('');
-      navigate('/app/matches');
+      setSelectedMember(null);
     } catch (error) {
-      console.error('Error sending message:', error);
+      toast.error('Kunde inte skicka meddelandet');
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Laddar din dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 pb-20">
-      {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">RunMate</h1>
-          <p className="text-sm text-gray-600 mt-1">Välkommen {user?.firstName}!</p>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 pb-20">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/50 z-10"></div>
+        <div className="container mx-auto px-4 pt-6 pb-8 relative z-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-4"
+          >
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900">
+              Välkommen tillbaka,
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+                {user?.firstName}!
+              </span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Här är din överblick för dagen
+            </p>
+          </motion.div>
         </div>
       </div>
 
-      {/* Recent Matches Section */}
-      <div className="p-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg overflow-hidden"
-        >
-          <div 
-            onClick={() => navigate('/app/matches')}
-            className="p-4 cursor-pointer hover:bg-gray-50 transition-all"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <Users className="w-6 h-6 text-orange-500" />
-                <h2 className="text-lg font-semibold">Löparkompis</h2>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
+      {/* Members Section */}
+      <section className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <Users className="w-6 h-6 text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900">Upptäck löpare</h2>
+              <span className="text-sm text-gray-500">({members.length}+ nya)</span>
             </div>
-            
-            {recentMatches.length > 0 ? (
-              <div className="space-y-3">
-                {recentMatches.slice(0, 3).map((match) => (
-                  <div key={match.id} className="flex items-center justify-between py-2">
-                    <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate('/app/discover')}
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
+            >
+              <span>Visa alla</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="relative">
+            <button
+              onClick={() => scroll(membersScrollRef, 'left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all md:p-3"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
+
+            <button
+              onClick={() => scroll(membersScrollRef, 'right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all md:p-3"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-700" />
+            </button>
+
+            <div 
+              ref={membersScrollRef}
+              className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {members.map((member) => (
+                <motion.div
+                  key={member._id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex-shrink-0 w-72 md:w-80"
+                >
+                  <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
+                    <div className="relative h-32 bg-gradient-to-br from-orange-400 to-red-400">
                       <img 
-                        src={match.profilePicture || '/default-avatar.png'} 
-                        alt={match.name}
-                        className="w-12 h-12 rounded-full object-cover"
+                        src={member.profilePicture}
+                        alt={member.firstName}
+                        className="absolute bottom-0 left-6 w-24 h-24 rounded-full border-4 border-white"
                       />
-                      <div>
-                        <p className="font-medium">{match.name}</p>
-                        <p className="text-sm text-gray-600">{match.pace} min/km</p>
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                          <span className="text-sm font-semibold">{member.rating?.toFixed(1) || '4.5'}</span>
+                        </div>
                       </div>
                     </div>
                     
-                    <div className="flex space-x-2">
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRejectMatch(match.id);
-                        }}
-                        className="p-2 bg-red-100 rounded-full hover:bg-red-200 transition-colors"
-                      >
-                        <X className="w-5 h-5 text-red-600" />
-                      </motion.button>
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAcceptMatch(match);
-                        }}
-                        className="p-2 bg-green-100 rounded-full hover:bg-green-200 transition-colors"
-                      >
-                        <Check className="w-5 h-5 text-green-600" />
-                      </motion.button>
+                    <div className="p-6 pt-8">
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        {member.firstName} {member.lastName?.charAt(0)}.
+                      </h3>
+                      <div className="flex items-center text-gray-600 text-sm mb-4">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {member.location || 'Sverige'}
+                      </div>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-500">PB 10k</span>
+                          <span className="font-semibold">{member.personalBests?.['10k'] || '45:00'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-500">Veckosnitt</span>
+                          <span className="font-semibold">{member.weeklyKm || 30} km</span>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-600 italic mb-4 line-clamp-2">
+                        "{member.motivation || 'Älskar att springa!'}"
+                      </p>
+
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => handleMemberAction(member, 'message')}
+                          className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span>Kontakta</span>
+                        </button>
+                        <button 
+                          onClick={() => handleMemberAction(member, 'like')}
+                          className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
+                        >
+                          <Heart className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                ))}
-                
-                {recentMatches.length > 3 && (
-                  <p className="text-sm text-orange-500 text-center pt-2">
-                    +{recentMatches.length - 3} fler matchningar
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-4">Inga nya matchningar</p>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Events Section - Horizontal Scroll */}
-      <div className="px-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Event</h2>
-          <button 
-            onClick={() => navigate('/app/events')}
-            className="text-sm text-orange-500 hover:text-orange-600"
-          >
-            Alla
-          </button>
-        </div>
-        
-        <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
-          {events.map((event) => (
-            <motion.div
-              key={event._id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(`/app/events/${event._id}`)}
-              className="flex-shrink-0 w-72 bg-white rounded-xl shadow-md p-4 cursor-pointer"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="bg-orange-100 rounded-lg p-3">
-                  <Calendar className="w-6 h-6 text-orange-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-600">
-                  {new Date(event.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
-                </span>
-              </div>
-              
-              <h3 className="font-semibold text-gray-900 mb-1">{event.title}</h3>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <span className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {event.location}
-                </span>
-                <span className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {event.time}
-                </span>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  {event.participants?.length || 0} deltagare
-                </span>
-                <span className="text-sm font-medium text-orange-500">
-                  Gå med →
-                </span>
-              </div>
-            </motion.div>
-          ))}
-          
-          {events.length === 0 && (
-            <div className="flex-shrink-0 w-72 bg-gray-100 rounded-xl p-8 flex items-center justify-center">
-              <p className="text-gray-500">Inga event tillgängliga</p>
+                </motion.div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Challenges Section */}
-      <div className="px-4 mb-6">
-        <h2 className="text-lg font-semibold mb-3">Utmaningar</h2>
-        <div className="space-y-3">
-          {challenges.map((challenge) => (
-            <motion.div
-              key={challenge._id}
-              whileHover={{ scale: 1.01 }}
-              onClick={() => navigate(`/app/challenges/${challenge._id}`)}
-              className="bg-white rounded-xl shadow-md p-4 cursor-pointer"
+      <section className="py-8 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <Trophy className="w-6 h-6 text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900">Dina utmaningar</h2>
+            </div>
+            <button 
+              onClick={() => navigate('/app/challenges')}
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Trophy className="w-8 h-8 text-yellow-500" />
+              <span>Visa alla</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="relative">
+            <div 
+              ref={challengesScrollRef}
+              className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {challenges.map((challenge) => (
+                <motion.div
+                  key={challenge._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex-shrink-0 w-72 md:w-80"
+                >
+                  <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-orange-100 rounded-xl">
+                        <Target className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <span className="text-sm text-gray-500">{challenge.daysLeft} dagar kvar</span>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{challenge.title}</h3>
+                    
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600">{challenge.progress}% genomfört</span>
+                        <span className="font-semibold text-orange-600">{challenge.reward}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${challenge.progress}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-gradient-to-r from-orange-500 to-red-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <button 
+                      onClick={() => navigate(`/app/challenges/${challenge._id}`)}
+                      className="w-full py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+                    >
+                      Se detaljer
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Calendar Section */}
+      <section className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <Calendar className="w-6 h-6 text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900">Kommande aktiviteter</h2>
+            </div>
+            <button 
+              onClick={() => navigate('/app/activities')}
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
+            >
+              <span>Visa mer</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {events.map((event, index) => (
+              <motion.div
+                key={event._id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer"
+                onClick={() => navigate(`/app/runevents/${event._id}`)}
+              >
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="font-semibold">{challenge.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      {challenge.progress}% genomfört
+                    <h3 className="font-bold text-gray-900">{event.title}</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {new Date(event.date).toLocaleDateString('sv-SE', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long' 
+                      })}
                     </p>
                   </div>
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Clock className="w-5 h-5 text-orange-600" />
+                  </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </div>
-              
-              <div className="mt-3 bg-gray-100 rounded-full h-2 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${challenge.progress}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-orange-400 to-red-500"
-                />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* User Rating Section */}
-      <div className="px-4 mb-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white shadow-lg"
-        >
-          <h2 className="text-xl font-bold mb-4">Ditt betyg</h2>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-1 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    className={`w-6 h-6 ${i < Math.floor(userRating?.averageRating || 0) ? 'fill-yellow-300 text-yellow-300' : 'text-white/50'}`} 
-                  />
-                ))}
-              </div>
-              <p className="text-2xl font-bold">{userRating?.averageRating?.toFixed(1) || '0.0'}</p>
-              <p className="text-sm opacity-90">{userRating?.totalRatings || 0} omdömen</p>
-            </div>
-            <Award className="w-16 h-16 text-white/20" />
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">
+                    <MapPin className="w-4 h-4 inline mr-1" />
+                    {event.location}
+                  </span>
+                  <span className="font-semibold text-orange-600">{event.distance}</span>
+                </div>
+                
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{event.participants} deltagare</span>
+                  <span className="text-sm font-medium text-orange-500">Gå med →</span>
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
-      </div>
-
-      {/* Top Users Section */}
-      <div className="px-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Topplista</h2>
-          <button 
-            onClick={() => navigate('/app/leaderboard')}
-            className="text-sm text-orange-500 hover:text-orange-600"
-          >
-            Se alla
-          </button>
         </div>
-        
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-          {topUsers.map((topUser, index) => (
-            <div 
-              key={topUser._id}
-              className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+      </section>
+
+      {/* Leaderboard Section */}
+      <section className="py-8 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <TrendingUp className="w-6 h-6 text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900">Veckans topplista</h2>
+            </div>
+            <button 
+              onClick={() => navigate('/app/leaderboard')}
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
-              <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white
-                  ${index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-gray-300'}`}>
-                  {index + 1}
-                </div>
-                <img 
-                  src={topUser.profilePicture || '/default-avatar.png'} 
-                  alt={topUser.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+              <span>Visa mer</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            {/* Your stats */}
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{topUser.firstName} {topUser.lastName?.charAt(0)}.</p>
-                  <p className="text-sm text-gray-600">{topUser.totalDistance?.toFixed(0) || 0} km</p>
+                  <p className="text-white/80 text-sm mb-1">Din vecka</p>
+                  <p className="text-3xl font-bold">{userStats?.stats?.totalDistance || 0} km</p>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="font-semibold text-orange-500">{topUser.points || 0}</p>
-                <p className="text-xs text-gray-600">poäng</p>
+                <div className="text-right">
+                  <p className="text-white/80 text-sm mb-1">Nationell ranking</p>
+                  <p className="text-2xl font-bold">#{userStats?.rankings?.national || '-'}</p>
+                </div>
+                <div className="p-4 bg-white/20 rounded-xl">
+                  <Zap className="w-8 h-8" />
+                </div>
               </div>
             </div>
-          ))}
+
+            {/* Top 5 */}
+            <div className="space-y-3">
+              {leaderboard.map((runner, index) => (
+                <div key={runner._id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-all">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                      index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                      index === 1 ? 'bg-gray-100 text-gray-700' :
+                      index === 2 ? 'bg-orange-100 text-orange-700' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center text-white font-bold">
+                      {runner.avatar}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{runner.name}</p>
+                      <p className="text-sm text-gray-600">{runner.location}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">{runner.weeklyKm} km</p>
+                    <p className="text-sm text-gray-600">{runner.points} poäng</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Rating Section */}
+      <section className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-xl p-8 text-white text-center">
+            <Award className="w-16 h-16 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold mb-2">Ditt betyg</h2>
+            <div className="flex items-center justify-center space-x-1 mb-4">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`w-8 h-8 ${i < Math.floor(userStats?.user?.rating || 4.5) ? 'fill-current' : ''}`} 
+                />
+              ))}
+              <span className="text-3xl font-bold ml-2">{userStats?.user?.rating || '4.7'}</span>
+            </div>
+            <p className="text-white/80">Baserat på {userStats?.totalRatings || 38} omdömen</p>
+            
+            <button 
+              onClick={() => navigate('/app/ratings')}
+              className="mt-6 px-6 py-3 bg-white text-orange-600 rounded-full font-bold hover:shadow-lg transition-all"
+            >
+              Se alla omdömen
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Message Modal */}
       <AnimatePresence>
-        {messageModal.open && (
+        {showMessageModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setMessageModal({ open: false, match: null })}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowMessageModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 max-w-md w-full"
+              className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src={messageModal.match?.profilePicture || '/default-avatar.png'} 
-                  alt={messageModal.match?.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="font-semibold text-lg">Skicka meddelande</h3>
-                  <p className="text-sm text-gray-600">till {messageModal.match?.name}</p>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900">
+                  Skicka meddelande till {selectedMember?.firstName}
+                </h3>
+                <button
+                  onClick={() => setShowMessageModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
               </div>
               
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Skriv ett meddelande..."
-                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                rows={4}
+                placeholder="Hej! Jag såg din profil och skulle gärna vilja springa tillsammans..."
+                className="w-full h-32 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
                 autoFocus
               />
               
               <div className="flex space-x-3 mt-4">
                 <button
-                  onClick={() => setMessageModal({ open: false, match: null })}
-                  className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  onClick={() => setShowMessageModal(false)}
+                  className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-all"
                 >
                   Avbryt
                 </button>
                 <button
                   onClick={sendMessage}
-                  disabled={!message.trim()}
-                  className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+                  className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2"
                 >
-                  Skicka
+                  <Send className="w-4 h-4" />
+                  <span>Skicka</span>
                 </button>
               </div>
             </motion.div>

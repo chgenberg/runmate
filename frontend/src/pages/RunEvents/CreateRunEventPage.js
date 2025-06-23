@@ -88,6 +88,7 @@ const CreateRunEventPage = () => {
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        autoComplete="off"
         className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 focus:bg-white focus:ring-0 transition-all"
       />
     </div>
@@ -122,6 +123,7 @@ const CreateRunEventPage = () => {
                 onChange={handleChange}
                 placeholder="Berätta lite om rundan. Vilken typ av pass? Finns det backar? Är det för nybörjare eller erfarna löpare?"
                 rows="4"
+                autoComplete="off"
                 className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-red-500 focus:bg-white focus:ring-0 transition-all"
               />
             </div>

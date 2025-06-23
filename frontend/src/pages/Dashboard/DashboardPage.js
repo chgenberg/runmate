@@ -21,7 +21,8 @@ import {
   Send
 } from 'lucide-react';
 import api from '../../services/api';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
+import ProfileAvatar from '../../components/common/ProfileAvatar';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -219,11 +220,11 @@ const DashboardPage = () => {
             <div className="flex items-center space-x-3">
               <Users className="w-6 h-6 text-orange-500" />
               <h2 className="text-2xl font-bold text-gray-900">Upptäck löpare</h2>
-              <span className="text-sm text-gray-500">({members.length}+ nya)</span>
+              <span className="text-sm text-gray-500 whitespace-nowrap">({members.length}+ nya)</span>
             </div>
             <button 
               onClick={() => navigate('/app/discover')}
-              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium whitespace-nowrap"
             >
               <span>Visa alla</span>
               <ChevronRight className="w-5 h-5" />
@@ -259,11 +260,15 @@ const DashboardPage = () => {
                 >
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
                     <div className="relative h-32 bg-gradient-to-br from-orange-400 to-red-400">
-                      <img 
-                        src={member.profilePicture}
-                        alt={member.firstName}
-                        className="absolute bottom-0 left-6 w-24 h-24 rounded-full border-4 border-white"
-                      />
+                      <div className="absolute bottom-0 left-6 transform translate-y-1/2">
+                        <ProfileAvatar 
+                          src={member.profilePicture}
+                          alt={member.firstName}
+                          size="xlarge"
+                          className="border-4 border-white"
+                          fallbackColor="bg-gray-100"
+                        />
+                      </div>
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
                         <div className="flex items-center space-x-1">
                           <Star className="w-4 h-4 text-yellow-500 fill-current" />
@@ -330,7 +335,7 @@ const DashboardPage = () => {
             </div>
             <button 
               onClick={() => navigate('/app/challenges')}
-              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium whitespace-nowrap"
             >
               <span>Visa alla</span>
               <ChevronRight className="w-5 h-5" />
@@ -399,7 +404,7 @@ const DashboardPage = () => {
             </div>
             <button 
               onClick={() => navigate('/app/activities')}
-              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium whitespace-nowrap"
             >
               <span>Visa mer</span>
               <ChevronRight className="w-5 h-5" />
@@ -460,7 +465,7 @@ const DashboardPage = () => {
             </div>
             <button 
               onClick={() => navigate('/app/leaderboard')}
-              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
+              className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium whitespace-nowrap"
             >
               <span>Visa mer</span>
               <ChevronRight className="w-5 h-5" />
@@ -498,9 +503,12 @@ const DashboardPage = () => {
                     }`}>
                       {index + 1}
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center text-white font-bold">
-                      {runner.avatar}
-                    </div>
+                    <ProfileAvatar 
+                      src={runner.profilePicture}
+                      alt={runner.name}
+                      size="medium"
+                      fallbackColor="bg-gradient-to-br from-orange-400 to-red-400"
+                    />
                     <div>
                       <p className="font-semibold text-gray-900">{runner.name}</p>
                       <p className="text-sm text-gray-600">{runner.location}</p>

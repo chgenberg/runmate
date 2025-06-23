@@ -381,7 +381,14 @@ const ChallengeDetailPage = () => {
   }
 
   if (error) return <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg m-4">{error}</div>;
-  if (!challenge) return null;
+  if (!challenge) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="text-center">
+      <p className="text-gray-600">Utmaningen kunde inte hittas</p>
+      <button onClick={() => navigate('/app/challenges')} className="mt-4 text-orange-600 hover:text-orange-700">
+        Tillbaka till utmaningar
+      </button>
+    </div>
+  </div>;
 
   const daysRemaining = Math.max(0, Math.ceil((new Date(challenge.endDate) - new Date()) / (1000 * 60 * 60 * 24)));
 

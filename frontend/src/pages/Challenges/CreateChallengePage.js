@@ -28,16 +28,6 @@ const popularCities = [
 
 const challengeTypes = [
   { 
-    id: 'route_race', 
-    label: 'Ruttrace', 
-    icon: MapPin, 
-    unit: 'km', 
-    description: 'Tävla på en specifik rutt',
-    gradient: 'from-primary-500 to-secondary-500',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200'
-  },
-  { 
     id: 'distance', 
     label: 'Total distans', 
     icon: Target, 
@@ -68,7 +58,7 @@ const CreateChallengePage = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    type: 'route_race',
+    type: 'distance',
     selectedCity: 'stockholm',
     routeDistance: 5,
     goal: {

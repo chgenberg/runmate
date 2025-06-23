@@ -306,40 +306,65 @@ const LeaderboardPage = () => {
                   transition={{ delay: index * 0.1 }}
                   className="p-6 hover:bg-gray-50 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
                     
-                    {/* Rank */}
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 ${rankConfig.bg} rounded-2xl flex items-center justify-center`}>
-                        <Icon className={`w-6 h-6 ${rankConfig.color}`} />
+                    {/* Mobile: Rank + Profile + Primary Metric in top row */}
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                      {/* Rank */}
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className={`w-10 h-10 md:w-12 md:h-12 ${rankConfig.bg} rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-5 h-5 md:w-6 md:h-6 ${rankConfig.color}`} />
+                        </div>
+                        <span className="text-xl md:text-2xl font-black text-gray-900 min-w-[35px] md:min-w-[50px]">
+                          #{runner.rank}
+                        </span>
                       </div>
-                      <span className="text-2xl font-black text-gray-900 min-w-[50px]">
-                        #{runner.rank}
-                      </span>
-                    </div>
 
-                    {/* Profile */}
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <img 
-                        src={runner.profilePhoto || `https://ui-avatars.com/api/?name=${runner.firstName}+${runner.lastName}&background=random`}
-                        alt={runner.firstName}
-                        className="w-16 h-16 rounded-full object-cover ring-4 ring-white shadow-lg"
-                      />
-                      <div className="min-w-0">
-                        <h3 className="text-xl font-bold text-gray-900">
-                          {runner.firstName} {runner.lastName}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <MapPin className="w-4 h-4" />
-                          <span>{runner.city}</span>
-                          <span>•</span>
-                          <span>Nivå {runner.level}</span>
+                      {/* Profile */}
+                      <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                        <img 
+                          src={runner.profilePhoto || `https://ui-avatars.com/api/?name=${runner.firstName}+${runner.lastName}&background=random`}
+                          alt={runner.firstName}
+                          className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover ring-2 md:ring-4 ring-white shadow-lg flex-shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-base md:text-xl font-bold text-gray-900 truncate">
+                            {runner.firstName} {runner.lastName}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500">
+                            <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                            <span className="truncate">{runner.city}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="hidden sm:inline">Nivå {runner.level}</span>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Primary Metric - Mobile */}
+                      <div className="text-right flex-shrink-0 md:hidden">
+                        {filters.type === 'points' && (
+                          <div>
+                            <p className="text-xl font-black text-gray-900">{runner.points}</p>
+                            <p className="text-xs text-gray-500 font-medium">poäng</p>
+                          </div>
+                        )}
+                        {filters.type === 'level' && (
+                          <div>
+                            <p className="text-xl font-black text-gray-900">Nivå {runner.level}</p>
+                            <p className="text-xs text-gray-500 font-medium">{runner.points} p</p>
+                          </div>
+                        )}
+                        {filters.type === 'distance' && (
+                          <div>
+                            <p className="text-xl font-black text-gray-900">{runner.stats.totalDistance}</p>
+                            <p className="text-xs text-gray-500 font-medium">km</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="hidden md:flex items-center gap-8">
+                    {/* Stats - Desktop Only */}
+                    <div className="hidden md:flex items-center gap-8 flex-shrink-0">
                       <div className="text-center">
                         <p className="text-sm text-gray-500 font-medium">Distans</p>
                         <p className="text-lg font-bold text-gray-900">{runner.stats.totalDistance} km</p>
@@ -354,8 +379,8 @@ const LeaderboardPage = () => {
                       </div>
                     </div>
 
-                    {/* Primary Metric */}
-                    <div className="text-right">
+                    {/* Primary Metric - Desktop */}
+                    <div className="hidden md:block text-right flex-shrink-0 ml-auto">
                       {filters.type === 'points' && (
                         <>
                           <p className="text-3xl font-black text-gray-900">{runner.points}</p>
@@ -374,6 +399,14 @@ const LeaderboardPage = () => {
                           <p className="text-sm text-gray-500 font-medium">km totalt</p>
                         </>
                       )}
+                    </div>
+
+                    {/* Mobile Stats Row */}
+                    <div className="flex justify-between text-xs text-gray-500 md:hidden">
+                      <span>Nivå {runner.level}</span>
+                      <span>{runner.stats.totalDistance} km totalt</span>
+                      <span>{runner.stats.totalRuns} pass</span>
+                      <span>{formatPace(runner.stats.averagePace)}/km</span>
                     </div>
 
                   </div>

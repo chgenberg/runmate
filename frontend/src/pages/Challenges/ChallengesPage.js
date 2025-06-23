@@ -440,7 +440,7 @@ const ChallengesPage = () => {
               className={`
                 px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center gap-2
                 ${activeTab === 'my' 
-                  ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25' 
+                  ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25 hover:from-primary/90 hover:to-purple-700' 
                   : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:text-gray-900 shadow-md hover:shadow-lg border border-gray-200'
                 }
               `}

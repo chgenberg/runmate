@@ -5,7 +5,6 @@ import {
   Crown, 
   Award, 
   Medal, 
-  TrendingUp, 
   MapPin,
   Activity,
   Star,
@@ -178,12 +177,10 @@ const LeaderboardPage = () => {
     switch (type) {
       case 'points':
         return sorted.sort((a, b) => b.points - a.points);
-      case 'level':
-        return sorted.sort((a, b) => b.level - a.level);
       case 'distance':
         return sorted.sort((a, b) => b.stats.totalDistance - a.stats.totalDistance);
       default:
-        return sorted;
+        return sorted.sort((a, b) => b.points - a.points);
     }
   };
 
@@ -227,7 +224,6 @@ const LeaderboardPage = () => {
             <div className="flex gap-2">
               {[
                 { key: 'points', label: 'Poäng', icon: Star },
-                { key: 'level', label: 'Nivå', icon: TrendingUp },
                 { key: 'distance', label: 'Distans', icon: Activity }
               ].map(({ key, label, icon: Icon }) => (
                 <button
@@ -287,7 +283,6 @@ const LeaderboardPage = () => {
             <p className="text-gray-600 mt-1">
               {filteredLeaderboard.length} löpare • Sorterat efter {
                 filters.type === 'points' ? 'poäng' :
-                filters.type === 'level' ? 'nivå' :
                 filters.type === 'distance' ? 'distans' : 'poäng'
               }
             </p>
@@ -335,7 +330,7 @@ const LeaderboardPage = () => {
                             <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                             <span className="truncate">{runner.city}</span>
                             <span className="hidden sm:inline">•</span>
-                            <span className="hidden sm:inline">Nivå {runner.level}</span>
+                            <span className="hidden sm:inline">{runner.stats.totalDistance}km totalt</span>
                           </div>
                         </div>
                       </div>
@@ -348,12 +343,7 @@ const LeaderboardPage = () => {
                             <p className="text-xs text-gray-500 font-medium">poäng</p>
                           </div>
                         )}
-                        {filters.type === 'level' && (
-                          <div>
-                            <p className="text-xl font-black text-gray-900">Nivå {runner.level}</p>
-                            <p className="text-xs text-gray-500 font-medium">{runner.points} p</p>
-                          </div>
-                        )}
+
                         {filters.type === 'distance' && (
                           <div>
                             <p className="text-xl font-black text-gray-900">{runner.stats.totalDistance}</p>
@@ -387,12 +377,7 @@ const LeaderboardPage = () => {
                           <p className="text-sm text-gray-500 font-medium">poäng</p>
                         </>
                       )}
-                      {filters.type === 'level' && (
-                        <>
-                          <p className="text-3xl font-black text-gray-900">Nivå {runner.level}</p>
-                          <p className="text-sm text-gray-500 font-medium">{runner.points} poäng</p>
-                        </>
-                      )}
+
                       {filters.type === 'distance' && (
                         <>
                           <p className="text-3xl font-black text-gray-900">{runner.stats.totalDistance}</p>
@@ -403,7 +388,7 @@ const LeaderboardPage = () => {
 
                     {/* Mobile Stats Row */}
                     <div className="flex justify-between text-xs text-gray-500 md:hidden">
-                      <span>Nivå {runner.level}</span>
+                      <span>{runner.points} poäng</span>
                       <span>{runner.stats.totalDistance} km totalt</span>
                       <span>{runner.stats.totalRuns} pass</span>
                       <span>{formatPace(runner.stats.averagePace)}/km</span>

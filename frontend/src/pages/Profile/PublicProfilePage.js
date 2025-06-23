@@ -141,16 +141,16 @@ const PublicProfilePage = () => {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b">
             <div className="text-center">
-              <p className="text-3xl font-bold text-gray-900">{user.totalRuns}</p>
-              <p className="text-sm text-gray-500">Träningspass</p>
-            </div>
-            <div className="text-center">
               <p className="text-3xl font-bold text-gray-900">{user.totalDistance || 0}km</p>
               <p className="text-sm text-gray-500">Total distans</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-gray-900">{user.weeklyGoal}km</p>
-              <p className="text-sm text-gray-500">Veckans mål</p>
+              <p className="text-3xl font-bold text-orange-600">{user.points || '6850'}</p>
+              <p className="text-sm text-gray-500">Poäng</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-gray-900">{user.totalRuns}</p>
+              <p className="text-sm text-gray-500">Träningspass</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-gray-900">{user.stats?.avgPace || user.pace}</p>
@@ -242,6 +242,6 @@ const PublicProfilePage = () => {
       </div>
     </div>
   );
-};
-
+  };
+  
 export default PublicProfilePage; 

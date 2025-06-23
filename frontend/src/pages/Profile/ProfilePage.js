@@ -234,23 +234,23 @@ const ProfilePage = () => {
                   <span>{user.age} år</span>
                 </div>
                 
-                {/* Quick Stats */}
+                {/* Quick Stats - Focus on Distance & Points */}
                 <div className="grid grid-cols-4 gap-4 mt-6">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.totalRuns}</p>
-                    <p className="text-sm text-gray-600">Löppass</p>
-                  </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900">{profileData.stats.totalDistance}</p>
                     <p className="text-sm text-gray-600">km totalt</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.totalTime}h</p>
-                    <p className="text-sm text-gray-600">Träningstid</p>
+                    <p className="text-2xl font-bold text-orange-600">8420</p>
+                    <p className="text-sm text-gray-600">Poäng</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">4.8</p>
-                    <p className="text-sm text-gray-600">Betyg</p>
+                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.totalRuns}</p>
+                    <p className="text-sm text-gray-600">Löppass</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-900">{profileData.stats.averagePace}</p>
+                    <p className="text-sm text-gray-600">Snitt-tempo</p>
                   </div>
                 </div>
               </div>
@@ -554,6 +554,6 @@ const ProfilePage = () => {
       </div>
     </div>
   );
-};
-
+  };
+  
 export default ProfilePage; 

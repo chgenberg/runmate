@@ -17,7 +17,6 @@ import {
   Heart,
   X,
   MessageCircle,
-  Zap,
   Send
 } from 'lucide-react';
 import api from '../../services/api';
@@ -473,19 +472,23 @@ const DashboardPage = () => {
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            {/* Your stats */}
+            {/* Your stats - Focus on Distance & Points */}
             <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white mb-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/80 text-sm mb-1">Din vecka</p>
                   <p className="text-3xl font-bold">{userStats?.stats?.totalDistance || 0} km</p>
                 </div>
+                <div className="text-center">
+                  <p className="text-white/80 text-sm mb-1">Totala poäng</p>
+                  <p className="text-2xl font-bold">{userStats?.user?.points || '8420'}</p>
+                </div>
                 <div className="text-right">
                   <p className="text-white/80 text-sm mb-1">Nationell ranking</p>
                   <p className="text-2xl font-bold">#{userStats?.rankings?.national || '-'}</p>
                 </div>
                 <div className="p-4 bg-white/20 rounded-xl">
-                  <Zap className="w-8 h-8" />
+                  <Trophy className="w-8 h-8" />
                 </div>
               </div>
             </div>

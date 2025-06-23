@@ -45,11 +45,12 @@ const SettingsPage = () => {
   const handleStravaConnect = async () => {
     setLoading(true);
     try {
-      // Redirect to backend auth endpoint which will handle Strava OAuth
-      window.location.href = `${process.env.REACT_APP_API_URL || 'https://staging-runmate-backend-production.up.railway.app'}/api/auth/strava`;
+      // Force redirect to backend auth endpoint which will handle Strava OAuth
+      const stravaAuthUrl = `${process.env.REACT_APP_API_URL || 'https://staging-runmate-backend-production.up.railway.app'}/api/auth/strava`;
+      console.log('Redirecting to:', stravaAuthUrl);
+      window.location.replace(stravaAuthUrl);
     } catch (error) {
       console.error('Error connecting to Strava:', error);
-    } finally {
       setLoading(false);
     }
   };

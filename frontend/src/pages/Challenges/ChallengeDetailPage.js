@@ -74,7 +74,44 @@ const cityRoutes = {
       return points;
     }
   },
-  // Add more cities as needed
+  malmo: {
+    center: [55.6050, 13.0038],
+    zoom: 12,
+    getRoute: (distance) => {
+      const baseCoords = [55.6050, 13.0038];
+      const points = [];
+      const numPoints = Math.max(20, distance * 2);
+      const radius = distance / (2 * Math.PI * 111);
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * 2 * Math.PI;
+        points.push([
+          baseCoords[0] + radius * Math.cos(angle),
+          baseCoords[1] + radius * Math.sin(angle) * 1.5
+        ]);
+      }
+      return points;
+    }
+  },
+  uppsala: {
+    center: [59.8586, 17.6389],
+    zoom: 12,
+    getRoute: (distance) => {
+      const baseCoords = [59.8586, 17.6389];
+      const points = [];
+      const numPoints = Math.max(20, distance * 2);
+      const radius = distance / (2 * Math.PI * 111);
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * 2 * Math.PI;
+        points.push([
+          baseCoords[0] + radius * Math.cos(angle),
+          baseCoords[1] + radius * Math.sin(angle) * 1.5
+        ]);
+      }
+      return points;
+    }
+  }
 };
 
 const ShareMenu = ({ 
@@ -395,8 +432,10 @@ const ChallengeDetailPage = () => {
   const isRouteChallenge = challenge.type === 'route_race' && challenge.route;
 
   // Get route data if it's a route challenge
-  const routeData = isRouteChallenge && challenge.route && cityRoutes[challenge.route.cityId];
-  const routeCoordinates = routeData?.getRoute(challenge.route?.distance) || [];
+  const routeData = isRouteChallenge && challenge.route && challenge.route.cityId && cityRoutes[challenge.route.cityId];
+  const routeCoordinates = routeData && routeData.getRoute && challenge.route?.distance 
+    ? routeData.getRoute(challenge.route.distance) 
+    : [];
 
   // Calculate participant positions on route based on their progress
   const getParticipantPosition = (participant) => {

@@ -227,10 +227,10 @@ const RunEventDetailPage = () => {
                     onClick={handleJoinRequest}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                    className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
                 >
-                    <UserPlus className="w-5 h-5" />
-                    <span>Begär att få gå med</span>
+                    <UserPlus className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-center">Begär att få gå med</span>
                 </motion.button>
             )
         }

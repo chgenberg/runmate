@@ -178,6 +178,20 @@
   animation-delay: 2000ms;
 }
 
+/* Custom animations for challenge page */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
 /* Slide up animation */
 @keyframes slide-up {
   0% {

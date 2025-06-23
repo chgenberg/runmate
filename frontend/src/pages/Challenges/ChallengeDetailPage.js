@@ -14,7 +14,12 @@ import {
   ChevronRight,
   MapPin,
   Plus,
-  Sparkles
+  Sparkles,
+  Zap,
+  Activity,
+  Medal,
+  Timer,
+  TrendingUp
 } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -24,6 +29,7 @@ import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinnerFullScreen } from '../../components/Layout/LoadingSpinner';
 import toast from 'react-hot-toast';
+import ProfileAvatar from '../../components/common/ProfileAvatar';
 
 // Fix for default markers in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -556,6 +562,228 @@ const ChallengeDetailPage = () => {
         </div>
       </div>
 
+      {/* Interactive Progress Race Track */}
+      <div className="px-4 pb-6">
+        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl shadow-lg p-6 overflow-hidden animate-slide-up animation-delay-100">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <Zap className="w-6 h-6 mr-2 text-orange-500" />
+            Live Progress Race
+          </h2>
+          
+          {/* Race Track */}
+          <div className="relative bg-white rounded-2xl p-8 shadow-inner">
+            {/* Track Background */}
+            <div className="absolute inset-4 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full opacity-50"></div>
+            
+            {/* Progress Track */}
+            <div className="relative">
+              {/* Start Line */}
+              <div className="absolute left-8 top-1/2 -translate-y-1/2 z-20">
+                <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                  START
+                </div>
+              </div>
+              
+              {/* Finish Line */}
+              <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20">
+                <div className="bg-checkered-flag bg-black text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center">
+                  <Trophy className="w-3 h-3 mr-1" />
+                  MÅL
+                </div>
+              </div>
+              
+              {/* Runner Avatars */}
+              <div className="relative h-32 flex items-center">
+                {leaderboard.slice(0, 8).map((participant, index) => {
+                  const progress = participant.progress.distance || participant.progress.time || participant.progress.activities || 0;
+                  const percentage = Math.min((progress / challenge.goal.target) * 100, 100);
+                  const isMe = participant.user._id === user._id;
+                  
+                  return (
+                    <motion.div
+                      key={participant.user._id}
+                      className="absolute"
+                      initial={{ left: '5%' }}
+                      animate={{ 
+                        left: `${5 + (percentage * 0.85)}%`,
+                        y: index % 3 === 0 ? -20 : index % 3 === 1 ? 0 : 20
+                      }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 50,
+                        damping: 20,
+                        delay: index * 0.1
+                      }}
+                    >
+                      <motion.div
+                        animate={{ 
+                          scale: [1, 1.1, 1],
+                          rotate: [0, 5, -5, 0]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: index * 0.2
+                        }}
+                        className="relative"
+                      >
+                        {/* Running effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-full blur-lg opacity-30 animate-pulse"></div>
+                        
+                        {/* Avatar */}
+                        <div className={`relative ${isMe ? 'ring-4 ring-primary-400 ring-offset-2' : ''}`}>
+                          <ProfileAvatar
+                            user={participant.user}
+                            size="medium"
+                            className="shadow-lg"
+                          />
+                          {index < 3 && (
+                            <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md ${
+                              index === 0 ? 'bg-yellow-400 text-yellow-900' :
+                              index === 1 ? 'bg-gray-300 text-gray-700' :
+                              'bg-orange-400 text-orange-900'
+                            }`}>
+                              {index + 1}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Name tag */}
+                        <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded-full whitespace-nowrap">
+                          {participant.user.firstName}
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+              
+              {/* Distance markers */}
+              <div className="absolute inset-x-8 bottom-0 flex justify-between text-xs text-gray-500">
+                <span>0 {challenge.goal.unit}</span>
+                <span>{Math.floor(challenge.goal.target / 2)} {challenge.goal.unit}</span>
+                <span>{challenge.goal.target} {challenge.goal.unit}</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="bg-white rounded-xl p-4 text-center shadow-sm"
+            >
+              <Activity className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+              <p className="text-2xl font-bold text-gray-900">
+                {challenge.participants.filter(p => p.isActive).length}
+              </p>
+              <p className="text-sm text-gray-600">Aktiva löpare</p>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="bg-white rounded-xl p-4 text-center shadow-sm"
+            >
+              <Timer className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+              <p className="text-2xl font-bold text-gray-900">
+                {daysRemaining}
+              </p>
+              <p className="text-sm text-gray-600">Dagar kvar</p>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="bg-white rounded-xl p-4 text-center shadow-sm"
+            >
+              <TrendingUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
+              <p className="text-2xl font-bold text-gray-900">
+                {Math.round((leaderboard.filter(p => (p.progress.distance || 0) >= challenge.goal.target).length / leaderboard.length) * 100)}%
+              </p>
+              <p className="text-sm text-gray-600">Klara</p>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Circle Chart */}
+      <div className="px-4 pb-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 animate-slide-up animation-delay-200">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <Medal className="w-5 h-5 mr-2 text-purple-500" />
+            Progress Overview
+          </h2>
+          
+          <div className="flex items-center justify-center">
+            <div className="relative w-64 h-64">
+              {/* Background circle */}
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="120"
+                  stroke="#e5e7eb"
+                  strokeWidth="16"
+                  fill="none"
+                />
+                
+                {/* Progress circles for top 5 participants */}
+                {leaderboard.slice(0, 5).map((participant, index) => {
+                  const progress = participant.progress.distance || participant.progress.time || participant.progress.activities || 0;
+                  const percentage = (progress / challenge.goal.target) * 100;
+                  const radius = 120 - (index * 20);
+                  const circumference = 2 * Math.PI * radius;
+                  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+                  const colors = ['#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6', '#10b981'];
+                  
+                  return (
+                    <circle
+                      key={participant.user._id}
+                      cx="128"
+                      cy="128"
+                      r={radius}
+                      stroke={colors[index]}
+                      strokeWidth="12"
+                      fill="none"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      className="transition-all duration-1000"
+                      style={{
+                        filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
+                      }}
+                    />
+                  );
+                })}
+              </svg>
+              
+              {/* Center text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <p className="text-4xl font-bold text-gray-900">
+                  {Math.round(leaderboard.reduce((acc, p) => {
+                    const progress = p.progress.distance || p.progress.time || p.progress.activities || 0;
+                    return acc + (progress / challenge.goal.target) * 100;
+                  }, 0) / leaderboard.length)}%
+                </p>
+                <p className="text-sm text-gray-600">Genomsnitt</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Legend */}
+          <div className="flex flex-wrap justify-center gap-3 mt-6">
+            {leaderboard.slice(0, 5).map((participant, index) => {
+              const colors = ['bg-amber-500', 'bg-red-500', 'bg-purple-500', 'bg-blue-500', 'bg-green-500'];
+              
+              return (
+                <div key={participant.user._id} className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${colors[index]}`}></div>
+                  <span className="text-xs text-gray-600">{participant.user.firstName}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* Map View for Route Challenges */}
       {isRouteChallenge && routeData && (
         <div className="px-4 pb-4">
@@ -622,91 +850,145 @@ const ChallengeDetailPage = () => {
         </div>
       )}
 
-      {/* Leaderboard */}
+      {/* Enhanced Leaderboard */}
       <div className="px-4 pb-20">
-        <div className="bg-white rounded-2xl shadow-sm p-6 animate-slide-up animation-delay-300">
-          <h2 className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
-            Topplista
+        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl shadow-lg p-6 animate-slide-up animation-delay-400">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <Trophy className="w-6 h-6 mr-2 text-yellow-500" />
+            Detaljerad Topplista
           </h2>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
             {leaderboard.slice(0, showAllParticipants ? undefined : 5).map((participant, index) => {
               const rank = index + 1;
               const isMe = participant.user._id === user._id;
               const progress = participant.progress.distance || participant.progress.time || participant.progress.activities || 0;
-              const percentage = (progress / challenge.goal.target) * 100;
+              const percentage = Math.min((progress / challenge.goal.target) * 100, 100);
               
               return (
-                <div
+                <motion.div
                   key={participant.user._id}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    isMe ? 'border-primary-500 bg-primary-50' : 'border-gray-100 hover:border-gray-200'
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`relative bg-white rounded-2xl p-5 shadow-md transition-all ${
+                    isMe ? 'ring-2 ring-primary-500 ring-offset-2' : ''
                   }`}
                 >
+                  {/* Rank Badge */}
+                  {rank <= 3 && (
+                    <div className={`absolute -top-3 -left-3 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transform rotate-12 ${
+                      rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
+                      rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-400' :
+                      'bg-gradient-to-br from-orange-400 to-orange-500'
+                    }`}>
+                      <Crown className="w-6 h-6 text-white transform -rotate-12" />
+                    </div>
+                  )}
+                  
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {/* Rank */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                        rank === 1 ? 'bg-yellow-100 text-yellow-700' :
-                        rank === 2 ? 'bg-gray-100 text-gray-700' :
-                        rank === 3 ? 'bg-orange-100 text-orange-700' :
-                        'bg-gray-50 text-gray-600'
+                    <div className="flex items-center space-x-4">
+                      {/* Rank number */}
+                      <div className={`min-w-[2rem] text-center font-bold text-2xl ${
+                        rank === 1 ? 'text-yellow-600' :
+                        rank === 2 ? 'text-gray-600' :
+                        rank === 3 ? 'text-orange-600' :
+                        'text-gray-400'
                       }`}>
-                        {rank === 1 ? <Crown className="w-5 h-5" /> : rank}
+                        {rank > 3 ? rank : ''}
                       </div>
                       
                       {/* User info */}
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${participant.user.name}&background=6366f1&color=fff`}
-                        alt={participant.user.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {participant.user.name}
-                          {isMe && <span className="text-primary-600 ml-1">(Du)</span>}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {progress} / {challenge.goal.target} {challenge.goal.unit}
-                        </p>
+                      <div className="flex items-center space-x-3">
+                        <ProfileAvatar
+                          user={participant.user}
+                          size="large"
+                          className="ring-2 ring-white"
+                        />
+                        <div>
+                          <p className="font-bold text-gray-900 text-lg">
+                            {participant.user.firstName} {participant.user.lastName?.charAt(0)}.
+                            {isMe && <span className="text-primary-600 text-sm ml-1">(Du)</span>}
+                          </p>
+                          <div className="flex items-center space-x-3 text-sm text-gray-600">
+                            <span className="flex items-center">
+                              <Activity className="w-4 h-4 mr-1" />
+                              {progress} {challenge.goal.unit}
+                            </span>
+                            {percentage >= 100 && (
+                              <span className="flex items-center text-green-600 font-medium">
+                                <Sparkles className="w-4 h-4 mr-1" />
+                                Klart!
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     
-                    {/* Progress */}
-                    <div className="text-right">
-                      <p className="font-bold text-lg text-gray-900">{percentage.toFixed(0)}%</p>
-                      {percentage >= 100 && (
-                        <div className="flex items-center text-green-600 text-sm">
-                          <Sparkles className="w-4 h-4 mr-1" />
-                          Klart!
-                        </div>
-                      )}
+                    {/* Progress Circle */}
+                    <div className="relative w-16 h-16">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke="#e5e7eb"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke={percentage >= 100 ? '#10b981' : isMe ? '#f97316' : '#6366f1'}
+                          strokeWidth="4"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 28}`}
+                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - percentage / 100)}`}
+                          className="transition-all duration-1000"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-bold">{Math.round(percentage)}%</span>
+                      </div>
                     </div>
                   </div>
                   
                   {/* Progress bar */}
-                  <div className="mt-3 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        isMe ? 'bg-gradient-primary' : 'bg-gradient-to-r from-blue-500 to-purple-500'
-                      }`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
+                  <div className="mt-4">
+                    <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percentage}%` }}
+                        transition={{ duration: 1, delay: index * 0.1 }}
+                        className={`h-full rounded-full relative overflow-hidden ${
+                          percentage >= 100 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                          isMe ? 'bg-gradient-to-r from-orange-400 to-red-500' : 
+                          'bg-gradient-to-r from-blue-400 to-purple-500'
+                        }`}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-shimmer"></div>
+                      </motion.div>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
           
           {leaderboard.length > 5 && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setShowAllParticipants(!showAllParticipants)}
-              className="w-full mt-4 py-2 text-center text-primary-600 font-medium hover:text-primary-700 transition-colors"
+              className="w-full mt-6 py-3 bg-white rounded-xl text-center text-purple-600 font-medium hover:bg-purple-50 transition-all shadow-sm"
             >
               {showAllParticipants ? 'Visa färre' : `Visa alla ${leaderboard.length} deltagare`}
               <ChevronRight className={`w-4 h-4 inline-block ml-1 transition-transform ${showAllParticipants ? 'rotate-90' : ''}`} />
-            </button>
+            </motion.button>
           )}
         </div>
       </div>

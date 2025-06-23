@@ -261,59 +261,153 @@ const LoadingSpinner = ({
 // Main loading screen with beautiful design
 export const LoadingSpinnerFullScreen = ({ message = "Laddar RunMate..." }) => {
   const icons = [
-    { Icon: Heart, delay: 0 },
-    { Icon: Activity, delay: 100 },
-    { Icon: MapPin, delay: 200 },
-    { Icon: Users, delay: 300 },
-    { Icon: Trophy, delay: 400 }
+    { Icon: Heart, delay: 0, color: 'text-red-500' },
+    { Icon: Activity, delay: 100, color: 'text-blue-500' },
+    { Icon: MapPin, delay: 200, color: 'text-green-500' },
+    { Icon: Users, delay: 300, color: 'text-purple-500' },
+    { Icon: Trophy, delay: 400, color: 'text-yellow-500' }
   ];
 
-  const content = (
-    <>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50">
       {/* Animated background gradients */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-red-50">
-        <div className="absolute top-20 -left-20 w-96 h-96 bg-primary-200 rounded-full filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute bottom-20 -right-20 w-96 h-96 bg-secondary-200 rounded-full filter blur-3xl opacity-20 animate-float animation-delay-2000"></div>
+      <div className="absolute inset-0">
+        <motion.div 
+          animate={{ 
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            duration: 20, 
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-r from-orange-200 to-red-200 rounded-full filter blur-3xl opacity-30"
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -100, 0],
+            y: [0, 50, 0],
+            rotate: [360, 180, 0]
+          }}
+          transition={{ 
+            duration: 25, 
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-r from-pink-200 to-purple-200 rounded-full filter blur-3xl opacity-30"
+        />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center">
-        {/* Logo */}
-        <div className="mb-8 animate-slide-up">
-          <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow animate-pulse-slow">
-            <Heart className="w-10 h-10 text-white" />
-          </div>
-        </div>
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 max-w-md mx-auto">
+        {/* Logo with enhanced animation */}
+        <motion.div 
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 20,
+            duration: 1
+          }}
+          className="mb-8"
+        >
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl flex items-center justify-center shadow-2xl"
+          >
+            <Heart className="w-12 h-12 text-white" />
+          </motion.div>
+        </motion.div>
 
-        {/* Animated icons */}
-        <div className="flex space-x-4 mb-8">
-          {icons.map(({ Icon, delay }, index) => (
-            <div
+        {/* Enhanced animated icons */}
+        <div className="flex space-x-6 mb-8">
+          {icons.map(({ Icon, delay, color }, index) => (
+            <motion.div
               key={index}
-              className="w-10 h-10 bg-white rounded-xl shadow-lg flex items-center justify-center animate-bounce"
-              style={{ animationDelay: `${delay}ms`, animationDuration: '2s' }}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: delay / 1000, duration: 0.5 }}
             >
-              <Icon className="w-5 h-5 text-primary-500" />
-            </div>
+              <motion.div
+                animate={{ 
+                  y: [0, -10, 0],
+                  rotate: [0, 10, -10, 0]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: delay / 1000,
+                  ease: "easeInOut"
+                }}
+                className="w-12 h-12 bg-white rounded-2xl shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow"
+              >
+                <Icon className={`w-6 h-6 ${color}`} />
+              </motion.div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Loading text */}
-        <h2 className="text-2xl font-bold gradient-text mb-2 animate-slide-up animation-delay-200">
+        {/* Enhanced loading text */}
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-4 text-center"
+        >
           {message}
-        </h2>
+        </motion.h2>
         
-        {/* Progress bar */}
-        <div className="w-48 h-1 bg-gray-200 rounded-full overflow-hidden animate-slide-up animation-delay-300">
-          <div className="h-full bg-gradient-primary animate-shimmer-slow"></div>
+        {/* Enhanced progress bar */}
+        <motion.div 
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: "100%", opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner"
+        >
+          <motion.div 
+            animate={{ 
+              x: ["-100%", "100%"]
+            }}
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="h-full w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-full"
+          />
+        </motion.div>
+        
+        {/* Subtle loading dots */}
+        <div className="flex space-x-2 mt-6">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 1, 0.3]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                delay: i * 0.2,
+                ease: "easeInOut"
+              }}
+              className="w-2 h-2 bg-orange-400 rounded-full"
+            />
+          ))}
         </div>
       </div>
-    </>
-  );
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
-      {content}
     </div>
   );
 };

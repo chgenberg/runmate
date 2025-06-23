@@ -395,15 +395,15 @@ const ChallengeDetailPage = () => {
   const isRouteChallenge = challenge.type === 'route_race' && challenge.route;
 
   // Get route data if it's a route challenge
-  const routeData = isRouteChallenge && cityRoutes[challenge.route.cityId];
-  const routeCoordinates = routeData?.getRoute(challenge.route.distance) || [];
+  const routeData = isRouteChallenge && challenge.route && cityRoutes[challenge.route.cityId];
+  const routeCoordinates = routeData?.getRoute(challenge.route?.distance) || [];
 
   // Calculate participant positions on route based on their progress
   const getParticipantPosition = (participant) => {
     if (!isRouteChallenge || !routeCoordinates.length) return null;
     
     const progress = participant.progress.distance || 0;
-    const totalDistance = challenge.route.distance;
+    const totalDistance = challenge.route?.distance || 1;
     const progressPercentage = Math.min(progress / totalDistance, 1);
     
     const pointIndex = Math.floor(progressPercentage * (routeCoordinates.length - 1));
@@ -524,7 +524,7 @@ const ChallengeDetailPage = () => {
             <div className="p-4 border-b border-gray-100">
               <h2 className="font-semibold text-gray-900 flex items-center">
                 <MapPin className="w-5 h-5 mr-2 text-primary-500" />
-                Rutt i {challenge.route.city} - {challenge.route.distance} km
+                Rutt i {challenge.route?.city} - {challenge.route?.distance} km
               </h2>
             </div>
             
@@ -562,7 +562,7 @@ const ChallengeDetailPage = () => {
                         <div className="text-sm">
                           <div className="font-semibold">{participant.user.name}</div>
                           <div className="text-gray-600">
-                            {participant.progress.distance || 0} / {challenge.route.distance} km
+                            {participant.progress.distance || 0} / {challenge.route?.distance || 0} km
                           </div>
                         </div>
                       </Popup>

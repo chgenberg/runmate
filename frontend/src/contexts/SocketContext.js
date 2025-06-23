@@ -12,8 +12,8 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (user) {
-      // Temporarily hardcode the URL to fix the immediate issue
-      const socketUrl = 'https://runmate-production.up.railway.app';
+      // Use staging backend for socket.io
+      const socketUrl = 'https://staging-runmate-backend-production.up.railway.app';
       const newSocket = io(socketUrl);
       
       newSocket.on('connect', () => {

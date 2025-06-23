@@ -433,15 +433,30 @@ const protectWithQueryToken = async (req, res, next) => {
   }
 
   if (!token) {
+    console.log('protectWithQueryToken: No token provided');
     return res.status(401).json({ success: false, message: 'Not authorized, no token provided' });
   }
 
   try {
     const jwt = require('jsonwebtoken');
+    console.log('protectWithQueryToken: Token received:', token.substring(0, 20) + '...');
+    console.log('protectWithQueryToken: JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('protectWithQueryToken: JWT_SECRET length:', process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0);
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
+    console.log('protectWithQueryToken: Token decoded successfully, user ID:', decoded.id);
+    
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      console.log('protectWithQueryToken: User not found with ID:', decoded.id);
+      return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
+    }
+    
+    console.log('protectWithQueryToken: User found:', user.email);
+    req.user = user;
     next();
   } catch (error) {
+    console.log('protectWithQueryToken: Token verification failed:', error.message);
     return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
   }
 };

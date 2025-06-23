@@ -42,17 +42,20 @@ const SettingsPage = () => {
     setDarkMode(savedDarkMode);
   }, [user]);
 
-  const handleStravaConnect = async () => {
+  const handleStravaConnect = () => {
     setLoading(true);
-    try {
-      // Force redirect to backend auth endpoint which will handle Strava OAuth
-      const stravaAuthUrl = `${process.env.REACT_APP_API_URL || 'https://staging-runmate-backend-production.up.railway.app'}/api/auth/strava`;
-      console.log('Redirecting to:', stravaAuthUrl);
-      window.location.replace(stravaAuthUrl);
-    } catch (error) {
-      console.error('Error connecting to Strava:', error);
-      setLoading(false);
-    }
+    
+    // Create a direct link to backend auth endpoint
+    const stravaAuthUrl = 'https://staging-runmate-backend-production.up.railway.app/api/auth/strava';
+    console.log('Redirecting to:', stravaAuthUrl);
+    
+    // Create a temporary anchor element and click it
+    const link = document.createElement('a');
+    link.href = stravaAuthUrl;
+    link.target = '_self'; // Same tab
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleToggleDarkMode = () => {

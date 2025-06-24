@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell, RadarChart,
-  RadarAxis, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import {
-  Activity, Heart, TrendingUp, Calendar, Clock,
-  Zap, Mountain, Award, Target, BarChart3,
-  Timer, Footprints, Wind, Brain, Moon,
-  ArrowUp, ArrowDown, Gauge, Waves
+  Activity, Heart, TrendingUp, Clock,
+  Zap, Mountain, BarChart3,
+  Footprints, Brain, Moon,
+  Gauge
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -36,11 +36,7 @@ const StatisticsPage = () => {
     info: '#54a0ff'
   };
 
-  useEffect(() => {
-    loadStatistics();
-  }, [selectedPeriod]);
-
-  const loadStatistics = async () => {
+  const loadStatistics = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -65,7 +61,11 @@ const StatisticsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    loadStatistics();
+  }, [loadStatistics]);
 
   const prepareChartData = (activities, stats) => {
     // Distans över tid

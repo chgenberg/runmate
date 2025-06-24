@@ -4,6 +4,7 @@ const { protect } = require('../middleware/auth');
 const Activity = require('../models/Activity');
 const User = require('../models/User');
 const Challenge = require('../models/Challenge');
+const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -198,5 +199,59 @@ router.delete('/:id', protect, async (req, res) => {
     }
 });
 
+// @route   GET api/activities/personal-records
+// @desc    Get user's personal records from activities
+// @access  Private
+router.get('/personal-records', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get all completed activities for the user
+    const activities = await Activity.find({
+      userId: new mongoose.Types.ObjectId(userId),
+      status: 'completed',
+      distance: { $gt: 0 },
+      duration: { $gt: 0 }
+    }).sort({ averagePace: 1 }); // Sort by pace (fastest first)
+
+    const records = {};
+    
+    // Define distance categories in meters (converted to km for comparison)
+    const distanceCategories = {
+      '5k': { min: 4.8, max: 5.2 },      // 5K ±200m
+      '10k': { min: 9.8, max: 10.2 },    // 10K ±200m
+      '21.1k': { min: 20.6, max: 21.6 }, // Half marathon ±500m
+      '42.2k': { min: 41.7, max: 42.7 }  // Marathon ±500m
+    };
+
+    // Find best time for each distance category
+    for (const [category, range] of Object.entries(distanceCategories)) {
+      const categoryActivities = activities.filter(activity => 
+        activity.distance >= range.min && activity.distance <= range.max
+      );
+
+      if (categoryActivities.length > 0) {
+        // Get the activity with the best (shortest) duration
+        const bestActivity = categoryActivities.reduce((best, current) => {
+          return current.duration < best.duration ? current : best;
+        });
+        
+        records[category] = bestActivity.duration; // Duration in seconds
+      }
+    }
+
+    res.json({
+      success: true,
+      records
+    });
+
+  } catch (error) {
+    console.error('Error fetching personal records:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching personal records'
+    });
+  }
+});
 
 module.exports = router;

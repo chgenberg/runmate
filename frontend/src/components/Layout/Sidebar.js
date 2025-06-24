@@ -7,7 +7,6 @@ import {
   Trophy,
   Settings,
   LogOut,
-  Heart,
   Compass,
   Home,
   PlusSquare,
@@ -20,9 +19,7 @@ import {
   Sparkles,
   Activity,
   Bell,
-  HelpCircle,
-  ChevronLeft,
-  Menu
+  ChevronLeft
 } from 'lucide-react';
 import ProfileAvatar from '../common/ProfileAvatar';
 import { getProfilePictureUrl } from '../../services/api';
@@ -32,7 +29,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeNotifications, setActiveNotifications] = useState(3);
+  const [activeNotifications] = useState(3);
 
   const handleLogout = () => {
     logout();

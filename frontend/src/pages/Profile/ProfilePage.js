@@ -32,7 +32,7 @@ const ProfilePage = () => {
   const { user: authUser, updateProfile } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [editingSections, setEditingSections] = useState({});
   const [activeTab, setActiveTab] = useState('overview');
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -60,6 +60,7 @@ const ProfilePage = () => {
 
   const [photos, setPhotos] = useState([]);
   const [realStats, setRealStats] = useState(null);
+  const [personalRecords, setPersonalRecords] = useState(null);
 
   const activityLevels = [
     { id: 'beginner', name: 'Nybörjare', desc: '1-2 gånger per vecka', color: 'from-green-400 to-green-600' },
@@ -80,17 +81,20 @@ const ProfilePage = () => {
     try {
       setLoading(true);
       
-      // Hämta användarens fullständiga profil från backend
-      const [profileResponse, statsResponse] = await Promise.allSettled([
+      // Hämta användarens fullständiga profil, statistik och personliga rekord parallellt
+      const [profileResponse, statsResponse, personalRecordsResponse] = await Promise.allSettled([
         api.get('/users/profile'),
-        api.get('/users/stats/summary')
+        api.get('/users/stats/summary'),
+        api.get('/activities/personal-records')
       ]);
       
       const userData = profileResponse.status === 'fulfilled' ? profileResponse.value.data : null;
       const statsData = statsResponse.status === 'fulfilled' ? statsResponse.value.data : null;
+      const recordsData = personalRecordsResponse.status === 'fulfilled' ? personalRecordsResponse.value.data : null;
       
       console.log('Loaded user profile:', userData);
       console.log('Loaded user stats:', statsData);
+      console.log('Loaded personal records:', recordsData);
       
       if (!userData) {
         throw new Error('Kunde inte hämta användardata');
@@ -105,6 +109,11 @@ const ProfilePage = () => {
       const realStatsData = statsData?.data?.stats || {};
       setRealStats(realStatsData);
       
+      // Sätt personliga rekord från aktiviteter
+      if (recordsData?.records) {
+        setPersonalRecords(recordsData.records);
+      }
+      
       // Formatera data för komponenten
       const formattedUser = {
         ...userData,
@@ -112,15 +121,16 @@ const ProfilePage = () => {
         points: statsData?.data?.user?.points || userData.points || 0,
         age: age ? age.toString() : '',
         location: userData.location?.city || '',
-        personalBests: {
-          '5k': userData.trainingStats?.bestTimes?.fiveK ? 
-            formatTimeFromSeconds(userData.trainingStats.bestTimes.fiveK) : '',
-          '10k': userData.trainingStats?.bestTimes?.tenK ? 
-            formatTimeFromSeconds(userData.trainingStats.bestTimes.tenK) : '',
-          'halfMarathon': userData.trainingStats?.bestTimes?.halfMarathon ? 
-            formatTimeFromSeconds(userData.trainingStats.bestTimes.halfMarathon) : '',
-          'marathon': userData.trainingStats?.bestTimes?.marathon ? 
-            formatTimeFromSeconds(userData.trainingStats.bestTimes.marathon) : ''
+        personalBests: recordsData?.records ? {
+          '5k': recordsData.records['5k'] ? formatTimeFromSeconds(recordsData.records['5k']) : '',
+          '10k': recordsData.records['10k'] ? formatTimeFromSeconds(recordsData.records['10k']) : '',
+          'halfMarathon': recordsData.records['21.1k'] ? formatTimeFromSeconds(recordsData.records['21.1k']) : '',
+          'marathon': recordsData.records['42.2k'] ? formatTimeFromSeconds(recordsData.records['42.2k']) : ''
+        } : {
+          '5k': '',
+          '10k': '',
+          'halfMarathon': '',
+          'marathon': ''
         },
         stats: {
           totalRuns: realStatsData.totalActivities || userData.trainingStats?.totalRuns || 0,
@@ -186,8 +196,6 @@ const ProfilePage = () => {
     loadUserProfile();
   }, [loadUserProfile]);
 
-
-
   const formatTimeFromSeconds = (seconds) => {
     if (!seconds || seconds === 0) return '';
     
@@ -201,24 +209,43 @@ const ProfilePage = () => {
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSave = async () => {
+  const toggleEdit = (section) => {
+    setEditingSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const handleSave = async (section) => {
     try {
       setLoading(true);
       
       // Uppdatera profil via API
-      const updateData = {
-        firstName: profileData.firstName,
-        lastName: profileData.lastName,
-        bio: profileData.bio,
-        location: profileData.location,
-      };
+      let updateData = {};
+      
+      switch (section) {
+        case 'basic':
+          updateData = {
+            firstName: profileData.firstName,
+            lastName: profileData.lastName,
+            location: profileData.location,
+          };
+          break;
+        case 'bio':
+          updateData = { bio: profileData.bio };
+          break;
+        case 'goals':
+          updateData = { goals: profileData.goals };
+          break;
+        default:
+          updateData = profileData;
+      }
       
       const result = await updateProfile(updateData);
       
       if (result.success) {
-        setUser(profileData);
-        setEditing(false);
-        // Förhindra duplicerade toast-meddelanden med unik ID
+        setUser(prev => ({ ...prev, ...updateData }));
+        setEditingSections(prev => ({ ...prev, [section]: false }));
         toast.success('Profil uppdaterad!', {
           id: 'profile-save-success',
           duration: 2000
@@ -235,24 +262,50 @@ const ProfilePage = () => {
     }
   };
 
-  const handlePhotoUpload = (event) => {
+  const handlePhotoUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotos([e.target.result, ...photos.slice(1)]);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        const response = await api.post('/users/profile/photo', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (response.data.photo) {
+          setPhotos(prev => [response.data.photo, ...prev.slice(1)]);
+          toast.success('Profilbild uppladdad!');
+          
+          // Uppdatera user state
+          setUser(prev => ({
+            ...prev,
+            profilePhoto: response.data.photo,
+            profilePicture: response.data.photo
+          }));
+        }
+      } catch (error) {
+        console.error('Error uploading photo:', error);
+        toast.error('Kunde inte ladda upp bild');
+      }
     }
   };
 
   const handleProfilePictureClick = () => {
-    // Trigger file input when profile picture is clicked
     document.getElementById('profile-picture-input').click();
   };
 
-  const removePhoto = (index) => {
-    setPhotos(photos.filter((_, i) => i !== index));
+  const removePhoto = async (index) => {
+    try {
+      await api.delete(`/users/profile/photo/${index}`);
+      setPhotos(photos.filter((_, i) => i !== index));
+      toast.success('Foto borttaget');
+    } catch (error) {
+      console.error('Error removing photo:', error);
+      toast.error('Kunde inte ta bort foto');
+    }
   };
 
   const toggleTime = (timeId) => {
@@ -290,41 +343,13 @@ const ProfilePage = () => {
         <div className="absolute inset-0 bg-black/20"></div>
         
         <div className="relative container mx-auto px-4 pt-16 pb-24">
-          <div className="flex items-center justify-between mb-8">
-            <motion.h1 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-3xl md:text-4xl font-bold text-white"
-            >
-              Min Profil
-            </motion.h1>
-            
-            {editing ? (
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setEditing(false)}
-                  className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-all"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-2 bg-white text-orange-600 rounded-lg font-semibold hover:bg-white/90 transition-all flex items-center space-x-2"
-                >
-                  <Save className="w-5 h-5" />
-                  <span>Spara</span>
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setEditing(true)}
-                className="px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-all flex items-center space-x-2"
-              >
-                <Edit3 className="w-5 h-5" />
-                <span>Redigera</span>
-              </button>
-            )}
-          </div>
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl md:text-4xl font-bold text-white text-center"
+          >
+            Min Profil
+          </motion.h1>
         </div>
       </div>
 
@@ -339,14 +364,14 @@ const ProfilePage = () => {
           <div className="p-6 md:p-8 pt-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
               <div 
-                className={`${editing ? 'cursor-pointer' : ''}`}
-                onClick={editing ? handleProfilePictureClick : undefined}
+                className="cursor-pointer"
+                onClick={handleProfilePictureClick}
               >
                 <ProfileAvatar
                   user={user}
                   src={getProfilePictureUrl(user) || photos[0]}
                   size="md"
-                  showEditIcon={editing}
+                  showEditIcon={true}
                   onEdit={handleProfilePictureClick}
                   EditIcon={Camera}
                 />
@@ -360,9 +385,48 @@ const ProfilePage = () => {
               </div>
               
               <div className="flex-1 text-center md:text-left">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mt-4 md:mt-0">
-                  {user.firstName} {user.lastName}
-                </h2>
+                {/* Basic Info with inline edit */}
+                <div className="flex items-center justify-center md:justify-start space-x-3">
+                  {editingSections.basic ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        value={profileData.firstName}
+                        onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                        className="text-2xl font-bold bg-transparent border-b-2 border-orange-500 focus:outline-none"
+                      />
+                      <input
+                        value={profileData.lastName}
+                        onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                        className="text-2xl font-bold bg-transparent border-b-2 border-orange-500 focus:outline-none"
+                      />
+                      <button
+                        onClick={() => handleSave('basic')}
+                        className="p-1 text-green-600 hover:bg-green-50 rounded"
+                      >
+                        <Save className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => toggleEdit('basic')}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                        {user.firstName} {user.lastName}
+                      </h2>
+                      <button
+                        onClick={() => toggleEdit('basic')}
+                        className="p-1 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
                 <div className="flex items-center justify-center md:justify-start space-x-4 mt-2 text-gray-600">
                   <span className="flex items-center">
                     <MapPin className="w-4 h-4 mr-1" />
@@ -372,7 +436,7 @@ const ProfilePage = () => {
                   <span>{user.age} år</span>
                 </div>
                 
-                {/* Quick Stats - Focus on Distance & Points */}
+                {/* Quick Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-6">
                   <div className="text-center">
                     <p className="text-xl sm:text-2xl font-bold text-gray-900">{profileData.stats.totalDistance}</p>
@@ -387,7 +451,7 @@ const ProfilePage = () => {
                     <p className="text-xs sm:text-sm text-gray-600 truncate">Löppass</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{profileData.stats.averagePace}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{realStats?.avgPaceFormatted || profileData.stats.averagePace}</p>
                     <p className="text-xs sm:text-sm text-gray-600 truncate">Snitt-tempo</p>
                   </div>
                 </div>
@@ -431,44 +495,97 @@ const ProfilePage = () => {
             >
               {/* Bio */}
               <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Om mig</h3>
-                {editing ? (
-                  <textarea
-                    value={profileData.bio}
-                    onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                    rows={4}
-                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all resize-none"
-                    placeholder="Berätta lite om dig själv..."
-                  />
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Om mig</h3>
+                  {!editingSections.bio && (
+                    <button
+                      onClick={() => toggleEdit('bio')}
+                      className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {editingSections.bio ? (
+                  <div className="space-y-4">
+                    <textarea
+                      value={profileData.bio}
+                      onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all resize-none"
+                      placeholder="Berätta lite om dig själv..."
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleSave('bio')}
+                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                      >
+                        Spara
+                      </button>
+                      <button
+                        onClick={() => toggleEdit('bio')}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        Avbryt
+                      </button>
+                    </div>
+                  </div>
                 ) : (
-                  <p className="text-gray-600 leading-relaxed">{profileData.bio}</p>
+                  <p className="text-gray-600 leading-relaxed">{profileData.bio || 'Ingen beskrivning än...'}</p>
                 )}
               </div>
 
               {/* Goals */}
               <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Target className="w-5 h-5 mr-2 text-orange-500" />
-                  Mina mål
-                </h3>
-                {editing ? (
-                  <textarea
-                    value={profileData.goals}
-                    onChange={(e) => setProfileData({ ...profileData, goals: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all resize-none"
-                    placeholder="Vad vill du uppnå med din träning?"
-                  />
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                    <Target className="w-5 h-5 mr-2 text-orange-500" />
+                    Mina mål
+                  </h3>
+                  {!editingSections.goals && (
+                    <button
+                      onClick={() => toggleEdit('goals')}
+                      className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {editingSections.goals ? (
+                  <div className="space-y-4">
+                    <textarea
+                      value={profileData.goals}
+                      onChange={(e) => setProfileData({ ...profileData, goals: e.target.value })}
+                      rows={3}
+                      className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all resize-none"
+                      placeholder="Vad vill du uppnå med din träning?"
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleSave('goals')}
+                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                      >
+                        Spara
+                      </button>
+                      <button
+                        onClick={() => toggleEdit('goals')}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        Avbryt
+                      </button>
+                    </div>
+                  </div>
                 ) : (
-                  <p className="text-gray-600 leading-relaxed">{profileData.goals}</p>
+                  <p className="text-gray-600 leading-relaxed">{profileData.goals || 'Inga mål satta än...'}</p>
                 )}
               </div>
 
-              {/* Personal Bests */}
+              {/* Personal Bests from Apple Health */}
               <div className="bg-white rounded-2xl shadow-sm p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                   <Trophy className="w-5 h-5 mr-2 text-orange-500" />
                   Personliga rekord
+                  <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Apple Health</span>
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   {Object.entries(profileData.personalBests).map(([distance, time]) => (
@@ -476,10 +593,19 @@ const ProfilePage = () => {
                       <p className="text-xs md:text-sm text-gray-600 mb-1 truncate">
                         {distance === 'halfMarathon' ? 'Halvmara' : distance.toUpperCase()}
                       </p>
-                      <p className="text-lg md:text-xl font-bold text-gray-900 truncate">{time || '-'}</p>
+                      <p className="text-lg md:text-xl font-bold text-gray-900 truncate">
+                        {time || 'Inget rekord'}
+                      </p>
                     </div>
                   ))}
                 </div>
+                {personalRecords && Object.keys(personalRecords).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Trophy className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>Inga personliga rekord hittade än</p>
+                    <p className="text-sm">Kör dina första distanser för att sätta rekord!</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -512,7 +638,7 @@ const ProfilePage = () => {
                         alt={`Foto ${index + 1}`}
                         className="w-full h-48 object-cover rounded-xl"
                       />
-                      {editing && (
+                      {editingSections.photos && (
                         <button
                           onClick={() => removePhoto(index)}
                           className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -528,7 +654,7 @@ const ProfilePage = () => {
                     </motion.div>
                   ))}
                   
-                  {editing && photos.length < 6 && (
+                  {editingSections.photos && photos.length < 6 && (
                     <motion.label 
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -779,13 +905,13 @@ const ProfilePage = () => {
                       key={level.id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => editing && setProfileData({ ...profileData, activityLevel: level.id })}
-                      disabled={!editing}
+                      onClick={() => editingSections.training && setProfileData({ ...profileData, activityLevel: level.id })}
+                      disabled={!editingSections.training}
                       className={`relative p-6 rounded-xl border-2 transition-all ${
                         profileData.activityLevel === level.id
                           ? 'border-orange-500 bg-orange-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      } ${!editing && profileData.activityLevel !== level.id ? 'opacity-50' : ''}`}
+                      } ${!editingSections.training && profileData.activityLevel !== level.id ? 'opacity-50' : ''}`}
                     >
                       {profileData.activityLevel === level.id && (
                         <div className="absolute top-3 right-3">
@@ -809,13 +935,13 @@ const ProfilePage = () => {
                       key={time.id}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => editing && toggleTime(time.id)}
-                      disabled={!editing}
+                      onClick={() => editingSections.training && toggleTime(time.id)}
+                      disabled={!editingSections.training}
                       className={`p-4 rounded-xl border-2 transition-all ${
                         profileData.preferredTimes.includes(time.id)
                           ? 'border-orange-500 bg-orange-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      } ${!editing ? 'cursor-default' : ''}`}
+                      } ${!editingSections.training ? 'cursor-default' : ''}`}
                     >
                       <div className="text-2xl mb-2">{time.icon}</div>
                       <h4 className="font-semibold text-gray-900">{time.name}</h4>
@@ -842,6 +968,6 @@ const ProfilePage = () => {
       </div>
     </div>
   );
-  };
-  
+};
+
 export default ProfilePage; 

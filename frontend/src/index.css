@@ -868,4 +868,65 @@ body.modal-open {
 [class*="fixed"][class*="inset-0"][class*="z-50"], 
 [class*="fixed"][class*="inset-0"][class*="z-40"] {
   z-index: 999999 !important;
+}
+
+/* Toast Container Styles */
+.toast-container {
+  z-index: 9999 !important;
+}
+
+/* Ensure toasts don't overlap */
+.toast-container > div {
+  margin-bottom: 8px !important;
+}
+
+/* Better toast animation */
+@keyframes toast-enter {
+  0% {
+    transform: translateY(-100%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-exit {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* Apply animations to toast */
+[data-sonner-toast] {
+  animation: toast-enter 0.3s ease-out;
+}
+
+[data-sonner-toast][data-removed="true"] {
+  animation: toast-exit 0.2s ease-in;
+}
+
+/* Improve toast readability */
+[data-sonner-toast] div:first-child {
+  text-shadow: none;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Fix any z-index issues with modals and toasts */
+div[role="dialog"],
+div[role="alertdialog"],
+.modal-overlay {
+  z-index: 999999 !important;
+}
+
+/* Ensure toast container is above modals */
+div[data-sonner-toaster] {
+  z-index: 999999 !important;
 } 

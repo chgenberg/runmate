@@ -98,25 +98,17 @@ const RunEventDetailPage = () => {
     };
 
     const handleCalendarExport = () => {
-        if (!event) return;
-
-        const eventDate = new Date(event.date);
-        const durationInHours = (event.distance * (event.pace / 60)) / 60; // A rough estimate
-
+        const eventStart = new Date(event.startTime);
+        const eventEnd = new Date(eventStart.getTime() + (90 * 60 * 1000)); // Default 90 minutes for the run
+        
         const icsEvent = {
+            start: [eventStart.getFullYear(), eventStart.getMonth() + 1, eventStart.getDate(), eventStart.getHours(), eventStart.getMinutes()],
+            end: [eventEnd.getFullYear(), eventEnd.getMonth() + 1, eventEnd.getDate(), eventEnd.getHours(), eventEnd.getMinutes()],
             title: event.title,
-            description: event.description,
-            start: [
-                eventDate.getUTCFullYear(),
-                eventDate.getUTCMonth() + 1,
-                eventDate.getUTCDate(),
-                eventDate.getUTCHours(),
-                eventDate.getUTCMinutes()
-            ],
-            duration: { hours: Math.floor(durationInHours), minutes: Math.round((durationInHours % 1) * 60) },
+            description: `${event.description}\n\nDistans: ${event.distance}km\nPlats: ${event.location.name}\nArrangör: ${event.host.firstName} ${event.host.lastName}`,
             location: event.location.name,
-            url: window.location.href,
             status: 'CONFIRMED',
+            busyStatus: 'BUSY',
             organizer: { name: `${event.host.firstName} ${event.host.lastName}`, email: event.host.email },
             attendees: event.participants.map(p => ({
                 name: `${p.firstName} ${p.lastName}`,
@@ -128,7 +120,9 @@ const RunEventDetailPage = () => {
         createEvent(icsEvent, (error, value) => {
             if (error) {
                 console.log(error);
-                toast.error('Kunde inte skapa kalenderfil.');
+                toast.error('Kunde inte skapa kalenderfil.', {
+                    id: 'calendar-export-error' // Prevent duplicate error toasts
+                });
                 return;
             }
             const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
@@ -138,6 +132,11 @@ const RunEventDetailPage = () => {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            // Show success message
+            toast.success('Kalenderfil skapad! 📅', {
+                id: 'calendar-export-success'
+            });
         });
     };
 

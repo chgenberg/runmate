@@ -16,7 +16,9 @@ import {
   Heart,
   X,
   MessageCircle,
-  Zap
+  Zap,
+  Activity,
+  Play
 } from 'lucide-react';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import api from '../../services/api';
@@ -54,8 +56,8 @@ const SuperLanding = () => {
       // Mock user stats for demo
       setUserStats({
         totalKm: 156,
-        nationalRank: 24,
-        rating: 4.7,
+        nationalRank: 42,
+        rating: 4.8,
         totalRatings: 38
       });
     } catch (error) {
@@ -100,7 +102,7 @@ const SuperLanding = () => {
   };
 
   const sendMessage = () => {
-    console.log('Sending message to:', selectedMember.firstName, message);
+    console.log('Sending message to:', selectedMember?.firstName, message);
     setShowMessageModal(false);
     setMessage('');
     setSelectedMember(null);
@@ -118,28 +120,125 @@ const SuperLanding = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/50 z-10"></div>
-        <div className="container mx-auto px-4 pt-20 pb-12 relative z-20">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section - Sportigt och färgglatt */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-sport-yellow-50 via-white to-sport-lime-50">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+            }}
+            transition={{ duration: 20, repeat: Infinity }}
+            className="absolute -top-20 -left-20 w-96 h-96 bg-sport-yellow-400/20 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{ 
+              scale: [1, 1.3, 1],
+              rotate: [0, -90, 0],
+            }}
+            transition={{ duration: 25, repeat: Infinity }}
+            className="absolute -bottom-20 -right-20 w-96 h-96 bg-sport-lime-400/20 rounded-full blur-3xl"
+          />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-4"
+            transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900">
-              Din löparresa börjar
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
-                här och nu
+            {/* Logo */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+              className="mb-8"
+            >
+              <div className="inline-flex items-center justify-center p-4 bg-white rounded-3xl shadow-xl">
+                <Activity className="w-12 h-12 text-sport-yellow-500 mr-3" />
+                <span className="text-3xl font-bold bg-gradient-to-r from-sport-yellow-500 to-sport-lime-500 bg-clip-text text-transparent">
+                  RunMate
+                </span>
+              </div>
+            </motion.div>
+
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <span className="text-gray-900">Spring </span>
+              <span className="bg-gradient-to-r from-sport-yellow-500 to-sport-lime-500 bg-clip-text text-transparent">
+                snabbare
+              </span>
+              <span className="text-gray-900">, längre</span>
+              <br />
+              <span className="text-gray-900">och </span>
+              <span className="bg-gradient-to-r from-sport-yellow-500 to-runmate-orange bg-clip-text text-transparent">
+                roligare
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-              Upptäck löparkompisar, utmaningar och events i hela Sverige
+            
+            <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto">
+              Hitta löpvänner, träningspartners och nya utmaningar. 
+              <span className="font-semibold text-sport-yellow-600"> AI-driven träning</span> som anpassar sig efter dig.
             </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/register')}
+                className="px-8 py-4 bg-sport-yellow-500 text-gray-900 rounded-2xl font-bold text-lg shadow-xl hover:bg-sport-yellow-400 transition-all flex items-center space-x-2"
+              >
+                <Zap className="w-5 h-5" />
+                <span>Kom igång gratis</span>
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/app/ai-coach')}
+                className="px-8 py-4 bg-white text-gray-900 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all flex items-center space-x-2 border-2 border-sport-yellow-500"
+              >
+                <Play className="w-5 h-5 text-sport-yellow-500" />
+                <span>Se demo</span>
+              </motion.button>
+            </div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto"
+            >
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+                <p className="text-4xl font-bold text-sport-yellow-500">12k+</p>
+                <p className="text-gray-600">Aktiva löpare</p>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+                <p className="text-4xl font-bold text-sport-lime-500">500+</p>
+                <p className="text-gray-600">Dagliga pass</p>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+                <p className="text-4xl font-bold text-runmate-orange">98%</p>
+                <p className="text-gray-600">Nöjda användare</p>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
-      </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        >
+          <div className="w-6 h-10 border-2 border-sport-yellow-500 rounded-full flex items-start justify-center p-1">
+            <div className="w-1 h-3 bg-sport-yellow-500 rounded-full" />
+          </div>
+        </motion.div>
+      </section>
 
       {/* Members Section */}
       <section className="py-12 px-4">

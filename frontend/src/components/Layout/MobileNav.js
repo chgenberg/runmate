@@ -175,9 +175,9 @@ const MobileNav = () => {
               onClick={() => handleMenuItemClick(item)}
               className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl transition-all relative ${
                 item.isSpecial 
-                  ? 'bg-gradient-to-r from-sport-yellow-400 to-sport-yellow-500 text-white shadow-lg' 
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg' 
                   : isActive(item.href) 
-                    ? 'bg-sport-yellow-50 text-sport-yellow-600' 
+                    ? 'bg-orange-50 text-orange-700' 
                     : 'text-gray-500'
               }`}
               whileHover={{ scale: 1.05 }}
@@ -325,7 +325,7 @@ const MobileNav = () => {
                             <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                               isActive(item.href)
                                 ? 'bg-white/20 text-white'
-                                : 'bg-sport-yellow-100 text-sport-yellow-600'
+                                : 'bg-orange-100 text-orange-700'
                             }`}>
                               {item.badge}
                             </span>

@@ -104,7 +104,7 @@ const Sidebar = () => {
           className={({ isActive }) =>
             `flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
               isActive
-                ? 'bg-sport-yellow-500 text-white shadow-sm'
+                ? 'bg-orange-600 text-white shadow-sm'
                 : 'text-gray-700 hover:bg-gray-50'
             }`
           }
@@ -161,7 +161,7 @@ const Sidebar = () => {
                     className={({ isActive }) =>
                       `flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-sport-yellow-500 text-white shadow-sm'
+                          ? 'bg-orange-600 text-white shadow-sm'
                           : 'text-gray-600 hover:bg-gray-50'
                       }`
                     }
@@ -174,7 +174,7 @@ const Sidebar = () => {
                           <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
                             isActive 
                               ? 'bg-white/20 text-white' 
-                              : 'bg-sport-yellow-100 text-sport-yellow-600'
+                              : 'bg-orange-100 text-orange-700'
                           }`}>
                             {child.badge}
                           </span>

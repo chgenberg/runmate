@@ -14,10 +14,9 @@ import {
   Clock,
   TrendingUp,
   Award,
-  Heart,
-  X,
   MessageCircle,
-  Send
+  Send,
+  X
 } from 'lucide-react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
@@ -30,7 +29,7 @@ const DashboardPage = () => {
   const [challenges, setChallenges] = useState([]);
   const [events, setEvents] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [userStats] = useState(null);
+  const [userStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);

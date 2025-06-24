@@ -20,9 +20,10 @@ const AllMembersPage = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [message, setMessage] = useState('');
-  const [filters, setFilters] = useState({
-    location: 'all',
-    level: 'all'
+  const [filters] = useState({
+    search: '',
+    activity: '',
+    location: ''
   });
 
   const fetchMembers = useCallback(async () => {

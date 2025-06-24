@@ -39,7 +39,6 @@ const LeaderboardPage = () => {
   const [showMunicipalityModal, setShowMunicipalityModal] = useState(false);
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
   const [showPointsModal, setShowPointsModal] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const formatPace = (secondsPerKm) => {
     const minutes = Math.floor(secondsPerKm / 60);
@@ -93,7 +92,6 @@ const LeaderboardPage = () => {
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      setLoading(true);
       try {
         const response = await api.get('/users/leaderboard', {
           params: {
@@ -107,8 +105,6 @@ const LeaderboardPage = () => {
         console.error('Error fetching leaderboard:', error);
         // Show empty leaderboard instead of dummy data
         setLeaderboard([]);
-      } finally {
-        setLoading(false);
       }
     };
 

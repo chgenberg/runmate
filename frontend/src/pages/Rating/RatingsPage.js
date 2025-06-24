@@ -29,9 +29,7 @@ const RatingsPage = () => {
   const [selectedRating, setSelectedRating] = useState(null);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [pendingRatings, setPendingRatings] = useState([]);
-  const [myRatings, setMyRatings] = useState([]);
+  const [ratings, setRatings] = useState([]);
 
   useEffect(() => {
     moment.locale('sv');
@@ -39,22 +37,14 @@ const RatingsPage = () => {
 
   useEffect(() => {
     const fetchRatings = async () => {
-      setLoading(true);
       try {
-        const [pendingRes, myRatingsRes] = await Promise.all([
-          api.get('/ratings/pending'),
-          api.get('/ratings/my-ratings')
-        ]);
+        const pendingRes = await api.get('/ratings/pending');
         
-        setPendingRatings(pendingRes.data.ratings || []);
-        setMyRatings(myRatingsRes.data.ratings || []);
+        setRatings(pendingRes.data.ratings || []);
       } catch (error) {
         console.error('Error fetching ratings:', error);
         // Show empty arrays instead of dummy data
-        setPendingRatings([]);
-        setMyRatings([]);
-      } finally {
-        setLoading(false);
+        setRatings([]);
       }
     };
 
@@ -390,7 +380,7 @@ const RatingsPage = () => {
           >
             {activeTab === 'pending' && (
               <div className="space-y-4">
-                {pendingRatings.map((pendingRating, index) => (
+                {ratings.map((pendingRating, index) => (
                   <motion.div
                     key={`${pendingRating.event._id}-${pendingRating.participant._id}`}
                     initial={{ opacity: 0, x: -20 }}
@@ -470,7 +460,7 @@ const RatingsPage = () => {
 
             {activeTab === 'myratings' && (
               <div className="space-y-4">
-                {myRatings.map((rating, index) => (
+                {ratings.map((rating, index) => (
                   <motion.div
                     key={rating._id}
                     initial={{ opacity: 0, x: -20 }}

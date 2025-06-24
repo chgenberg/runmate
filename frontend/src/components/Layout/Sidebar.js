@@ -2,24 +2,26 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users,
-  Trophy,
-  Settings,
-  LogOut,
-  Compass,
+import {
   Home,
+  Users,
+  Compass,
   PlusSquare,
   Award,
-  Star,
+  Trophy,
+  User,
   Calendar,
   MessageCircle,
   BarChart3,
-  ChevronRight,
-  Sparkles,
-  Activity,
+  Settings,
+  LogOut,
   Bell,
-  ChevronLeft
+  Star,
+  X,
+  Menu,
+  Activity,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import ProfileAvatar from '../common/ProfileAvatar';
 import { getProfilePictureUrl } from '../../services/api';
@@ -30,6 +32,7 @@ const Sidebar = () => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeNotifications] = useState(3);
+  const [showProModal, setShowProModal] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -180,7 +183,7 @@ const Sidebar = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {isCollapsed ? <ChevronRight className="w-5 h-5 text-gray-600" /> : <ChevronLeft className="w-5 h-5 text-gray-600" />}
+          {isCollapsed ? <ArrowRight className="w-5 h-5 text-gray-600" /> : <Menu className="w-5 h-5 text-gray-600" />}
         </motion.button>
       </div>
 
@@ -304,33 +307,34 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Pro Upgrade Banner */}
-      <AnimatePresence>
-        {!isCollapsed && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="px-4 py-3"
-          >
-            <motion.div 
-              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-4 text-white relative overflow-hidden"
-              whileHover={{ scale: 1.02 }}
-            >
-              <Sparkles className="w-8 h-8 mb-2" />
-              <h3 className="font-bold mb-1">Uppgradera till Pro</h3>
-              <p className="text-xs text-white/80 mb-3">Få tillgång till avancerad statistik och coaching</p>
-              <button className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-white/30 transition-colors">
-                Läs mer
-              </button>
-              
-              {/* Decorative circles */}
-              <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/10 rounded-full" />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Pro Upgrade Banner - Compact */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className={`${isCollapsed ? 'px-2' : 'px-4'} mb-4`}
+      >
+        <motion.button
+          onClick={() => setShowProModal(true)}
+          className={`w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl p-3 text-left transition-all hover:from-purple-700 hover:to-pink-700 hover:scale-105 shadow-lg`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center justify-between">
+            <div className={`${isCollapsed ? 'hidden' : 'block'}`}>
+              <div className="flex items-center space-x-2 mb-1">
+                <Sparkles className="w-4 h-4" />
+                <span className="font-bold text-sm">Uppgradera till Pro</span>
+              </div>
+              <p className="text-xs text-purple-100">Läs mer</p>
+            </div>
+            <div className={`${isCollapsed ? 'block' : 'hidden'}`}>
+              <Sparkles className="w-5 h-5" />
+            </div>
+            {!isCollapsed && <ArrowRight className="w-4 h-4 text-purple-200" />}
+          </div>
+        </motion.button>
+      </motion.div>
 
       {/* User Section */}
       <div className="p-4 border-t border-gray-200">
@@ -395,6 +399,106 @@ const Sidebar = () => {
           </motion.button>
         </div>
       </div>
+
+      {/* Pro Upgrade Modal */}
+      <AnimatePresence>
+        {showProModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowProModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl max-w-md w-full p-6 relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setShowProModal(false)}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">RunMate Pro</h2>
+                <p className="text-gray-600">AI-baserad träningsagent</p>
+              </div>
+
+              {/* Features */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Activity className="w-3 h-3 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Personlig AI-coach</h3>
+                    <p className="text-sm text-gray-600">Få skräddarsydda träningsplaner baserade på dina mål och livsstil</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <BarChart3 className="w-3 h-3 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Avancerad analys</h3>
+                    <p className="text-sm text-gray-600">Djupgående insights och realtidscoaching för att nå dina mål</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Calendar className="w-3 h-3 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Smart planering</h3>
+                    <p className="text-sm text-gray-600">Automatisk anpassning av träning baserat på din återhämtning</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 mb-6">
+                <div className="text-center">
+                  <div className="flex items-baseline justify-center mb-2">
+                    <span className="text-3xl font-bold text-gray-900">99 kr</span>
+                    <span className="text-gray-600 ml-1">/månad</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Avsluta när som helst</p>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+                >
+                  Starta 7 dagars gratis provperiod
+                </motion.button>
+                
+                <button
+                  onClick={() => setShowProModal(false)}
+                  className="w-full text-gray-600 font-medium py-2 hover:text-gray-800 transition-colors"
+                >
+                  Kanske senare
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

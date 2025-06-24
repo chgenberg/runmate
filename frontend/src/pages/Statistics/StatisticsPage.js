@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar,
+  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, PieChart, Pie, Cell, RadarChart,
+  ResponsiveContainer, RadarChart,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import {
   Activity, Heart, TrendingUp, Clock,
   Zap, Mountain, BarChart3,
-  Footprints, Brain, Moon,
   Gauge, Apple
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';

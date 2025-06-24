@@ -65,7 +65,7 @@ const SettingsPage = () => {
         {
           icon: User,
           label: 'Redigera profil',
-          action: () => navigate('/profile'),
+          action: () => navigate('/app/profile'),
           value: user?.name || 'Namn saknas'
         }
       ]

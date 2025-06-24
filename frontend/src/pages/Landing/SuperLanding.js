@@ -151,7 +151,7 @@ const SuperLanding = () => {
               <span className="text-sm text-gray-500">({members.length}+ aktiva)</span>
             </div>
             <button 
-              onClick={() => navigate('/app/matches')}
+              onClick={() => navigate('/app/discover')}
               className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
               <span>Visa alla</span>
@@ -262,7 +262,7 @@ const SuperLanding = () => {
               <h2 className="text-2xl font-bold text-gray-900">Aktiva utmaningar</h2>
             </div>
             <button 
-              onClick={() => navigate('/challenges')}
+              onClick={() => navigate('/app/challenges')}
               className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
               <span>Visa alla</span>
@@ -317,7 +317,7 @@ const SuperLanding = () => {
               <h2 className="text-2xl font-bold text-gray-900">Kommande aktiviteter</h2>
             </div>
             <button 
-              onClick={() => navigate('/activities')}
+              onClick={() => navigate('/app/activities')}
               className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
               <span>Visa mer</span>
@@ -369,7 +369,7 @@ const SuperLanding = () => {
               <h2 className="text-2xl font-bold text-gray-900">Veckans topplista</h2>
             </div>
             <button 
-              onClick={() => navigate('/leaderboard')}
+              onClick={() => navigate('/app/leaderboard')}
               className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium"
             >
               <span>Visa mer</span>

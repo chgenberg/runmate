@@ -30,20 +30,20 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { path: '/dashboard', name: 'Översikt', icon: Home },
-    { path: '/profile', name: 'Profil', icon: User },
-    { path: '/activities', name: 'Aktiviteter', icon: Activity },
-    { path: '/leaderboard', name: 'Topplista', icon: Trophy },
-    { path: '/statistics', name: 'Statistik', icon: TrendingUp },
-    { path: '/challenges', name: 'Utmaningar', icon: Star },
-    { path: '/discover', name: 'Upptäck', icon: Search },
-    { path: '/matches', name: 'Matcha', icon: Heart },
-    { path: '/messages', name: 'Meddelanden', icon: MessageCircle },
-    { path: '/community', name: 'Community', icon: Users },
-    { path: '/events', name: 'Event', icon: Calendar },
-    { path: '/runevents', name: 'Löp-events', icon: MapPin },
-    { path: '/aicoach', name: 'AI Coach', icon: Brain },
-    { path: '/settings', name: 'Inställningar', icon: Settings },
+    { path: '/app/dashboard', name: 'Översikt', icon: Home },
+    { path: '/app/profile', name: 'Profil', icon: User },
+    { path: '/app/activities', name: 'Aktiviteter', icon: Activity },
+    { path: '/app/leaderboard', name: 'Topplista', icon: Trophy },
+    { path: '/app/statistics', name: 'Statistik', icon: TrendingUp },
+    { path: '/app/challenges', name: 'Utmaningar', icon: Star },
+    { path: '/app/discover', name: 'Upptäck', icon: Search },
+    { path: '/app/matches', name: 'Matcha', icon: Heart },
+    { path: '/app/messages', name: 'Meddelanden', icon: MessageCircle },
+    { path: '/app/community', name: 'Community', icon: Users },
+    { path: '/app/events', name: 'Event', icon: Calendar },
+    { path: '/app/runevents', name: 'Löp-events', icon: MapPin },
+    { path: '/app/ai-coach', name: 'AI Coach', icon: Brain },
+    { path: '/app/settings', name: 'Inställningar', icon: Settings },
   ];
 
   return (

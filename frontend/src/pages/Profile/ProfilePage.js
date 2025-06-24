@@ -265,9 +265,14 @@ const ProfilePage = () => {
   const handlePhotoUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Auto-enable photo editing mode
+      setEditingSections(prev => ({ ...prev, photos: true }));
+      
       try {
         const formData = new FormData();
         formData.append('photo', file);
+
+        toast.loading('Laddar upp bild...', { id: 'upload' });
 
         const response = await api.post('/users/profile/photo', formData, {
           headers: {
@@ -276,25 +281,37 @@ const ProfilePage = () => {
         });
 
         if (response.data.photo) {
-          setPhotos(prev => [response.data.photo, ...prev.slice(1)]);
-          toast.success('Profilbild uppladdad!');
+          // Update photos array
+          setPhotos(prev => {
+            const newPhotos = [...prev];
+            newPhotos.unshift(response.data.photo);
+            return newPhotos.slice(0, 6); // Keep max 6 photos
+          });
           
-          // Uppdatera user state
+          // Update user state with new profile picture
           setUser(prev => ({
             ...prev,
             profilePhoto: response.data.photo,
-            profilePicture: response.data.photo
+            profilePicture: response.data.photo,
+            photos: response.data.photos || [...photos, response.data.photo]
           }));
+          
+          toast.success('Profilbild uppladdad!', { id: 'upload' });
         }
       } catch (error) {
         console.error('Error uploading photo:', error);
-        toast.error('Kunde inte ladda upp bild');
+        toast.error('Kunde inte ladda upp bild', { id: 'upload' });
       }
     }
+    // Clear the input
+    event.target.value = '';
   };
 
   const handleProfilePictureClick = () => {
-    document.getElementById('profile-picture-input').click();
+    const input = document.getElementById('profile-picture-input');
+    if (input) {
+      input.click();
+    }
   };
 
   const removePhoto = async (index) => {
@@ -364,17 +381,26 @@ const ProfilePage = () => {
           <div className="p-6 md:p-8 pt-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
               <div 
-                className="cursor-pointer"
+                className="relative cursor-pointer group"
                 onClick={handleProfilePictureClick}
               >
                 <ProfileAvatar
                   user={user}
                   src={getProfilePictureUrl(user) || photos[0]}
                   size="md"
-                  showEditIcon={true}
-                  onEdit={handleProfilePictureClick}
-                  EditIcon={Camera}
+                  showEditIcon={false}
                 />
+                
+                {/* Camera overlay */}
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Camera className="w-8 h-8 text-white" />
+                </div>
+                
+                {/* Camera icon in corner */}
+                <div className="absolute -bottom-2 -right-2 bg-orange-500 text-white p-2 rounded-full shadow-lg hover:bg-orange-600 transition-colors">
+                  <Camera className="w-4 h-4" />
+                </div>
+                
                 <input
                   id="profile-picture-input"
                   type="file"
@@ -621,7 +647,19 @@ const ProfilePage = () => {
               <div className="bg-white rounded-2xl shadow-sm p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-gray-900">Mina foton</h3>
-                  <p className="text-sm text-gray-600">{photos.length}/6 foton</p>
+                  <div className="flex items-center space-x-3">
+                    <p className="text-sm text-gray-600">{photos.length}/6 foton</p>
+                    <button
+                      onClick={() => toggleEdit('photos')}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                        editingSections.photos
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                          : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                      }`}
+                    >
+                      {editingSections.photos ? 'Klar' : 'Redigera'}
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -654,7 +692,7 @@ const ProfilePage = () => {
                     </motion.div>
                   ))}
                   
-                  {editingSections.photos && photos.length < 6 && (
+                  {photos.length < 6 && (
                     <motion.label 
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}

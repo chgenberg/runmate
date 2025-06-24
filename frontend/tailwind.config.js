@@ -92,6 +92,7 @@ module.exports = {
         'pulse-slow': 'pulse 3s ease-in-out infinite',
         'spin-slow': 'spin 10s linear infinite',
         'gradient': 'gradient 15s ease infinite',
+        'gradient-x': 'gradient-x 3s ease infinite',
         'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.5s ease-out',
         'slide-left': 'slideLeft 0.5s ease-out',
@@ -113,6 +114,14 @@ module.exports = {
           '50%': {
             'background-size': '200% 200%',
             'background-position': 'right center'
+          }
+        },
+        'gradient-x': {
+          '0%, 100%': {
+            'background-position': '0% 50%'
+          },
+          '50%': {
+            'background-position': '100% 50%'
           }
         },
         slideUp: {

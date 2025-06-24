@@ -825,4 +825,25 @@
 .content-above-map {
   position: relative;
   z-index: 1000 !important;
+}
+
+/* Enhanced gradient animation for loading screen */
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Additional loading screen animations */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Ensure proper rendering of gradient text */
+.bg-gradient-to-r {
+  background-size: 200% auto;
 } 

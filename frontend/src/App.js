@@ -42,6 +42,9 @@ import PublicProfilePage from './pages/Profile/PublicProfilePage';
 // Events Page
 import EventsPage from './pages/Events/EventsPage';
 
+// Statistics Page
+import StatisticsPage from './pages/Statistics/StatisticsPage';
+
 // Community Page
 import CommunityPage from './pages/Community/CommunityPage';
 import CommunityRoomPage from './pages/Community/CommunityRoomPage';
@@ -101,6 +104,7 @@ function App() {
               {/* Nested routes within the app layout */}
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="statistics" element={<StatisticsPage />} />
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="members" element={<AllMembersPage />} />
               <Route path="matches" element={<MatchesPage />} />

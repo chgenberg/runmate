@@ -15,7 +15,11 @@ import {
   Trophy,
   Calendar,
   TrendingUp,
-  Check
+  Check,
+  Clock,
+  Heart,
+  Zap,
+  Mountain
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
@@ -55,6 +59,7 @@ const ProfilePage = () => {
   });
 
   const [photos, setPhotos] = useState([]);
+  const [realStats, setRealStats] = useState(null);
 
   const activityLevels = [
     { id: 'beginner', name: 'Nybörjare', desc: '1-2 gånger per vecka', color: 'from-green-400 to-green-600' },
@@ -97,7 +102,8 @@ const ProfilePage = () => {
         null;
       
       // Använd verklig statistik från statsData eller fallback till userData
-      const realStats = statsData?.data?.stats || {};
+      const realStatsData = statsData?.data?.stats || {};
+      setRealStats(realStatsData);
       
       // Formatera data för komponenten
       const formattedUser = {
@@ -117,10 +123,10 @@ const ProfilePage = () => {
             formatTimeFromSeconds(userData.trainingStats.bestTimes.marathon) : ''
         },
         stats: {
-          totalRuns: realStats.totalActivities || userData.trainingStats?.totalRuns || 0,
-          totalDistance: Math.round(realStats.totalDistance || userData.trainingStats?.totalDistance || 0),
-          totalTime: Math.round((realStats.totalTime || userData.trainingStats?.totalTime || 0) / 3600), // Convert to hours
-          averagePace: realStats.avgPace ? formatTimeFromSeconds(realStats.avgPace) : 
+          totalRuns: realStatsData.totalActivities || userData.trainingStats?.totalRuns || 0,
+          totalDistance: Math.round(realStatsData.totalDistance || userData.trainingStats?.totalDistance || 0),
+          totalTime: Math.round((realStatsData.totalTime || userData.trainingStats?.totalTime || 0) / 3600), // Convert to hours
+          averagePace: realStatsData.avgPace ? formatTimeFromSeconds(realStatsData.avgPace) : 
                       (userData.trainingStats?.averagePace || '0:00')
         },
         preferredTimes: userData.trainingPreferences?.preferredTimes || [],
@@ -558,35 +564,181 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
                     <Activity className="w-8 h-8 mb-3 opacity-80" />
-                    <p className="text-3xl font-bold mb-1">{profileData.stats.totalDistance} km</p>
+                    <p className="text-3xl font-bold mb-1">
+                      {realStats ? `${realStats.totalDistance} km` : `${profileData.stats.totalDistance} km`}
+                    </p>
                     <p className="text-blue-100">Total distans</p>
                   </div>
                   
                   <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
                     <Calendar className="w-8 h-8 mb-3 opacity-80" />
-                    <p className="text-3xl font-bold mb-1">{profileData.stats.totalRuns}</p>
-                    <p className="text-green-100">Antal pass</p>
+                    <p className="text-3xl font-bold mb-1">
+                      {realStats ? realStats.totalActivities : profileData.stats.totalRuns}
+                    </p>
+                    <p className="text-green-100">Antal löpningar</p>
                   </div>
                   
                   <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
                     <TrendingUp className="w-8 h-8 mb-3 opacity-80" />
-                    <p className="text-3xl font-bold mb-1">{profileData.stats.averagePace}</p>
+                    <p className="text-3xl font-bold mb-1">
+                      {realStats && realStats.avgPaceFormatted ? 
+                        realStats.avgPaceFormatted : 
+                        profileData.stats.averagePace
+                      }
+                    </p>
                     <p className="text-purple-100">Snittempo/km</p>
                   </div>
                 </div>
               </div>
+
+              {/* Enhanced Statistics - Only show if we have real data */}
+              {realStats && (
+                <>
+                  {/* Personal Records */}
+                  <div className="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                      <Trophy className="w-6 h-6 mr-2 text-yellow-500" />
+                      Personliga rekord
+                    </h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-sm text-gray-600">Längsta löpning</p>
+                        <p className="text-xl font-bold text-blue-600">{realStats.longestRun} km</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-sm text-gray-600">Snabbaste tempo</p>
+                        <p className="text-xl font-bold text-green-600">{realStats.bestPaceFormatted} min/km</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <p className="text-sm text-gray-600">Största klättring</p>
+                        <p className="text-xl font-bold text-purple-600">{realStats.biggestClimb} m</p>
+                      </div>
+                      <div className="text-center p-4 bg-red-50 rounded-lg">
+                        <p className="text-sm text-gray-600">Max puls</p>
+                        <p className="text-xl font-bold text-red-600">{realStats.maxHeartRate} bpm</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Health & Performance Metrics */}
+                  <div className="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                      <Activity className="w-6 h-6 mr-2 text-orange-500" />
+                      Hälso- och prestandamått
+                    </h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="text-center">
+                        <div className="bg-blue-100 rounded-full p-3 w-fit mx-auto mb-2">
+                          <Clock className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <p className="text-sm text-gray-600">Total träningstid</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.totalHours} timmar</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="bg-green-100 rounded-full p-3 w-fit mx-auto mb-2">
+                          <Activity className="w-6 h-6 text-green-600" />
+                        </div>
+                        <p className="text-sm text-gray-600">Genomsnittlig löpning</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.avgRunTime} min</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="bg-red-100 rounded-full p-3 w-fit mx-auto mb-2">
+                          <Heart className="w-6 h-6 text-red-600" />
+                        </div>
+                        <p className="text-sm text-gray-600">Genomsnittspuls</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.avgHeartRate} bpm</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="bg-orange-100 rounded-full p-3 w-fit mx-auto mb-2">
+                          <Zap className="w-6 h-6 text-orange-600" />
+                        </div>
+                        <p className="text-sm text-gray-600">Totala kalorier</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.totalCalories} kcal</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Distance & Elevation */}
+                  <div className="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                      <Mountain className="w-6 h-6 mr-2 text-gray-600" />
+                      Distans & höjdmeter
+                    </h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Total höjdmeter</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.totalElevation} m</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Genomsnittlig distans</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.avgRunDistance} km</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Aktivitet senaste 30 dagar</p>
+                        <p className="text-lg font-semibold text-gray-900">{realStats.activeDays} dagar</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Veckokonsistens</p>
+                        <div className="flex items-center justify-center">
+                          <p className="text-lg font-semibold text-gray-900 mr-2">{realStats.weeklyConsistency}/4</p>
+                          <div className="flex space-x-1">
+                            {[1,2,3,4].map(week => (
+                              <div 
+                                key={week} 
+                                className={`w-2 h-2 rounded-full ${
+                                  week <= realStats.weeklyConsistency 
+                                    ? 'bg-green-500' 
+                                    : 'bg-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* This Month Progress */}
+                  {realStats.thisMonth && realStats.thisMonth.activities > 0 && (
+                    <div className="bg-white rounded-2xl shadow-sm p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <Calendar className="w-6 h-6 mr-2 text-blue-500" />
+                        Denna månad
+                      </h3>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-gray-600">Distans</p>
+                          <p className="text-xl font-bold text-blue-600">{realStats.thisMonth.distance} km</p>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                          <p className="text-sm text-gray-600">Löpningar</p>
+                          <p className="text-xl font-bold text-green-600">{realStats.thisMonth.activities}</p>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 rounded-lg">
+                          <p className="text-sm text-gray-600">Tid</p>
+                          <p className="text-xl font-bold text-purple-600">{Math.round(realStats.thisMonth.time / 3600)} h</p>
+                        </div>
+                        <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                          <p className="text-sm text-gray-600">Bästa tempo</p>
+                          <p className="text-xl font-bold text-yellow-600">{realStats.thisMonth.bestPaceFormatted} min/km</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* Achievement Badges */}
               <div className="bg-white rounded-2xl shadow-sm p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Utmärkelser</h3>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
                   {[
-                    { icon: '🏃', title: '100 pass' },
-                    { icon: '🏆', title: 'PB 5K' },
-                    { icon: '🔥', title: 'Streak 30' },
-                    { icon: '🌟', title: 'Top löpare' },
-                    { icon: '💪', title: '500 km' },
-                    { icon: '🎯', title: 'Måluppfyllare' }
+                    { icon: '🏃', title: realStats && realStats.totalActivities >= 100 ? '100+ pass' : '100 pass', earned: realStats && realStats.totalActivities >= 100 },
+                    { icon: '🏆', title: 'PB 5K', earned: realStats && realStats.bestPace > 0 },
+                    { icon: '🔥', title: 'Streak 30', earned: realStats && realStats.weeklyConsistency >= 4 },
+                    { icon: '🌟', title: 'Top löpare', earned: realStats && realStats.totalDistance >= 100 },
+                    { icon: '💪', title: '500 km', earned: realStats && realStats.totalDistance >= 500 },
+                    { icon: '🎯', title: 'Måluppfyllare', earned: realStats && realStats.totalActivities >= 10 }
                   ].map((badge, index) => (
                     <motion.div
                       key={index}
@@ -595,10 +747,14 @@ const ProfilePage = () => {
                       transition={{ delay: index * 0.1 }}
                       className="text-center"
                     >
-                      <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center text-2xl mb-2 mx-auto">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-2 mx-auto ${
+                        badge.earned 
+                          ? 'bg-gradient-to-br from-orange-100 to-red-100' 
+                          : 'bg-gray-100 opacity-50'
+                      }`}>
                         {badge.icon}
                       </div>
-                      <p className="text-xs text-gray-600">{badge.title}</p>
+                      <p className={`text-xs ${badge.earned ? 'text-gray-600' : 'text-gray-400'}`}>{badge.title}</p>
                     </motion.div>
                   ))}
                 </div>

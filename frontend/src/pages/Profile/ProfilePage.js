@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Camera, 
@@ -18,11 +18,15 @@ import {
   Check
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import UserRatingProfile from '../../components/Rating/UserRatingProfile';
 
 const ProfilePage = () => {
+  const { user: authUser, updateProfile } = useAuth();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [profileData, setProfileData] = useState({
@@ -42,66 +46,175 @@ const ProfilePage = () => {
       'marathon': ''
     },
     stats: {
-      totalRuns: 142,
-      totalDistance: 845,
-      totalTime: 112,
-      averagePace: '5:30'
+      totalRuns: 0,
+      totalDistance: 0,
+      totalTime: 0,
+      averagePace: '0:00'
     }
   });
 
-  const [photos, setPhotos] = useState([
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop&auto=format',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&auto=format',
-    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=400&fit=crop&auto=format'
-  ]);
+  const [photos, setPhotos] = useState([]);
 
   const activityLevels = [
     { id: 'beginner', name: 'Nybörjare', desc: '1-2 gånger per vecka', color: 'from-green-400 to-green-600' },
-    { id: 'intermediate', name: 'Medel', desc: '3-4 gånger per vecka', color: 'from-blue-400 to-blue-600' },
-    { id: 'advanced', name: 'Avancerad', desc: '5+ gånger per vecka', color: 'from-purple-400 to-purple-600' },
-    { id: 'athlete', name: 'Atlet', desc: 'Daglig träning', color: 'from-red-400 to-red-600' }
+    { id: 'recreational', name: 'Rekreation', desc: '3-4 gånger per vecka', color: 'from-blue-400 to-blue-600' },
+    { id: 'serious', name: 'Seriös', desc: '5+ gånger per vecka', color: 'from-purple-400 to-purple-600' },
+    { id: 'competitive', name: 'Tävling', desc: 'Daglig träning', color: 'from-red-400 to-red-600' },
+    { id: 'elite', name: 'Elit', desc: 'Professionell', color: 'from-yellow-400 to-yellow-600' }
   ];
 
   const timeOptions = [
-    { id: 'morning', name: 'Morgon', time: '06:00-09:00', icon: '🌅' },
-    { id: 'lunch', name: 'Lunch', time: '11:00-14:00', icon: '☀️' },
-    { id: 'afternoon', name: 'Eftermiddag', time: '15:00-18:00', icon: '🌤️' },
-    { id: 'evening', name: 'Kväll', time: '18:00-21:00', icon: '🌙' }
+    { id: 'early-morning', name: 'Tidig morgon', time: '05:00-07:00', icon: '🌅' },
+    { id: 'morning', name: 'Morgon', time: '07:00-10:00', icon: '☀️' },
+    { id: 'afternoon', name: 'Eftermiddag', time: '12:00-16:00', icon: '🌤️' },
+    { id: 'evening', name: 'Kväll', time: '17:00-21:00', icon: '🌙' }
   ];
 
   useEffect(() => {
-    // Load user data
-    const userData = {
-      firstName: 'Christopher',
-      lastName: 'Genberg',
-      bio: 'Löpare från Stockholm som älskar att utforska nya rutter och träffa nya träningspartners!',
-      age: '28',
-      location: 'Stockholm, Sverige',
-      sports: ['running'],
-      activityLevel: 'intermediate',
-      preferredTimes: ['morning', 'evening'],
-      goals: 'Springa mitt första maraton inom 6 månader',
-      personalBests: {
-        '5k': '19:45',
-        '10k': '42:30',
-        'halfMarathon': '1:35:20',
-        'marathon': '-'
-      },
-      stats: {
-        totalRuns: 142,
-        totalDistance: 845,
-        totalTime: 112,
-        averagePace: '5:30'
-      }
-    };
-    setUser(userData);
-    setProfileData(userData);
+    loadUserProfile();
   }, []);
 
-  const handleSave = () => {
-    setUser(profileData);
-    setEditing(false);
-    toast.success('Profil uppdaterad!');
+  const loadUserProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Hämta användarens fullständiga profil från backend
+      const [profileResponse, statsResponse] = await Promise.allSettled([
+        api.get('/users/profile'),
+        api.get('/users/stats/summary')
+      ]);
+      
+      const userData = profileResponse.status === 'fulfilled' ? profileResponse.value.data : null;
+      const statsData = statsResponse.status === 'fulfilled' ? statsResponse.value.data : null;
+      
+      console.log('Loaded user profile:', userData);
+      console.log('Loaded user stats:', statsData);
+      
+      if (!userData) {
+        throw new Error('Kunde inte hämta användardata');
+      }
+      
+      // Beräkna ålder från dateOfBirth
+      const age = userData.dateOfBirth ? 
+        Math.floor((new Date() - new Date(userData.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 
+        null;
+      
+      // Använd verklig statistik från statsData eller fallback till userData
+      const realStats = statsData?.data?.stats || {};
+      
+      // Formatera data för komponenten
+      const formattedUser = {
+        ...userData,
+        age: age ? age.toString() : '',
+        location: userData.location?.city || '',
+        personalBests: {
+          '5k': userData.trainingStats?.bestTimes?.fiveK ? 
+            formatTimeFromSeconds(userData.trainingStats.bestTimes.fiveK) : '',
+          '10k': userData.trainingStats?.bestTimes?.tenK ? 
+            formatTimeFromSeconds(userData.trainingStats.bestTimes.tenK) : '',
+          'halfMarathon': userData.trainingStats?.bestTimes?.halfMarathon ? 
+            formatTimeFromSeconds(userData.trainingStats.bestTimes.halfMarathon) : '',
+          'marathon': userData.trainingStats?.bestTimes?.marathon ? 
+            formatTimeFromSeconds(userData.trainingStats.bestTimes.marathon) : ''
+        },
+        stats: {
+          totalRuns: realStats.totalActivities || userData.trainingStats?.totalRuns || 0,
+          totalDistance: Math.round(realStats.totalDistance || userData.trainingStats?.totalDistance || 0),
+          totalTime: Math.round((realStats.totalTime || userData.trainingStats?.totalTime || 0) / 3600), // Convert to hours
+          averagePace: realStats.avgPace ? formatTimeFromSeconds(realStats.avgPace * 60) : 
+                      (userData.trainingStats?.averagePace || '0:00')
+        },
+        preferredTimes: userData.trainingPreferences?.preferredTimes || [],
+        goals: userData.goals || '',
+        sports: userData.sportTypes || ['running']
+      };
+      
+      setUser(formattedUser);
+      setProfileData(formattedUser);
+      
+      // Hantera foton
+      if (userData.profilePhoto) {
+        setPhotos([userData.profilePhoto, ...(userData.additionalPhotos || [])]);
+      } else if (userData.additionalPhotos?.length > 0) {
+        setPhotos(userData.additionalPhotos);
+      }
+      
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      toast.error('Kunde inte ladda profil');
+      
+      // Fallback med AuthContext-data om API misslyckas
+      if (authUser) {
+        const fallbackUser = {
+          firstName: authUser.firstName || '',
+          lastName: authUser.lastName || '',
+          email: authUser.email || '',
+          bio: authUser.bio || '',
+          age: authUser.age ? authUser.age.toString() : '',
+          location: authUser.location?.city || '',
+          sports: authUser.sportTypes || ['running'],
+          activityLevel: authUser.activityLevel || 'recreational',
+          preferredTimes: authUser.trainingPreferences?.preferredTimes || [],
+          goals: '',
+          personalBests: {
+            '5k': '',
+            '10k': '',
+            'halfMarathon': '',
+            'marathon': ''
+          },
+          stats: {
+            totalRuns: 0,
+            totalDistance: 0,
+            totalTime: 0,
+            averagePace: '0:00'
+          }
+        };
+        setUser(fallbackUser);
+        setProfileData(fallbackUser);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const formatTimeFromSeconds = (seconds) => {
+    if (!seconds || seconds === 0) return '';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      
+      // Uppdatera profil via API
+      const updateData = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        bio: profileData.bio,
+        location: profileData.location,
+      };
+      
+      const result = await updateProfile(updateData);
+      
+      if (result.success) {
+        setUser(profileData);
+        setEditing(false);
+        toast.success('Profil uppdaterad!');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Kunde inte uppdatera profil');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePhotoUpload = (event) => {
@@ -126,7 +239,7 @@ const ProfilePage = () => {
     setProfileData({ ...profileData, preferredTimes: newTimes });
   };
 
-  if (!user) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
         <LoadingSpinner 
@@ -241,7 +354,7 @@ const ProfilePage = () => {
                     <p className="text-xs sm:text-sm text-gray-600 truncate">km totalt</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xl sm:text-2xl font-bold text-orange-600">8420</p>
+                    <p className="text-xl sm:text-2xl font-bold text-orange-600">{user.points || 0}</p>
                     <p className="text-xs sm:text-sm text-gray-600 truncate">Poäng</p>
                   </div>
                   <div className="text-center">

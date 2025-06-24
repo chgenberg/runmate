@@ -7,14 +7,10 @@ import {
   ChevronLeft, 
   Users, 
   Trophy, 
-  Calendar,
   Star,
   MapPin,
   Target,
   Clock,
-  TrendingUp,
-  Award,
-  MessageCircle,
   Send,
   X,
   Activity,
@@ -22,7 +18,6 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import ProfileAvatar from '../../components/common/ProfileAvatar';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -30,7 +25,6 @@ const DashboardPage = () => {
   const [members, setMembers] = useState([]);
   const [challenges, setChallenges] = useState([]);
   const [events, setEvents] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [userStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -38,30 +32,26 @@ const DashboardPage = () => {
   const [message, setMessage] = useState('');
 
   const membersScrollRef = useRef(null);
-  const challengesScrollRef = useRef(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const [membersRes, challengesRes, eventsRes, leaderboardRes] = await Promise.all([
+        const [membersRes, challengesRes, eventsRes] = await Promise.all([
           api.get('/users/discover?limit=10'),
           api.get('/challenges?limit=5'),
-          api.get('/runevents?limit=5'), 
-          api.get('/users/leaderboard?limit=5')
+          api.get('/runevents?limit=5')
         ]);
         
         setMembers(membersRes.data.users || []);
         setChallenges(challengesRes.data || challengesRes.data.challenges || []);
         setEvents(eventsRes.data.data || eventsRes.data.events || []);
-        setLeaderboard(leaderboardRes.data.data?.leaderboard || leaderboardRes.data.users || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         // Set empty arrays on error instead of mock data
         setMembers([]);
         setChallenges([]);
         setEvents([]);
-        setLeaderboard([]);
       } finally {
         setLoading(false);
       }

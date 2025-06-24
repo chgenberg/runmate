@@ -127,7 +127,7 @@ const AICoachPage = () => {
   };
 
   const quickActions = [
-    { text: "Skapa träningsplan", icon: Calendar, color: 'from-sport-yellow-400 to-sport-yellow-500' },
+    { text: "Skapa träningsplan", icon: Calendar, color: 'from-orange-500 to-orange-600' },
     { text: "Analysera min löpning", icon: TrendingUp, color: 'from-sport-lime-400 to-sport-lime-500' },
     { text: "Tips för motivation", icon: Heart, color: 'from-red-400 to-red-500' },
     { text: "Förebygg skador", icon: Activity, color: 'from-blue-400 to-blue-500' }
@@ -149,14 +149,14 @@ const AICoachPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sport-yellow-50 via-white to-sport-lime-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-sport-lime-50">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-sport-yellow-400 to-sport-lime-400 rounded-2xl flex items-center justify-center shadow-lg">
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-sport-lime-400 rounded-2xl flex items-center justify-center shadow-lg">
                   <Brain className="w-8 h-8 text-white" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
@@ -167,7 +167,7 @@ const AICoachPage = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-sport-yellow-500" />
+              <Sparkles className="w-5 h-5 text-orange-500" />
               <span className="text-sm text-gray-600">Powered by GPT-4</span>
             </div>
           </div>
@@ -188,7 +188,7 @@ const AICoachPage = () => {
               >
                 {message.type === 'ai' ? (
                   <div className="flex items-start space-x-3 max-w-[80%]">
-                    <div className="w-10 h-10 bg-gradient-to-br from-sport-yellow-400 to-sport-lime-400 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-sport-lime-400 rounded-2xl flex items-center justify-center flex-shrink-0">
                       <Brain className="w-6 h-6 text-white" />
                     </div>
                     <div className="bg-white rounded-2xl px-5 py-4 shadow-sm">
@@ -206,9 +206,9 @@ const AICoachPage = () => {
                   </div>
                 ) : (
                   <div className="max-w-[80%]">
-                    <div className="bg-gradient-to-r from-sport-yellow-400 to-sport-yellow-500 text-gray-900 rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl px-5 py-4 shadow-sm">
                       <p className="leading-relaxed font-medium">{message.content}</p>
-                      <p className="text-xs text-gray-700/70 mt-3">
+                      <p className="text-xs text-white/70 mt-3">
                         {new Date(message.timestamp).toLocaleTimeString('sv-SE', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
@@ -227,14 +227,14 @@ const AICoachPage = () => {
               animate={{ opacity: 1 }}
               className="flex items-start space-x-3"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-sport-yellow-400 to-sport-lime-400 rounded-2xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-sport-lime-400 rounded-2xl flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
               <div className="bg-white rounded-2xl px-5 py-4 shadow-sm">
                 <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-sport-yellow-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-sport-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-sport-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </motion.div>
@@ -275,7 +275,7 @@ const AICoachPage = () => {
                   }
                 }}
                 placeholder="Fråga ARIA om löpning, träning eller kost..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-sport-yellow-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 rows={1}
                 style={{ minHeight: '48px', maxHeight: '120px' }}
               />
@@ -287,7 +287,7 @@ const AICoachPage = () => {
               disabled={!inputValue.trim() || isTyping}
               className={`p-3 rounded-2xl transition-all ${
                 inputValue.trim() && !isTyping
-                  ? 'bg-gradient-to-r from-sport-yellow-400 to-sport-yellow-500 text-white shadow-lg hover:shadow-xl'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl'
                   : 'bg-gray-100 text-gray-400'
               }`}
             >
@@ -310,7 +310,7 @@ const AICoachPage = () => {
               label="Veckans mål"
               value={trainingPlan?.weeklyGoal || "42 km"}
               progress={75}
-              color="from-sport-yellow-400 to-sport-yellow-500"
+              color="from-orange-500 to-orange-600"
             />
             <StatsCard
               icon={Activity}

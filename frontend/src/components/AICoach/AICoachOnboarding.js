@@ -166,7 +166,7 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
           className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
         >
           {/* Header */}
-          <div className="relative bg-gradient-to-r from-sport-yellow-400 to-sport-lime-400 p-6 text-white">
+          <div className="relative bg-gradient-to-r from-orange-500 to-sport-lime-400 p-6 text-white">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"

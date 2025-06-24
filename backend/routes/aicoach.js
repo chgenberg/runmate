@@ -148,6 +148,113 @@ router.post('/generate-plan', protect, async (req, res) => {
   }
 });
 
+// Chat endpoint for AI conversations
+router.post('/chat', protect, async (req, res) => {
+  try {
+    const { message, context } = req.body;
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    let response;
+    
+    // Use OpenAI if available, otherwise fallback to simple responses
+    if (openai) {
+      try {
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `Du är ARIA - en professionell AI-löpcoach. Du svarar på svenska och ger konkreta, praktiska råd baserat på vetenskap och beprövad erfarenhet. Håll svaren personliga och uppmuntrande.
+
+              Användarens profil:
+              - Namn: ${user.firstName}
+              - Träningsnivå: ${user.activityLevel || 'okänd'}
+              - AI Coach profil: ${user.aiCoachProfile ? JSON.stringify(user.aiCoachProfile) : 'Inte konfigurerad'}
+              
+              Fokusera på praktiska råd för löpning, återhämtning, nutrition och skadeförebyggning. Använd emojis sparsamt och naturligt.`
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ],
+          max_tokens: 300,
+          temperature: 0.7,
+        });
+
+        response = completion.choices[0].message.content;
+      } catch (openaiError) {
+        console.error('OpenAI API error:', openaiError);
+        // Fallback to simple response if OpenAI fails
+        response = generateAIAdvice(message, context, user);
+      }
+    } else {
+      // Use fallback responses when OpenAI is not available
+      response = generateAIAdvice(message, context, user);
+    }
+
+    res.json({ 
+      message: response,
+      timestamp: new Date(),
+      enhanced: !!openai
+    });
+  } catch (error) {
+    console.error('Error in AI chat:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Onboarding endpoint to create training plan
+router.post('/onboarding', protect, async (req, res) => {
+  try {
+    const { goal, currentLevel, weeklyRuns, personalBest, injuries, timeCommitment } = req.body;
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Create AI coach profile from onboarding data
+    const aiCoachProfile = {
+      goals: [goal],
+      currentLevel,
+      weeklyVolume: weeklyRuns,
+      personalBest,
+      injuries: injuries === 'none' ? [] : [injuries],
+      timeCommitment,
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+
+    user.aiCoachProfile = aiCoachProfile;
+    await user.save();
+
+    // Generate a basic training plan
+    const trainingPlan = {
+      weeklyGoal: getWeeklyGoal(currentLevel, timeCommitment),
+      weeklySchedule: getWeeklySchedule(weeklyRuns, timeCommitment),
+      focusAreas: getFocusAreas(goal, currentLevel),
+      completedSessions: 0,
+      totalSessions: parseInt(weeklyRuns.split('-')[1] || weeklyRuns.split('+')[0] || '3'),
+      averagePace: getEstimatedPace(personalBest),
+      streak: 0
+    };
+
+    res.json({ 
+      success: true,
+      plan: trainingPlan,
+      profile: aiCoachProfile
+    });
+  } catch (error) {
+    console.error('Error in onboarding:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get AI coaching advice with OpenAI integration
 router.post('/advice', protect, async (req, res) => {
   try {
@@ -477,6 +584,84 @@ function formatPace(seconds) {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Helper functions for onboarding
+function getWeeklyGoal(currentLevel, timeCommitment) {
+  const timeHours = parseInt(timeCommitment.split('-')[0] || timeCommitment.split('+')[0] || '3');
+  
+  switch (currentLevel) {
+    case 'beginner':
+      return `${Math.min(timeHours * 3, 15)} km`;
+    case 'intermediate':
+      return `${Math.min(timeHours * 4, 25)} km`;
+    case 'advanced':
+      return `${Math.min(timeHours * 5, 40)} km`;
+    case 'elite':
+      return `${Math.min(timeHours * 6, 60)} km`;
+    default:
+      return '20 km';
+  }
+}
+
+function getWeeklySchedule(weeklyRuns, timeCommitment) {
+  const runs = parseInt(weeklyRuns.split('-')[1] || weeklyRuns.split('+')[0] || '3');
+  const timeHours = parseInt(timeCommitment.split('-')[0] || timeCommitment.split('+')[0] || '3');
+  
+  if (runs <= 2) {
+    return `${runs} pass per vecka: 1 längre pass (${Math.floor(timeHours/2)}0 min), 1 intervallpass (30 min)`;
+  } else if (runs <= 3) {
+    return `${runs} pass per vecka: 1 långpass, 1 intervallpass, 1 lugnt pass`;
+  } else {
+    return `${runs} pass per vecka: 2 kvalitetspass, ${runs-2} lugna pass`;
+  }
+}
+
+function getFocusAreas(goal, currentLevel) {
+  const areas = [];
+  
+  switch (goal) {
+    case 'speed':
+      areas.push('Intervallträning', 'Teknikförbättring');
+      break;
+    case 'distance':
+      areas.push('Uthållighet', 'Långpass');
+      break;
+    case 'weight':
+      areas.push('Fettförbränning', 'Regelbundenhet');
+      break;
+    case 'health':
+      areas.push('Grundkondition', 'Återhämtning');
+      break;
+    case 'race':
+      areas.push('Specifik träning', 'Tävlingsförberedelse');
+      break;
+    default:
+      areas.push('Allmän kondition', 'Löpglädje');
+  }
+  
+  if (currentLevel === 'beginner') {
+    areas.push('Skadeförebyggning');
+  }
+  
+  return areas.join(', ');
+}
+
+function getEstimatedPace(personalBest) {
+  switch (personalBest) {
+    case 'sub20':
+      return '4:00/km';
+    case '20-25':
+      return '4:30/km';
+    case '25-30':
+      return '5:30/km';
+    case '30-35':
+      return '6:30/km';
+    case '35+':
+      return '7:00/km';
+    default:
+      return '6:00/km';
+  }
 }
 
 module.exports = router;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Trophy, 
@@ -18,120 +18,7 @@ import {
   Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// Dummy data för topplistan
-const dummyLeaderboard = [
-  {
-    _id: '1',
-    firstName: 'Anna',
-    lastName: 'Karlsson',
-    profilePhoto: null,
-    points: 2850,
-    level: 8,
-    city: 'Stockholm',
-    stats: { totalDistance: 425.5, totalRuns: 89, averagePace: 285 },
-    rank: 1
-  },
-  {
-    _id: '2',
-    firstName: 'Erik',
-    lastName: 'Andersson',
-    profilePhoto: null,
-    points: 2720,
-    level: 7,
-    city: 'Göteborg',
-    stats: { totalDistance: 398.2, totalRuns: 82, averagePace: 295 },
-    rank: 2
-  },
-  {
-    _id: '3',
-    firstName: 'Sara',
-    lastName: 'Lindqvist',
-    profilePhoto: null,
-    points: 2650,
-    level: 7,
-    city: 'Stockholm',
-    stats: { totalDistance: 380.1, totalRuns: 76, averagePace: 275 },
-    rank: 3
-  },
-  {
-    _id: '4',
-    firstName: 'Marcus',
-    lastName: 'Johansson',
-    profilePhoto: null,
-    points: 2480,
-    level: 6,
-    city: 'Malmö',
-    stats: { totalDistance: 365.8, totalRuns: 71, averagePace: 305 },
-    rank: 4
-  },
-  {
-    _id: '5',
-    firstName: 'Emma',
-    lastName: 'Nilsson',
-    profilePhoto: null,
-    points: 2320,
-    level: 6,
-    city: 'Stockholm',
-    stats: { totalDistance: 342.4, totalRuns: 68, averagePace: 290 },
-    rank: 5
-  },
-  {
-    _id: '6',
-    firstName: 'Johan',
-    lastName: 'Berg',
-    profilePhoto: null,
-    points: 2180,
-    level: 5,
-    city: 'Uppsala',
-    stats: { totalDistance: 325.6, totalRuns: 64, averagePace: 310 },
-    rank: 6
-  },
-  {
-    _id: '7',
-    firstName: 'Lisa',
-    lastName: 'Holm',
-    profilePhoto: null,
-    points: 2050,
-    level: 5,
-    city: 'Göteborg',
-    stats: { totalDistance: 308.2, totalRuns: 59, averagePace: 280 },
-    rank: 7
-  },
-  {
-    _id: '8',
-    firstName: 'Daniel',
-    lastName: 'Svensson',
-    profilePhoto: null,
-    points: 1950,
-    level: 5,
-    city: 'Stockholm',
-    stats: { totalDistance: 295.1, totalRuns: 57, averagePace: 315 },
-    rank: 8
-  },
-  {
-    _id: '9',
-    firstName: 'Mia',
-    lastName: 'Persson',
-    profilePhoto: null,
-    points: 1850,
-    level: 4,
-    city: 'Lund',
-    stats: { totalDistance: 278.5, totalRuns: 54, averagePace: 300 },
-    rank: 9
-  },
-  {
-    _id: '10',
-    firstName: 'Oscar',
-    lastName: 'Gustafsson',
-    profilePhoto: null,
-    points: 1780,
-    level: 4,
-    city: 'Stockholm',
-    stats: { totalDistance: 265.8, totalRuns: 52, averagePace: 295 },
-    rank: 10
-  }
-];
+import api from '../../services/api';
 
 // Svenska kommuner
 const swedishMunicipalities = [
@@ -143,7 +30,7 @@ const swedishMunicipalities = [
 ];
 
 const LeaderboardPage = () => {
-  const [leaderboard, setLeaderboard] = useState(dummyLeaderboard);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [filters, setFilters] = useState({
     type: 'points', // points, level, distance
     timeframe: 'all', // week, month, all
@@ -152,6 +39,7 @@ const LeaderboardPage = () => {
   const [showMunicipalityModal, setShowMunicipalityModal] = useState(false);
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
   const [showPointsModal, setShowPointsModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const formatPace = (secondsPerKm) => {
     const minutes = Math.floor(secondsPerKm / 60);
@@ -173,8 +61,8 @@ const LeaderboardPage = () => {
     toast.success(`Visar topplista för ${municipality}`);
     
     // Filter data för vald kommun
-    const filteredData = dummyLeaderboard.filter(user => user.city === municipality);
-    setLeaderboard(filteredData.length > 0 ? filteredData : dummyLeaderboard.slice(0, 3));
+    const filteredData = leaderboard.filter(user => user.city === municipality);
+    setLeaderboard(filteredData.length > 0 ? filteredData : leaderboard.slice(0, 3));
   };
 
   // Sortera data baserat på vald typ
@@ -202,6 +90,30 @@ const LeaderboardPage = () => {
     ...user,
     rank: index + 1
   }));
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get('/users/leaderboard', {
+          params: {
+            timeframe: filters.timeframe,
+            location: filters.location !== 'all' ? filters.location : undefined,
+            category: filters.type !== 'all' ? filters.type : undefined
+          }
+        });
+        setLeaderboard(response.data.users || []);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        // Show empty leaderboard instead of dummy data
+        setLeaderboard([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [filters.timeframe, filters.location, filters.type]);
 
   return (
     <div className="min-h-screen bg-gray-50">

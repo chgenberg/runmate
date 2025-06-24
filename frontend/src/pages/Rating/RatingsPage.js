@@ -22,15 +22,43 @@ import RatingModal from '../../components/Rating/RatingModal';
 import { useAuth } from '../../contexts/AuthContext';
 import moment from 'moment';
 import 'moment/locale/sv';
+import api from '../../services/api';
 
 const RatingsPage = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [selectedRating, setSelectedRating] = useState(null);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [pendingRatings, setPendingRatings] = useState([]);
+  const [myRatings, setMyRatings] = useState([]);
 
   useEffect(() => {
     moment.locale('sv');
+  }, []);
+
+  useEffect(() => {
+    const fetchRatings = async () => {
+      setLoading(true);
+      try {
+        const [pendingRes, myRatingsRes] = await Promise.all([
+          api.get('/ratings/pending'),
+          api.get('/ratings/my-ratings')
+        ]);
+        
+        setPendingRatings(pendingRes.data.ratings || []);
+        setMyRatings(myRatingsRes.data.ratings || []);
+      } catch (error) {
+        console.error('Error fetching ratings:', error);
+        // Show empty arrays instead of dummy data
+        setPendingRatings([]);
+        setMyRatings([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRatings();
   }, []);
 
   const tabs = [
@@ -54,93 +82,6 @@ const RatingsPage = () => {
       icon: Crown,
       count: 8,
       color: 'from-purple-500 to-pink-600' 
-    }
-  ];
-
-  // Dummy data för test@test.se
-  const dummyPendingRatings = [
-    {
-      event: {
-        _id: '1',
-        title: 'Morgonjogg i Hagaparken',
-        date: new Date(Date.now() - 24 * 60 * 60 * 1000) // Igår
-      },
-      participant: {
-        _id: '2',
-        firstName: 'Emma',
-        lastName: 'Johansson',
-        profilePhoto: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop'
-      }
-    },
-    {
-      event: {
-        _id: '2',
-        title: 'Intervallträning Östermalm',
-        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 dagar sedan
-      },
-      participant: {
-        _id: '3',
-        firstName: 'Marcus',
-        lastName: 'Andersson',
-        profilePhoto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop'
-      }
-    },
-    {
-      event: {
-        _id: '3',
-        title: 'Långpass Djurgården',
-        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // En vecka sedan
-      },
-      participant: {
-        _id: '4',
-        firstName: 'Sofia',
-        lastName: 'Nilsson',
-        profilePhoto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop'
-      }
-    }
-  ];
-
-  const dummyMyRatings = [
-    {
-      _id: '1',
-      ratee: {
-        firstName: 'Johan',
-        lastName: 'Eriksson',
-        profilePhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop'
-      },
-      event: {
-        title: 'Tempo-löpning Vasastan',
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-      },
-      overallRating: 5,
-      categories: {
-        punctual: true,
-        fittingPace: true,
-        motivating: true,
-        friendly: true
-      },
-      comment: 'Fantastisk löppartner! Johan höll perfekt tempo och var väldigt motiverande.',
-      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: '2',
-      ratee: {
-        firstName: 'Lisa',
-        lastName: 'Svensson',
-        profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop'
-      },
-      event: {
-        title: 'Backträning Hammarbybacken',
-        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
-      },
-      overallRating: 4,
-      categories: {
-        punctual: true,
-        wellPrepared: true,
-        knowledgeable: true
-      },
-      comment: 'Mycket kunnig om backträning och hade bra tips!',
-      createdAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000)
     }
   ];
 
@@ -449,7 +390,7 @@ const RatingsPage = () => {
           >
             {activeTab === 'pending' && (
               <div className="space-y-4">
-                {dummyPendingRatings.map((pendingRating, index) => (
+                {pendingRatings.map((pendingRating, index) => (
                   <motion.div
                     key={`${pendingRating.event._id}-${pendingRating.participant._id}`}
                     initial={{ opacity: 0, x: -20 }}
@@ -529,7 +470,7 @@ const RatingsPage = () => {
 
             {activeTab === 'myratings' && (
               <div className="space-y-4">
-                {dummyMyRatings.map((rating, index) => (
+                {myRatings.map((rating, index) => (
                   <motion.div
                     key={rating._id}
                     initial={{ opacity: 0, x: -20 }}

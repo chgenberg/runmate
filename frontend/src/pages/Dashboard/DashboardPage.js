@@ -39,103 +39,35 @@ const DashboardPage = () => {
   const membersScrollRef = useRef(null);
   const challengesScrollRef = useRef(null);
 
-  const fetchAllData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [membersRes, challengesRes, eventsRes, leaderboardRes, statsRes] = await Promise.all([
-        api.get('/users/discover?limit=20'),
-        api.get('/challenges/my-challenges'),
-        api.get('/runevents/my-events'),
-        api.get('/users/leaderboard?limit=5'),
-        api.get('/users/stats/summary')
-      ]);
-
-      setMembers(membersRes.data.users || generateMockMembers());
-      setChallenges(challengesRes.data.challenges || generateMockChallenges());
-      setEvents(eventsRes.data.events || generateMockEvents());
-      setLeaderboard(leaderboardRes.data.leaderboard || generateMockLeaderboard());
-      setUserStats(statsRes.data.data || {
-        user: { points: 156, level: 5 },
-        stats: { totalDistance: 156, totalActivities: 45 },
-        rankings: { national: 24 }
-      });
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      // Use mock data as fallback
-      setMembers(generateMockMembers());
-      setChallenges(generateMockChallenges());
-      setEvents(generateMockEvents());
-      setLeaderboard(generateMockLeaderboard());
-      setUserStats({
-        user: { points: 156, level: 5, rating: 4.7 },
-        stats: { totalDistance: 156, totalActivities: 45 },
-        rankings: { national: 24 }
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        const [membersRes, challengesRes, eventsRes, leaderboardRes] = await Promise.all([
+          api.get('/discover/users?limit=10'),
+          api.get('/challenges?limit=5'),
+          api.get('/runevents/upcoming?limit=5'), 
+          api.get('/users/leaderboard?limit=5')
+        ]);
+        
+        setMembers(membersRes.data.users || []);
+        setChallenges(challengesRes.data.challenges || []);
+        setEvents(eventsRes.data.events || []);
+        setLeaderboard(leaderboardRes.data.users || []);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        // Set empty arrays on error instead of mock data
+        setMembers([]);
+        setChallenges([]);
+        setEvents([]);
+        setLeaderboard([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const generateMockMembers = () => {
-    const mockData = [
-      { name: 'Emma Johansson', location: 'Stockholm', pb10k: '42:15', motivation: 'Älskar känslan efter ett långpass', activities: ['Löpning', 'Trail'] },
-      { name: 'Marcus Berg', location: 'Göteborg', pb10k: '38:45', motivation: 'Tränar för mitt första maraton', activities: ['Löpning', 'Cykling'] },
-      { name: 'Sara Lindqvist', location: 'Malmö', pb10k: '45:30', motivation: 'Springer för hälsan och gemenskapen', activities: ['Löpning'] },
-      { name: 'Johan Nilsson', location: 'Uppsala', pb10k: '41:00', motivation: 'Jagar nya PB varje vecka!', activities: ['Löpning', 'Gym'] },
-      { name: 'Anna Svensson', location: 'Lund', pb10k: '44:20', motivation: 'Löpning är min meditation', activities: ['Löpning', 'Yoga'] }
-    ];
-
-    return mockData.map((data, idx) => ({
-      _id: idx.toString(),
-      firstName: data.name.split(' ')[0],
-      lastName: data.name.split(' ')[1],
-      profilePicture: `https://ui-avatars.com/api/?name=${data.name}&background=random&size=400`,
-      location: data.location,
-      personalBests: { '10k': data.pb10k },
-      motivation: data.motivation,
-      favoriteActivities: data.activities,
-      rating: 4 + Math.random(),
-      weeklyKm: Math.floor(Math.random() * 50) + 20,
-      pace: data.pb10k.substring(0, 4) + ' min/km'
-    }));
-  };
-
-  const generateMockChallenges = () => {
-    return [
-      { _id: '1', title: 'Veckans Mil', participants: 156, daysLeft: 5, reward: '500 poäng', progress: 65 },
-      { _id: '2', title: 'Oktober Marathon', participants: 89, daysLeft: 18, reward: '1000 poäng', progress: 30 },
-      { _id: '3', title: 'Höstrusket 5K', participants: 234, daysLeft: 3, reward: '300 poäng', progress: 85 },
-      { _id: '4', title: '100km på 30 dagar', participants: 67, daysLeft: 24, reward: '2000 poäng', progress: 45 }
-    ];
-  };
-
-  const generateMockEvents = () => {
-    const dates = [
-      new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-      new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-      new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
-    ];
-
-    return [
-      { _id: '1', title: 'Morgonlöpning Djurgården', date: dates[0], participants: 8, distance: '8 km', location: 'Djurgården' },
-      { _id: '2', title: 'Intervaller Ladugårdsgärde', date: dates[1], participants: 5, distance: '6 km', location: 'Gärdet' },
-      { _id: '3', title: 'Långpass Haga', date: dates[2], participants: 12, distance: '15 km', location: 'Hagaparken' }
-    ];
-  };
-
-  const generateMockLeaderboard = () => {
-    return [
-      { _id: '1', name: 'Erik Gustafsson', location: 'Stockholm', weeklyKm: 78, avatar: 'EG', points: 2340 },
-      { _id: '2', name: 'Maria Andersson', location: 'Göteborg', weeklyKm: 72, avatar: 'MA', points: 2180 },
-      { _id: '3', name: 'Johan Lindberg', location: 'Malmö', weeklyKm: 68, avatar: 'JL', points: 1920 },
-      { _id: '4', name: 'Anna Nilsson', location: 'Uppsala', weeklyKm: 65, avatar: 'AN', points: 1850 },
-      { _id: '5', name: 'Peter Svensson', location: 'Lund', weeklyKm: 61, avatar: 'PS', points: 1720 }
-    ];
-  };
+    fetchDashboardData();
+  }, []);
 
   const scroll = (ref, direction) => {
     if (ref.current) {

@@ -20,64 +20,34 @@ const AllMembersPage = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [message, setMessage] = useState('');
+  const [filters, setFilters] = useState({
+    location: 'all',
+    level: 'all'
+  });
 
   const fetchMembers = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await api.get('/users/public?limit=50');
-      const allMembers = response.data.users || generateMockMembers();
-      setMembers(allMembers);
+      const response = await api.get('/users/discover', {
+        params: {
+          limit: 50,
+          location: filters.location !== 'all' ? filters.location : undefined,
+          activityLevel: filters.level !== 'all' ? filters.level : undefined
+        }
+      });
+      setMembers(response.data.users || []);
     } catch (error) {
       console.error('Error fetching members:', error);
-      setMembers(generateMockMembers());
+      // Show empty list instead of mock data
+      setMembers([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
-
-  const generateMockMembers = () => {
-    const names = [
-      'Emma Johansson', 'Marcus Andersson', 'Sara Lindqvist', 'Johan Nilsson',
-      'Anna Svensson', 'Viktor Bergman', 'Lisa Karlsson', 'Andreas Olsson',
-      'Maja Eriksson', 'Oscar Lindberg', 'Julia Pettersson', 'Erik Gustafsson',
-      'Klara Henriksson', 'Simon Larsson', 'Elin Persson', 'Filip Jansson'
-    ];
-    
-    const locations = ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Lund', 'Örebro', 'Linköping', 'Västerås'];
-    const motivations = [
-      'Älskar känslan efter ett långpass',
-      'Tränar för mitt första maraton',
-      'Springer för hälsan och gemenskapen',
-      'Jagar nya PB varje vecka!',
-      'Löpning är min meditation',
-      'Tränar för Vasaloppet',
-      'Gillar att utmana mig själv',
-      'Springer för att må bra'
-    ];
-
-    return names.map((name, idx) => ({
-      _id: idx.toString(),
-      firstName: name.split(' ')[0],
-      lastName: name.split(' ')[1],
-      profilePicture: `https://ui-avatars.com/api/?name=${name}&background=random&size=400`,
-      location: locations[idx % locations.length],
-      personalBests: { 
-        '5k': `${20 + Math.floor(Math.random() * 10)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-        '10k': `${40 + Math.floor(Math.random() * 15)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-        'halfMarathon': `${90 + Math.floor(Math.random() * 30)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`
-      },
-      motivation: motivations[idx % motivations.length],
-      favoriteActivities: ['Löpning', 'Trail', 'Intervaller', 'Långpass'].slice(0, Math.floor(Math.random() * 3) + 1),
-      rating: 3.5 + Math.random() * 1.5,
-      weeklyKm: Math.floor(Math.random() * 60) + 15,
-      totalRuns: Math.floor(Math.random() * 200) + 50,
-      memberSince: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
-    }));
-  };
 
   const handleSwipe = (action) => {
     if (currentIndex >= members.length) return;

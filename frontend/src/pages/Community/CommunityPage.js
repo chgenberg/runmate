@@ -47,20 +47,34 @@ const CommunityPage = () => {
       if (searchTerm) params.append('search', searchTerm);
       
       const response = await api.get(`/community/rooms?${params}`);
-      setRooms(response.data.rooms || generateMockRooms());
+      setRooms(response.data.rooms || []);
     } catch (error) {
       console.error('Error fetching rooms:', error);
-      // Use mock data on error
-      setRooms(generateMockRooms());
+      // Show empty list instead of mock data
+      setRooms([]);
     } finally {
       setLoading(false);
     }
   }, [selectedCategory, selectedCity, searchTerm]);
 
   useEffect(() => {
-    fetchRooms();
+    const fetchCommunityData = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get('/community/rooms');
+        setRooms(response.data.rooms || []);
+      } catch (error) {
+        console.error('Error fetching community rooms:', error);
+        // Show empty list instead of mock data
+        setRooms([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCommunityData();
     fetchMyRooms();
-  }, [fetchRooms]);
+  }, []);
 
   const fetchMyRooms = async () => {
     try {
@@ -69,68 +83,6 @@ const CommunityPage = () => {
     } catch (error) {
       console.error('Error fetching my rooms:', error);
     }
-  };
-
-  const generateMockRooms = () => {
-    return [
-      {
-        _id: '1',
-        title: 'Stockholms Morgonlöpare',
-        description: 'Vi träffas varje tisdag och torsdag kl 06:00 vid Hötorget för gemensamma löppass. Alla nivåer välkomna!',
-        category: 'location',
-        location: { city: 'Stockholm' },
-        stats: { memberCount: 156, messageCount: 892, lastActivity: new Date() },
-        tags: ['morgon', '5-10km', 'nybörjarvänlig'],
-        isHot: true
-      },
-      {
-        _id: '2',
-        title: 'Trail Running Göteborg',
-        description: 'För dig som älskar att springa i naturen! Vi utforskar stigar runt Göteborg varje helg.',
-        category: 'training',
-        location: { city: 'Göteborg' },
-        stats: { memberCount: 89, messageCount: 456, lastActivity: new Date(Date.now() - 3600000) },
-        tags: ['trail', 'helger', 'natur', 'kuperat']
-      },
-      {
-        _id: '3',
-        title: 'Malmö Marathon Träning',
-        description: 'Träningsgrupp för Malmö Marathon 2024. Strukturerade träningsprogram och gruppträningar.',
-        category: 'events',
-        location: { city: 'Malmö' },
-        stats: { memberCount: 234, messageCount: 1567, lastActivity: new Date(Date.now() - 7200000) },
-        tags: ['marathon', 'träningsprogram', 'långdistans'],
-        isNew: true
-      },
-      {
-        _id: '4',
-        title: 'Nybörjare Uppsala',
-        description: 'Perfekt för dig som just börjat springa! Vi kör lugna pass och fokuserar på teknik och glädje.',
-        category: 'beginners',
-        location: { city: 'Uppsala' },
-        stats: { memberCount: 67, messageCount: 234, lastActivity: new Date(Date.now() - 86400000) },
-        tags: ['nybörjare', 'teknik', 'social']
-      },
-      {
-        _id: '5',
-        title: 'Intervallträning Lund',
-        description: 'Intensiva intervallpass för dig som vill förbättra din hastighet och kondition.',
-        category: 'advanced',
-        location: { city: 'Lund' },
-        stats: { memberCount: 45, messageCount: 789, lastActivity: new Date() },
-        tags: ['intervaller', 'hastighet', 'avancerat']
-      },
-      {
-        _id: '6',
-        title: 'Kvinnor som springer - Stockholm',
-        description: 'Ett tryggt rum för kvinnor som springer. Vi stöttar varandra och har kul tillsammans!',
-        category: 'location',
-        location: { city: 'Stockholm' },
-        stats: { memberCount: 198, messageCount: 2345, lastActivity: new Date() },
-        tags: ['kvinnor', 'trygghet', 'gemenskap'],
-        isHot: true
-      }
-    ];
   };
 
   const formatLastActivity = (dateString) => {

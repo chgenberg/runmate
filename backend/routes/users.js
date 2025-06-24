@@ -696,7 +696,7 @@ router.get('/stats/summary', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     
-    // Get activity statistics
+    // Get activity statistics with enhanced metrics
     const activityStats = await Activity.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
       {
@@ -707,8 +707,53 @@ router.get('/stats/summary', auth, async (req, res) => {
           totalTime: { $sum: '$duration' },
           totalElevation: { $sum: '$elevationGain' },
           totalPoints: { $sum: '$pointsEarned' },
+          totalCalories: { $sum: '$calories' },
           avgDistance: { $avg: '$distance' },
-          avgPace: { $avg: '$averagePace' }
+          avgPace: { $avg: '$averagePace' },
+          avgHeartRate: { $avg: '$averageHeartRate' },
+          maxDistance: { $max: '$distance' },
+          fastestPace: { $min: '$averagePace' },
+          maxElevation: { $max: '$elevationGain' },
+          maxHeartRate: { $max: '$maxHeartRate' }
+        }
+      }
+    ]);
+    
+    // Get running consistency (weekly activity)
+    const last30Days = new Date();
+    last30Days.setDate(last30Days.getDate() - 30);
+    
+    const recentActivities = await Activity.find({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      startTime: { $gte: last30Days }
+    }).sort({ startTime: -1 });
+    
+    // Calculate weekly consistency
+    const weeksWithRuns = new Set();
+    recentActivities.forEach(activity => {
+      const week = Math.floor((new Date() - new Date(activity.startTime)) / (7 * 24 * 60 * 60 * 1000));
+      weeksWithRuns.add(week);
+    });
+    
+    // Get personal records (this month vs all time)
+    const thisMonth = new Date();
+    thisMonth.setDate(1);
+    thisMonth.setHours(0, 0, 0, 0);
+    
+    const monthlyStats = await Activity.aggregate([
+      { 
+        $match: { 
+          userId: new mongoose.Types.ObjectId(req.user.id),
+          startTime: { $gte: thisMonth }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          monthlyDistance: { $sum: '$distance' },
+          monthlyActivities: { $sum: 1 },
+          monthlyTime: { $sum: '$duration' },
+          bestMonthlyPace: { $min: '$averagePace' }
         }
       }
     ]);
@@ -719,8 +764,66 @@ router.get('/stats/summary', auth, async (req, res) => {
       totalTime: 0,
       totalElevation: 0,
       totalPoints: 0,
+      totalCalories: 0,
       avgDistance: 0,
-      avgPace: 0
+      avgPace: 0,
+      avgHeartRate: 0,
+      maxDistance: 0,
+      fastestPace: 0,
+      maxElevation: 0,
+      maxHeartRate: 0
+    };
+    
+    const monthly = monthlyStats[0] || {
+      monthlyDistance: 0,
+      monthlyActivities: 0,
+      monthlyTime: 0,
+      bestMonthlyPace: 0
+    };
+    
+    // Calculate enhanced metrics
+    const enhancedStats = {
+      ...stats,
+      // Basic metrics
+      totalActivities: stats.totalActivities,
+      totalDistance: Math.round(stats.totalDistance * 10) / 10,
+      totalTime: stats.totalTime,
+      avgPace: Math.round(stats.avgPace),
+      
+      // Distance achievements
+      longestRun: Math.round(stats.maxDistance * 10) / 10,
+      avgRunDistance: Math.round(stats.avgDistance * 10) / 10,
+      
+      // Pace achievements
+      bestPace: Math.round(stats.fastestPace),
+      avgPaceFormatted: formatPaceFromSeconds(stats.avgPace),
+      bestPaceFormatted: formatPaceFromSeconds(stats.fastestPace),
+      
+      // Health metrics
+      totalCalories: Math.round(stats.totalCalories),
+      avgHeartRate: Math.round(stats.avgHeartRate),
+      maxHeartRate: Math.round(stats.maxHeartRate),
+      
+      // Elevation
+      totalElevation: Math.round(stats.totalElevation),
+      biggestClimb: Math.round(stats.maxElevation),
+      
+      // Consistency metrics
+      weeklyConsistency: Math.min(weeksWithRuns.size, 4), // Last 4 weeks
+      activeDays: recentActivities.length,
+      
+      // Monthly progress
+      thisMonth: {
+        distance: Math.round(monthly.monthlyDistance * 10) / 10,
+        activities: monthly.monthlyActivities,
+        time: monthly.monthlyTime,
+        bestPace: Math.round(monthly.bestMonthlyPace),
+        bestPaceFormatted: formatPaceFromSeconds(monthly.bestMonthlyPace)
+      },
+      
+      // Training insights
+      totalHours: Math.round(stats.totalTime / 3600 * 10) / 10,
+      avgRunTime: stats.totalActivities > 0 ? Math.round(stats.totalTime / stats.totalActivities / 60) : 0
     };
     
     // Calculate national and local rankings
@@ -749,7 +852,7 @@ router.get('/stats/summary', auth, async (req, res) => {
           level: user.level,
           profilePhoto: user.profilePhoto
         },
-        stats,
+        stats: enhancedStats,
         rankings: {
           national: nationalRank,
           local: localRank
@@ -765,6 +868,14 @@ router.get('/stats/summary', auth, async (req, res) => {
     });
   }
 });
+
+// Helper function to format pace from seconds to MM:SS
+function formatPaceFromSeconds(seconds) {
+  if (!seconds || seconds === 0) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
 
 // Public endpoint to get a specific user's profile
 router.get('/public/:userId', async (req, res) => {

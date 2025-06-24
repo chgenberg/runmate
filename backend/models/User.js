@@ -355,6 +355,30 @@ const userSchema = new mongoose.Schema({
   },
   premiumExpiry: Date,
   
+  // AI Coach Profile
+  aiCoachProfile: {
+    goals: String,
+    currentLevel: String,
+    targetDistance: String,
+    targetTime: Number, // in seconds
+    deadline: Date,
+    injuries: [String],
+    limitations: [String],
+    weeklyVolume: Number, // hours per week
+    restDays: Number,
+    workSchedule: String,
+    equipment: [String],
+    priorities: [String],
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    lastUpdated: {
+      type: Date,
+      default: Date.now
+    }
+  },
+
   // Account Settings
   isActive: {
     type: Boolean,

@@ -137,6 +137,7 @@ app.use('/api/integrations', require('./routes/integrations'));
 app.use('/api/health', require('./routes/health'));
 app.use('/api/community', require('./routes/community'));
 app.use('/api/debug', require('./routes/debug'));
+app.use('/api/aicoach', require('./routes/aicoach'));
 // app.use('/api/notifications', notificationRoutes); // Temporarily disabled
 
 // Socket.io real-time functionality

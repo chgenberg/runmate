@@ -102,6 +102,8 @@ const ProfilePage = () => {
       // Formatera data för komponenten
       const formattedUser = {
         ...userData,
+        // Use points from stats if available, otherwise from user data
+        points: statsData?.data?.user?.points || userData.points || 0,
         age: age ? age.toString() : '',
         location: userData.location?.city || '',
         personalBests: {
@@ -118,7 +120,7 @@ const ProfilePage = () => {
           totalRuns: realStats.totalActivities || userData.trainingStats?.totalRuns || 0,
           totalDistance: Math.round(realStats.totalDistance || userData.trainingStats?.totalDistance || 0),
           totalTime: Math.round((realStats.totalTime || userData.trainingStats?.totalTime || 0) / 3600), // Convert to hours
-          averagePace: realStats.avgPace ? formatTimeFromSeconds(realStats.avgPace * 60) : 
+          averagePace: realStats.avgPace ? formatTimeFromSeconds(realStats.avgPace) : 
                       (userData.trainingStats?.averagePace || '0:00')
         },
         preferredTimes: userData.trainingPreferences?.preferredTimes || [],

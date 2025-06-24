@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,7 +30,7 @@ const DashboardPage = () => {
   const [challenges, setChallenges] = useState([]);
   const [events, setEvents] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [userStats, setUserStats] = useState(null);
+  const [userStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -196,66 +196,96 @@ const DashboardPage = () => {
                   className="flex-shrink-0 w-72 md:w-80"
                 >
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all">
-                    <div className="relative h-32 bg-gradient-to-br from-orange-400 to-red-400">
-                      <div className="absolute bottom-4 left-6">
-                        <ProfileAvatar 
-                          user={member}
-                          src={member.profilePicture}
-                          size="lg"
-                          className="border-4 border-white"
+                    {/* Profile Image Section */}
+                    <div className="relative h-48 md:h-56">
+                      {member.profilePicture ? (
+                        <img 
+                          src={member.profilePicture} 
+                          alt={`${member.firstName} ${member.lastName}`}
+                          className="w-full h-full object-cover"
                         />
-                      </div>
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center">
+                          <span className="text-6xl md:text-7xl font-bold text-white/80">
+                            {member.firstName?.charAt(0)}{member.lastName?.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                      
+                      {/* Rating badge */}
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
                         <div className="flex items-center space-x-1">
                           <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className="text-sm font-semibold">{member.rating?.toFixed(1) || '4.5'}</span>
+                          <span className="text-sm font-semibold text-gray-800">{member.rating?.toFixed(1) || '4.5'}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Location badge */}
+                      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-800">{member.location || 'Sverige'}</span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="p-6 pt-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                    <div className="p-5">
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">
                         {member.firstName} {member.lastName?.charAt(0)}.
                       </h3>
-                      <div className="flex items-center text-gray-600 text-sm mb-4">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {member.location || 'Sverige'}
-                      </div>
 
-                      <div className="space-y-3 mb-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500">PB 10k</span>
-                          <span className="font-semibold">{member.personalBests?.['10k'] || '45:00'}</span>
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-gray-50 rounded-lg p-3 text-center">
+                          <p className="text-xs text-gray-500 mb-1">PB 10k</p>
+                          <p className="font-bold text-gray-900">{member.personalBests?.['10k'] || '45:00'}</p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500">Veckosnitt</span>
-                          <span className="font-semibold">{member.weeklyKm || 30} km</span>
+                        <div className="bg-gray-50 rounded-lg p-3 text-center">
+                          <p className="text-xs text-gray-500 mb-1">Vecka</p>
+                          <p className="font-bold text-gray-900">{member.weeklyKm || 30} km</p>
                         </div>
                       </div>
 
+                      {/* Bio/Quote */}
                       <p className="text-sm text-gray-600 italic mb-4 line-clamp-2">
-                        "{member.motivation || 'Älskar att springa!'}"
+                        "{member.bio || member.motivation || 'Älskar att springa och träffa nya löparvänner!'}"
                       </p>
 
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => handleMemberAction(member, 'message')}
-                          className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                          <span>Kontakta</span>
-                        </button>
-                        <button 
-                          onClick={() => handleMemberAction(member, 'like')}
-                          className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
-                        >
-                          <Heart className="w-5 h-5" />
-                        </button>
-                      </div>
+                      {/* Action buttons */}
+                      <button 
+                        onClick={() => handleMemberAction(member, 'message')}
+                        className="w-full py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Kontakta</span>
+                      </button>
                     </div>
                   </div>
                 </motion.div>
               ))}
+              
+              {/* Show more card */}
+              {members.length >= 5 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex-shrink-0 w-72 md:w-80"
+                >
+                  <button
+                    onClick={() => navigate('/app/discover')}
+                    className="w-full h-full min-h-[400px] bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-4 hover:shadow-xl transition-all group"
+                  >
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ChevronRight className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <p className="text-xl font-bold text-gray-800">Visa fler löpare</p>
+                    <p className="text-sm text-gray-600">+{members.length * 2} till</p>
+                  </button>
+                </motion.div>
+              )}
             </div>
           </div>
         </div>

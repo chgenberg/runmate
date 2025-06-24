@@ -236,4 +236,4 @@ Stort tack till:
 
 ---
 
-**Made with ❤️ in Sweden** 🇸🇪 
+**Made with ❤️ in Sweden** 🇸🇪 # Railway deployment trigger Tue Jun 24 14:33:03 CEST 2025

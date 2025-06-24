@@ -22,6 +22,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import api, { getProfilePictureUrl } from '../../services/api';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import UserRatingProfile from '../../components/Rating/UserRatingProfile';
+import ProfileAvatar from '../../components/common/ProfileAvatar';
 
 const ProfilePage = () => {
   const { user: authUser, updateProfile } = useAuth();
@@ -229,10 +230,15 @@ const ProfilePage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPhotos([...photos, e.target.result]);
+        setPhotos([e.target.result, ...photos.slice(1)]);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleProfilePictureClick = () => {
+    // Trigger file input when profile picture is clicked
+    document.getElementById('profile-picture-input').click();
   };
 
   const removePhoto = (index) => {
@@ -322,23 +328,25 @@ const ProfilePage = () => {
           {/* Profile Header */}
           <div className="p-6 md:p-8 pt-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-              <div className="relative">
-                <img
-                  src={getProfilePictureUrl(user) || photos[0] || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&auto=format'}
-                  alt="Profile"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl"
+              <div 
+                className={`${editing ? 'cursor-pointer' : ''}`}
+                onClick={editing ? handleProfilePictureClick : undefined}
+              >
+                <ProfileAvatar
+                  user={user}
+                  src={getProfilePictureUrl(user) || photos[0]}
+                  size="md"
+                  showEditIcon={editing}
+                  onEdit={handleProfilePictureClick}
+                  EditIcon={Camera}
                 />
-                {editing && (
-                  <label className="absolute bottom-0 right-0 w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-600 transition-all">
-                    <Camera className="w-5 h-5 text-white" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
-                    />
-                  </label>
-                )}
+                <input
+                  id="profile-picture-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
               </div>
               
               <div className="flex-1 text-center md:text-left">

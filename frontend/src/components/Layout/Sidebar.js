@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { 
   Users,
   Trophy,
-  User,
   Settings,
   LogOut,
   Heart,
@@ -17,6 +16,8 @@ import {
   Calendar,
   MessageCircle
 } from 'lucide-react';
+import ProfileAvatar from '../common/ProfileAvatar';
+import { getProfilePictureUrl } from '../../services/api';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -132,17 +133,11 @@ const Sidebar = () => {
           to="/app/profile"
           className="flex items-center p-3 rounded-lg hover:bg-gray-100 transition-colors mb-3"
         >
-          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-            {user?.profilePicture ? (
-              <img 
-                src={user.profilePicture} 
-                alt="Profil" 
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <User className="w-5 h-5 text-gray-600" />
-            )}
-          </div>
+          <ProfileAvatar
+            user={user}
+            src={getProfilePictureUrl(user)}
+            size="sm"
+          />
           <div className="ml-3 flex-1">
             <p className="text-sm font-semibold text-gray-900">
               {user?.firstName} {user?.lastName}

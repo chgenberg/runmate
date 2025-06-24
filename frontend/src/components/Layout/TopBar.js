@@ -3,13 +3,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { useNavigate } from 'react-router-dom';
 import { 
-  BellIcon, 
-  UserIcon
+  BellIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
 import { Heart } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import AppleHealthSyncModal from './AppleHealthSyncModal';
+import ProfileAvatar from '../common/ProfileAvatar';
+import { getProfilePictureUrl } from '../../services/api';
 
 const TopBar = () => {
   const { user } = useAuth();
@@ -127,17 +128,14 @@ const TopBar = () => {
           {/* Profile Picture */}
           <button
             onClick={() => navigate('/app/profile')}
-            className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all transform hover:scale-105"
+            className="shadow-md hover:shadow-lg transition-all transform hover:scale-105"
           >
-            {user?.profileImage ? (
-              <img 
-                src={user.profileImage} 
-                alt="Profil" 
-                className="w-10 h-10 rounded-full object-cover border-2 border-white"
-              />
-            ) : (
-              <UserIcon className="w-5 h-5 text-white" />
-            )}
+            <ProfileAvatar
+              user={user}
+              src={getProfilePictureUrl(user)}
+              size="sm"
+              className="border-2 border-white"
+            />
           </button>
         </div>
       </div>

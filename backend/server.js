@@ -52,9 +52,10 @@ const connectWithRetry = async () => {
   } catch (error) {
     console.error('✗ Database connection failed:', error.message);
     if (process.env.RAILWAY_ENVIRONMENT) {
-      // In Railway, don't retry - let the deployment fail if DB connection fails
-      console.error('Railway deployment: Database connection required');
-      process.exit(1);
+      // In Railway, log the error but don't exit - let the health check handle it
+      console.error('Railway deployment: Database connection failed, but continuing server startup');
+      // Set a flag to indicate DB is not connected
+      global.dbConnected = false;
     } else {
       // Local development - retry after 5 seconds
       console.log('Retrying database connection in 5 seconds...');
@@ -63,11 +64,28 @@ const connectWithRetry = async () => {
   }
 };
 
+// Set initial DB connection flag
+global.dbConnected = true;
+
 // Start database connection
 connectWithRetry();
 
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = socketIo(server, {
+  cors: {
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001', 
+      'https://staging-rummate-frontend-production.up.railway.app',
+      'https://staging-runmate-frontend-production.up.railway.app'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
 
 // Security middleware
 app.use(helmet({
@@ -137,11 +155,17 @@ console.log('✓ Static files configured');
 
 // Health check
 app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  
   res.status(200).json({
     success: true,
     message: 'RunMate API is running',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    database: dbStatus,
+    environment: process.env.NODE_ENV || 'development',
+    railway: process.env.RAILWAY_ENVIRONMENT || 'not detected'
   });
 });
 

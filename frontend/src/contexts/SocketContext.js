@@ -23,7 +23,7 @@ export function SocketProvider({ children }) {
         console.log('Connected to socket server');
         
         // Join user's personal room
-        newSocket.emit('join', user.id);
+        newSocket.emit('join', user._id || user.id);
       });
 
       newSocket.on('disconnect', () => {

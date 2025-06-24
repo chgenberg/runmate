@@ -99,11 +99,11 @@ const ChatPage = () => {
 
   const handleTyping = () => {
     if (socket) {
-      socket.emit('typing', { chatId, userId: user.id, userName: user.firstName });
+      socket.emit('typing', { chatId, userId: user._id || user.id, userName: user.firstName });
       
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
-        socket.emit('stopped_typing', { chatId, userId: user.id, userName: user.firstName });
+        socket.emit('stopped_typing', { chatId, userId: user._id || user.id, userName: user.firstName });
       }, 1000);
     }
   };
@@ -220,7 +220,7 @@ const ChatPage = () => {
         ) : (
           <AnimatePresence>
             {messages.map((message, index) => {
-              const isOwnMessage = message.sender._id === user.id;
+              const isOwnMessage = message.sender._id === (user._id || user.id);
               const showAvatar = index === 0 || messages[index - 1].sender._id !== message.sender._id;
               
               return (

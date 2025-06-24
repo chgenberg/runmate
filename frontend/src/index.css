@@ -846,4 +846,26 @@
 /* Ensure proper rendering of gradient text */
 .bg-gradient-to-r {
   background-size: 200% auto;
+}
+
+/* Global modal overlay with very high z-index */
+.modal-overlay {
+  z-index: 999999 !important;
+}
+
+/* Ensure modals are always on top */
+.modal-content {
+  z-index: 999999 !important;
+  position: relative;
+}
+
+/* Fix for elements that might interfere with modals */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Override any lower z-index values for modals */
+[class*="fixed"][class*="inset-0"][class*="z-50"], 
+[class*="fixed"][class*="inset-0"][class*="z-40"] {
+  z-index: 999999 !important;
 } 

@@ -213,127 +213,146 @@ const LeaderboardPage = () => {
           </div>
 
           <div className="divide-y divide-gray-100">
-            {filteredLeaderboard.map((runner, index) => {
-              const rankConfig = getRankIcon(runner.rank);
-              const Icon = rankConfig.icon;
-              
-              return (
-                <motion.div
-                  key={runner._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="p-6 hover:bg-gray-50 transition-all duration-300"
+            {filteredLeaderboard.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-6xl mb-4">🏃‍♂️</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Inga löpare hittades</h3>
+                <p className="text-gray-600 mb-6">
+                  {filters.location === 'local' && selectedMunicipality 
+                    ? `Det finns inga löpare registrerade i ${selectedMunicipality} än.`
+                    : 'Topplistan är tom för tillfället.'
+                  }
+                </p>
+                <button
+                  onClick={() => setFilters({ type: 'points', timeframe: 'all', location: 'national' })}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-                    
-                    {/* Mobile: Rank + Profile + Primary Metric in top row */}
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                      {/* Rank */}
-                      <div className="flex items-center gap-2 md:gap-3">
-                        <div className={`w-10 h-10 md:w-12 md:h-12 ${rankConfig.bg} rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-5 h-5 md:w-6 md:h-6 ${rankConfig.color}`} />
+                  Visa nationell topplista
+                </button>
+              </div>
+            ) : (
+              filteredLeaderboard.map((runner, index) => {
+                const rankConfig = getRankIcon(runner.rank);
+                const Icon = rankConfig.icon;
+                
+                return (
+                  <motion.div
+                    key={runner._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="p-6 hover:bg-gray-50 transition-all duration-300"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                      
+                      {/* Mobile: Rank + Profile + Primary Metric in top row */}
+                      <div className="flex items-center gap-3 w-full md:w-auto">
+                        {/* Rank */}
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <div className={`w-10 h-10 md:w-12 md:h-12 ${rankConfig.bg} rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`w-5 h-5 md:w-6 md:h-6 ${rankConfig.color}`} />
+                          </div>
+                          <span className="text-xl md:text-2xl font-black text-gray-900 min-w-[35px] md:min-w-[50px]">
+                            #{runner.rank}
+                          </span>
                         </div>
-                        <span className="text-xl md:text-2xl font-black text-gray-900 min-w-[35px] md:min-w-[50px]">
-                          #{runner.rank}
-                        </span>
-                      </div>
 
-                      {/* Profile */}
-                      <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                        <img 
-                          src={runner.profilePhoto || runner.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(runner.firstName || 'User')}+${encodeURIComponent(runner.lastName || '')}&background=random`}
-                          alt={runner.firstName}
-                          className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover ring-2 md:ring-4 ring-white shadow-lg flex-shrink-0"
-                          onError={(e) => {
-                            if (!e.target.src.includes('ui-avatars.com')) {
-                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(runner.firstName || 'User')}+${encodeURIComponent(runner.lastName || '')}&background=random`;
-                            }
-                          }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-base md:text-xl font-bold text-gray-900 truncate">
-                            {runner.firstName} {runner.lastName}
-                          </h3>
-                          <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500">
-                            <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
-                            <span className="truncate">{runner.city}</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span className="hidden sm:inline">{runner.stats.totalDistance}km totalt</span>
+                        {/* Profile */}
+                        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                          <img 
+                            src={runner.profilePhoto || runner.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(runner.firstName || 'User')}+${encodeURIComponent(runner.lastName || '')}&background=random`}
+                            alt={runner.firstName}
+                            className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover ring-2 md:ring-4 ring-white shadow-lg flex-shrink-0"
+                            onError={(e) => {
+                              if (!e.target.src.includes('ui-avatars.com')) {
+                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(runner.firstName || 'User')}+${encodeURIComponent(runner.lastName || '')}&background=random`;
+                              }
+                            }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-base md:text-xl font-bold text-gray-900 truncate">
+                              {runner.firstName} {runner.lastName}
+                            </h3>
+                            <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500">
+                              <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                              <span className="truncate">{runner.city}</span>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="hidden sm:inline">{runner.stats.totalDistance}km totalt</span>
+                            </div>
                           </div>
                         </div>
+
+                        {/* Primary Metric - Mobile */}
+                        <div className="text-right flex-shrink-0 md:hidden">
+                          {filters.type === 'points' && (
+                            <div>
+                              <p className="text-xl font-black text-gray-900">{runner.points}</p>
+                              <p className="text-xs text-gray-500 font-medium">poäng</p>
+                            </div>
+                          )}
+
+                          {filters.type === 'distance' && (
+                            <div>
+                              <p className="text-xl font-black text-gray-900">{runner.stats.totalDistance}</p>
+                              <p className="text-xs text-gray-500 font-medium">km</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Primary Metric - Mobile */}
-                      <div className="text-right flex-shrink-0 md:hidden">
+                      {/* Stats - Desktop Only */}
+                      <div className="hidden md:flex items-center gap-8 flex-shrink-0">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500 font-medium">Distans</p>
+                          <p className="text-lg font-bold text-gray-900">{runner.stats.totalDistance} km</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500 font-medium">Pass</p>
+                          <p className="text-lg font-bold text-gray-900">{runner.stats.totalRuns}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500 font-medium">Snittfart</p>
+                          <p className="text-lg font-bold text-gray-900">{formatPace(runner.stats.averagePace)}/km</p>
+                        </div>
+                      </div>
+
+                      {/* Primary Metric - Desktop */}
+                      <div className="hidden md:block text-right flex-shrink-0 ml-auto">
                         {filters.type === 'points' && (
-                          <div>
-                            <p className="text-xl font-black text-gray-900">{runner.points}</p>
-                            <p className="text-xs text-gray-500 font-medium">poäng</p>
-                          </div>
+                          <>
+                            <p className="text-3xl font-black text-gray-900">{runner.points}</p>
+                            <p className="text-sm text-gray-500 font-medium">poäng</p>
+                          </>
                         )}
 
                         {filters.type === 'distance' && (
-                          <div>
-                            <p className="text-xl font-black text-gray-900">{runner.stats.totalDistance}</p>
-                            <p className="text-xs text-gray-500 font-medium">km</p>
-                          </div>
+                          <>
+                            <p className="text-3xl font-black text-gray-900">{runner.stats.totalDistance}</p>
+                            <p className="text-sm text-gray-500 font-medium">km totalt</p>
+                          </>
                         )}
                       </div>
-                    </div>
 
-                    {/* Stats - Desktop Only */}
-                    <div className="hidden md:flex items-center gap-8 flex-shrink-0">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-500 font-medium">Distans</p>
-                        <p className="text-lg font-bold text-gray-900">{runner.stats.totalDistance} km</p>
+                      {/* Mobile Stats Row */}
+                      <div className="flex justify-between text-xs text-gray-500 md:hidden">
+                        <span>{runner.points} poäng</span>
+                        <span>{runner.stats.totalDistance} km totalt</span>
+                        <span>{runner.stats.totalRuns} pass</span>
+                        <span>{formatPace(runner.stats.averagePace)}/km</span>
                       </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-500 font-medium">Pass</p>
-                        <p className="text-lg font-bold text-gray-900">{runner.stats.totalRuns}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-500 font-medium">Snittfart</p>
-                        <p className="text-lg font-bold text-gray-900">{formatPace(runner.stats.averagePace)}/km</p>
-                      </div>
+
                     </div>
-
-                    {/* Primary Metric - Desktop */}
-                    <div className="hidden md:block text-right flex-shrink-0 ml-auto">
-                      {filters.type === 'points' && (
-                        <>
-                          <p className="text-3xl font-black text-gray-900">{runner.points}</p>
-                          <p className="text-sm text-gray-500 font-medium">poäng</p>
-                        </>
-                      )}
-
-                      {filters.type === 'distance' && (
-                        <>
-                          <p className="text-3xl font-black text-gray-900">{runner.stats.totalDistance}</p>
-                          <p className="text-sm text-gray-500 font-medium">km totalt</p>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Mobile Stats Row */}
-                    <div className="flex justify-between text-xs text-gray-500 md:hidden">
-                      <span>{runner.points} poäng</span>
-                      <span>{runner.stats.totalDistance} km totalt</span>
-                      <span>{runner.stats.totalRuns} pass</span>
-                      <span>{formatPace(runner.stats.averagePace)}/km</span>
-                    </div>
-
-                  </div>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
 
       {/* Municipality Modal */}
       {showMunicipalityModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -377,7 +396,7 @@ const LeaderboardPage = () => {
       {/* Points System Modal */}
       <AnimatePresence>
         {showPointsModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

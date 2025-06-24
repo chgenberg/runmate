@@ -9,6 +9,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 require('dotenv').config();
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 
 // Import database connection
 const connectDB = require('./config/database');
@@ -138,6 +140,20 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 console.log('✓ Logging configured');
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+const photosDir = path.join(uploadsDir, 'photos');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('✓ Created uploads directory');
+}
+
+if (!fs.existsSync(photosDir)) {
+  fs.mkdirSync(photosDir, { recursive: true });
+  console.log('✓ Created uploads/photos directory');
+}
 
 // Static files
 app.use('/uploads', express.static('uploads'));

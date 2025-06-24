@@ -21,8 +21,7 @@ import {
   Activity,
   Sparkles,
   ArrowRight,
-  Brain,
-  Search
+  Brain
 } from 'lucide-react';
 import ProfileAvatar from '../common/ProfileAvatar';
 import { getProfilePictureUrl } from '../../services/api';

@@ -11,7 +11,17 @@ import {
   ArrowLeft,
   CheckCircle,
   MapPin,
-  Activity
+  Activity,
+  Sparkles,
+  Zap,
+  Lightbulb,
+  Moon,
+  TrendingUp,
+  Heart,
+  Shield,
+  RefreshCw,
+  BarChart3,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-hot-toast';

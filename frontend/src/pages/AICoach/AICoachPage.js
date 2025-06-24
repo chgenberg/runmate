@@ -10,7 +10,6 @@ import {
   Heart,
   Award,
   Brain,
-  Zap,
   Plus
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';

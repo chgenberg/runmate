@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, 
   User, 
-  TrendingUp, 
   MessageCircle, 
   Trophy, 
-  MapPin, 
   Activity,
   Heart,
   Settings,
@@ -17,7 +15,6 @@ import {
   LogOut,
   Search,
   ChevronDown,
-  ChevronRight,
   BarChart3,
   Zap
 } from 'lucide-react';
@@ -26,6 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState(['training']);
 
@@ -98,7 +96,6 @@ const Sidebar = () => {
   ];
 
   const MenuItem = ({ item, isChild = false }) => {
-    const isActive = item.path && location.pathname === item.path;
     
     if (item.single) {
       return (

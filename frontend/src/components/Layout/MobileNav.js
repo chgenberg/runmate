@@ -5,30 +5,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home,
   Users,
-  Compass,
   PlusSquare,
-  Award,
   Trophy,
   Calendar,
   MessageCircle,
   BarChart3,
   Settings,
   LogOut,
-  Bell,
   Star,
   X,
   Menu,
   Activity,
   Sparkles,
-  ArrowRight,
   Brain,
   Heart,
   Search,
   ChevronRight,
   Zap
 } from 'lucide-react';
-import ProfileAvatar from '../common/ProfileAvatar';
-import { getProfilePictureUrl } from '../../services/api';
 
 const MobileNav = () => {
   const { user, logout } = useAuth();

@@ -41,18 +41,23 @@ const ChatPage = () => {
 
   const fetchChatData = useCallback(async () => {
     try {
-      const response = await api.get(`/chat/${chatId}`);
+      const response = await api.get(`/chat/${chatId}/messages`);
       if (response.data.success) {
         setMessages(response.data.messages);
-        setOtherUser(response.data.otherUser);
+        // Extract the other user from participants
+        const currentUserId = user._id || user.id;
+        const other = response.data.chat.participants.find(p => p._id !== currentUserId);
+        setOtherUser(other);
       }
     } catch (error) {
       console.error('Error fetching chat:', error);
-      toast.error('Kunde inte ladda meddelanden');
+      toast.error('Kunde inte ladda meddelanden', {
+        id: 'chat-load-error'
+      });
     } finally {
       setLoading(false);
     }
-  }, [chatId]);
+  }, [chatId, user]);
 
   useEffect(() => {
     fetchChatData();

@@ -77,6 +77,32 @@ module.exports = {
           700: '#404040',
           800: '#262626',
           900: '#171717',
+        },
+        'runmate-orange': '#e5754d',
+        'runmate': {
+          50: '#fef7f5',
+          100: '#fee9e3',
+          200: '#fdd1c4',
+          300: '#fcb09a',
+          400: '#e5754d',
+          500: '#d45b33',
+          600: '#b84825',
+          700: '#983b1f',
+          800: '#7b321c',
+          900: '#652c1a',
+        },
+        gray: {
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         }
       },
       backgroundImage: {
@@ -100,6 +126,7 @@ module.exports = {
         'fade-in': 'fadeIn 0.5s ease-out',
         'scale-in': 'scaleIn 0.3s ease-out',
         'wiggle': 'wiggle 1s ease-in-out infinite',
+        'fade-out': 'fadeOut 0.3s ease-in',
       },
       keyframes: {
         float: {
@@ -144,6 +171,10 @@ module.exports = {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
         scaleIn: {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
@@ -157,12 +188,17 @@ module.exports = {
         'glow': '0 0 20px rgba(239, 68, 68, 0.5)',
         'glow-lg': '0 0 40px rgba(239, 68, 68, 0.5)',
         'inner-glow': 'inset 0 0 20px rgba(239, 68, 68, 0.1)',
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'card': '0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        'hover': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+        'focus': '0 0 0 3px rgba(229, 117, 77, 0.15)',
       },
       backdropBlur: {
         xs: '2px',
       },
       fontFamily: {
         'display': ['Inter var', 'system-ui', 'sans-serif'],
+        'body': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',
@@ -170,10 +206,12 @@ module.exports = {
         '128': '32rem',
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'fade-out': 'fadeOut 0.3s ease-in',
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
-        'pulse-slow': 'pulse 3s infinite',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-subtle': 'bounceSubtle 2s infinite',
         'swipe-right': 'swipeRight 0.3s ease-out',
         'swipe-left': 'swipeLeft 0.3s ease-out',
@@ -183,12 +221,16 @@ module.exports = {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
         slideUp: {
-          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         slideDown: {
-          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '0%': { transform: 'translateY(-10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         bounceSubtle: {
@@ -217,7 +259,8 @@ module.exports = {
     },
   },
   plugins: [
-    // require('@tailwindcss/forms'),
-    // require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/forms')({
+      strategy: 'class',
+    }),
   ],
 } 

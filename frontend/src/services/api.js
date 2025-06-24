@@ -1,7 +1,13 @@
 import axios from 'axios';
 
-// Update to use staging server where our new endpoints are deployed
-const API_BASE_URL = 'https://staging-runmate-backend-production.up.railway.app/api';
+// Use local development server or staging based on environment
+// Check both NODE_ENV and if we're running on localhost
+const isLocalDevelopment = process.env.NODE_ENV === 'development' || 
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+
+const API_BASE_URL = isLocalDevelopment
+  ? 'http://localhost:8000/api'
+  : 'https://staging-runmate-backend-production.up.railway.app/api';
 
 // Create axios instance with timeout
 const apiClient = axios.create({

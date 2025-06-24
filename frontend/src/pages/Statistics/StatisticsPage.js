@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -24,7 +24,7 @@ const StatisticsPage = () => {
   const [chartData, setChartData] = useState({});
 
   // Färgschema för grafer
-  const colors = {
+  const colors = useMemo(() => ({
     primary: '#ff6b6b',
     secondary: '#4ecdc4',
     tertiary: '#45b7d1',
@@ -33,7 +33,7 @@ const StatisticsPage = () => {
     danger: '#ee5a6f',
     success: '#1dd1a1',
     info: '#54a0ff'
-  };
+  }), []);
 
   const getWeekNumber = (date) => {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);

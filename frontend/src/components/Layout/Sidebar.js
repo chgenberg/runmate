@@ -9,7 +9,6 @@ import {
   PlusSquare,
   Award,
   Trophy,
-  User,
   Calendar,
   MessageCircle,
   BarChart3,

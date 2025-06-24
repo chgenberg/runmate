@@ -581,4 +581,4 @@ export const EventLoader = () => (
   </div>
 );
 
-export default LoadingSpinner; 
+export default LoadingSpinner;

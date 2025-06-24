@@ -208,16 +208,13 @@ const ActivitiesPage = () => {
                         transition={{ delay: 0.2 }}
                         className="flex flex-wrap justify-center gap-4 mb-16"
                     >
-                        <Link to="/app/live-tracking">
-                            <motion.button 
-                                className="group relative inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                <Navigation className="w-5 h-5" />
-                                <span>GPS Spårning</span>
-                            </motion.button>
-                        </Link>
+                        <button 
+                            onClick={() => toast.info('GPS-spårning kommer snart!')}
+                            className="group relative inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                        >
+                            <Navigation className="w-5 h-5" />
+                            <span>GPS Spårning</span>
+                        </button>
                         <Link to="/app/log-activity">
                             <motion.button 
                                 className="group relative inline-flex items-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"

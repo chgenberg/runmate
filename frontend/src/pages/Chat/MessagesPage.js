@@ -80,7 +80,7 @@ const MessagesPage = () => {
   }, [socket, fetchChats, handleNewMessage, handleMessageRead, handleUserOnline, handleUserOffline]);
 
   const filteredChats = chats.filter(chat => {
-    const otherUser = chat.participants.find(p => p._id !== user.id);
+    const otherUser = chat.participants.find(p => p._id !== user?._id);
     const matchesSearch = !searchTerm || 
       otherUser?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       otherUser?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -223,7 +223,7 @@ const MessagesPage = () => {
           <div className="space-y-2">
             <AnimatePresence>
               {filteredChats.map((chat, index) => {
-                const otherUser = chat.participants.find(p => p._id !== user.id);
+                const otherUser = chat.participants.find(p => p._id !== user?._id);
                 const isOnline = onlineUsers.includes(otherUser?._id);
                 
                 return (
@@ -282,11 +282,11 @@ const MessagesPage = () => {
                             <p className={`text-sm truncate ${
                               chat.unreadCount > 0 ? 'font-medium text-gray-900' : 'text-gray-500'
                             }`}>
-                              {chat.lastMessage.sender === user.id ? 'Du: ' : ''}
+                              {chat.lastMessage.sender === user?._id ? 'Du: ' : ''}
                               {chat.lastMessage.content}
                             </p>
                             <div className="flex items-center space-x-1 ml-2">
-                              {chat.lastMessage.sender === user.id && (
+                              {chat.lastMessage.sender === user?._id && (
                                 <>
                                   {chat.lastMessage.readBy?.includes(otherUser?._id) ? (
                                     <CheckCheck className="h-3 w-3 text-blue-500" />

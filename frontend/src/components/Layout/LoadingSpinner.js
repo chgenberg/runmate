@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Activity, Zap, Heart, Star, MapPin, Users, Trophy } from 'lucide-react';
+import { Sparkles, Activity, Zap, Heart, Star } from 'lucide-react';
 
 const LoadingSpinner = ({ 
   variant = 'default', 

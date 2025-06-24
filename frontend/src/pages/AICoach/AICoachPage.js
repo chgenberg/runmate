@@ -7,14 +7,10 @@ import {
   Activity,
   Target,
   TrendingUp,
-  ChevronRight,
-  Zap,
   Heart,
-  Award,
-  Clock
+  Award
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
 const AICoachPage = () => {
@@ -22,9 +18,8 @@ const AICoachPage = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [currentPhase, setCurrentPhase] = useState('chat');
+  const [currentPhase] = useState('chat');
   const [aiProfile, setAiProfile] = useState(null);
-  const [trainingPlan, setTrainingPlan] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 

@@ -100,10 +100,26 @@ const LeaderboardPage = () => {
             category: filters.type !== 'all' ? filters.type : undefined
           }
         });
-        setLeaderboard(response.data.data?.leaderboard || response.data.users || []);
+        
+        // Handle the response properly
+        const users = response.data.data?.leaderboard || response.data.users || response.data || [];
+        
+        // Ensure each user has required stats
+        const processedUsers = users.map(user => ({
+          ...user,
+          stats: user.stats || {
+            totalDistance: 0,
+            totalRuns: 0,
+            averagePace: 300 // 5:00 min/km default
+          },
+          points: user.points || 0,
+          city: user.city || 'Stockholm'
+        }));
+        
+        setLeaderboard(processedUsers);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
-        // Show empty leaderboard instead of dummy data
+        // Show empty leaderboard instead of crashing
         setLeaderboard([]);
       }
     };

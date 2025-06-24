@@ -190,7 +190,7 @@ const ChatPage = () => {
       </motion.div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={messagesEndRef}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -312,6 +312,7 @@ const ChatPage = () => {
             <span>{typingUsers[0]} skriver...</span>
           </motion.div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

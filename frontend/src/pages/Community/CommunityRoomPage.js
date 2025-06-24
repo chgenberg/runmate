@@ -55,152 +55,34 @@ const CommunityRoomPage = () => {
 
   // Load room data
   const fetchRoomData = useCallback(async () => {
-    console.log('Fetching room data for roomId:', roomId);
+    setLoading(true);
     try {
       const [roomResponse, messagesResponse] = await Promise.all([
         api.get(`/community/rooms/${roomId}`),
         api.get(`/community/rooms/${roomId}/messages`)
       ]);
       
-      console.log('Room response:', roomResponse.data);
-      console.log('Messages response:', messagesResponse.data);
-      
       setRoom(roomResponse.data);
-      setMessages(messagesResponse.data || []);
+      setMessages(messagesResponse.data);
     } catch (error) {
       console.error('Error fetching room data:', error);
-      console.error('Error details:', error.response?.data);
       
-      // Use mock data as fallback
-      const mockRoom = generateMockRoom(roomId);
-      const mockMessages = generateMockMessages();
+      // Show error message for production
+      if (error.response?.status === 404) {
+        toast.error('Rummet hittades inte');
+      } else if (error.response?.status === 403) {
+        toast.error('Du har inte tillgång till detta rum');
+      } else {
+        toast.error('Kunde inte ladda rummet');
+      }
       
-      setRoom(mockRoom);
-      setMessages(mockMessages);
-      
-      // Show a more user-friendly message
-      console.log('Using demo mode due to API error');
-      toast.success('Välkommen till demo-läget! Du kan testa chatten här.', {
-        id: 'demo-mode-info',
-        duration: 3000
-      });
+      // No fallback data - user needs to join or room doesn't exist
+      setRoom(null);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
   }, [roomId]);
-
-  // Generate mock room data
-  const generateMockRoom = (id) => {
-    const mockUser = {
-      _id: 'mock-user-1',
-      firstName: 'Demo',
-      lastName: 'Användare',
-      profilePicture: null
-    };
-
-    const rooms = {
-      '1': {
-        _id: '1',
-        title: 'Stockholms Morgonlöpare',
-        description: 'Vi träffas varje tisdag och torsdag kl 06:00 vid Hötorget för gemensamma löppass. Alla nivåer välkomna!',
-        category: 'location',
-        location: { city: 'Stockholm' },
-        creator: mockUser,
-        members: [
-          { user: mockUser, role: 'admin', joinedAt: new Date() },
-          { user: { ...mockUser, _id: 'mock-user-2', firstName: 'Anna' }, role: 'member', joinedAt: new Date() },
-          { user: { ...mockUser, _id: 'mock-user-3', firstName: 'Erik' }, role: 'member', joinedAt: new Date() }
-        ],
-        stats: { memberCount: 156, messageCount: 892, lastActivity: new Date() },
-        tags: ['morgon', '5-10km', 'nybörjarvänlig'],
-        verified: true,
-        settings: { isPrivate: false }
-      },
-      '2': {
-        _id: '2',
-        title: 'Trail Running Göteborg',
-        description: 'För dig som älskar att springa i naturen! Vi utforskar stigar runt Göteborg varje helg.',
-        category: 'training',
-        location: { city: 'Göteborg' },
-        creator: mockUser,
-        members: [
-          { user: mockUser, role: 'admin', joinedAt: new Date() }
-        ],
-        stats: { memberCount: 89, messageCount: 456, lastActivity: new Date() },
-        tags: ['trail', 'helger', 'natur'],
-        settings: { isPrivate: false }
-      }
-    };
-
-    return rooms[id] || {
-      _id: id,
-      title: 'Stockholm Löpgrupp',
-      description: 'En aktiv grupp löpare i Stockholm som träffas regelbundet för träning och gemensamma pass. Alla nivåer välkomna! 🏃‍♂️🏃‍♀️',
-      category: 'location',
-      location: { city: 'Stockholm' },
-      creator: { _id: 'mock-user-1', firstName: 'Anna', lastName: 'Löpare' },
-      members: [
-        { user: { _id: 'mock-user-1', firstName: 'Anna', lastName: 'Löpare' }, role: 'admin', joinedAt: new Date() },
-        { user: { _id: 'mock-user-2', firstName: 'Erik', lastName: 'Runner' }, role: 'member', joinedAt: new Date() },
-        { user: { _id: 'mock-user-3', firstName: 'Sara', lastName: 'Sprint' }, role: 'member', joinedAt: new Date() },
-        { user: user, role: 'member', joinedAt: new Date() }
-      ],
-      stats: { memberCount: 24, messageCount: 156, lastActivity: new Date() },
-      tags: ['stockholm', 'löpning', 'träning', 'morgon'],
-      verified: true,
-      settings: { isPrivate: false }
-    };
-  };
-
-  // Generate mock messages
-  const generateMockMessages = () => {
-    return [
-      {
-        _id: 'mock-msg-1',
-        content: 'Hej och välkommen till RunMate Community! 👋',
-        sender: {
-          _id: 'mock-user-1',
-          firstName: 'Anna',
-          lastName: 'Löpare'
-        },
-        createdAt: new Date(Date.now() - 7200000),
-        reactions: [{ reaction: '👋', userId: 'mock-user-2' }]
-      },
-      {
-        _id: 'mock-msg-2',
-        content: 'Är det någon som vill springa imorgon bitti? Tänkte dra en 5-mila 🏃‍♀️',
-        sender: {
-          _id: 'mock-user-2',
-          firstName: 'Erik',
-          lastName: 'Runner'
-        },
-        createdAt: new Date(Date.now() - 3600000),
-        reactions: [{ reaction: '🔥', userId: 'mock-user-1' }]
-      },
-      {
-        _id: 'mock-msg-3',
-        content: 'Ja absolut! Vilken tid? Jag kan från 06:00 💪',
-        sender: {
-          _id: 'mock-user-3',
-          firstName: 'Sara',
-          lastName: 'Sprint'
-        },
-        createdAt: new Date(Date.now() - 1800000),
-        reactions: []
-      },
-      {
-        _id: 'mock-msg-4',
-        content: 'Perfect! Vi ses vid Hötorget 06:00 sharp. Blir kul! 🎉',
-        sender: {
-          _id: 'mock-user-2',
-          firstName: 'Erik',
-          lastName: 'Runner'
-        },
-        createdAt: new Date(Date.now() - 900000),
-        reactions: [{ reaction: '🎉', userId: 'mock-user-1' }, { reaction: '👍', userId: 'mock-user-3' }]
-      }
-    ];
-  };
 
   const handleNewMessage = useCallback((message) => {
     setMessages(prev => [...prev, message]);
@@ -292,28 +174,7 @@ const CommunityRoomPage = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Add message locally in demo mode
-      const newMessage = {
-        _id: `demo-msg-${Date.now()}`,
-        content: messageText.trim(),
-        sender: {
-          _id: user?._id || 'current-user',
-          firstName: user?.firstName || 'Du',
-          lastName: user?.lastName || ''
-        },
-        createdAt: new Date(),
-        reactions: []
-      };
-      
-      setMessages(prev => [...prev, newMessage]);
-      setMessageText('');
-      setReplyingTo(null);
-      messageInputRef.current?.focus();
-      
-      toast.success('Meddelande skickat i demo-läge! 🎉', {
-        id: 'demo-message-sent',
-        duration: 2000
-      });
+      toast.error('Kunde inte skicka meddelande');
     }
   };
 
@@ -361,28 +222,7 @@ const CommunityRoomPage = () => {
       toast.success('Du har gått med i rummet!');
     } catch (error) {
       console.error('Error joining room:', error);
-      // In demo mode, automatically join locally
-      if (room) {
-        const updatedRoom = {
-          ...room,
-          members: [
-            ...room.members,
-            {
-              user: {
-                _id: user?._id || 'current-user',
-                firstName: user?.firstName || 'Du',
-                lastName: user?.lastName || ''
-              },
-              role: 'member',
-              joinedAt: new Date()
-            }
-          ]
-        };
-        setRoom(updatedRoom);
-        toast.success('Du har gått med i rummet (demo-läge)!');
-      } else {
-        toast.error(error.response?.data?.error || 'Kunde inte gå med i rummet');
-      }
+              toast.error(error.response?.data?.error || 'Kunde inte gå med i rummet');
     }
   };
 
@@ -625,7 +465,7 @@ const CommunityRoomPage = () => {
     );
   }
 
-  const isMember = room.members?.some(m => m.user?._id === user?._id) || true; // Always show chat in demo mode
+  const isMember = room.members?.some(m => m.user?._id === user?._id) || false;
   const isCreator = room.creator?._id === user?._id;
 
   return (

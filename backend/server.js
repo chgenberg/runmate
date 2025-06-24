@@ -44,28 +44,19 @@ console.log('Environment:', process.env.NODE_ENV || 'development');
 console.log('Railway Environment:', process.env.RAILWAY_ENVIRONMENT || 'not detected');
 console.log('Port:', process.env.PORT || 8000);
 
-// Connect to database
+// Connect to database with retry logic
 const connectWithRetry = async () => {
   try {
     await connectDB();
     console.log('✓ Database connected successfully');
   } catch (error) {
     console.error('✗ Database connection failed:', error.message);
-    if (process.env.RAILWAY_ENVIRONMENT) {
-      // In Railway, log the error but don't exit - let the health check handle it
-      console.error('Railway deployment: Database connection failed, but continuing server startup');
-      // Set a flag to indicate DB is not connected
-      global.dbConnected = false;
-    } else {
-      // Local development - retry after 5 seconds
-      console.log('Retrying database connection in 5 seconds...');
-      setTimeout(connectWithRetry, 5000);
-    }
+    
+    // Retry after 5 seconds in any environment
+    console.log('Retrying database connection in 5 seconds...');
+    setTimeout(connectWithRetry, 5000);
   }
 };
-
-// Set initial DB connection flag
-global.dbConnected = true;
 
 // Start database connection
 connectWithRetry();

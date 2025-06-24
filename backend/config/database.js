@@ -6,16 +6,13 @@ const connectDB = async () => {
     console.log('DEBUG: MONGODB_URI environment variable:', process.env.MONGODB_URI ? 'SET' : 'NOT SET');
     console.log('DEBUG: Using MongoDB URI:', mongoUri.substring(0, 50) + '...');
     
-    // Railway-optimized connection options
+    // Stable connection options that work with Railway
     const conn = await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000, // Increase timeout for Railway
+      serverSelectionTimeoutMS: 30000, // 30 seconds - back to more generous timeout
       socketTimeoutMS: 45000,
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionRetryDelay: 5000, // Keep trying to send operations for 5 seconds
-      heartbeatFrequencyMS: 10000, // Send a ping every 10 seconds
-      bufferMaxEntries: 0 // Disable mongoose buffering
+      heartbeatFrequencyMS: 10000
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);

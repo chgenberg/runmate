@@ -21,7 +21,6 @@ const StatisticsPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedMetric, setSelectedMetric] = useState('overview');
   const [stats, setStats] = useState(null);
-  const [activities, setActivities] = useState([]);
   const [chartData, setChartData] = useState({});
 
   // Färgschema för grafer
@@ -36,38 +35,7 @@ const StatisticsPage = () => {
     info: '#54a0ff'
   };
 
-  const loadStatistics = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      // Hämta statistik och aktiviteter parallellt
-      const [statsResponse, activitiesResponse] = await Promise.all([
-        api.get('/users/stats/summary'),
-        api.get(`/activities?period=${selectedPeriod}`)
-      ]);
-
-      const statsData = statsResponse.data.data.stats;
-      const activitiesData = activitiesResponse.data.activities || [];
-
-      setStats(statsData);
-      setActivities(activitiesData);
-      
-      // Förbered data för grafer
-      prepareChartData(activitiesData, statsData);
-      
-    } catch (error) {
-      console.error('Error loading statistics:', error);
-      toast.error('Kunde inte ladda statistik');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedPeriod]);
-
-  useEffect(() => {
-    loadStatistics();
-  }, [loadStatistics]);
-
-  const prepareChartData = (activities, stats) => {
+  const prepareChartData = useCallback((activities, stats) => {
     // Distans över tid
     const distanceOverTime = activities
       .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
@@ -105,7 +73,37 @@ const StatisticsPage = () => {
       activityTypes,
       performanceRadar
     });
-  };
+  }, [colors]);
+
+  const loadStatistics = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Hämta statistik och aktiviteter parallellt
+      const [statsResponse, activitiesResponse] = await Promise.all([
+        api.get('/users/stats/summary'),
+        api.get(`/activities?period=${selectedPeriod}`)
+      ]);
+
+      const statsData = statsResponse.data.data.stats;
+      const activitiesData = activitiesResponse.data.activities || [];
+
+      setStats(statsData);
+      
+      // Förbered data för grafer
+      prepareChartData(activitiesData, statsData);
+      
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+      toast.error('Kunde inte ladda statistik');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedPeriod, prepareChartData]);
+
+  useEffect(() => {
+    loadStatistics();
+  }, [loadStatistics]);
 
   const calculateHeartRateZones = (activities) => {
     const zones = [

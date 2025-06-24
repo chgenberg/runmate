@@ -70,10 +70,6 @@ const ProfilePage = () => {
     { id: 'evening', name: 'Kväll', time: '17:00-21:00', icon: '🌙' }
   ];
 
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
-
   const loadUserProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -175,7 +171,11 @@ const ProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authUser]);
+
+  useEffect(() => {
+    loadUserProfile();
+  }, [loadUserProfile]);
 
   const formatTimeFromSeconds = (seconds) => {
     if (!seconds || seconds === 0) return '';

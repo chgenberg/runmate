@@ -41,7 +41,7 @@
     "use-debounce": "^10.0.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "GENERATE_SOURCEMAP=false react-scripts start",
     "start:prod": "serve -s build -l $PORT",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",

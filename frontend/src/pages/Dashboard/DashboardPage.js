@@ -267,11 +267,10 @@ const DashboardPage = () => {
                     <div className="relative h-32 bg-gradient-to-br from-orange-400 to-red-400">
                       <div className="absolute bottom-4 left-6">
                         <ProfileAvatar 
+                          user={member}
                           src={member.profilePicture}
-                          alt={member.firstName}
-                          size="large"
+                          size="lg"
                           className="border-4 border-white"
-                          fallbackColor="bg-gray-100"
                         />
                       </div>
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -513,10 +512,9 @@ const DashboardPage = () => {
                       {index + 1}
                     </div>
                     <ProfileAvatar 
+                      user={{ firstName: runner.name.split(' ')[0], lastName: runner.name.split(' ')[1] }}
                       src={runner.profilePicture}
-                      alt={runner.name}
-                      size="medium"
-                      fallbackColor="bg-gradient-to-br from-orange-400 to-red-400"
+                      size="sm"
                     />
                     <div>
                       <p className="font-semibold text-gray-900">{runner.name}</p>

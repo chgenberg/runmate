@@ -12,8 +12,10 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (user) {
-      // Use staging backend for socket.io
-      const socketUrl = 'https://staging-runmate-backend-production.up.railway.app';
+      // Use appropriate backend based on environment
+      const socketUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:8000'
+        : 'https://staging-runmate-backend-production.up.railway.app';
       const newSocket = io(socketUrl);
       
       newSocket.on('connect', () => {

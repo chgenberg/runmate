@@ -207,11 +207,18 @@ const ProfilePage = () => {
       if (result.success) {
         setUser(profileData);
         setEditing(false);
-        toast.success('Profil uppdaterad!');
+        // Förhindra duplicerade toast-meddelanden med unik ID
+        toast.success('Profil uppdaterad!', {
+          id: 'profile-save-success',
+          duration: 2000
+        });
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Kunde inte uppdatera profil');
+      toast.error('Kunde inte uppdatera profil', {
+        id: 'profile-save-error',
+        duration: 3000
+      });
     } finally {
       setLoading(false);
     }
@@ -266,7 +273,7 @@ const ProfilePage = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 opacity-90"></div>
         <div className="absolute inset-0 bg-black/20"></div>
         
-        <div className="relative container mx-auto px-4 pt-8 pb-32">
+        <div className="relative container mx-auto px-4 pt-16 pb-24">
           <div className="flex items-center justify-between mb-8">
             <motion.h1 
               initial={{ opacity: 0, y: -20 }}
@@ -306,14 +313,14 @@ const ProfilePage = () => {
       </div>
 
       {/* Profile Card */}
-      <div className="container mx-auto px-4 -mt-24">
+      <div className="container mx-auto px-4 -mt-16 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-3xl shadow-xl overflow-hidden"
         >
           {/* Profile Header */}
-          <div className="p-6 md:p-8">
+          <div className="p-6 md:p-8 pt-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
               <div className="relative">
                 <img
@@ -335,7 +342,7 @@ const ProfilePage = () => {
               </div>
               
               <div className="flex-1 text-center md:text-left">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mt-4 md:mt-0">
                   {user.firstName} {user.lastName}
                 </h2>
                 <div className="flex items-center justify-center md:justify-start space-x-4 mt-2 text-gray-600">

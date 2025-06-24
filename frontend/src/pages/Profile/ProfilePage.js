@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../services/api';
+import api, { getProfilePictureUrl } from '../../services/api';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import UserRatingProfile from '../../components/Rating/UserRatingProfile';
 
@@ -317,7 +317,7 @@ const ProfilePage = () => {
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
               <div className="relative">
                 <img
-                  src={photos[0] || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&auto=format'}
+                  src={getProfilePictureUrl(user) || photos[0] || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&auto=format'}
                   alt="Profile"
                   className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl"
                 />

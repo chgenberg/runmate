@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Activity = require('../models/Activity');
-const { authenticateToken } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Initialize OpenAI client if API key is available
 let openai;
@@ -18,9 +18,9 @@ try {
 }
 
 // Get user's AI coach profile
-router.get('/profile', authenticateToken, async (req, res) => {
+router.get('/profile', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -35,7 +35,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 });
 
 // Store user's training profile and goals
-router.post('/profile', authenticateToken, async (req, res) => {
+router.post('/profile', protect, async (req, res) => {
   try {
     const { 
       goals, 
@@ -52,7 +52,7 @@ router.post('/profile', authenticateToken, async (req, res) => {
       priorities 
     } = req.body;
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -88,9 +88,9 @@ router.post('/profile', authenticateToken, async (req, res) => {
 });
 
 // Generate personalized training plan
-router.post('/generate-plan', authenticateToken, async (req, res) => {
+router.post('/generate-plan', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
     if (!user || !user.aiCoachProfile) {
       return res.status(400).json({ message: 'AI Coach profile not found' });
     }
@@ -99,7 +99,7 @@ router.post('/generate-plan', authenticateToken, async (req, res) => {
     
     // Get user's recent activities for analysis
     const recentActivities = await Activity.find({ 
-      user: req.user.userId 
+      user: req.user._id 
     }).sort({ date: -1 }).limit(10);
 
     // Generate base training plan
@@ -149,11 +149,11 @@ router.post('/generate-plan', authenticateToken, async (req, res) => {
 });
 
 // Get AI coaching advice with OpenAI integration
-router.post('/advice', authenticateToken, async (req, res) => {
+router.post('/advice', protect, async (req, res) => {
   try {
     const { question, context } = req.body;
     
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -209,7 +209,7 @@ router.post('/advice', authenticateToken, async (req, res) => {
 });
 
 // Update training plan based on performance
-router.post('/adapt-plan', authenticateToken, async (req, res) => {
+router.post('/adapt-plan', protect, async (req, res) => {
   try {
     const { 
       completedWorkouts, 
@@ -218,7 +218,7 @@ router.post('/adapt-plan', authenticateToken, async (req, res) => {
       performanceMetrics 
     } = req.body;
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
     if (!user || !user.aiCoachProfile) {
       return res.status(400).json({ message: 'AI Coach profile not found' });
     }

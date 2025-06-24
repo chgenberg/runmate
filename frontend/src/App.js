@@ -53,6 +53,9 @@ import CommunityRoomPage from './pages/Community/CommunityRoomPage';
 import MessagesPage from './pages/Chat/MessagesPage';
 import ChatPage from './pages/Chat/ChatPage';
 
+// AI Coach Page
+import AICoachPage from './pages/AICoach/AICoachPage';
+
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
 
@@ -105,6 +108,7 @@ function App() {
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
+              <Route path="ai-coach" element={<AICoachPage />} />
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="members" element={<AllMembersPage />} />
               <Route path="matches" element={<MatchesPage />} />

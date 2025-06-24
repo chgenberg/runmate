@@ -20,7 +20,8 @@ import {
   Menu,
   Activity,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Brain
 } from 'lucide-react';
 import ProfileAvatar from '../common/ProfileAvatar';
 import { getProfilePictureUrl } from '../../services/api';
@@ -55,6 +56,15 @@ const Sidebar = () => {
       badge: 'NY',
       badgeColor: 'bg-green-500',
       color: 'from-purple-500 to-purple-600'
+    },
+    {
+      name: 'AI-Coach',
+      href: '/app/ai-coach',
+      icon: Brain,
+      description: 'Personlig träningsplan',
+      badge: 'AI',
+      badgeColor: 'bg-gradient-to-r from-blue-500 to-purple-500',
+      color: 'from-blue-500 to-purple-600'
     },
     {
       name: 'Träningspass',
@@ -406,14 +416,15 @@ const Sidebar = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
             onClick={() => setShowProModal(false)}
+            style={{ zIndex: 9999 }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl max-w-md w-full p-6 relative"
+              className="bg-white rounded-2xl max-w-md w-full p-6 relative z-[10000]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}

@@ -35,6 +35,57 @@ const StatisticsPage = () => {
     info: '#54a0ff'
   };
 
+  const getWeekNumber = (date) => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  };
+
+  const calculateHeartRateZones = useCallback((activities) => {
+    const zones = [
+      { name: 'Vila', range: '< 60%', count: 0, color: colors.info },
+      { name: 'Lätt', range: '60-70%', count: 0, color: colors.success },
+      { name: 'Aerob', range: '70-80%', count: 0, color: colors.warning },
+      { name: 'Tröskel', range: '80-90%', count: 0, color: colors.primary },
+      { name: 'Max', range: '> 90%', count: 0, color: colors.danger }
+    ];
+
+    activities.forEach(act => {
+      if (act.averageHeartRate) {
+        const percentage = (act.averageHeartRate / 190) * 100; // Assuming max HR of 190
+        if (percentage < 60) zones[0].count++;
+        else if (percentage < 70) zones[1].count++;
+        else if (percentage < 80) zones[2].count++;
+        else if (percentage < 90) zones[3].count++;
+        else zones[4].count++;
+      }
+    });
+
+    return zones;
+  }, [colors]);
+
+  const calculateWeeklyStats = useCallback((activities) => {
+    const weeks = {};
+    activities.forEach(act => {
+      const week = getWeekNumber(new Date(act.startTime));
+      if (!weeks[week]) {
+        weeks[week] = { distance: 0, time: 0, activities: 0, elevation: 0 };
+      }
+      weeks[week].distance += act.distance;
+      weeks[week].time += act.duration;
+      weeks[week].activities += 1;
+      weeks[week].elevation += act.elevationGain || 0;
+    });
+
+    return Object.entries(weeks)
+      .map(([week, data]) => ({
+        week: `V${week}`,
+        ...data,
+        avgPace: data.time > 0 ? (data.time / data.distance / 60).toFixed(2) : 0
+      }))
+      .slice(-8); // Last 8 weeks
+  }, []);
+
   const prepareChartData = useCallback((activities, stats) => {
     // Distans över tid
     const distanceOverTime = activities
@@ -73,7 +124,7 @@ const StatisticsPage = () => {
       activityTypes,
       performanceRadar
     });
-  }, [colors]);
+  }, [calculateHeartRateZones, calculateWeeklyStats]);
 
   const loadStatistics = useCallback(async () => {
     try {
@@ -104,57 +155,6 @@ const StatisticsPage = () => {
   useEffect(() => {
     loadStatistics();
   }, [loadStatistics]);
-
-  const calculateHeartRateZones = (activities) => {
-    const zones = [
-      { name: 'Vila', range: '< 60%', count: 0, color: colors.info },
-      { name: 'Lätt', range: '60-70%', count: 0, color: colors.success },
-      { name: 'Aerob', range: '70-80%', count: 0, color: colors.warning },
-      { name: 'Tröskel', range: '80-90%', count: 0, color: colors.primary },
-      { name: 'Max', range: '> 90%', count: 0, color: colors.danger }
-    ];
-
-    activities.forEach(act => {
-      if (act.averageHeartRate) {
-        const percentage = (act.averageHeartRate / 190) * 100; // Assuming max HR of 190
-        if (percentage < 60) zones[0].count++;
-        else if (percentage < 70) zones[1].count++;
-        else if (percentage < 80) zones[2].count++;
-        else if (percentage < 90) zones[3].count++;
-        else zones[4].count++;
-      }
-    });
-
-    return zones;
-  };
-
-  const calculateWeeklyStats = (activities) => {
-    const weeks = {};
-    activities.forEach(act => {
-      const week = getWeekNumber(new Date(act.startTime));
-      if (!weeks[week]) {
-        weeks[week] = { distance: 0, time: 0, activities: 0, elevation: 0 };
-      }
-      weeks[week].distance += act.distance;
-      weeks[week].time += act.duration;
-      weeks[week].activities += 1;
-      weeks[week].elevation += act.elevationGain || 0;
-    });
-
-    return Object.entries(weeks)
-      .map(([week, data]) => ({
-        week: `V${week}`,
-        ...data,
-        avgPace: data.time > 0 ? (data.time / data.distance / 60).toFixed(2) : 0
-      }))
-      .slice(-8); // Last 8 weeks
-  };
-
-  const getWeekNumber = (date) => {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  };
 
   if (loading) {
     return (

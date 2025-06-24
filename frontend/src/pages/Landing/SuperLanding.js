@@ -40,7 +40,7 @@ const SuperLanding = () => {
     try {
       setLoading(true);
       const [membersRes, challengesRes, eventsRes, leaderboardRes] = await Promise.all([
-        api.get('/discover/users?limit=5'),
+        api.get('/users/discover?limit=5'),
         api.get('/challenges?limit=4'),
         api.get('/runevents/upcoming?limit=3'),
         api.get('/users/leaderboard?limit=5')
@@ -49,7 +49,7 @@ const SuperLanding = () => {
       setMembers(membersRes.data.users || []);
       setChallenges(challengesRes.data.challenges || []);
       setEvents(eventsRes.data.events || []);
-      setLeaderboard(leaderboardRes.data.users || []);
+      setLeaderboard(leaderboardRes.data.data?.leaderboard || leaderboardRes.data.users || []);
       
       // Mock user stats for demo
       setUserStats({

@@ -43,16 +43,16 @@ const DashboardPage = () => {
       setLoading(true);
       try {
         const [membersRes, challengesRes, eventsRes, leaderboardRes] = await Promise.all([
-          api.get('/discover/users?limit=10'),
+          api.get('/users/discover?limit=10'),
           api.get('/challenges?limit=5'),
-          api.get('/runevents/upcoming?limit=5'), 
+          api.get('/runevents?limit=5'), 
           api.get('/users/leaderboard?limit=5')
         ]);
         
         setMembers(membersRes.data.users || []);
-        setChallenges(challengesRes.data.challenges || []);
-        setEvents(eventsRes.data.events || []);
-        setLeaderboard(leaderboardRes.data.users || []);
+        setChallenges(challengesRes.data || challengesRes.data.challenges || []);
+        setEvents(eventsRes.data.data || eventsRes.data.events || []);
+        setLeaderboard(leaderboardRes.data.data?.leaderboard || leaderboardRes.data.users || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         // Set empty arrays on error instead of mock data
@@ -159,7 +159,7 @@ const DashboardPage = () => {
               <span className="text-sm text-gray-500 whitespace-nowrap">({members.length}+ nya)</span>
             </div>
             <button 
-              onClick={() => navigate('/app/discover')}
+              onClick={() => navigate('/app/members')}
               className="flex items-center space-x-2 text-orange-600 hover:text-orange-700 font-medium whitespace-nowrap"
             >
               <span>Visa alla</span>
@@ -274,7 +274,7 @@ const DashboardPage = () => {
                   className="flex-shrink-0 w-72 md:w-80"
                 >
                   <button
-                    onClick={() => navigate('/app/discover')}
+                    onClick={() => navigate('/app/members')}
                     className="w-full h-full min-h-[400px] bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-4 hover:shadow-xl transition-all group"
                   >
                     <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -405,7 +405,7 @@ const DashboardPage = () => {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">
                     <MapPin className="w-4 h-4 inline mr-1" />
-                    {event.location}
+                    {event.location?.name || event.location}
                   </span>
                   <span className="font-semibold text-orange-600">{event.distance}</span>
                 </div>
@@ -473,18 +473,18 @@ const DashboardPage = () => {
                       {index + 1}
                     </div>
                     <ProfileAvatar 
-                      user={{ firstName: runner.name.split(' ')[0], lastName: runner.name.split(' ')[1] }}
-                      src={runner.profilePicture}
+                      user={{ firstName: runner.firstName, lastName: runner.lastName }}
+                      src={runner.profilePhoto || runner.profilePicture}
                       size="sm"
                     />
                     <div>
-                      <p className="font-semibold text-gray-900">{runner.name}</p>
-                      <p className="text-sm text-gray-600">{runner.location}</p>
+                      <p className="font-semibold text-gray-900">{runner.firstName} {runner.lastName}</p>
+                      <p className="text-sm text-gray-600">{runner.location?.city || runner.location || 'Sverige'}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900">{runner.weeklyKm} km</p>
-                    <p className="text-sm text-gray-600">{runner.points} poäng</p>
+                    <p className="font-bold text-gray-900">{runner.points || 0} poäng</p>
+                    <p className="text-sm text-gray-600">Nivå {runner.level || 1}</p>
                   </div>
                 </div>
               ))}

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import CreateRoomModal from '../../components/Community/CreateRoomModal';
+import { useNavigate } from 'react-router-dom';
 
 const CommunityPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -27,6 +28,7 @@ const CommunityPage = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const navigate = useNavigate();
 
   const categories = [
     { value: 'all', label: 'Alla kategorier', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
@@ -117,7 +119,7 @@ const CommunityPage = () => {
         exit={{ opacity: 0, y: -20 }}
         whileHover={{ y: -4 }}
         className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all cursor-pointer overflow-hidden group"
-        onClick={() => window.location.href = `/app/community/${room._id}`}
+        onClick={() => navigate(`/app/community/${room._id}`)}
       >
         {/* Header with gradient */}
         <div className={`h-2 bg-gradient-to-r ${categoryData.color}`}></div>
@@ -341,7 +343,7 @@ const CommunityPage = () => {
                   {myRooms.slice(0, 5).map((room) => (
                     <div
                       key={room._id}
-                      onClick={() => window.location.href = `/app/community/${room._id}`}
+                      onClick={() => navigate(`/app/community/${room._id}`)}
                       className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">

@@ -100,7 +100,7 @@ const LeaderboardPage = () => {
             category: filters.type !== 'all' ? filters.type : undefined
           }
         });
-        setLeaderboard(response.data.users || []);
+        setLeaderboard(response.data.data?.leaderboard || response.data.users || []);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
         // Show empty leaderboard instead of dummy data

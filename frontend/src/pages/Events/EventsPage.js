@@ -337,7 +337,7 @@ const EventsPage = () => {
                   <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                     <span className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
-                      {event.location}
+                      {event.location?.name || event.location}
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
@@ -426,7 +426,7 @@ const EventsPage = () => {
                   <div className="bg-orange-50 rounded-2xl p-4 text-center">
                     <MapPin className="w-6 h-6 text-orange-500 mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Plats</p>
-                    <p className="font-bold text-gray-900">{selectedEvent.location}</p>
+                    <p className="font-bold text-gray-900">{selectedEvent.location?.name || selectedEvent.location}</p>
                   </div>
                   <div className="bg-blue-50 rounded-2xl p-4 text-center">
                     <Activity className="w-6 h-6 text-blue-500 mx-auto mb-2" />

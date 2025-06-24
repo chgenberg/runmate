@@ -14,6 +14,9 @@ import { LoadingSpinnerFullScreen } from './components/Layout/LoadingSpinner';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 
+// Members Pages
+import AllMembersPage from './pages/Members/AllMembersPage';
+
 // Main App Pages
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import DiscoverPage from './pages/Discover/DiscoverPage';
@@ -35,7 +38,6 @@ import LeaderboardPage from './pages/Leaderboard/LeaderboardPage';
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
 import PublicProfilePage from './pages/Profile/PublicProfilePage';
-import AllMembersPage from './pages/Members/AllMembersPage';
 
 // Events Page
 import EventsPage from './pages/Events/EventsPage';
@@ -100,6 +102,7 @@ function App() {
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="discover" element={<DiscoverPage />} />
+              <Route path="members" element={<AllMembersPage />} />
               <Route path="matches" element={<MatchesPage />} />
               <Route path="messages" element={<MessagesPage />} />
               <Route path="messages/:chatId" element={<ChatPage />} />

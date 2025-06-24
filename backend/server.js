@@ -38,72 +38,102 @@ const searchRoutes = require('./routes/search');
 const { protect } = require('./middleware/auth');
 const errorHandler = require('./middleware/error');
 
+console.log('=== RunMate Backend Starting ===');
+console.log('Node.js version:', process.version);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Railway Environment:', process.env.RAILWAY_ENVIRONMENT || 'not detected');
+console.log('Port:', process.env.PORT || 8000);
+
 // Connect to database
-connectDB();
+const connectWithRetry = async () => {
+  try {
+    await connectDB();
+    console.log('✓ Database connected successfully');
+  } catch (error) {
+    console.error('✗ Database connection failed:', error.message);
+    if (process.env.RAILWAY_ENVIRONMENT) {
+      // In Railway, don't retry - let the deployment fail if DB connection fails
+      console.error('Railway deployment: Database connection required');
+      process.exit(1);
+    } else {
+      // Local development - retry after 5 seconds
+      console.log('Retrying database connection in 5 seconds...');
+      setTimeout(connectWithRetry, 5000);
+    }
+  }
+};
+
+// Start database connection
+connectWithRetry();
 
 const app = express();
 const server = http.createServer(app);
 
-// Trust proxy for rate limiting behind proxies (like frontend dev server)
-app.set('trust proxy', 1);
-
-// Socket.io setup for real-time features
-const io = socketIo(server, {
-  cors: {
-    origin: [
-      process.env.CLIENT_URL || "http://localhost:3000",
-      "https://happy-love-production.up.railway.app",
-      "https://humble-radiance-production.up.railway.app",
-      "https://fabulous-sparkle-production.up.railway.app",
-      "https://staging-runmate-frontend-production.up.railway.app",
-      "https://staging-rummate-frontend-production.up.railway.app",
-      "http://localhost:3001",
-      "http://localhost:3002",
-      "http://localhost:3003",
-      "http://localhost:3004",
-      "http://localhost:3005",
-      "http://localhost:3006"
-    ],
-    methods: ["GET", "POST"],
-    credentials: true
-  }
-});
-
 // Security middleware
-app.use(helmet());
-
-// Rate limiting - more lenient for development
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // increased to 1000 requests per windowMs for development
-  message: 'Too many requests from this IP, please try again later.',
-  skip: (req) => {
-    // Skip rate limiting for development
-    return process.env.NODE_ENV === 'development';
-  }
-});
-app.use(limiter);
-
-// Body parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false }));
-
-// Compression
-app.use(compression());
-
-// CORS - Temporarily allow all origins for debugging
-app.use(cors({
-  origin: true, // Allow all origins temporarily
-  credentials: true
+app.use(helmet({
+  crossOriginResourcePolicy: false,
 }));
 
-// Logging
+console.log('✓ Security middleware loaded');
+
+// Trust proxy for Railway
+app.set('trust proxy', 1);
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://staging-rummate-frontend-production.up.railway.app',
+    'https://staging-runmate-frontend-production.up.railway.app'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+console.log('✓ CORS configured');
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
+
+console.log('✓ Rate limiting configured');
+
+// Compression middleware
+app.use(compression());
+
+console.log('✓ Compression enabled');
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+console.log('✓ Body parsing configured');
+
+// Logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
 }
+
+console.log('✓ Logging configured');
 
 // Static files
 app.use('/uploads', express.static('uploads'));
+
+console.log('✓ Static files configured');
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -115,30 +145,74 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+console.log('✓ Health check endpoint configured');
+
 // Make io available to routes
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
+console.log('✓ Socket.IO middleware configured');
+
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-// app.use('/api/matching', matchingRoutes); // Temporarily disabled - causing crashes
-app.use('/api/strava', stravaRoutes);
-app.use('/api/challenges', challengeRoutes);
-app.use('/api/activities', activityRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/runevents', runEventRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/ratings', ratingsRoutes);
-app.use('/api/search', searchRoutes);
-app.use('/api/integrations', require('./routes/integrations'));
-app.use('/api/health', require('./routes/health'));
-app.use('/api/community', require('./routes/community'));
-app.use('/api/debug', require('./routes/debug'));
-app.use('/api/aicoach', require('./routes/aicoach'));
-// app.use('/api/notifications', notificationRoutes); // Temporarily disabled
+console.log('Loading API routes...');
+try {
+  app.use('/api/auth', authRoutes);
+  console.log('✓ Auth routes loaded');
+  
+  app.use('/api/users', userRoutes);
+  console.log('✓ User routes loaded');
+  
+  // app.use('/api/matching', matchingRoutes); // Temporarily disabled - causing crashes
+  
+  app.use('/api/strava', stravaRoutes);
+  console.log('✓ Strava routes loaded');
+  
+  app.use('/api/challenges', challengeRoutes);
+  console.log('✓ Challenge routes loaded');
+  
+  app.use('/api/activities', activityRoutes);
+  console.log('✓ Activity routes loaded');
+  
+  app.use('/api/chat', chatRoutes);
+  console.log('✓ Chat routes loaded');
+  
+  app.use('/api/runevents', runEventRoutes);
+  console.log('✓ Run event routes loaded');
+  
+  app.use('/api/dashboard', dashboardRoutes);
+  console.log('✓ Dashboard routes loaded');
+  
+  app.use('/api/ratings', ratingsRoutes);
+  console.log('✓ Rating routes loaded');
+  
+  app.use('/api/search', searchRoutes);
+  console.log('✓ Search routes loaded');
+  
+  app.use('/api/integrations', require('./routes/integrations'));
+  console.log('✓ Integration routes loaded');
+  
+  app.use('/api/health', require('./routes/health'));
+  console.log('✓ Health routes loaded');
+  
+  app.use('/api/community', require('./routes/community'));
+  console.log('✓ Community routes loaded');
+  
+  app.use('/api/debug', require('./routes/debug'));
+  console.log('✓ Debug routes loaded');
+  
+  app.use('/api/aicoach', require('./routes/aicoach'));
+  console.log('✓ AI Coach routes loaded');
+  
+  // app.use('/api/notifications', notificationRoutes); // Temporarily disabled
+  
+  console.log('✓ All API routes loaded successfully');
+} catch (routeError) {
+  console.error('✗ Error loading routes:', routeError.message);
+  console.error('Route error stack:', routeError.stack);
+  process.exit(1);
+}
 
 // Socket.io real-time functionality
 io.on('connection', (socket) => {
@@ -362,11 +436,24 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 8000;
 
-server.listen(PORT, () => {
-  console.log(`RunMate server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`API URL: http://localhost:${PORT}/api`);
-  console.log(`Local network: http://192.168.1.74:${PORT}/api`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
+console.log('Starting server...');
+console.log('Port configuration:', PORT);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('🚀 RunMate server successfully started!');
+  console.log(`✓ Running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`✓ API URL: http://localhost:${PORT}/api`);
+  console.log(`✓ Local network: http://192.168.1.74:${PORT}/api`);
+  console.log(`✓ Health check: http://localhost:${PORT}/api/health`);
+  
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    console.log('✓ Railway deployment detected - server ready for health checks');
+  }
+}).on('error', (err) => {
+  console.error('✗ Server startup error:', err.message);
+  console.error('Full error:', err);
+  process.exit(1);
 });
 
 // Handle unhandled promise rejections

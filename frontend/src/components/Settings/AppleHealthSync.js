@@ -41,6 +41,34 @@ const AppleHealthSync = () => {
     }
   };
 
+  const refreshStats = async () => {
+    try {
+      setSyncStatus(prev => ({ ...prev, isLoading: true }));
+      
+      // Anropa refresh stats endpoint
+      const response = await api.post('/health/refresh-stats');
+      
+      if (response.data.success) {
+        toast.success(`🎉 Statistik uppdaterad! ${response.data.stats.totalActivities} träningspass, ${response.data.stats.totalDistance}km`, {
+          duration: 4000
+        });
+        
+        // Uppdatera status också
+        await checkSyncStatus();
+        
+        // Trigga profiluppdatering om det finns en callback
+        if (typeof refreshStats === 'function') {
+          refreshStats();
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing stats:', error);
+      toast.error('Kunde inte uppdatera statistik');
+    } finally {
+      setSyncStatus(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
   const handleManualSync = async () => {
     // Check if user is on iOS device
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -181,6 +209,15 @@ const AppleHealthSync = () => {
           >
             <RefreshCw className={`w-4 h-4 ${syncStatus.isLoading ? 'animate-spin' : ''}`} />
             <span>Uppdatera status</span>
+          </button>
+          
+          <button
+            onClick={refreshStats}
+            disabled={syncStatus.isLoading}
+            className="w-full bg-blue-100 text-blue-700 font-medium py-2 px-4 rounded-xl hover:bg-blue-200 transition-all flex items-center justify-center space-x-2"
+          >
+            <Activity className={`w-4 h-4 ${syncStatus.isLoading ? 'animate-spin' : ''}`} />
+            <span>Uppdatera statistik</span>
           </button>
         </div>
 

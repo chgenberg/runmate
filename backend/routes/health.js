@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const Activity = require('../models/Activity');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // @route   POST /api/health/apple-health/import
 // @desc    Import Apple Health workout data
@@ -71,18 +72,40 @@ router.post('/apple-health/import', protect, async (req, res) => {
     // Spara nya aktiviteter
     const savedActivities = await Activity.insertMany(newActivities);
     
-    // Uppdatera användarstatistik
+    // Uppdatera användarstatistik och belöna med poäng
     const user = await User.findById(req.user._id);
     if (user) {
       const totalDistance = savedActivities.reduce((sum, activity) => sum + activity.distance, 0);
-      user.totalDistance = (user.totalDistance || 0) + totalDistance;
-      user.totalActivities = (user.totalActivities || 0) + savedActivities.length;
+      const totalDuration = savedActivities.reduce((sum, activity) => sum + activity.duration, 0);
+      
+      // Beräkna poäng för importerade aktiviteter (10 poäng per km + 5 poäng per träningspass)
+      const pointsEarned = Math.round(totalDistance * 10) + (savedActivities.length * 5);
+      
+      // Uppdatera användarfält
+      user.points = (user.points || 0) + pointsEarned;
+      user.level = Math.floor((user.points || 0) / 100) + 1; // Level based on points
+      
+      // Uppdatera training stats om de finns
+      if (!user.trainingStats) {
+        user.trainingStats = {};
+      }
+      user.trainingStats.totalDistance = (user.trainingStats.totalDistance || 0) + totalDistance;
+      
+      // Uppdatera Apple Health integration fields
+      user.appleHealthConnected = true;
+      user.appleHealthLastSync = new Date();
+      
       await user.save();
+      
+      console.log(`Updated user stats: +${totalDistance}km, +${pointsEarned} points, level ${user.level}`);
     }
 
     res.json({ 
       imported: savedActivities.length,
       skipped: activities.length - newActivities.length,
+      pointsEarned: user ? Math.round(savedActivities.reduce((sum, activity) => sum + activity.distance, 0) * 10) + (savedActivities.length * 5) : 0,
+      totalDistance: savedActivities.reduce((sum, activity) => sum + activity.distance, 0),
+      newUserLevel: user ? user.level : 1,
       activities: savedActivities.map(a => ({
         _id: a._id,
         title: a.title,
@@ -125,6 +148,70 @@ router.get('/apple-health/status', protect, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// @route   POST /api/health/refresh-stats
+// @desc    Refresh user statistics after Apple Health sync
+// @access  Private
+router.post('/refresh-stats', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    // Räkna alla aktiviteter för användaren
+    const totalActivities = await Activity.countDocuments({
+      userId: req.user._id
+    });
+    
+    // Beräkna totala siffror från aktiviteter
+    const activityStats = await Activity.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.user._id) } },
+      {
+        $group: {
+          _id: null,
+          totalDistance: { $sum: '$distance' },
+          totalTime: { $sum: '$duration' },
+          avgPace: { $avg: '$averagePace' }
+        }
+      }
+    ]);
+    
+    const stats = activityStats[0] || {
+      totalDistance: 0,
+      totalTime: 0,
+      avgPace: 0
+    };
+    
+    // Uppdatera training stats
+    if (!user.trainingStats) {
+      user.trainingStats = {};
+    }
+    
+    user.trainingStats.totalDistance = stats.totalDistance;
+    user.trainingStats.totalTime = stats.totalTime;
+    user.trainingStats.averagePace = stats.avgPace;
+    user.trainingStats.totalRuns = totalActivities;
+    
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: 'Statistik uppdaterad',
+      stats: {
+        totalActivities,
+        totalDistance: Math.round(stats.totalDistance),
+        totalTime: Math.round(stats.totalTime),
+        averagePace: stats.avgPace
+      }
+    });
+    
+  } catch (error) {
+    console.error('Refresh stats error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Fel vid uppdatering av statistik',
+      error: error.message 
+    });
   }
 });
 

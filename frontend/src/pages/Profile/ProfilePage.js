@@ -178,6 +178,8 @@ const ProfilePage = () => {
     loadUserProfile();
   }, [loadUserProfile]);
 
+
+
   const formatTimeFromSeconds = (seconds) => {
     if (!seconds || seconds === 0) return '';
     

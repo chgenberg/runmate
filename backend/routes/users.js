@@ -698,7 +698,7 @@ router.get('/stats/summary', auth, async (req, res) => {
     
     // Get activity statistics
     const activityStats = await Activity.aggregate([
-      { $match: { userId: mongoose.Types.ObjectId(req.user.id) } },
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
       {
         $group: {
           _id: null,

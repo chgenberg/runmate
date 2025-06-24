@@ -55,22 +55,126 @@ const CommunityRoomPage = () => {
 
   // Load room data
   const fetchRoomData = useCallback(async () => {
+    console.log('Fetching room data for roomId:', roomId);
     try {
       const [roomResponse, messagesResponse] = await Promise.all([
         api.get(`/community/rooms/${roomId}`),
         api.get(`/community/rooms/${roomId}/messages`)
       ]);
       
+      console.log('Room response:', roomResponse.data);
+      console.log('Messages response:', messagesResponse.data);
+      
       setRoom(roomResponse.data);
-      setMessages(messagesResponse.data);
+      setMessages(messagesResponse.data || []);
     } catch (error) {
       console.error('Error fetching room data:', error);
-      toast.error('Kunde inte ladda rummet');
-      navigate('/app/community');
+      console.error('Error details:', error.response?.data);
+      
+      // Use mock data as fallback
+      const mockRoom = generateMockRoom(roomId);
+      const mockMessages = generateMockMessages();
+      
+      setRoom(mockRoom);
+      setMessages(mockMessages);
+      
+      // Show different toasts based on error type
+      if (error.response?.status === 404) {
+        toast.error('Rummet hittades inte - visar demo-data');
+      } else if (error.response?.status === 403) {
+        toast.error('Du har inte tillgång till detta rum - visar demo-data');
+      } else {
+        toast.error('Kunde inte ladda rummet - visar demo-data');
+      }
     } finally {
       setLoading(false);
     }
-  }, [roomId, navigate]);
+  }, [roomId]);
+
+  // Generate mock room data
+  const generateMockRoom = (id) => {
+    const mockUser = {
+      _id: 'mock-user-1',
+      firstName: 'Demo',
+      lastName: 'Användare',
+      profilePicture: null
+    };
+
+    const rooms = {
+      '1': {
+        _id: '1',
+        title: 'Stockholms Morgonlöpare',
+        description: 'Vi träffas varje tisdag och torsdag kl 06:00 vid Hötorget för gemensamma löppass. Alla nivåer välkomna!',
+        category: 'location',
+        location: { city: 'Stockholm' },
+        creator: mockUser,
+        members: [
+          { user: mockUser, role: 'admin', joinedAt: new Date() },
+          { user: { ...mockUser, _id: 'mock-user-2', firstName: 'Anna' }, role: 'member', joinedAt: new Date() },
+          { user: { ...mockUser, _id: 'mock-user-3', firstName: 'Erik' }, role: 'member', joinedAt: new Date() }
+        ],
+        stats: { memberCount: 156, messageCount: 892, lastActivity: new Date() },
+        tags: ['morgon', '5-10km', 'nybörjarvänlig'],
+        verified: true,
+        settings: { isPrivate: false }
+      },
+      '2': {
+        _id: '2',
+        title: 'Trail Running Göteborg',
+        description: 'För dig som älskar att springa i naturen! Vi utforskar stigar runt Göteborg varje helg.',
+        category: 'training',
+        location: { city: 'Göteborg' },
+        creator: mockUser,
+        members: [
+          { user: mockUser, role: 'admin', joinedAt: new Date() }
+        ],
+        stats: { memberCount: 89, messageCount: 456, lastActivity: new Date() },
+        tags: ['trail', 'helger', 'natur'],
+        settings: { isPrivate: false }
+      }
+    };
+
+    return rooms[id] || {
+      _id: id,
+      title: 'Demo Community Rum',
+      description: 'Detta är ett demo-rum som visas när den riktiga datan inte kan laddas.',
+      category: 'general',
+      location: { city: 'Demo Stad' },
+      creator: mockUser,
+      members: [{ user: mockUser, role: 'admin', joinedAt: new Date() }],
+      stats: { memberCount: 1, messageCount: 0, lastActivity: new Date() },
+      tags: ['demo'],
+      settings: { isPrivate: false }
+    };
+  };
+
+  // Generate mock messages
+  const generateMockMessages = () => {
+    return [
+      {
+        _id: 'mock-msg-1',
+        content: 'Välkommen till community! Detta är demo-data som visas när servern inte är tillgänglig.',
+        sender: {
+          _id: 'mock-user-1',
+          firstName: 'Demo',
+          lastName: 'Bot'
+        },
+        createdAt: new Date(Date.now() - 3600000),
+        reactions: []
+      },
+      {
+        _id: 'mock-msg-2',
+        content: 'Här kan du chatta med andra löpare och dela tips och erfarenheter! 🏃‍♂️',
+        sender: {
+          _id: 'mock-user-1',
+          firstName: 'Demo',
+          lastName: 'Bot'
+        },
+        createdAt: new Date(),
+        reactions: []
+      }
+    ];
+  };
 
   const handleNewMessage = useCallback((message) => {
     setMessages(prev => [...prev, message]);
@@ -161,7 +265,26 @@ const CommunityRoomPage = () => {
       messageInputRef.current?.focus();
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Kunde inte skicka meddelande');
+      
+      // Add message locally in demo mode
+      const newMessage = {
+        _id: `demo-msg-${Date.now()}`,
+        content: messageText.trim(),
+        sender: {
+          _id: user?._id || 'demo-user',
+          firstName: user?.firstName || 'Demo',
+          lastName: user?.lastName || 'User'
+        },
+        createdAt: new Date(),
+        reactions: []
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+      setMessageText('');
+      setReplyingTo(null);
+      messageInputRef.current?.focus();
+      
+      toast.error('Demo-läge: Meddelandet sparas endast lokalt');
     }
   };
 
@@ -427,7 +550,7 @@ const CommunityRoomPage = () => {
     );
   }
 
-  if (!room) {
+  if (!room || (room && Object.keys(room).length === 0)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 flex items-center justify-center">
         <motion.div 
@@ -435,7 +558,12 @@ const CommunityRoomPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Rummet hittades inte</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {loading ? 'Laddar rum...' : 'Rummet hittades inte eller du har inte tillgång'}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Kontrollera att du har rätt behörigheter eller att rummet fortfarande finns.
+          </p>
           <button
             onClick={() => navigate('/app/community')}
             className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:shadow-lg transition-all"
@@ -447,8 +575,8 @@ const CommunityRoomPage = () => {
     );
   }
 
-  const isMember = room.members.some(m => m.user._id === user?._id);
-  const isCreator = room.creator._id === user?._id;
+  const isMember = room.members?.some(m => m.user?._id === user?._id) || false;
+  const isCreator = room.creator?._id === user?._id;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
@@ -482,11 +610,11 @@ const CommunityRoomPage = () => {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-blue-500" />
-                    {room.stats.memberCount} medlemmar
+                    {room.stats?.memberCount || 0} medlemmar
                   </span>
                   <span className="flex items-center gap-1.5">
                     <MessageCircle className="w-4 h-4 text-green-500" />
-                    {room.stats.messageCount} meddelanden
+                    {room.stats?.messageCount || 0} meddelanden
                   </span>
                 </div>
               </div>
@@ -501,7 +629,7 @@ const CommunityRoomPage = () => {
               >
                 <Users className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
-                  {room.stats.memberCount}
+                  {room.stats?.memberCount || 0}
                 </span>
               </motion.button>
               {isMember && (
@@ -762,7 +890,7 @@ const CommunityRoomPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <Users className="w-7 h-7 text-orange-500" />
-                  Medlemmar ({room.stats.memberCount})
+                  Medlemmar ({room.stats?.memberCount || 0})
                 </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -775,7 +903,7 @@ const CommunityRoomPage = () => {
               </div>
               
               <div className="space-y-2 overflow-y-auto max-h-[60vh] pr-2">
-                {room.members.map((member, index) => (
+                {(room.members || []).map((member, index) => (
                   <motion.div 
                     key={member.user._id}
                     initial={{ opacity: 0, x: -20 }}

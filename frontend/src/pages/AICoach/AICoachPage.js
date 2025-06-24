@@ -8,7 +8,6 @@ import {
   Target,
   Calendar,
   ChevronRight,
-  ArrowLeft,
   CheckCircle,
   MapPin,
   Activity,

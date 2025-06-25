@@ -1,384 +1,297 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  HomeIcon,
-  PlayIcon,
-  MapPinIcon,
-  TrophyIcon,
-  SparklesIcon,
-  UserGroupIcon,
-  ChatBubbleLeftRightIcon,
-  UserIcon,
-  ChartBarIcon,
-  CalendarIcon,
-  Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
-  Bars3Icon,
-  XMarkIcon,
-  FireIcon
-} from '@heroicons/react/24/outline';
-import { 
-  HomeIcon as HomeIconSolid,
-  PlayIcon as PlayIconSolid,
-  MapPinIcon as MapPinIconSolid,
-  TrophyIcon as TrophyIconSolid,
-  SparklesIcon as SparklesIconSolid,
-  UserGroupIcon as UserGroupIconSolid,
-  ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
-  UserIcon as UserIconSolid,
-  ChartBarIcon as ChartBarIconSolid,
-  CalendarIcon as CalendarIconSolid
-} from '@heroicons/react/24/solid';
-import { useAuth } from '../../contexts/AuthContext';
+  Home,
+  Users,
+  Trophy,
+  BarChart3,
+  Menu,
+  X
+} from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const menuItems = [
-    { 
-      path: '/app/dashboard', 
-      label: 'Översikt', 
-      icon: HomeIcon,
-      iconSolid: HomeIconSolid,
-      color: 'orange'
+  const navigationItems = [
+    {
+      name: 'Översikt',
+      path: '/app/dashboard',
+      icon: Home,
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'from-blue-50 to-cyan-50'
     },
-    { 
-      path: '/app/activities', 
-      label: 'Aktiviteter', 
-      icon: PlayIcon,
-      iconSolid: PlayIconSolid,
-      color: 'blue'
+    {
+      name: 'Hitta löparvänner',
+      path: '/app/discover',
+      icon: Users,
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'from-green-50 to-emerald-50'
     },
-    { 
-      path: '/app/suggested-routes', 
-      label: 'Rutter', 
-      icon: MapPinIcon,
-      iconSolid: MapPinIconSolid,
-      color: 'green'
+    {
+      name: 'Utmaningar',
+      path: '/app/challenges',
+      icon: Trophy,
+      color: 'from-yellow-500 to-orange-500',
+      bgColor: 'from-yellow-50 to-orange-50'
     },
-    { 
-      path: '/app/challenges', 
-      label: 'Utmaningar', 
-      icon: TrophyIcon,
-      iconSolid: TrophyIconSolid,
-      color: 'yellow'
-    },
-    { 
-      path: '/app/ai-coach', 
-      label: 'AI Coach', 
-      icon: SparklesIcon,
-      iconSolid: SparklesIconSolid,
-      color: 'purple'
-    },
-    { 
-      path: '/app/discover', 
-      label: 'Upptäck', 
-      icon: UserGroupIcon,
-      iconSolid: UserGroupIconSolid,
-      color: 'pink'
-    },
-    { 
-      path: '/app/community', 
-      label: 'Community', 
-      icon: ChatBubbleLeftRightIcon,
-      iconSolid: ChatBubbleLeftRightIconSolid,
-      color: 'indigo'
-    },
-    { 
-      path: '/app/statistics', 
-      label: 'Statistik', 
-      icon: ChartBarIcon,
-      iconSolid: ChartBarIconSolid,
-      color: 'teal'
-    },
-    { 
-      path: '/app/events', 
-      label: 'Event', 
-      icon: CalendarIcon,
-      iconSolid: CalendarIconSolid,
-      color: 'red'
+    {
+      name: 'Statistik',
+      path: '/app/statistics',
+      icon: BarChart3,
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'from-purple-50 to-pink-50'
     }
   ];
-
-  const bottomMenuItems = [
-    { 
-      path: '/app/profile', 
-      label: 'Profil', 
-      icon: UserIcon,
-      iconSolid: UserIconSolid,
-      color: 'gray'
-    },
-    { 
-      path: '/app/settings', 
-      label: 'Inställningar', 
-      icon: Cog6ToothIcon,
-      iconSolid: Cog6ToothIcon,
-      color: 'gray'
-    }
-  ];
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
 
   const isActive = (path) => location.pathname === path;
 
   const sidebarVariants = {
-    expanded: { width: '240px' },
+    expanded: { width: '280px' },
     collapsed: { width: '80px' }
   };
 
-  const SidebarContent = ({ mobile = false }) => (
-    <div className={`flex flex-col h-full ${mobile ? 'p-6' : 'p-4'}`}>
-      {/* Logo */}
-      <Link to="/app/dashboard" className="mb-8">
-        <motion.div 
-          className="flex items-center gap-3"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
-            <FireIcon className="w-7 h-7 text-white" />
-          </div>
+  const SidebarContent = () => (
+    <motion.div 
+      className="h-full bg-white border-r border-gray-200 flex flex-col shadow-lg"
+      variants={sidebarVariants}
+      animate={isCollapsed ? 'collapsed' : 'expanded'}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+    >
+      {/* Header */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between">
           <AnimatePresence>
-            {(!isCollapsed || mobile) && (
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="text-2xl font-bold gradient-text"
-              >
-                RunMate
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </Link>
-
-      {/* User Info */}
-      <div className={`mb-6 p-4 bg-gray-50 rounded-xl ${isCollapsed && !mobile ? 'px-2' : ''}`}>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
-              {user?.name?.charAt(0) || 'U'}
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-          </div>
-          <AnimatePresence>
-            {(!isCollapsed || mobile) && (
+            {!isCollapsed && (
               <motion.div
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="flex-1"
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-3"
               >
-                <p className="font-semibold text-sm">{user?.name || 'Användare'}</p>
-                <p className="text-xs text-gray-500">Nivå 12 • 1,234 XP</p>
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">R</span>
+                </div>
+                <span className="text-xl font-bold text-gray-900">RunMate</span>
               </motion.div>
             )}
           </AnimatePresence>
+          
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors hidden lg:block"
+          >
+            <Menu className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1">
-        {menuItems.map((item) => {
-          const Icon = isActive(item.path) ? item.iconSolid : item.icon;
+      <nav className="flex-1 p-4 space-y-2">
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
           const active = isActive(item.path);
           
           return (
             <Link key={item.path} to={item.path}>
               <motion.div
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                  relative flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 group
                   ${active 
-                    ? `bg-${item.color}-100 text-${item.color}-700` 
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? `bg-gradient-to-r ${item.bgColor} border border-gray-200 shadow-sm` 
+                    : 'hover:bg-gray-50'
                   }
-                  ${isCollapsed && !mobile ? 'justify-center' : ''}
                 `}
-                whileHover={{ x: active ? 0 : 4 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Icon className={`w-5 h-5 ${active ? `text-${item.color}-600` : ''}`} />
+                {/* Active indicator */}
+                {active && (
+                  <motion.div
+                    layoutId="activeIndicator"
+                    className={`absolute left-0 w-1 h-8 bg-gradient-to-b ${item.color} rounded-r-full`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+
+                {/* Icon */}
+                <div className={`
+                  w-10 h-10 rounded-xl flex items-center justify-center transition-all
+                  ${active 
+                    ? `bg-gradient-to-br ${item.color} shadow-lg` 
+                    : 'bg-gray-100 group-hover:bg-gray-200'
+                  }
+                `}>
+                  <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-600'}`} />
+                </div>
+
+                {/* Label */}
                 <AnimatePresence>
-                  {(!isCollapsed || mobile) && (
+                  {!isCollapsed && (
                     <motion.span
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
-                      className="font-medium"
+                      transition={{ duration: 0.2 }}
+                      className={`font-medium ${active ? 'text-gray-900' : 'text-gray-700'}`}
                     >
-                      {item.label}
+                      {item.name}
                     </motion.span>
                   )}
                 </AnimatePresence>
-                {active && (!isCollapsed || mobile) && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className={`ml-auto w-1 h-5 bg-${item.color}-600 rounded-full`}
-                  />
-                )}
               </motion.div>
             </Link>
           );
         })}
       </nav>
 
-      {/* Stats Widget */}
-      <AnimatePresence>
-        {(!isCollapsed || mobile) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="my-6 p-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl text-white"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium opacity-90">Veckans mål</span>
-              <TrophyIcon className="w-4 h-4" />
-            </div>
-            <div className="text-2xl font-bold mb-2">32.5 / 50 km</div>
-            <div className="w-full bg-white/20 rounded-full h-2">
-              <motion.div
-                className="h-full bg-white rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: '65%' }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bottom Menu */}
-      <div className="space-y-1 pt-4 border-t border-gray-200">
-        {bottomMenuItems.map((item) => {
-          const Icon = isActive(item.path) ? item.iconSolid : item.icon;
-          const active = isActive(item.path);
-          
-          return (
-            <Link key={item.path} to={item.path}>
-              <motion.div
-                className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-                  ${active 
-                    ? 'bg-gray-100 text-gray-900' 
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }
-                  ${isCollapsed && !mobile ? 'justify-center' : ''}
-                `}
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Icon className="w-5 h-5" />
-                <AnimatePresence>
-                  {(!isCollapsed || mobile) && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="font-medium"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </Link>
-          );
-        })}
-        
-        <motion.button
-          onClick={handleLogout}
-          className={`
-            w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-            text-red-600 hover:bg-red-50
-            ${isCollapsed && !mobile ? 'justify-center' : ''}
-          `}
-          whileHover={{ x: 4 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <ArrowRightOnRectangleIcon className="w-5 h-5" />
-          <AnimatePresence>
-            {(!isCollapsed || mobile) && (
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="font-medium"
-              >
-                Logga ut
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-100">
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center"
+            >
+              <p className="text-xs text-gray-500 mb-2">
+                © 2024 RunMate
+              </p>
+              <div className="flex justify-center gap-4 text-xs">
+                <Link to="/privacy" className="text-gray-400 hover:text-gray-600">
+                  Integritet
+                </Link>
+                <Link to="/faq" className="text-gray-400 hover:text-gray-600">
+                  FAQ
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Collapse Button - Desktop Only */}
-      {!mobile && (
-        <motion.button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="mt-4 p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors self-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Bars3Icon className="w-5 h-5 text-gray-600" />
-        </motion.button>
-      )}
-    </div>
+    </motion.div>
   );
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={isCollapsed ? 'collapsed' : 'expanded'}
-        variants={sidebarVariants}
-        className="hidden lg:block fixed left-0 top-0 h-full bg-white border-r border-gray-200 shadow-sm z-40"
-      >
+      <div className="hidden lg:block">
         <SidebarContent />
-      </motion.aside>
+      </div>
 
       {/* Mobile Menu Button */}
       <button
-        onClick={() => setShowMobileMenu(!showMobileMenu)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md"
+        onClick={() => setIsMobileOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-xl shadow-lg border border-gray-200"
       >
-        {showMobileMenu ? (
-          <XMarkIcon className="w-6 h-6 text-gray-600" />
-        ) : (
-          <Bars3Icon className="w-6 h-6 text-gray-600" />
-        )}
+        <Menu className="w-6 h-6 text-gray-600" />
       </button>
 
       {/* Mobile Sidebar */}
       <AnimatePresence>
-        {showMobileMenu && (
+        {isMobileOpen && (
           <>
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              onClick={() => setIsMobileOpen(false)}
               className="lg:hidden fixed inset-0 bg-black/50 z-40"
-              onClick={() => setShowMobileMenu(false)}
             />
-            <motion.aside
+
+            {/* Mobile Sidebar */}
+            <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 20 }}
-              className="lg:hidden fixed left-0 top-0 h-full w-72 bg-white shadow-xl z-50"
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="lg:hidden fixed left-0 top-0 h-full w-80 z-50"
             >
-              <SidebarContent mobile />
-            </motion.aside>
+              <div className="h-full bg-white border-r border-gray-200 flex flex-col shadow-xl">
+                {/* Mobile Header */}
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">R</span>
+                    </div>
+                    <span className="text-xl font-bold text-gray-900">RunMate</span>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileOpen(false)}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+
+                {/* Mobile Navigation */}
+                <nav className="flex-1 p-4 space-y-2">
+                  {navigationItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.path);
+                    
+                    return (
+                      <Link 
+                        key={item.path} 
+                        to={item.path}
+                        onClick={() => setIsMobileOpen(false)}
+                      >
+                        <div
+                          className={`
+                            relative flex items-center gap-4 p-4 rounded-2xl transition-all duration-200
+                            ${active 
+                              ? `bg-gradient-to-r ${item.bgColor} border border-gray-200 shadow-sm` 
+                              : 'hover:bg-gray-50'
+                            }
+                          `}
+                        >
+                          {/* Active indicator */}
+                          {active && (
+                            <div className={`absolute left-0 w-1 h-8 bg-gradient-to-b ${item.color} rounded-r-full`} />
+                          )}
+
+                          {/* Icon */}
+                          <div className={`
+                            w-10 h-10 rounded-xl flex items-center justify-center transition-all
+                            ${active 
+                              ? `bg-gradient-to-br ${item.color} shadow-lg` 
+                              : 'bg-gray-100'
+                            }
+                          `}>
+                            <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-600'}`} />
+                          </div>
+
+                          {/* Label */}
+                          <span className={`font-medium ${active ? 'text-gray-900' : 'text-gray-700'}`}>
+                            {item.name}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                {/* Mobile Footer */}
+                <div className="p-4 border-t border-gray-100 text-center">
+                  <p className="text-xs text-gray-500 mb-2">
+                    © 2024 RunMate
+                  </p>
+                  <div className="flex justify-center gap-4 text-xs">
+                    <Link to="/privacy" className="text-gray-400 hover:text-gray-600">
+                      Integritet
+                    </Link>
+                    <Link to="/faq" className="text-gray-400 hover:text-gray-600">
+                      FAQ
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

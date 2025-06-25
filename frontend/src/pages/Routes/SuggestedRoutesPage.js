@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { MapPinIcon, ClockIcon, FireIcon, ChartBarIcon, SparklesIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const SuggestedRoutesPage = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // eslint-disable-line no-unused-vars
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRoute, setSelectedRoute] = useState(null);
   const [filters, setFilters] = useState({
     distance: 'all',
     difficulty: 'all',
@@ -163,7 +161,6 @@ const SuggestedRoutesPage = () => {
 
   const filteredRoutes = routes.filter(route => {
     if (filters.distance !== 'all') {
-      const distance = parseFloat(filters.distance);
       if (filters.distance === '5' && route.distance > 5) return false;
       if (filters.distance === '10' && (route.distance <= 5 || route.distance > 10)) return false;
       if (filters.distance === '15' && route.distance <= 10) return false;

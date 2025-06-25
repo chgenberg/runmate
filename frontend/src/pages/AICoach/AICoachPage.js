@@ -13,7 +13,7 @@ import { toast } from 'react-hot-toast';
 import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const AICoachPage = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // eslint-disable-line no-unused-vars
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);

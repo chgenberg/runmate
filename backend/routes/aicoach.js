@@ -208,6 +208,131 @@ router.post('/chat', protect, async (req, res) => {
   }
 });
 
+// Comprehensive coaching plan endpoint
+router.post('/comprehensive-plan', protect, async (req, res) => {
+  try {
+    const {
+      primaryGoal,
+      currentLevel,
+      weeklyHours,
+      currentDiet,
+      sleepHours,
+      injuries,
+      motivation,
+      equipment,
+      lifestyle,
+      specificTarget
+    } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Create comprehensive AI coach profile
+    const comprehensiveProfile = {
+      ...req.body,
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+
+    user.aiCoachProfile = comprehensiveProfile;
+    await user.save();
+
+    let comprehensivePlan = {};
+
+    // Generate comprehensive plan with OpenAI if available
+    if (openai) {
+      try {
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `Du är världens bästa personliga tränare och nutritionist med 20+ års erfarenhet. Du har coachat olympiska atleter, hjälpt tusentals människor nå sina mål, och har djup kunskap inom:
+
+- Träningsfysiologi och periodisering
+- Näringslära och metabolisme  
+- Psykologi och beteendeförändring
+- Skadeförebyggning och rehabilitering
+- Livsstilsoptimering och stresshantering
+
+Din filosofi: Varje person är unik och förtjänar en helt personlig plan som passar deras liv, mål och förutsättningar. Du skapar holistiska program som är hållbara på lång sikt.
+
+Skapa en KOMPLETT, DETALJERAD och PERSONLIG tränings- och kostplan på svenska. Planen ska vara praktisk, specifik och inspirerande. Inkludera:
+
+1. TRÄNINGSSCHEMA (4 veckor framåt, dag för dag)
+2. KOSTPLAN (veckomeny med recept och makron)
+3. LIVSSTILSRÅD (sömn, stress, återhämtning)
+4. UPPFÖLJNING (mål, mätningar, milstolpar)
+
+Anpassa allt efter användarens specifika situation och mål.`
+            },
+            {
+              role: "user", 
+              content: `Skapa min personliga plan baserat på:
+
+MINA MÅL: ${primaryGoal}
+NUVARANDE NIVÅ: ${currentLevel}
+TRÄNING PER VECKA: ${weeklyHours} timmar
+NUVARANDE KOST: ${currentDiet}
+SÖMN: ${sleepHours} timmar/natt
+SKADOR/BEGRÄNSNINGAR: ${Array.isArray(injuries) ? injuries.join(', ') : injuries}
+MOTIVATION: ${motivation}
+TILLGÄNGLIG UTRUSTNING: ${Array.isArray(equipment) ? equipment.join(', ') : equipment}
+LIVSSTIL: ${lifestyle}
+SPECIFIKT MÅL: ${specificTarget || 'Inget specifikt mål angivet'}
+
+Namn: ${user.firstName}
+
+Skapa en detaljerad plan som hjälper mig nå mina mål på det mest effektiva sättet!`
+            }
+          ],
+          max_tokens: 4000,
+          temperature: 0.7,
+        });
+
+        const aiResponse = completion.choices[0].message.content;
+        
+        // Parse and structure the AI response
+        comprehensivePlan = {
+          aiGenerated: true,
+          rawPlan: aiResponse,
+          summary: {
+            primaryFocus: primaryGoal,
+            weeklyCommitment: `${weeklyHours} timmar/vecka`,
+            keyStrategies: extractKeyStrategies(aiResponse),
+            expectedResults: extractExpectedResults(aiResponse)
+          },
+          trainingPlan: extractTrainingPlan(aiResponse),
+          nutritionPlan: extractNutritionPlan(aiResponse),
+          lifestylePlan: extractLifestylePlan(aiResponse),
+          progressTracking: extractProgressTracking(aiResponse)
+        };
+
+      } catch (openaiError) {
+        console.error('OpenAI API error:', openaiError);
+        // Fallback to structured plan
+        comprehensivePlan = generateStructuredPlan(req.body, user);
+      }
+    } else {
+      // Generate structured plan without OpenAI
+      comprehensivePlan = generateStructuredPlan(req.body, user);
+    }
+
+    res.json({
+      success: true,
+      plan: comprehensivePlan,
+      profile: comprehensiveProfile,
+      createdAt: new Date()
+    });
+
+  } catch (error) {
+    console.error('Error creating comprehensive plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Onboarding endpoint to create training plan
 router.post('/onboarding', protect, async (req, res) => {
   try {
@@ -662,6 +787,233 @@ function getEstimatedPace(personalBest) {
     default:
       return '6:00/km';
   }
+}
+
+// Helper functions for comprehensive plan parsing
+function extractKeyStrategies(aiResponse) {
+  // Extract key strategies from AI response
+  const strategies = [];
+  const lines = aiResponse.split('\n');
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].toLowerCase();
+    if (line.includes('strategi') || line.includes('fokus') || line.includes('nyckel')) {
+      strategies.push(lines[i].replace(/^[•\-\*]\s*/, '').trim());
+    }
+  }
+  
+  return strategies.slice(0, 3); // Top 3 strategies
+}
+
+function extractExpectedResults(aiResponse) {
+  // Extract expected results from AI response
+  const results = [];
+  const lines = aiResponse.split('\n');
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].toLowerCase();
+    if (line.includes('resultat') || line.includes('förvänta') || line.includes('mål')) {
+      results.push(lines[i].replace(/^[•\-\*]\s*/, '').trim());
+    }
+  }
+  
+  return results.slice(0, 3); // Top 3 expected results
+}
+
+function extractTrainingPlan(aiResponse) {
+  // Extract training plan section from AI response
+  const sections = aiResponse.split(/(?:TRÄNING|TRAINING)/i);
+  if (sections.length > 1) {
+    return sections[1].split(/(?:KOST|NUTRITION|LIVSSTIL|LIFESTYLE)/i)[0].trim();
+  }
+  return 'Detaljerat träningsschema finns i den fullständiga planen.';
+}
+
+function extractNutritionPlan(aiResponse) {
+  // Extract nutrition plan section from AI response
+  const sections = aiResponse.split(/(?:KOST|NUTRITION)/i);
+  if (sections.length > 1) {
+    return sections[1].split(/(?:LIVSSTIL|LIFESTYLE|UPPFÖLJNING|TRACKING)/i)[0].trim();
+  }
+  return 'Detaljerad kostplan finns i den fullständiga planen.';
+}
+
+function extractLifestylePlan(aiResponse) {
+  // Extract lifestyle plan section from AI response
+  const sections = aiResponse.split(/(?:LIVSSTIL|LIFESTYLE)/i);
+  if (sections.length > 1) {
+    return sections[1].split(/(?:UPPFÖLJNING|TRACKING)/i)[0].trim();
+  }
+  return 'Detaljerade livsstilsråd finns i den fullständiga planen.';
+}
+
+function extractProgressTracking(aiResponse) {
+  // Extract progress tracking section from AI response
+  const sections = aiResponse.split(/(?:UPPFÖLJNING|TRACKING|PROGRESS)/i);
+  if (sections.length > 1) {
+    return sections[1].trim();
+  }
+  return 'Detaljerad uppföljningsplan finns i den fullständiga planen.';
+}
+
+function generateStructuredPlan(formData, user) {
+  // Fallback structured plan when OpenAI is not available
+  const {
+    primaryGoal,
+    currentLevel,
+    weeklyHours,
+    currentDiet,
+    sleepHours,
+    injuries,
+    motivation,
+    equipment,
+    lifestyle,
+    specificTarget
+  } = formData;
+
+  return {
+    aiGenerated: false,
+    summary: {
+      primaryFocus: primaryGoal,
+      weeklyCommitment: `${weeklyHours} timmar/vecka`,
+      keyStrategies: [
+        'Progressiv överbelastning anpassad efter din nivå',
+        'Balanserad kost som stödjer dina mål',
+        'Optimal återhämtning för bästa resultat'
+      ],
+      expectedResults: [
+        'Märkbara förbättringar inom 2-4 veckor',
+        'Ökad styrka och uthållighet',
+        'Bättre allmän hälsa och välbefinnande'
+      ]
+    },
+    trainingPlan: generateBasicTrainingPlan(primaryGoal, currentLevel, weeklyHours, equipment),
+    nutritionPlan: generateBasicNutritionPlan(primaryGoal, currentDiet),
+    lifestylePlan: generateBasicLifestylePlan(sleepHours, lifestyle),
+    progressTracking: generateBasicProgressTracking(primaryGoal),
+    rawPlan: `Personlig tränings- och kostplan för ${user.firstName}
+
+TRÄNINGSSCHEMA:
+${generateBasicTrainingPlan(primaryGoal, currentLevel, weeklyHours, equipment)}
+
+KOSTPLAN:
+${generateBasicNutritionPlan(primaryGoal, currentDiet)}
+
+LIVSSTILSRÅD:
+${generateBasicLifestylePlan(sleepHours, lifestyle)}
+
+UPPFÖLJNING:
+${generateBasicProgressTracking(primaryGoal)}`
+  };
+}
+
+function generateBasicTrainingPlan(goal, level, hours, equipment) {
+  const equipmentList = Array.isArray(equipment) ? equipment : [];
+  const hasGym = equipmentList.includes('full-gym');
+  const hasWeights = equipmentList.includes('dumbbells') || equipmentList.includes('barbell');
+  
+  let plan = `Veckoschema (${hours} timmar/vecka):\n\n`;
+  
+  if (parseInt(hours) <= 3) {
+    plan += `MÅNDAG: Helkroppsstyrka (45 min)
+ONSDAG: Konditionsträning (30-45 min)
+FREDAG: Funktionell träning (45 min)`;
+  } else if (parseInt(hours) <= 6) {
+    plan += `MÅNDAG: Överkropp styrka (45 min)
+TISDAG: Kondition/löpning (45 min)
+TORSDAG: Underkropp styrka (45 min)
+LÖRDAG: Aktiv återhämtning/yoga (30 min)`;
+  } else {
+    plan += `MÅNDAG: Bröst/triceps (60 min)
+TISDAG: Kondition HIIT (45 min)
+ONSDAG: Rygg/biceps (60 min)
+TORSDAG: Löpning/cykling (45 min)
+FREDAG: Ben/rumpa (60 min)
+LÖRDAG: Axlar/core (45 min)
+SÖNDAG: Aktiv vila`;
+  }
+  
+  if (!hasGym && !hasWeights) {
+    plan += `\n\nAnpassat för hemmaträning med kroppsvikt och ${equipmentList.join(', ')}.`;
+  }
+  
+  return plan;
+}
+
+function generateBasicNutritionPlan(goal, currentDiet) {
+  let plan = 'Grundläggande kostprinciper:\n\n';
+  
+  switch (goal) {
+    case 'weight-loss':
+      plan += `• Kaloriunderskott på 300-500 kcal/dag
+• Hög proteinintag (1,6-2,2g per kg kroppsvikt)
+• Mycket grönsaker och fibrer
+• Begränsa processad mat och socker`;
+      break;
+    case 'muscle-gain':
+      plan += `• Kaloriöverskott på 200-400 kcal/dag
+• Hög proteinintag (2-2,5g per kg kroppsvikt)
+• Komplexa kolhydrater runt träning
+• Nyttiga fetter för hormonproduktion`;
+      break;
+    default:
+      plan += `• Balanserad makrofördelning (40% kolhydrater, 30% protein, 30% fett)
+• Regelbundna måltider
+• Mycket vatten (2-3 liter/dag)
+• Fokus på näringstäta livsmedel`;
+  }
+  
+  plan += `\n\nExempel på dagsmeny kommer i den detaljerade planen.`;
+  
+  return plan;
+}
+
+function generateBasicLifestylePlan(sleepHours, lifestyle) {
+  let plan = 'Livsstilsoptimering:\n\n';
+  
+  plan += `SÖMN:
+• Mål: 7-9 timmar per natt (du sover ${sleepHours}h)
+• Regelbundna sovtider
+• Mörkt och svalt sovrum
+• Ingen skärmtid 1h före sömn\n\n`;
+  
+  plan += `STRESSHANTERING:
+• Daglig meditation (10-15 min)
+• Djupandning mellan träningspass
+• Regelbundna pauser från arbete
+• Naturvistelse när möjligt\n\n`;
+  
+  plan += `ÅTERHÄMTNING:
+• Aktiva vilopass (promenader, yoga)
+• Stretching efter träning
+• Varmbadd eller sauna 1-2 ggr/vecka
+• Massage eller foamrolling`;
+  
+  return plan;
+}
+
+function generateBasicProgressTracking(goal) {
+  let plan = 'Uppföljning och mätningar:\n\n';
+  
+  plan += `VECKOVIS MÄTNING:
+• Kroppsvikt (samma tid, samma dag)
+• Energinivå (skala 1-10)
+• Träningskvalitet (skala 1-10)
+• Sömnkvalitet (skala 1-10)\n\n`;
+  
+  plan += `MÅNADSVIS MÄTNING:
+• Kroppsmått (midja, höfter, armar)
+• Konditionstest
+• Styrketest (max antal push-ups)
+• Progressbilder\n\n`;
+  
+  plan += `MILSTOLPAR:
+• Vecka 2: Första förbättringarna märks
+• Vecka 4: Tydliga resultat
+• Vecka 8: Betydande förändringar
+• Vecka 12: Måluppfyllelse`;
+  
+  return plan;
 }
 
 module.exports = router;

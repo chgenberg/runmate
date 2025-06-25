@@ -7,13 +7,13 @@ import {
   BellIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
-import { Heart, Search, X } from 'lucide-react';
+import { Heart, Search, X, Menu } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import AppleHealthSyncModal from './AppleHealthSyncModal';
 import ProfileAvatar from '../common/ProfileAvatar';
 import { getProfilePictureUrl } from '../../services/api';
 
-const TopBar = () => {
+const TopBar = ({ onMenuClick }) => {
   const { user } = useAuth();
   const { isConnected } = useSocket();
   const navigate = useNavigate();
@@ -56,19 +56,29 @@ const TopBar = () => {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         <div className="flex items-center justify-between h-16">
-          {/* Logo/Brand for mobile */}
-          <motion.div 
-            className="lg:hidden flex items-center"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center mr-2">
-              <Heart className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
-              RunMate
-            </h1>
-          </motion.div>
+          {/* Mobile Menu Button and Logo */}
+          <div className="lg:hidden flex items-center">
+            <motion.button
+              onClick={onMenuClick}
+              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all mr-3"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Menu className="h-6 w-6" />
+            </motion.button>
+            <motion.div 
+              className="flex items-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center mr-2">
+                <Heart className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
+                RunMate
+              </h1>
+            </motion.div>
+          </div>
 
           {/* Search Bar - Hidden on mobile, shown on larger screens */}
           <div className="hidden lg:flex flex-1 max-w-lg mx-4">

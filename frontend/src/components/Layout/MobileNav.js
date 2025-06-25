@@ -32,7 +32,7 @@ const MobileNav = () => {
   const [activeNotifications] = useState(3);
   const [showProModal, setShowProModal] = useState(false);
 
-  // Main bottom navigation items
+  // Main bottom navigation items - only essential features
   const bottomNavItems = [
     {
       name: 'Hem',
@@ -40,14 +40,20 @@ const MobileNav = () => {
       icon: Home,
     },
     {
-      name: 'Träning',
-      href: '/app/activities',
-      icon: Activity,
+      name: 'Träningskompis',
+      href: '/app/discover',
+      icon: Users,
     },
     {
-      name: 'Meddelanden',
-      href: '/app/messages',
-      icon: MessageCircle,
+      name: 'Rutter',
+      href: '/app/suggested-routes',
+      icon: Activity,
+      badge: 'NY'
+    },
+    {
+      name: 'Utmaningar',
+      href: '/app/challenges',
+      icon: Trophy,
     },
     {
       name: 'Mer',
@@ -187,10 +193,15 @@ const MobileNav = () => {
               transition={{ delay: index * 0.1 }}
             >
               <motion.div
-                className={`${isActive(item.href) && !item.isSpecial ? 'scale-110' : ''}`}
+                className={`${isActive(item.href) && !item.isSpecial ? 'scale-110' : ''} relative`}
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <item.icon className="w-5 h-5" />
+                {item.badge && (
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full">
+                    {item.badge}
+                  </span>
+                )}
               </motion.div>
               <span className={`text-xs mt-1 ${item.isSpecial ? 'font-medium' : ''}`}>
                 {item.name}

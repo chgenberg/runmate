@@ -1,152 +1,223 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Send,
-  Sparkles,
-  Calendar,
-  Activity,
-  Target,
-  TrendingUp,
-  Heart,
-  Award,
   Brain,
-  Plus
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
-import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
+import { toast } from 'react-hot-toast';
+import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const AICoachPage = () => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [currentPhase] = useState('chat');
-  const [aiProfile, setAiProfile] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [trainingPlan, setTrainingPlan] = useState(null);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [coachingPlan, setCoachingPlan] = useState(null);
+  const [formData, setFormData] = useState({
+    primaryGoal: '',
+    specificSport: '',
+    currentLevel: '',
+    weeklyHours: '',
+    flexibleSchedule: '',
+    currentDiet: '',
+    dietaryRestrictions: [],
+    sleepHours: '',
+    stressLevel: '',
+    injuries: [],
+    previousExperience: '',
+    motivation: '',
+    pastChallenges: '',
+    equipment: [],
+    gymAccess: '',
+    lifestyle: '',
+    workSchedule: '',
+    specificTarget: '',
+    deadline: '',
+    previousResults: ''
+  });
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Initialize with welcome message
-  useEffect(() => {
-    const initMessages = [
-      {
-        type: 'ai',
-        content: `Hej ${user?.firstName}! 👋\n\nJag heter ARIA - din personliga AI-löpcoach. Jag använder avancerad AI för att skapa skräddarsydda träningsplaner som anpassar sig efter din utveckling.\n\nVill du att jag skapar en personlig träningsplan för dig?`,
-        timestamp: Date.now()
-      }
-    ];
-    setMessages(initMessages);
-  }, [user]);
-
-  // Load existing AI profile
-  useEffect(() => {
-    const loadAIProfile = async () => {
-      try {
-        const response = await api.get('/aicoach/profile');
-        if (response.data.profile) {
-          setAiProfile(response.data.profile);
-          setTrainingPlan(response.data.trainingPlan);
-        }
-      } catch (error) {
-        console.log('No AI profile found');
-      }
-    };
-    
-    loadAIProfile();
-  }, []);
-
-  const formatAIMessage = (message) => {
-    // Convert **text** to <strong>text</strong>
-    let formatted = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Convert line breaks to <br/>
-    formatted = formatted.replace(/\n/g, '<br/>');
-    
-    // Convert lists
-    formatted = formatted.replace(/^- (.*?)$/gm, '<li>$1</li>');
-    formatted = formatted.replace(/(<li>.*<\/li>)/s, '<ul class="list-disc list-inside mt-2 mb-2">$1</ul>');
-    
-    return formatted;
-  };
-
-  const addAIMessage = async (message) => {
-    setIsTyping(true);
-    
-    // Simulate typing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsTyping(false);
-    setMessages(prev => [...prev, {
-      type: 'ai',
-      content: message,
-      timestamp: Date.now()
-    }]);
-  };
-
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    
-    const userMessage = inputValue.trim();
-    setInputValue('');
-    
-    // Add user message
-    setMessages(prev => [...prev, {
-      type: 'user',
-      content: userMessage,
-      timestamp: Date.now()
-    }]);
-
-    // Get AI response
-    try {
-      const response = await api.post('/aicoach/chat', {
-        message: userMessage,
-        context: {
-          hasProfile: !!aiProfile,
-          currentPhase,
-          userName: user?.firstName
-        }
-      });
-
-      if (response.data.message) {
-        await addAIMessage(response.data.message);
-      }
-    } catch (error) {
-      console.error('Error getting AI response:', error);
-      await addAIMessage('Ursäkta, jag kunde inte bearbeta ditt meddelande just nu. Kan du försöka igen?');
+  const questions = [
+    {
+      id: 'primaryGoal',
+      title: 'Vad är ditt huvudmål? 🎯',
+      subtitle: 'Välj det som motiverar dig mest',
+      type: 'single-choice',
+      options: [
+        { value: 'weight-loss', label: 'Gå ner i vikt', icon: '⚖️', description: 'Förbränna fett och forma kroppen' },
+        { value: 'muscle-gain', label: 'Bygga muskler', icon: '💪', description: 'Öka muskelmassa och styrka' },
+        { value: 'endurance', label: 'Förbättra uthållighet', icon: '🏃', description: 'Springa längre och starkare' },
+        { value: 'strength', label: 'Bli starkare', icon: '🏋️', description: 'Öka maxstyrka och kraft' },
+        { value: 'health', label: 'Allmän hälsa', icon: '❤️', description: 'Må bättre och leva hälsosamt' },
+        { value: 'competition', label: 'Tävla', icon: '🏆', description: 'Prestera i tävling eller event' }
+      ]
+    },
+    {
+      id: 'currentLevel',
+      title: 'Hur skulle du beskriva din nuvarande nivå? 📊',
+      subtitle: 'Var ärlig - detta hjälper oss skapa rätt plan',
+      type: 'single-choice',
+      options: [
+        { value: 'beginner', label: 'Nybörjare', icon: '🌱', description: 'Jag har precis börjat eller tränar sällan' },
+        { value: 'intermediate', label: 'Medelnivå', icon: '🏃', description: 'Jag tränar regelbundet 2-4 gånger/vecka' },
+        { value: 'advanced', label: 'Avancerad', icon: '🚀', description: 'Jag tränar 5+ gånger/vecka med struktur' },
+        { value: 'elite', label: 'Elit', icon: '🏅', description: 'Jag tävlar eller tränar på mycket hög nivå' }
+      ]
+    },
+    {
+      id: 'weeklyHours',
+      title: 'Hur många timmar kan du träna per vecka? ⏱️',
+      subtitle: 'Räkna realistiskt med din nuvarande livssituation',
+      type: 'slider',
+      min: 1,
+      max: 20,
+      unit: 'timmar'
+    },
+    {
+      id: 'currentDiet',
+      title: 'Hur ser din nuvarande kost ut? 🍎',
+      subtitle: 'Ingen dömer - vi vill bara förstå utgångspunkten',
+      type: 'single-choice',
+      options: [
+        { value: 'very-healthy', label: 'Mycket hälsosam', icon: '🥗', description: 'Jag äter mestadels näringsrik mat' },
+        { value: 'mostly-healthy', label: 'Mestadels hälsosam', icon: '🍎', description: 'Bra bas med några undantag' },
+        { value: 'mixed', label: 'Blandat', icon: '🍕', description: 'Både hälsosamt och ohälsosamt' },
+        { value: 'needs-improvement', label: 'Behöver förbättras', icon: '🍟', description: 'Mycket processad mat och snacks' }
+      ]
+    },
+    {
+      id: 'sleepHours',
+      title: 'Hur många timmar sover du per natt? 😴',
+      subtitle: 'Sömn är avgörande för återhämtning och resultat',
+      type: 'slider',
+      min: 4,
+      max: 10,
+      unit: 'timmar'
+    },
+    {
+      id: 'injuries',
+      title: 'Har du några skador eller begränsningar? 🩹',
+      subtitle: 'Vi anpassar träningen för att hålla dig skadefri',
+      type: 'multi-choice',
+      options: [
+        { value: 'none', label: 'Inga skador', icon: '✅' },
+        { value: 'knee', label: 'Knäproblem', icon: '🦵' },
+        { value: 'back', label: 'Ryggproblem', icon: '🔙' },
+        { value: 'shoulder', label: 'Axelproblem', icon: '💪' },
+        { value: 'ankle', label: 'Fotledsproblem', icon: '🦶' },
+        { value: 'wrist', label: 'Handledsproblem', icon: '✋' },
+        { value: 'other', label: 'Annat', icon: '🩹' }
+      ]
+    },
+    {
+      id: 'motivation',
+      title: 'Vad motiverar dig mest att träna? 🔥',
+      subtitle: 'Detta hjälper oss designa en plan som håller dig engagerad',
+      type: 'single-choice',
+      options: [
+        { value: 'results', label: 'Se resultat', icon: '📈', description: 'Fysiska förändringar och framsteg' },
+        { value: 'energy', label: 'Känna mig energisk', icon: '⚡', description: 'Må bättre i vardagen' },
+        { value: 'challenge', label: 'Utmana mig själv', icon: '🎯', description: 'Sätta och nå nya mål' },
+        { value: 'social', label: 'Träna med andra', icon: '👥', description: 'Gemenskap och stöd' },
+        { value: 'stress-relief', label: 'Minska stress', icon: '🧘', description: 'Mental hälsa och avkoppling' },
+        { value: 'routine', label: 'Ha en rutin', icon: '📅', description: 'Struktur i vardagen' }
+      ]
+    },
+    {
+      id: 'equipment',
+      title: 'Vilken träningsutrustning har du tillgång till? 🏋️',
+      subtitle: 'Vi anpassar övningarna efter vad du har',
+      type: 'multi-choice',
+      options: [
+        { value: 'bodyweight', label: 'Kroppsvikt', icon: '🤸' },
+        { value: 'dumbbells', label: 'Hantlar', icon: '🏋️' },
+        { value: 'resistance-bands', label: 'Gummiband', icon: '🎯' },
+        { value: 'kettlebells', label: 'Kettlebells', icon: '⚫' },
+        { value: 'barbell', label: 'Skivstång', icon: '🏋️‍♂️' },
+        { value: 'cardio-machine', label: 'Kardiomaskin', icon: '🏃‍♀️' },
+        { value: 'full-gym', label: 'Komplett gym', icon: '🏢' }
+      ]
+    },
+    {
+      id: 'lifestyle',
+      title: 'Hur ser din livsstil ut? 🏠',
+      subtitle: 'Detta påverkar hur vi strukturerar din plan',
+      type: 'single-choice',
+      options: [
+        { value: 'student', label: 'Student', icon: '🎓', description: 'Flexibel schema, begränsad budget' },
+        { value: 'office-worker', label: 'Kontorsarbetare', icon: '💼', description: 'Sitter mycket, regelbundna tider' },
+        { value: 'parent', label: 'Förälder', icon: '👨‍👩‍👧‍👦', description: 'Begränsad tid, familjeansvar' },
+        { value: 'shift-worker', label: 'Skiftarbetare', icon: '🌙', description: 'Oregelbundna tider' },
+        { value: 'entrepreneur', label: 'Företagare', icon: '🚀', description: 'Flexibel men opredictable' },
+        { value: 'retired', label: 'Pensionär', icon: '🌅', description: 'Mycket tid, fokus på hälsa' }
+      ]
+    },
+    {
+      id: 'specificTarget',
+      title: 'Har du ett specifikt mål eller event? 🎯',
+      subtitle: 'T.ex. marathon, bröllop, semester, tävling',
+      type: 'text',
+      placeholder: 'Beskriv ditt specifika mål...'
     }
-  };
-
-  const quickActions = [
-    { text: "Skapa träningsplan", icon: Calendar, color: 'from-orange-500 to-orange-600' },
-    { text: "Analysera min löpning", icon: TrendingUp, color: 'from-sport-lime-400 to-sport-lime-500' },
-    { text: "Tips för motivation", icon: Heart, color: 'from-red-400 to-red-500' },
-    { text: "Förebygg skador", icon: Activity, color: 'from-blue-400 to-blue-500' }
   ];
 
-  const handleQuickAction = (action) => {
-    if (action.text === "Skapa träningsplan" && !aiProfile) {
-      setShowOnboarding(true);
+  const currentQuestion = questions[currentStep];
+  const progress = ((currentStep + 1) / questions.length) * 100;
+
+  const handleAnswer = (questionId, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+
+  const handleNext = () => {
+    if (currentStep < questions.length - 1) {
+      setCurrentStep(currentStep + 1);
     } else {
-      setInputValue(action.text);
-      inputRef.current?.focus();
+      handleSubmit();
     }
   };
 
-  const handleOnboardingComplete = (plan) => {
-    setShowOnboarding(false);
-    setTrainingPlan(plan);
-    addAIMessage(`Fantastiskt! 🎉\n\nJag har skapat en personlig träningsplan baserat på dina svar. Här är en översikt:\n\n**Veckans träningspass:**\n${plan.weeklySchedule}\n\n**Fokusområden:**\n${plan.focusAreas}\n\nVill du att jag går igenom planen i detalj?`);
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
   };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/aicoach/comprehensive-plan', formData);
+      
+      if (response.data.success) {
+        setCoachingPlan(response.data.plan);
+        setShowResults(true);
+        toast.success('Din personliga tränings- och kostplan är klar! 🎉');
+      }
+    } catch (error) {
+      console.error('Error creating coaching plan:', error);
+      toast.error('Något gick fel. Försök igen!');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isAnswered = () => {
+    const value = formData[currentQuestion.id];
+    if (currentQuestion.type === 'multi-choice') {
+      return Array.isArray(value) && value.length > 0;
+    }
+    return value && value.toString().length > 0;
+  };
+
+  if (showResults && coachingPlan) {
+    return <CoachingResults plan={coachingPlan} onBack={() => setShowResults(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-sport-lime-50">
@@ -162,8 +233,8 @@ const AICoachPage = () => {
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">ARIA</h1>
-                <p className="text-sm text-gray-600">AI Running Intelligence Assistant</p>
+                <h1 className="text-2xl font-bold text-gray-900">AI Coach 2.0</h1>
+                <p className="text-sm text-gray-600">Personlig tränings- och kostcoach</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -171,228 +242,222 @@ const AICoachPage = () => {
               <span className="text-sm text-gray-600">Powered by GPT-4</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Messages Container */}
-      <div className="max-w-4xl mx-auto">
-        <div className="h-[calc(100vh-280px)] overflow-y-auto px-4 py-6">
-          <AnimatePresence>
-            {messages.map((message, index) => (
+          
+          {/* Progress bar */}
+          <div className="mt-6">
+            <div className="flex justify-between text-sm text-gray-500 mb-2">
+              <span>Fråga {currentStep + 1} av {questions.length}</span>
+              <span>{Math.round(progress)}% klart</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
-                className={`mb-6 ${message.type === 'user' ? 'flex justify-end' : ''}`}
-              >
-                {message.type === 'ai' ? (
-                  <div className="flex items-start space-x-3 max-w-[80%]">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-sport-lime-400 rounded-2xl flex items-center justify-center flex-shrink-0">
-                      <Brain className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="bg-white rounded-2xl px-5 py-4 shadow-sm">
-                      <div 
-                        className="text-gray-800 leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: formatAIMessage(message.content) }}
-                      />
-                      <p className="text-xs text-gray-400 mt-3">
-                        {new Date(message.timestamp).toLocaleTimeString('sv-SE', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="max-w-[80%]">
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl px-5 py-4 shadow-sm">
-                      <p className="leading-relaxed font-medium">{message.content}</p>
-                      <p className="text-xs text-white/70 mt-3">
-                        {new Date(message.timestamp).toLocaleTimeString('sv-SE', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-start space-x-3"
-            >
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-sport-lime-400 rounded-2xl flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <div className="bg-white rounded-2xl px-5 py-4 shadow-sm">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Quick Actions */}
-        <div className="border-t border-gray-200 px-4 py-3 bg-white/80 backdrop-blur-sm">
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {quickActions.map((action, index) => (
-              <motion.button
-                key={index}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleQuickAction(action)}
-                className={`flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r ${action.color} text-white rounded-2xl whitespace-nowrap transition-all shadow-sm hover:shadow-md`}
-              >
-                <action.icon className="w-4 h-4" />
-                <span className="text-sm font-medium">{action.text}</span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Input Area */}
-        <div className="border-t border-gray-200 p-4 bg-white">
-          <div className="flex items-end space-x-3">
-            <div className="flex-1">
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder="Fråga ARIA om löpning, träning eller kost..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                rows={1}
-                style={{ minHeight: '48px', maxHeight: '120px' }}
+                className="h-full bg-gradient-to-r from-orange-500 to-sport-lime-500 rounded-full"
               />
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isTyping}
-              className={`p-3 rounded-2xl transition-all ${
-                inputValue.trim() && !isTyping
-                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl'
-                  : 'bg-gray-100 text-gray-400'
-              }`}
-            >
-              <Send className="w-5 h-5" />
-            </motion.button>
           </div>
         </div>
       </div>
 
-      {/* Training Stats - Optional Dashboard */}
-      {trainingPlan && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto px-4 pb-8"
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatsCard
-              icon={Target}
-              label="Veckans mål"
-              value={trainingPlan?.weeklyGoal || "42 km"}
-              progress={75}
-              color="from-orange-500 to-orange-600"
-            />
-            <StatsCard
-              icon={Activity}
-              label="Träningspass"
-              value={trainingPlan?.completedSessions || "4/5"}
-              progress={80}
-              color="from-sport-lime-400 to-sport-lime-500"
-            />
-            <StatsCard
-              icon={TrendingUp}
-              label="Snittempo"
-              value={trainingPlan?.averagePace || "5:15"}
-              trend="+3%"
-              color="from-blue-400 to-blue-500"
-            />
-            <StatsCard
-              icon={Award}
-              label="Streak"
-              value={trainingPlan?.streak || "12 dagar"}
-              highlight
-              color="from-red-400 to-red-500"
-            />
-          </div>
-        </motion.div>
-      )}
+      {/* Question Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-3xl shadow-xl p-8"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                {currentQuestion.title}
+              </h2>
+              <p className="text-lg text-gray-600">
+                {currentQuestion.subtitle}
+              </p>
+            </div>
 
-      {/* Onboarding Modal */}
-      <AICoachOnboarding
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={handleOnboardingComplete}
-      />
+            <QuestionRenderer 
+              question={currentQuestion}
+              value={formData[currentQuestion.id]}
+              onChange={(value) => handleAnswer(currentQuestion.id, value)}
+            />
 
-      {/* Floating Action Button for New Plan */}
-      {!showOnboarding && (
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowOnboarding(true)}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-sport-yellow-400 to-sport-yellow-500 rounded-full shadow-xl flex items-center justify-center text-white hover:shadow-2xl transition-all"
-        >
-          <Plus className="w-6 h-6" />
-        </motion.button>
-      )}
+            {/* Navigation */}
+            <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+              <button
+                onClick={handleBack}
+                disabled={currentStep === 0}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-2xl transition-all ${
+                  currentStep === 0
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span>Tillbaka</span>
+              </button>
+
+              <button
+                onClick={handleNext}
+                disabled={!isAnswered() || isLoading}
+                className={`flex items-center space-x-2 px-8 py-3 rounded-2xl transition-all ${
+                  isAnswered() && !isLoading
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Skapar din plan...</span>
+                  </>
+                ) : currentStep === questions.length - 1 ? (
+                  <>
+                    <span>Skapa min plan</span>
+                    <Sparkles className="w-5 h-5" />
+                  </>
+                ) : (
+                  <>
+                    <span>Nästa</span>
+                    <ChevronRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
 
-const StatsCard = ({ icon: Icon, label, value, progress, trend, highlight, color }) => {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      className={`p-4 rounded-2xl border-2 bg-white ${
-        highlight 
-          ? 'border-sport-yellow-400' 
-          : 'border-gray-200'
-      }`}
-    >
-      <div className="flex items-center justify-between mb-2">
-        <div className={`p-2 bg-gradient-to-r ${color} rounded-xl`}>
-          <Icon className="w-5 h-5 text-white" />
+// Question Renderer Component
+const QuestionRenderer = ({ question, value, onChange }) => {
+  switch (question.type) {
+    case 'single-choice':
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {question.options.map((option) => (
+            <motion.button
+              key={option.value}
+              onClick={() => onChange(option.value)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`p-6 rounded-2xl border-2 transition-all text-left ${
+                value === option.value
+                  ? 'border-orange-500 bg-orange-50 shadow-lg'
+                  : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+              }`}
+            >
+              <div className="flex items-start space-x-4">
+                <div className="text-3xl">{option.icon}</div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                    {option.label}
+                  </h3>
+                  {option.description && (
+                    <p className="text-gray-600 text-sm">{option.description}</p>
+                  )}
+                </div>
+                {value === option.value && (
+                  <Check className="w-6 h-6 text-orange-500" />
+                )}
+              </div>
+            </motion.button>
+          ))}
         </div>
-        {trend && (
-          <span className="text-xs text-green-600 font-medium">{trend}</span>
-        )}
-      </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-600">{label}</p>
-      {progress !== undefined && (
-        <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 1 }}
-            className={`h-1.5 rounded-full bg-gradient-to-r ${color}`}
+      );
+
+    case 'multi-choice':
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {question.options.map((option) => {
+            const isSelected = Array.isArray(value) && value.includes(option.value);
+            return (
+              <motion.button
+                key={option.value}
+                onClick={() => {
+                  const currentArray = Array.isArray(value) ? value : [];
+                  if (option.value === 'none') {
+                    onChange(['none']);
+                  } else {
+                    const filtered = currentArray.filter(v => v !== 'none');
+                    if (isSelected) {
+                      onChange(filtered.filter(v => v !== option.value));
+                    } else {
+                      onChange([...filtered, option.value]);
+                    }
+                  }
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`p-4 rounded-2xl border-2 transition-all text-left ${
+                  isSelected
+                    ? 'border-orange-500 bg-orange-50 shadow-lg'
+                    : 'border-gray-200 hover:border-orange-300'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  {option.icon && <span className="text-2xl">{option.icon}</span>}
+                  <span className="font-medium text-gray-900">{option.label}</span>
+                  {isSelected && <Check className="w-5 h-5 text-orange-500 ml-auto" />}
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      );
+
+    case 'slider':
+      return (
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-8">
+            <div className="text-6xl font-bold text-orange-500 mb-2">
+              {value || question.min}
+            </div>
+            <div className="text-xl text-gray-600">{question.unit}</div>
+          </div>
+          <input
+            type="range"
+            min={question.min}
+            max={question.max}
+            value={value || question.min}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+            style={{
+              background: `linear-gradient(to right, #f97316 0%, #f97316 ${((value || question.min) - question.min) / (question.max - question.min) * 100}%, #e5e7eb ${((value || question.min) - question.min) / (question.max - question.min) * 100}%, #e5e7eb 100%)`
+            }}
+          />
+          <div className="flex justify-between text-sm text-gray-500 mt-2">
+            <span>{question.min}</span>
+            <span>{question.max}</span>
+          </div>
+        </div>
+      );
+
+    case 'text':
+      return (
+        <div className="max-w-2xl mx-auto">
+          <textarea
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={question.placeholder}
+            className="w-full p-6 border-2 border-gray-200 rounded-2xl focus:border-orange-500 focus:outline-none resize-none text-lg"
+            rows={4}
           />
         </div>
-      )}
-    </motion.div>
-  );
+      );
+
+    default:
+      return null;
+  }
 };
+
+
 
 export default AICoachPage; 

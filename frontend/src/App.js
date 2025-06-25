@@ -54,6 +54,8 @@ import ChatPage from './pages/Chat/ChatPage';
 
 // AI Coach Page
 import AICoachPage from './pages/AICoach/AICoachPage';
+import SuggestedRoutesPage from './pages/Routes/SuggestedRoutesPage';
+import PrivacyPage from './pages/Legal/PrivacyPage';
 
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
@@ -87,6 +89,16 @@ function App() {
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             
+            {/* Legal and Company Pages */}
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<PrivacyPage />} />
+            <Route path="/cookies" element={<PrivacyPage />} />
+            <Route path="/gdpr" element={<PrivacyPage />} />
+            <Route path="/about" element={<PrivacyPage />} />
+            <Route path="/contact" element={<PrivacyPage />} />
+            <Route path="/help" element={<PrivacyPage />} />
+            <Route path="/careers" element={<PrivacyPage />} />
+            
             {/* Protected Routes with Socket */}
             <Route path="/app" element={
               <ProtectedRoute>
@@ -97,7 +109,8 @@ function App() {
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
-              <Route path="ai-coach" element={<AICoachPage />} />
+                              <Route path="ai-coach" element={<AICoachPage />} />
+                <Route path="suggested-routes" element={<SuggestedRoutesPage />} />
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="members" element={<AllMembersPage />} />
               <Route path="matches" element={<MatchesPage />} />

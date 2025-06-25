@@ -1,253 +1,163 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
-  Home, 
-  User, 
-  MessageCircle, 
-  Trophy, 
-  Activity,
-  Heart,
-  Settings,
-  Star,
-  Users,
-  Calendar,
-  Brain,
-  LogOut,
-  Search,
-  ChevronDown,
-  BarChart3,
-  Zap
-} from 'lucide-react';
+  HomeIcon, 
+  UsersIcon, 
+  MapIcon,
+  TrophyIcon,
+  CogIcon,
+  ArrowRightOnRectangleIcon
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
 
-const Sidebar = () => {
-  const navigate = useNavigate();
+const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const [expandedMenus, setExpandedMenus] = useState(['training']);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
-  const toggleMenu = (menuId) => {
-    setExpandedMenus(prev => 
-      prev.includes(menuId) 
-        ? prev.filter(id => id !== menuId)
-        : [...prev, menuId]
-    );
-  };
-
-  const menuStructure = [
+  // Essential menu items only
+  const menuItems = [
     { 
+      name: 'Hem', 
       path: '/app/dashboard', 
-      name: 'Översikt', 
-      icon: Home,
-      single: true 
-    },
-    {
-      id: 'training',
-      name: 'Träning',
-      icon: Activity,
-      iconColor: 'text-sport-yellow-500',
-      children: [
-        { path: '/app/activities', name: 'Mina aktiviteter', icon: Zap },
-        { path: '/app/statistics', name: 'Statistik', icon: BarChart3 },
-        { path: '/app/ai-coach', name: 'AI Coach', icon: Brain, badge: 'NY' },
-        { path: '/app/challenges', name: 'Utmaningar', icon: Star }
-      ]
-    },
-    {
-      id: 'social',
-      name: 'Socialt',
-      icon: Users,
-      iconColor: 'text-sport-lime-500',
-      children: [
-        { path: '/app/discover', name: 'Upptäck löpare', icon: Search },
-        { path: '/app/matches', name: 'Matcha', icon: Heart },
-        { path: '/app/messages', name: 'Meddelanden', icon: MessageCircle },
-        { path: '/app/community', name: 'Community', icon: Users }
-      ]
-    },
-    {
-      id: 'compete',
-      name: 'Tävla',
-      icon: Trophy,
-      iconColor: 'text-orange-500',
-      children: [
-        { path: '/app/leaderboard', name: 'Topplista', icon: Trophy },
-        { path: '/app/events', name: 'Event', icon: Calendar }
-      ]
+      icon: HomeIcon,
+      description: 'Översikt och aktiviteter'
     },
     { 
-      path: '/app/profile', 
-      name: 'Min profil', 
-      icon: User,
-      single: true 
+      name: 'Ny träningskompis', 
+      path: '/app/discover', 
+      icon: UsersIcon,
+      description: 'Hitta träningspartners'
     },
     { 
-      path: '/app/settings', 
+      name: 'Föreslagna rutter', 
+      path: '/app/suggested-routes', 
+      icon: MapIcon,
+      description: 'AI-genererade träningsrutter',
+      badge: 'NY'
+    },
+    { 
+      name: 'Utmaningar', 
+      path: '/app/challenges', 
+      icon: TrophyIcon,
+      description: 'Tävla och utmana dig själv'
+    },
+    { 
       name: 'Inställningar', 
-      icon: Settings,
-      single: true 
+      path: '/app/settings', 
+      icon: CogIcon,
+      description: 'Profil och preferenser'
     }
   ];
 
-  const MenuItem = ({ item, isChild = false }) => {
-    
-    if (item.single) {
-      return (
-        <NavLink
-          to={item.path}
-          className={({ isActive }) =>
-            `flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-              isActive
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
-              <span className="text-sm font-medium">{item.name}</span>
-            </>
-          )}
-        </NavLink>
-      );
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
     }
-
-    const isExpanded = expandedMenus.includes(item.id);
-    const hasActiveChild = item.children?.some(child => location.pathname === child.path);
-
-    return (
-      <div>
-        <button
-          onClick={() => toggleMenu(item.id)}
-          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 ${
-            hasActiveChild || isExpanded
-              ? 'bg-gray-50 text-gray-900'
-              : 'text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          <div className="flex items-center space-x-3">
-            <item.icon className={`w-5 h-5 ${item.iconColor || 'text-gray-400'}`} />
-            <span className="text-sm font-medium">{item.name}</span>
-          </div>
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown className="w-4 h-4 text-gray-400" />
-          </motion.div>
-        </button>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="ml-4 mt-1 space-y-1">
-                {item.children.map((child) => (
-                  <NavLink
-                    key={child.path}
-                    to={child.path}
-                    className={({ isActive }) =>
-                      `flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'bg-orange-600 text-white shadow-sm'
-                          : 'text-gray-600 hover:bg-gray-50'
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <child.icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
-                        <span className="text-sm">{child.name}</span>
-                        {child.badge && (
-                          <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
-                            isActive 
-                              ? 'bg-white/20 text-white' 
-                              : 'bg-orange-100 text-orange-700'
-                          }`}>
-                            {child.badge}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
   };
 
   return (
-    <motion.aside 
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      className="hidden lg:flex flex-col h-full bg-white border-r border-gray-200 w-64"
-    >
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-sport-yellow-400 to-sport-lime-400 rounded-xl flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`
+        fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:static lg:shadow-none lg:border-r lg:border-gray-200
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <img src="/logo.png" alt="RunMate" className="w-10 h-10" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">RunMate</h1>
+                <p className="text-sm text-gray-500">Träna smartare tillsammans</p>
+              </div>
+            </div>
           </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-sport-yellow-500 to-sport-lime-500 bg-clip-text text-transparent">
-            RunMate
-          </span>
-        </div>
-      </div>
 
-      {/* User Info */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <img 
-            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=ffee00&color=000`}
-            alt={user?.firstName}
-            className="w-10 h-10 rounded-full"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {user?.firstName} {user?.lastName}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              @{user?.username}
-            </p>
+          {/* User Info */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                {user?.firstName?.charAt(0) || 'U'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 p-4 space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={onClose}
+                  className={`
+                    group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                    ${active 
+                      ? 'bg-orange-50 text-orange-700 border border-orange-200' 
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  <Icon className={`
+                    mr-3 h-5 w-5 transition-colors
+                    ${active ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-600'}
+                  `} />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{item.name}</span>
+                      {item.badge && (
+                        <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Logout */}
+          <div className="p-4 border-t border-gray-100">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl transition-all duration-200"
+            >
+              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-gray-400" />
+              Logga ut
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        <div className="px-3 space-y-1">
-          {menuStructure.map((item, index) => (
-            <MenuItem key={item.path || item.id || index} item={item} />
-          ))}
-        </div>
-      </nav>
-
-      {/* Logout */}
-      <div className="p-4 border-t border-gray-200">
-        <button
-          onClick={handleLogout}
-          className="flex items-center space-x-3 px-3 py-2.5 w-full rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          <LogOut className="w-5 h-5 text-gray-400" />
-          <span className="text-sm font-medium">Logga ut</span>
-        </button>
-      </div>
-    </motion.aside>
+    </>
   );
 };
 

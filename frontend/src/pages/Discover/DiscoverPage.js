@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { 
   HeartIcon,
@@ -10,16 +10,13 @@ import {
   AdjustmentsHorizontalIcon,
   UserGroupIcon,
   FireIcon,
-  ClockIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const DiscoverPage = () => {
-  const { user } = useAuth();
   const [runners, setRunners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -33,11 +30,14 @@ const DiscoverPage = () => {
 
   const constraintsRef = useRef(null);
 
-  useEffect(() => {
-    fetchRunners();
-  }, [filters]);
+  // Move useTransform calls to top level
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+  const likeOpacity = useTransform(x, [0, 100], [0, 1]);
+  const skipOpacity = useTransform(x, [-100, 0], [1, 0]);
 
-  const fetchRunners = async () => {
+  const fetchRunners = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get('/users/discover', { params: filters });
@@ -98,7 +98,11 @@ const DiscoverPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchRunners();
+  }, [fetchRunners]);
 
   const handleSwipe = async (direction) => {
     if (currentIndex >= runners.length) return;
@@ -128,10 +132,6 @@ const DiscoverPage = () => {
 
   const currentRunner = runners[currentIndex];
   const hasMoreRunners = currentIndex < runners.length;
-
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-30, 30]);
-  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
   const levelColors = {
     'Nybörjare': 'green',
@@ -341,7 +341,7 @@ const DiscoverPage = () => {
                   <motion.div
                     className="absolute -top-8 left-1/2 transform -translate-x-1/2"
                     style={{
-                      opacity: useTransform(x, [0, 100], [0, 1])
+                      opacity: likeOpacity
                     }}
                   >
                     <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold">
@@ -352,7 +352,7 @@ const DiscoverPage = () => {
                   <motion.div
                     className="absolute -top-8 left-1/2 transform -translate-x-1/2"
                     style={{
-                      opacity: useTransform(x, [-100, 0], [1, 0])
+                      opacity: skipOpacity
                     }}
                   >
                     <div className="bg-red-500 text-white px-4 py-2 rounded-full font-bold">

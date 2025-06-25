@@ -1,379 +1,424 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { 
-  Filter, 
-  Plus, 
-  Search, 
-  MapPin, 
-  Calendar,
-  Users,
-  Heart,
-  TrendingUp,
-  Sparkles,
-  X,
-  ChevronRight
-} from 'lucide-react';
+  HeartIcon,
+  XMarkIcon,
+  MapPinIcon,
+  BoltIcon,
+  TrophyIcon,
+  SparklesIcon,
+  AdjustmentsHorizontalIcon,
+  UserGroupIcon,
+  FireIcon,
+  ClockIcon,
+  StarIcon
+} from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import FilterPanel from '../../components/Discover/FilterPanel';
-import { LoadingSpinnerFullScreen } from '../../components/Layout/LoadingSpinner';
 
 const DiscoverPage = () => {
-  const [runEvents, setRunEvents] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const { user } = useAuth();
+  const [runners, setRunners] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    distance: [0, 50],
-    pace: [180, 600],
-    maxDistance: 50,
-    minCompatibility: 0.3,
-    ageRange: '18-99',
-    activityLevel: '',
-    sportTypes: ''
+    distance: 50,
+    pace: 'all',
+    level: 'all',
+    goals: []
   });
 
-  const fetchRunEvents = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await api.get('/runevents');
-      if (response.data.success) {
-        setRunEvents(response.data.data);
-      } else {
-        setRunEvents([]);
-        setError('Kunde inte hämta löpevent.');
-      }
-    } catch (err) {
-      setError('Ett fel uppstod. Försök igen senare.');
-      console.error(err);
-      toast.error('Kunde inte ladda event.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const constraintsRef = useRef(null);
 
   useEffect(() => {
-    fetchRunEvents();
-  }, [fetchRunEvents]);
+    fetchRunners();
+  }, [filters]);
 
-  const handleApplyFilters = (newFilters) => {
-    setFilters(prev => ({...prev, ...newFilters}));
-    setShowFilterPanel(false);
+  const fetchRunners = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/users/discover', { params: filters });
+      setRunners(response.data.users || []);
+    } catch (error) {
+      console.error('Error fetching runners:', error);
+      // Demo data
+      setRunners([
+        {
+          id: 1,
+          name: 'Emma Johansson',
+          age: 28,
+          location: 'Stockholm',
+          distance: 12,
+          bio: 'Marathonlöpare som älskar långdistans. Tränar för Berlin Marathon 2024.',
+          level: 'Avancerad',
+          pace: '4:45',
+          weeklyDistance: 65,
+          interests: ['Marathon', 'Trail', 'Intervaller'],
+          profilePicture: '/avatar2.png',
+          rating: 4.8,
+          totalRuns: 342,
+          achievements: ['Marathon Finisher', 'Sub 3:30', '100km Club']
+        },
+        {
+          id: 2,
+          name: 'Marcus Andersson',
+          age: 32,
+          location: 'Göteborg',
+          distance: 8,
+          bio: 'Nybörjare som siktar på första 10km-loppet. Söker motiverande träningssällskap!',
+          level: 'Nybörjare',
+          pace: '6:30',
+          weeklyDistance: 20,
+          interests: ['5K', '10K', 'Morgonlöpning'],
+          profilePicture: '/avatar2.png',
+          rating: 4.5,
+          totalRuns: 45,
+          achievements: ['First 5K', 'Morning Runner']
+        },
+        {
+          id: 3,
+          name: 'Sofia Lindberg',
+          age: 25,
+          location: 'Uppsala',
+          distance: 15,
+          bio: 'Traillöpare och äventyrare. Älskar att utforska nya stigar i naturen.',
+          level: 'Medel',
+          pace: '5:15',
+          weeklyDistance: 40,
+          interests: ['Trail', 'Ultramarathon', 'Bergslopp'],
+          profilePicture: '/avatar2.png',
+          rating: 4.9,
+          totalRuns: 189,
+          achievements: ['Trail Master', 'Mountain Goat', 'Ultra Runner']
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredEvents = runEvents.filter(event => {
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      return event.title.toLowerCase().includes(search) || 
-             event.location.name.toLowerCase().includes(search) ||
-             event.host?.name?.toLowerCase().includes(search);
-    }
-    return true;
-  });
+  const handleSwipe = async (direction) => {
+    if (currentIndex >= runners.length) return;
 
-  if (isLoading) {
-    return <LoadingSpinnerFullScreen message="Laddar löprundor..." />;
-  }
+    const currentRunner = runners[currentIndex];
+    
+    if (direction === 'right') {
+      // Like
+      try {
+        await api.post(`/users/${currentRunner.id}/like`);
+        toast.success(
+          <div className="flex items-center gap-2">
+            <HeartIconSolid className="w-5 h-5 text-red-500" />
+            <span>Gillat! Om {currentRunner.name} också gillar dig blir det en match!</span>
+          </div>
+        );
+      } catch (error) {
+        console.error('Error liking runner:', error);
+      }
+    }
+
+    // Move to next runner
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+    }, 300);
+  };
+
+  const currentRunner = runners[currentIndex];
+  const hasMoreRunners = currentIndex < runners.length;
+
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+
+  const levelColors = {
+    'Nybörjare': 'green',
+    'Medel': 'yellow',
+    'Avancerad': 'red',
+    'Expert': 'purple'
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
-        <div className="px-4 py-4">
+        <div className="container-app py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold gradient-text">Upptäck</h1>
-            <Link to="/app/runevents/create">
-              <button className="btn btn-primary btn-sm group">
-                <Plus className="w-4 h-4 mr-1" />
-                <span className="hidden sm:inline">Skapa event</span>
-                <span className="sm:hidden">Ny</span>
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Enhanced Stats Banner */}
-      <div className="px-4 pt-4">
-        <div className="relative overflow-hidden bg-gradient-to-br from-orange-400 via-red-400 to-pink-500 rounded-3xl shadow-xl animate-slide-up">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
-            <div className="absolute top-1/2 right-0 w-24 h-24 bg-white rounded-full translate-x-12 -translate-y-12"></div>
-            <div className="absolute bottom-0 left-1/3 w-20 h-20 bg-white rounded-full translate-y-10"></div>
-          </div>
-          
-          {/* Running Figure Background */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-              <path d="M13.5,5.5C14.59,5.5 15.5,4.59 15.5,3.5S14.59,1.5 13.5,1.5S11.5,2.41 11.5,3.5S12.41,5.5 13.5,5.5M9.89,19.38L10.89,15L13,17V23H15V15.5L12.89,13.5L13.5,10.5C14.79,12 16.79,13 19,13V11C17.09,11 15.5,10 14.69,8.58L13.69,7.08C13.29,6.38 12.69,6 12,6S10.71,6.38 10.31,7.08L7.5,11.5L9.22,13.22L10.89,10.5L9.89,19.38Z"/>
-            </svg>
-          </div>
-          
-          {/* Content */}
-          <div className="relative p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-white">
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-                    <MapPin className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold">Löprundor nära dig</h2>
-                    <p className="text-sm text-white/90">
-                      Hitta din nästa löpupplevelse
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="text-center text-white">
-                <div className="flex items-center justify-center space-x-2 mb-1">
-                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-full">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <span className="text-3xl font-bold">{runEvents.length}</span>
-                </div>
-                <span className="text-sm text-white/90 font-medium">aktiva event</span>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold">Upptäck Löpare</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Hitta din perfekta träningspartner
+              </p>
             </div>
             
-            {/* Progress Bar */}
-            <div className="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
-              <div 
-                className="bg-white h-full rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${Math.min((runEvents.length / 10) * 100, 100)}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-white/80 mt-1">
-              {runEvents.length > 0 ? 'Fantastiskt utbud!' : 'Vara första att skapa en runda!'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="px-4 py-4 space-y-3">
-        <div className="relative animate-slide-up animation-delay-200">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Sök på plats, titel eller värd..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors ${
+                showFilters ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600'
+              }`}
             >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+              <AdjustmentsHorizontalIcon className="w-5 h-5" />
+            </motion.button>
+          </div>
         </div>
-
-        <button
-          onClick={() => setShowFilterPanel(!showFilterPanel)}
-          className="w-full btn btn-glass flex items-center justify-center animate-slide-up animation-delay-300"
-        >
-          <Filter className="w-5 h-5 mr-2" />
-          Filtrera resultat
-        </button>
       </div>
 
-      {/* Filter Panel */}
-      {showFilterPanel && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl animate-slide-left">
-            <FilterPanel
-              initialFilters={filters}
-              onApply={handleApplyFilters}
-              onClose={() => setShowFilterPanel(false)}
-            />
-          </div>
-        </div>
-      )}
+      {/* Filters */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-white border-b border-gray-200 overflow-hidden"
+          >
+            <div className="container-app py-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Max avstånd: {filters.distance} km
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  value={filters.distance}
+                  onChange={(e) => setFilters({ ...filters, distance: e.target.value })}
+                  className="w-full mt-2"
+                />
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2">
+                {['all', 'Nybörjare', 'Medel', 'Avancerad'].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setFilters({ ...filters, level })}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      filters.level === level
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {level === 'all' ? 'Alla nivåer' : level}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Content */}
-      <div className="px-4 pb-20 md:pb-8">
-        {error ? (
-          <div className="mt-8 text-center animate-slide-up">
-            <div className="bg-red-50 rounded-2xl p-8 border border-red-200">
-              <MapPin className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <p className="text-red-600 font-medium mb-4">{error}</p>
-              <button 
-                onClick={fetchRunEvents}
-                className="btn btn-primary"
-              >
-                Försök igen
-              </button>
+      <div className="container-app py-8">
+        {loading ? (
+          <div className="flex items-center justify-center h-[600px]">
+            <div className="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
           </div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="mt-8 text-center animate-slide-up">
-            <div className="bg-gray-50 rounded-2xl p-8">
-              <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Inga löprundor hittades
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {searchTerm ? 'Prova att söka på något annat.' : 'Bli först med att skapa en löprunda!'}
-              </p>
-              <Link to="/app/runevents/create">
-                <button className="btn btn-primary">
-                  <Plus className="w-5 h-5 mr-2" />
-                  Skapa första rundan
-                </button>
-              </Link>
+        ) : hasMoreRunners ? (
+          <div className="relative h-[600px] flex items-center justify-center" ref={constraintsRef}>
+            <AnimatePresence>
+              {currentRunner && (
+                <motion.div
+                  key={currentRunner.id}
+                  className="absolute w-full max-w-sm"
+                  style={{ x, rotate, opacity }}
+                  drag="x"
+                  dragConstraints={constraintsRef}
+                  dragElastic={0.2}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = Math.abs(offset.x) * velocity.x;
+                    if (swipe < -10000) {
+                      handleSwipe('left');
+                    } else if (swipe > 10000) {
+                      handleSwipe('right');
+                    }
+                  }}
+                  whileDrag={{ scale: 1.05 }}
+                >
+                  <div className="card-retro overflow-hidden cursor-grab active:cursor-grabbing">
+                    {/* Profile Image */}
+                    <div className="relative h-64 bg-gradient-to-br from-orange-400 to-pink-400">
+                      {currentRunner.profilePicture ? (
+                        <img
+                          src={currentRunner.profilePicture}
+                          alt={currentRunner.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <UserGroupIcon className="w-24 h-24 text-white/50" />
+                        </div>
+                      )}
+                      
+                      {/* Level Badge */}
+                      <div className={`absolute top-4 right-4 px-3 py-1 rounded-full bg-${levelColors[currentRunner.level]}-500 text-white font-semibold text-sm`}>
+                        {currentRunner.level}
+                      </div>
+                      
+                      {/* Rating */}
+                      <div className="absolute top-4 left-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                        <StarIcon className="w-4 h-4 text-yellow-500 fill-current" />
+                        <span className="font-semibold text-sm">{currentRunner.rating}</span>
+                      </div>
+                    </div>
+
+                    {/* Profile Info */}
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h2 className="text-2xl font-bold">{currentRunner.name}, {currentRunner.age}</h2>
+                        <p className="text-gray-600 flex items-center gap-1 mt-1">
+                          <MapPinIcon className="w-4 h-4" />
+                          {currentRunner.location} • {currentRunner.distance} km bort
+                        </p>
+                      </div>
+
+                      <p className="text-gray-700 mb-4">{currentRunner.bio}</p>
+
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center mb-1">
+                            <BoltIcon className="w-5 h-5 text-orange-500" />
+                          </div>
+                          <p className="text-lg font-bold">{currentRunner.pace}</p>
+                          <p className="text-xs text-gray-500">min/km</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="flex items-center justify-center mb-1">
+                            <FireIcon className="w-5 h-5 text-red-500" />
+                          </div>
+                          <p className="text-lg font-bold">{currentRunner.weeklyDistance}</p>
+                          <p className="text-xs text-gray-500">km/vecka</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="flex items-center justify-center mb-1">
+                            <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                          </div>
+                          <p className="text-lg font-bold">{currentRunner.totalRuns}</p>
+                          <p className="text-xs text-gray-500">löprundor</p>
+                        </div>
+                      </div>
+
+                      {/* Interests */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {currentRunner.interests.map((interest, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                          >
+                            {interest}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Achievements */}
+                      {currentRunner.achievements && currentRunner.achievements.length > 0 && (
+                        <div className="border-t pt-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Prestationer</p>
+                          <div className="flex gap-2">
+                            {currentRunner.achievements.slice(0, 3).map((achievement, index) => (
+                              <div
+                                key={index}
+                                className="p-2 bg-yellow-50 rounded-lg"
+                                title={achievement}
+                              >
+                                <TrophyIcon className="w-5 h-5 text-yellow-600" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Swipe Indicators */}
+                  <motion.div
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2"
+                    style={{
+                      opacity: useTransform(x, [0, 100], [0, 1])
+                    }}
+                  >
+                    <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold">
+                      GILLA
+                    </div>
+                  </motion.div>
+                  
+                  <motion.div
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2"
+                    style={{
+                      opacity: useTransform(x, [-100, 0], [1, 0])
+                    }}
+                  >
+                    <div className="bg-red-500 text-white px-4 py-2 rounded-full font-bold">
+                      SKIPPA
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Action Buttons */}
+            <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleSwipe('left')}
+                className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500"
+              >
+                <XMarkIcon className="w-8 h-8" />
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => console.log('Super like!')}
+                className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500"
+              >
+                <SparklesIcon className="w-8 h-8" />
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleSwipe('right')}
+                className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500"
+              >
+                <HeartIcon className="w-8 h-8" />
+              </motion.button>
             </div>
           </div>
         ) : (
-          <div className="mt-4 space-y-4">
-            {filteredEvents.map((event, index) => (
-              <RunEventCard 
-                key={event._id} 
-                event={event} 
-                index={index}
-              />
-            ))}
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserGroupIcon className="w-12 h-12 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Inga fler löpare just nu
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Kom tillbaka senare för att se fler profiler
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setCurrentIndex(0);
+                fetchRunners();
+              }}
+              className="btn-primary"
+            >
+              Uppdatera
+            </motion.button>
           </div>
         )}
       </div>
     </div>
-  );
-};
-
-// Updated RunEventCard component with new design
-const RunEventCard = ({ event, index }) => {
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('sv-SE', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getDifficultyColor = (difficulty) => {
-    const colors = {
-      easy: 'bg-green-100 text-green-700',
-      medium: 'bg-yellow-100 text-yellow-700',
-      hard: 'bg-red-100 text-red-700'
-    };
-    return colors[difficulty] || colors.medium;
-  };
-
-  const getDifficultyText = (difficulty) => {
-    const texts = {
-      easy: 'Lätt',
-      medium: 'Medel',
-      hard: 'Svår'
-    };
-    return texts[difficulty] || 'Medel';
-  };
-
-  return (
-    <Link to={`/app/runevents/${event._id}`}>
-      <div 
-        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.02] overflow-hidden animate-slide-up"
-        style={{ animationDelay: `${index * 50}ms` }}
-      >
-        {/* Image or Map Preview */}
-        <div className="relative h-48 bg-gradient-to-br from-primary-100 to-secondary-100">
-          {event.imageUrl ? (
-            <img 
-              src={event.imageUrl} 
-              alt={event.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <MapPin className="w-16 h-16 text-primary-300" />
-            </div>
-          )}
-          
-          {/* Difficulty Badge */}
-          <div className="absolute top-4 right-4">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(event.difficulty)}`}>
-              {getDifficultyText(event.difficulty)}
-            </span>
-          </div>
-
-          {/* Participants Count */}
-          <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center space-x-1">
-            <Users className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              {event.participants?.length || 0}/{event.maxParticipants || '∞'}
-            </span>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-5">
-          {/* Title and Host */}
-          <div className="mb-3">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">{event.title}</h3>
-            <p className="text-sm text-gray-600 flex items-center">
-              <Heart className="w-4 h-4 mr-1 text-primary-500" />
-              Arrangeras av {event.host?.name || 'Okänd'}
-            </p>
-          </div>
-
-          {/* Event Details */}
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center text-sm text-gray-600">
-              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-              {formatDate(event.date)}
-            </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-              {event.location.name}
-            </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <TrendingUp className="w-4 h-4 mr-2 text-gray-400" />
-              {event.distance} km • Tempo: {event.pace}
-            </div>
-          </div>
-
-          {/* Description */}
-          {event.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-              {event.description}
-            </p>
-          )}
-
-          {/* Action */}
-          <div className="flex items-center justify-between">
-            <div className="flex -space-x-2">
-              {event.participants?.slice(0, 3).map((participant, i) => (
-                <img
-                  key={i}
-                  src={`https://ui-avatars.com/api/?name=${participant.name}&background=6366f1&color=fff`}
-                  alt={participant.name}
-                  className="w-8 h-8 rounded-full border-2 border-white"
-                />
-              ))}
-              {event.participants?.length > 3 && (
-                <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
-                    +{event.participants.length - 3}
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center text-primary-600 font-medium">
-              <span className="text-sm">Se detaljer</span>
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 };
 

@@ -1,7 +1,311 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
+  PlayIcon,
+  ClockIcon,
+  MapPinIcon,
+  FireIcon,
+  ChartBarIcon,
+  CalendarIcon,
+  FunnelIcon,
+  PlusIcon,
+  TrophyIcon,
+  BoltIcon,
+  ArrowTrendingUpIcon,
+  HeartIcon
+} from '@heroicons/react/24/outline';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
+
+const ActivitiesPage = () => {
+  const { user } = useAuth();
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
+  const [showFilters, setShowFilters] = useState(false);
+  const [stats, setStats] = useState({
+    totalDistance: 0,
+    totalTime: 0,
+    avgPace: '0:00',
+    totalCalories: 0
+  });
+
+  useEffect(() => {
+    fetchActivities();
+    fetchStats();
+  }, [filter, sortBy]);
+
+  const fetchActivities = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/activities?filter=${filter}&sort=${sortBy}`);
+      setActivities(response.data);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      // Demo data
+      setActivities([
+        {
+          id: 1,
+          type: 'run',
+          distance: 8.2,
+          duration: 42,
+          pace: '5:07',
+          calories: 520,
+          date: '2024-01-15',
+          time: '07:30',
+          route: 'Morgonrunda Djurgården',
+          heartRate: 145,
+          elevation: 85,
+          weather: 'Soligt, 18°C'
+        },
+        {
+          id: 2,
+          type: 'run',
+          distance: 5.5,
+          duration: 28,
+          pace: '5:05',
+          calories: 350,
+          date: '2024-01-14',
+          time: '18:00',
+          route: 'Kvällsjogg Hagaparken',
+          heartRate: 142,
+          elevation: 45,
+          weather: 'Molnigt, 15°C'
+        },
+        {
+          id: 3,
+          type: 'run',
+          distance: 12.1,
+          duration: 65,
+          pace: '5:22',
+          calories: 780,
+          date: '2024-01-13',
+          time: '09:00',
+          route: 'Långpass Kungsholmen',
+          heartRate: 138,
+          elevation: 120,
+          weather: 'Regn, 12°C'
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/activities/stats');
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setStats({
+        totalDistance: 142.5,
+        totalTime: 720,
+        avgPace: '5:15',
+        totalCalories: 8420
+      });
+    }
+  };
+
+  const filterOptions = [
+    { value: 'all', label: 'Alla', icon: ChartBarIcon },
+    { value: 'week', label: 'Denna vecka', icon: CalendarIcon },
+    { value: 'month', label: 'Denna månad', icon: CalendarIcon },
+    { value: 'running', label: 'Löpning', icon: PlayIcon },
+    { value: 'personal-best', label: 'Personbästa', icon: TrophyIcon }
+  ];
+
+  const sortOptions = [
+    { value: 'date', label: 'Datum' },
+    { value: 'distance', label: 'Distans' },
+    { value: 'pace', label: 'Tempo' },
+    { value: 'duration', label: 'Tid' }
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  const getActivityIcon = (type) => {
+    switch (type) {
+      case 'run': return PlayIcon;
+      case 'bike': return BoltIcon;
+      default: return PlayIcon;
+    }
+  };
+
+  const getActivityColor = (type) => {
+    switch (type) {
+      case 'run': return 'orange';
+      case 'bike': return 'blue';
+      default: return 'gray';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
+        <div className="container-app py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Mina Aktiviteter</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                {activities.length} aktiviteter registrerade
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowFilters(!showFilters)}
+                className={`p-2 rounded-lg transition-colors ${
+                  showFilters ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                <FunnelIcon className="w-5 h-5" />
+              </motion.button>
+              
+              <Link to="/app/log-activity">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                  <span className="hidden sm:inline">Ny aktivitet</span>
+                </motion.button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-white border-b border-gray-200 overflow-hidden"
+          >
+            <div className="container-app py-4 space-y-4">
+              {/* Filter Pills */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Filter</p>
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <motion.button
+                        key={option.value}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setFilter(option.value)}
+                        className={`px-4 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${
+                          filter === option.value
+                            ? 'bg-orange-500 text-white shadow-lg'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {option.label}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sort Options */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Sortera efter</p>
+                <div className="flex flex-wrap gap-2">
+                  {sortOptions.map((option) => (
+                    <motion.button
+                      key={option.value}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSortBy(option.value)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        sortBy === option.value
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {option.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="container-app py-8">
+        {/* Stats Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+        >
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-2">
+              <MapPinIcon className="w-5 h-5 text-orange-500" />
+              <span className="text-xs text-gray-500">Total</span>
+            </div>
+            <p className="stat-value">{stats.totalDistance}</p>
+            <p className="stat-label">Kilometer</p>
+          </div>
+          
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-2">
+              <ClockIcon className="w-5 h-5 text-blue-500" />
+              <span className="text-xs text-gray-500">Total</span>
+            </div>
+            <p className="stat-value">{Math.floor(stats.totalTime / 60)}</p>
+            <p className="stat-label">Timmar</p>
+          </div>
+          
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-2">
+              <BoltIcon className="w-5 h-5 text-yellow-500" />
+              <span className="text-xs text-gray-500">Snitt</span>
+            </div>
+            <p className="stat-value">{stats.avgPace}</p>
+            <p className="stat-label">Min/km</p>
+          </div>
+          
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-2">
+              <FireIcon className="w-5 h-5 text-red-500" />
+              <span className="text-xs text-gray-500">Total</span>
+            </div>
+            <p className="stat-value">{stats.totalCalories}</p>
+            <p className="stat-label">Kalorier</p>
+          </div>
     Footprints, ChevronRight, Repeat, Target, MapPin, Mountain, 
     Plus, Navigation, Calendar, Timer, TrendingUp,
     Zap, Award, Filter, Activity

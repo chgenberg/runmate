@@ -15,7 +15,7 @@ import {
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
-const AppleHealthSyncModal = ({ isOpen, onClose }) => {
+const AppleHealthSyncModal = ({ isOpen, onClose, onComplete }) => {
   const [syncStatus, setSyncStatus] = useState('idle'); // idle, syncing, success, error
   const [syncData, setSyncData] = useState(null);
   const [lastSync, setLastSync] = useState(null);
@@ -70,10 +70,13 @@ const AppleHealthSyncModal = ({ isOpen, onClose }) => {
         }
       });
       
-      // Reset after 3 seconds
+      // Reset after 3 seconds and trigger completion
       setTimeout(() => {
         setSyncStatus('idle');
         checkLastSync();
+        if (onComplete) {
+          onComplete();
+        }
       }, 3000);
     }, 3000);
 

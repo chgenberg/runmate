@@ -16,11 +16,15 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
+import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const DashboardPage = () => {
   const { user } = useAuth();
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
+  const [showCoachingResults, setShowCoachingResults] = useState(false);
   const [hasCompletedAnalysis, setHasCompletedAnalysis] = useState(false);
+  const [coachingPlan, setCoachingPlan] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,6 +58,19 @@ const DashboardPage = () => {
 
   const handleStartAIAnalysis = () => {
     setShowAIOnboarding(true);
+  };
+
+  const handleAIOnboardingComplete = (plan) => {
+    setCoachingPlan(plan);
+    setHasCompletedAnalysis(true);
+    setShowCoachingResults(true);
+    
+    // Update dashboard data to reflect completion
+    setDashboardData(prev => ({
+      ...prev,
+      hasCompletedAIAnalysis: true,
+      aiCoachPlan: plan
+    }));
   };
 
   if (isLoading) {
@@ -282,62 +299,19 @@ const DashboardPage = () => {
       </div>
 
       {/* AI Onboarding Modal */}
-      <AnimatePresence>
-        {showAIOnboarding && (
-          <AIOnboardingModal 
-            onClose={() => setShowAIOnboarding(false)}
-            onComplete={() => {
-              setShowAIOnboarding(false);
-              setHasCompletedAnalysis(true);
-              toast.success('AI-analys genomförd! Din personliga plan är redo.');
-            }}
-          />
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+      <AICoachOnboarding 
+        isOpen={showAIOnboarding}
+        onClose={() => setShowAIOnboarding(false)}
+        onComplete={handleAIOnboardingComplete}
+      />
 
-// Placeholder for AI Onboarding Modal - will be implemented next
-const AIOnboardingModal = ({ onClose, onComplete }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-3xl p-8 max-w-md w-full"
-      >
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Brain className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">AI-träningsanalys</h3>
-          <p className="text-gray-600 mb-8">
-            Denna funktion kommer snart! Vi förbereder 15 smarta frågor som kommer att skapa din perfekta träningsplan.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Stäng
-            </button>
-            <button
-              onClick={onComplete}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:shadow-lg transition-all"
-            >
-              Demo: Markera som klar
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+      {/* Coaching Results Modal */}
+      <CoachingResults 
+        plan={coachingPlan}
+        isVisible={showCoachingResults}
+        onClose={() => setShowCoachingResults(false)}
+      />
+    </div>
   );
 };
 

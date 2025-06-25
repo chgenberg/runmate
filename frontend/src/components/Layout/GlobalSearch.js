@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  SearchIcon, 
-  XIcon,
+  MagnifyingGlassIcon, 
+  XMarkIcon,
   UserIcon,
   MapPinIcon,
   TrophyIcon,
@@ -111,7 +111,7 @@ const GlobalSearch = ({ onClose }) => {
     <div className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           ref={searchRef}
           type="text"
@@ -126,7 +126,7 @@ const GlobalSearch = ({ onClose }) => {
             onClick={() => setQuery('')}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
-            <XIcon className="w-5 h-5" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         )}
       </div>

@@ -3,32 +3,58 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  safelist: [
+    // Background colors
+    'bg-orange-100', 'bg-orange-500', 'bg-orange-600',
+    'bg-blue-100', 'bg-blue-500', 'bg-blue-600',
+    'bg-green-100', 'bg-green-500', 'bg-green-600',
+    'bg-yellow-100', 'bg-yellow-500', 'bg-yellow-600',
+    'bg-purple-100', 'bg-purple-500', 'bg-purple-600',
+    'bg-pink-100', 'bg-pink-500', 'bg-pink-600',
+    'bg-red-100', 'bg-red-500', 'bg-red-600',
+    'bg-indigo-100', 'bg-indigo-500', 'bg-indigo-600',
+    'bg-teal-100', 'bg-teal-500', 'bg-teal-600',
+    // Text colors
+    'text-orange-600', 'text-orange-700',
+    'text-blue-600', 'text-blue-700',
+    'text-green-600', 'text-green-700',
+    'text-yellow-600', 'text-yellow-700',
+    'text-purple-600', 'text-purple-700',
+    'text-pink-600', 'text-pink-700',
+    'text-red-600', 'text-red-700',
+    'text-indigo-600', 'text-indigo-700',
+    'text-teal-600', 'text-teal-700',
+    // Border colors
+    'border-orange-500', 'border-blue-500', 'border-green-500',
+    'border-yellow-500', 'border-purple-500', 'border-pink-500',
+    'border-red-500', 'border-indigo-500', 'border-teal-500',
+  ],
   theme: {
     extend: {
       colors: {
         primary: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
         },
         secondary: {
-          50: '#fef3c7',
-          100: '#fde68a',
-          200: '#fcd34d',
-          300: '#fbbf24',
-          400: '#f59e0b',
-          500: '#d97706',
-          600: '#b45309',
-          700: '#92400e',
-          800: '#78350f',
-          900: '#451a03',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
         },
         sport: {
           yellow: {
@@ -131,18 +157,17 @@ module.exports = {
           900: '#652c1a',
         },
         gray: {
-          50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
-          950: '#0a0a0a',
-        }
+          50: '#f9fafb',
+          100: '#f3f4f6',
+          200: '#e5e7eb',
+          300: '#d1d5db',
+          400: '#9ca3af',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
+        },
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #ef4444 0%, #f59e0b 100%)',
@@ -152,97 +177,29 @@ module.exports = {
         'gradient-glass': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'bounce-slow': 'bounce 3s ease-in-out infinite',
+        'float': 'float 3s ease-in-out infinite',
         'pulse-slow': 'pulse 3s ease-in-out infinite',
-        'spin-slow': 'spin 10s linear infinite',
-        'gradient': 'gradient 15s ease infinite',
-        'gradient-x': 'gradient-x 3s ease infinite',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'slide-down': 'slideDown 0.5s ease-out',
-        'slide-left': 'slideLeft 0.5s ease-out',
-        'slide-right': 'slideRight 0.5s ease-out',
-        'fade-in': 'fadeIn 0.5s ease-out',
-        'scale-in': 'scaleIn 0.3s ease-out',
-        'wiggle': 'wiggle 1s ease-in-out infinite',
-        'fade-out': 'fadeOut 0.3s ease-in',
+        'progress-bar-stripes': 'progress-bar-stripes 1s linear infinite',
       },
       keyframes: {
         float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' },
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
-        gradient: {
-          '0%, 100%': {
-            'background-size': '200% 200%',
-            'background-position': 'left center'
-          },
-          '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'right center'
-          }
+        'progress-bar-stripes': {
+          from: { backgroundPosition: '1rem 0' },
+          to: { backgroundPosition: '0 0' },
         },
-        'gradient-x': {
-          '0%, 100%': {
-            'background-position': '0% 50%'
-          },
-          '50%': {
-            'background-position': '100% 50%'
-          }
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        slideDown: {
-          '0%': { transform: 'translateY(-20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        slideLeft: {
-          '0%': { transform: 'translateX(20px)', opacity: '0' },
-          '100%': { transform: 'translateX(0)', opacity: '1' },
-        },
-        slideRight: {
-          '0%': { transform: 'translateX(-20px)', opacity: '0' },
-          '100%': { transform: 'translateX(0)', opacity: '1' },
-        },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        fadeOut: {
-          '0%': { opacity: '1' },
-          '100%': { opacity: '0' },
-        },
-        scaleIn: {
-          '0%': { transform: 'scale(0.9)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-        wiggle: {
-          '0%, 100%': { transform: 'rotate(-3deg)' },
-          '50%': { transform: 'rotate(3deg)' },
-        }
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(239, 68, 68, 0.5)',
-        'glow-lg': '0 0 40px rgba(239, 68, 68, 0.5)',
-        'inner-glow': 'inset 0 0 20px rgba(239, 68, 68, 0.1)',
-        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'card': '0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-        'hover': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
-        'focus': '0 0 0 3px rgba(229, 117, 77, 0.15)',
-      },
-      backdropBlur: {
-        xs: '2px',
-      },
-      fontFamily: {
-        'display': ['Inter var', 'system-ui', 'sans-serif'],
-        'body': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'retro': '4px 4px 0 #1a1a2e, 8px 8px 0 #f97316',
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
+        'safe': 'env(safe-area-inset-bottom)',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

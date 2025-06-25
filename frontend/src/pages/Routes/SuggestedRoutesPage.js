@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { MapPinIcon, ClockIcon, FireIcon, ChartBarIcon, SparklesIcon, PlayIcon, HeartIcon, ShareIcon, BookmarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { useAuth } from '../../contexts/AuthContext';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 const SuggestedRoutesPage = () => {
-  const { user } = useAuth();
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRoute, setSelectedRoute] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
   const [filters, setFilters] = useState({
     distance: 'all',
     difficulty: 'all',
@@ -31,7 +28,7 @@ const SuggestedRoutesPage = () => {
   const loadUserData = async () => {
     try {
       // Load user's training data for personalization
-      const response = await api.get('/activities/recent');
+      await api.get('/activities/recent');
       // Process data for AI recommendations
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -42,10 +39,7 @@ const SuggestedRoutesPage = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+          console.log('Location:', position.coords.latitude, position.coords.longitude);
         },
         (error) => {
           console.error('Error getting location:', error);

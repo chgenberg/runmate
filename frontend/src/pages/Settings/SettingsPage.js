@@ -16,7 +16,6 @@ import {
   Check
 } from 'lucide-react';
 import AppleHealthSync from '../../components/Settings/AppleHealthSync';
-import AppleHealthSyncModal from '../../components/Layout/AppleHealthSyncModal';
 
 const SettingsPage = () => {
   const { user, logout } = useAuth();

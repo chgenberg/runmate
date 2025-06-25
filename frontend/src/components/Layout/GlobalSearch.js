@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -29,19 +29,7 @@ const GlobalSearch = ({ onClose }) => {
     }
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (query.length > 1) {
-        performSearch();
-      } else {
-        setResults(null);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  const performSearch = async () => {
+  const performSearch = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get(`/search/global?q=${encodeURIComponent(query)}`);
@@ -70,7 +58,19 @@ const GlobalSearch = ({ onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query.length > 1) {
+        performSearch();
+      } else {
+        setResults(null);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query, performSearch]);
 
   const handleResultClick = (type, item) => {
     // Save to recent searches
@@ -232,38 +232,38 @@ const GlobalSearch = ({ onClose }) => {
                 )}
               </div>
             ) : (
-              <div>
+              <div className="p-6">
                 {/* Recent Searches */}
                 {recentSearches.length > 0 && (
-                  <div className="p-4 border-b border-gray-100">
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Senaste sökningar</h3>
-                    {recentSearches.map((search, index) => (
-                      <motion.button
-                        key={index}
-                        onClick={() => setQuery(search.query)}
-                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                        whileHover={{ x: 4 }}
-                      >
-                        <ClockIcon className="w-5 h-5 text-gray-400" />
-                        <span className="flex-1 text-left text-gray-700">{search.query}</span>
-                      </motion.button>
-                    ))}
+                  <div className="mb-6">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Senaste sökningar</h3>
+                    <div className="space-y-1">
+                      {recentSearches.map((search, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setQuery(search.query)}
+                          className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                        >
+                          <ClockIcon className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm text-gray-700">{search.query}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {/* Quick Actions */}
-                <div className="p-4">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Snabbåtgärder</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Snabblänkar</h3>
+                  <div className="space-y-1">
                     {quickActions.map((action, index) => (
                       <motion.button
                         key={index}
                         onClick={action.action}
-                        className="flex items-center space-x-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                        whileHover={{ x: 4 }}
                       >
-                        <action.icon className="w-5 h-5 text-orange-600" />
+                        <action.icon className="w-5 h-5 text-gray-400" />
                         <span className="text-sm text-gray-700">{action.label}</span>
                       </motion.button>
                     ))}

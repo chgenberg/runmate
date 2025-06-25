@@ -6,7 +6,8 @@ import {
   MapIcon,
   TrophyIcon,
   CogIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -38,6 +39,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       icon: MapIcon,
       description: 'AI-genererade träningsrutter',
       badge: 'NY'
+    },
+    {
+      name: 'AI Coach 2.0',
+      path: '/app/ai-coach',
+      icon: SparklesIcon,
+      description: 'Din personliga träningsassistent',
+      badge: 'AI',
+      gradient: true
     },
     { 
       name: 'Utmaningar', 

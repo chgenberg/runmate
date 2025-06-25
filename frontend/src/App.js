@@ -56,6 +56,7 @@ import ChatPage from './pages/Chat/ChatPage';
 import AICoachPage from './pages/AICoach/AICoachPage';
 import SuggestedRoutesPage from './pages/Routes/SuggestedRoutesPage';
 import PrivacyPage from './pages/Legal/PrivacyPage';
+import FAQPage from './pages/Legal/FAQPage';
 
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
@@ -91,12 +92,13 @@ function App() {
             
             {/* Legal and Company Pages */}
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/contact" element={<FAQPage />} />
             <Route path="/terms" element={<PrivacyPage />} />
             <Route path="/cookies" element={<PrivacyPage />} />
             <Route path="/gdpr" element={<PrivacyPage />} />
             <Route path="/about" element={<PrivacyPage />} />
-            <Route path="/contact" element={<PrivacyPage />} />
-            <Route path="/help" element={<PrivacyPage />} />
+            <Route path="/help" element={<FAQPage />} />
             <Route path="/careers" element={<PrivacyPage />} />
             
             {/* Protected Routes with Socket */}

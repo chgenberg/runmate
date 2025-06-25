@@ -100,14 +100,12 @@ const TopBar = ({ onMenuClick }) => {
             {/* Apple Health Sync Button */}
             <motion.button
               onClick={() => setShowAppleHealthSync(true)}
-              className="group relative p-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl hover:shadow-lg transition-all"
-              whileHover={{ scale: 1.05, rotateY: 10 }}
+              className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl hover:shadow-lg transition-all text-white"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Heart className="h-5 w-5 text-white" />
-              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
-                Synka Apple Health
-              </span>
+              <Heart className="h-5 w-5" />
+              <span className="text-sm font-medium hidden sm:inline">Synka Apple Health</span>
               <motion.span 
                 className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full"
                 animate={{ scale: [1, 1.2, 1] }}

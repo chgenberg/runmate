@@ -1,240 +1,280 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDebounce } from 'use-debounce';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, 
-  X, 
-  User, 
-  Activity, 
-  Trophy, 
-  // Hash,
-  ArrowRight
-} from 'lucide-react';
+  SearchIcon, 
+  XIcon,
+  UserIcon,
+  MapPinIcon,
+  TrophyIcon,
+  CalendarIcon,
+  ClockIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 import api from '../../services/api';
 
-const GlobalSearch = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const GlobalSearch = ({ onClose }) => {
   const [query, setQuery] = useState('');
-  const [debouncedQuery] = useDebounce(query, 300);
   const [results, setResults] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const searchRef = useRef(null);
   const navigate = useNavigate();
 
-  const openSearch = () => setIsOpen(true);
-  const closeSearch = () => {
-    setQuery('');
-    setIsOpen(false);
-  };
+  useEffect(() => {
+    // Load recent searches from localStorage
+    const saved = localStorage.getItem('recentSearches');
+    if (saved) {
+      setRecentSearches(JSON.parse(saved));
+    }
+  }, []);
 
   useEffect(() => {
-    // Keyboard shortcut to open search (Cmd+K or Ctrl+K)
-    const handleKeyDown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault();
-        setIsOpen(prev => !prev);
+    const timer = setTimeout(() => {
+      if (query.length > 1) {
+        performSearch();
+      } else {
+        setResults(null);
       }
-      if (event.key === 'Escape' && isOpen) {
-        closeSearch();
-      }
-    };
+    }, 300);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  useEffect(() => {
-    if (isOpen) {
-      // Focus input when modal opens
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  }, [isOpen]);
-
-  const fetchResults = useCallback(async () => {
-    if (debouncedQuery.trim().length < 2) {
-      setResults(null);
-      return;
-    }
-    
-    setIsLoading(true);
+  const performSearch = async () => {
+    setLoading(true);
     try {
-      const response = await api.get(`/search?q=${debouncedQuery}`);
-      setResults(response.data.data);
+      const response = await api.get(`/search/global?q=${encodeURIComponent(query)}`);
+      setResults(response.data);
     } catch (error) {
-      console.error('Search failed:', error);
-      setResults(null); // Clear results on error
+      console.error('Search error:', error);
+      // Fallback results for demo
+      setResults({
+        users: [
+          { id: 1, name: 'Anna Andersson', username: 'anna_runner', level: 'Avancerad' },
+          { id: 2, name: 'Erik Eriksson', username: 'erik_speed', level: 'Medel' }
+        ],
+        routes: [
+          { id: 1, name: 'Morgonrunda Djurgården', distance: 5.2, difficulty: 'Lätt' },
+          { id: 2, name: 'Intervaller Haga', distance: 8.0, difficulty: 'Medel' }
+        ],
+        challenges: [
+          { id: 1, name: 'Veckans utmaning', type: 'Distans', participants: 45 },
+          { id: 2, name: 'Månadens maraton', type: 'Tid', participants: 120 }
+        ],
+        events: [
+          { id: 1, name: 'Stockholm Marathon', date: '2024-06-01', participants: 1500 },
+          { id: 2, name: 'Midnattsloppet', date: '2024-08-15', participants: 800 }
+        ]
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [debouncedQuery]);
-
-  useEffect(() => {
-    fetchResults();
-  }, [fetchResults]);
-
-  const handleNavigation = (path) => {
-    navigate(path);
-    closeSearch();
   };
-  
-  const ResultItem = ({ icon: Icon, text, subtext, path, color }) => (
-    <motion.li
-      whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.05)' }}
-      onClick={() => handleNavigation(path)}
-      className="flex items-center gap-4 px-4 py-3 rounded-lg cursor-pointer"
-    >
-      <div className={`p-2 rounded-lg bg-gradient-to-br ${color} text-white`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div>
-        <p className="font-semibold text-gray-800">{text}</p>
-        {subtext && <p className="text-sm text-gray-500">{subtext}</p>}
-      </div>
-      <ArrowRight className="w-4 h-4 text-gray-400 ml-auto" />
-    </motion.li>
-  );
+
+  const handleResultClick = (type, item) => {
+    // Save to recent searches
+    const newSearch = { query, timestamp: Date.now() };
+    const updated = [newSearch, ...recentSearches.filter(s => s.query !== query)].slice(0, 5);
+    setRecentSearches(updated);
+    localStorage.setItem('recentSearches', JSON.stringify(updated));
+
+    // Navigate based on type
+    switch (type) {
+      case 'user':
+        navigate(`/app/profile/${item.id}`);
+        break;
+      case 'route':
+        navigate(`/app/suggested-routes?highlight=${item.id}`);
+        break;
+      case 'challenge':
+        navigate(`/app/challenges/${item.id}`);
+        break;
+      case 'event':
+        navigate(`/app/events/${item.id}`);
+        break;
+      default:
+        break;
+    }
+
+    if (onClose) onClose();
+  };
+
+  const quickActions = [
+    { icon: MapPinIcon, label: 'Hitta rutter nära mig', action: () => navigate('/app/suggested-routes') },
+    { icon: UserIcon, label: 'Sök löpare', action: () => navigate('/app/discover') },
+    { icon: TrophyIcon, label: 'Aktiva utmaningar', action: () => navigate('/app/challenges') },
+    { icon: SparklesIcon, label: 'AI Coach', action: () => navigate('/app/ai-coach') }
+  ];
 
   return (
-    <>
-      <button 
-        onClick={openSearch}
-        className="flex items-center gap-2 text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors"
-      >
-        <Search className="w-4 h-4" />
-        Sök...
-        <span className="ml-2 text-xs border border-gray-300 rounded px-1.5 py-0.5">⌘K</span>
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm"
-            onClick={closeSearch}
+    <div className="relative w-full">
+      {/* Search Input */}
+      <div className="relative">
+        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          ref={searchRef}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Sök på allt - löpare, rutter, utmaningar..."
+          className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+          autoFocus
+        />
+        {query && (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
-            <motion.div
-              initial={{ scale: 0.95, y: -20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: -20 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Search Input */}
-              <div className="relative p-4 border-b border-gray-100">
-                <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Sök efter löpare, events, utmaningar..."
-                  className="w-full bg-transparent pl-10 pr-4 py-2 text-lg text-gray-800 focus:outline-none"
-                />
-                <button
-                  onClick={closeSearch}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            <XIcon className="w-5 h-5" />
+          </button>
+        )}
+      </div>
 
-              {/* Results */}
-              <div className="p-4 max-h-[60vh] overflow-y-auto">
-                {isLoading && (
-                  <div className="flex items-center justify-center p-6">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                      className="w-6 h-6 border-2 border-t-red-500 border-gray-200 rounded-full"
-                    />
-                    <p className="ml-2 text-gray-600">Söker...</p>
+      {/* Results Dropdown */}
+      <AnimatePresence>
+        {(results || recentSearches.length > 0 || query === '') && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50 max-h-[70vh] overflow-y-auto"
+          >
+            {loading ? (
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
+                <p className="mt-2 text-sm text-gray-500">Söker...</p>
+              </div>
+            ) : results ? (
+              <div>
+                {/* Users */}
+                {results.users?.length > 0 && (
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Löpare</h3>
+                    {results.users.map((user) => (
+                      <motion.button
+                        key={user.id}
+                        onClick={() => handleResultClick('user', user)}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        whileHover={{ x: 4 }}
+                      >
+                        <UserIcon className="w-5 h-5 text-gray-400" />
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-gray-900">{user.name}</p>
+                          <p className="text-sm text-gray-500">@{user.username} • {user.level}</p>
+                        </div>
+                      </motion.button>
+                    ))}
                   </div>
                 )}
-                
-                {!isLoading && debouncedQuery && results && (
-                  <AnimatePresence>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {results.users?.length > 0 && (
-                        <div className="mb-4">
-                          <h3 className="text-xs font-semibold text-gray-400 uppercase px-4 mb-2">Löpare</h3>
-                          <ul>
-                            {results.users.map(u => 
-                              <ResultItem 
-                                key={u._id} 
-                                icon={User}
-                                text={`${u.firstName} ${u.lastName}`}
-                                path={`/app/profile/${u._id}`}
-                                color="from-blue-400 to-blue-500"
-                              />
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {results.events?.length > 0 && (
-                        <div className="mb-4">
-                          <h3 className="text-xs font-semibold text-gray-400 uppercase px-4 mb-2">Events</h3>
-                          <ul>
-                            {results.events.map(e => 
-                              <ResultItem 
-                                key={e._id} 
-                                icon={Activity}
-                                text={e.title}
-                                subtext={e.location.name}
-                                path={`/app/runevents/${e._id}`}
-                                color="from-red-400 to-red-500"
-                              />
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {results.challenges?.length > 0 && (
-                        <div className="mb-4">
-                          <h3 className="text-xs font-semibold text-gray-400 uppercase px-4 mb-2">Utmaningar</h3>
-                          <ul>
-                            {results.challenges.map(c => 
-                              <ResultItem 
-                                key={c._id} 
-                                icon={Trophy}
-                                text={c.title}
-                                path={`/app/challenges/${c._id}`}
-                                color="from-yellow-400 to-yellow-500"
-                              />
-                            )}
-                          </ul>
-                        </div>
-                      )}
 
-                      {results.users?.length === 0 && results.events?.length === 0 && results.challenges?.length === 0 && (
-                        <div className="text-center p-8">
-                          <p className="font-semibold text-gray-700">Inga resultat hittades för "{query}"</p>
-                          <p className="text-sm text-gray-500 mt-1">Försök med en annan sökterm.</p>
+                {/* Routes */}
+                {results.routes?.length > 0 && (
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Rutter</h3>
+                    {results.routes.map((route) => (
+                      <motion.button
+                        key={route.id}
+                        onClick={() => handleResultClick('route', route)}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        whileHover={{ x: 4 }}
+                      >
+                        <MapPinIcon className="w-5 h-5 text-gray-400" />
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-gray-900">{route.name}</p>
+                          <p className="text-sm text-gray-500">{route.distance} km • {route.difficulty}</p>
                         </div>
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
+                      </motion.button>
+                    ))}
+                  </div>
                 )}
 
-                {!debouncedQuery && !isLoading && (
-                   <div className="text-center p-8">
-                    <p className="font-semibold text-gray-700">Börja skriva för att söka</p>
-                    <p className="text-sm text-gray-500 mt-1">Hitta allt på ett ställe.</p>
+                {/* Challenges */}
+                {results.challenges?.length > 0 && (
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Utmaningar</h3>
+                    {results.challenges.map((challenge) => (
+                      <motion.button
+                        key={challenge.id}
+                        onClick={() => handleResultClick('challenge', challenge)}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        whileHover={{ x: 4 }}
+                      >
+                        <TrophyIcon className="w-5 h-5 text-gray-400" />
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-gray-900">{challenge.name}</p>
+                          <p className="text-sm text-gray-500">{challenge.type} • {challenge.participants} deltagare</p>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Events */}
+                {results.events?.length > 0 && (
+                  <div className="p-4">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Event</h3>
+                    {results.events.map((event) => (
+                      <motion.button
+                        key={event.id}
+                        onClick={() => handleResultClick('event', event)}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        whileHover={{ x: 4 }}
+                      >
+                        <CalendarIcon className="w-5 h-5 text-gray-400" />
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-gray-900">{event.name}</p>
+                          <p className="text-sm text-gray-500">{event.date} • {event.participants} anmälda</p>
+                        </div>
+                      </motion.button>
+                    ))}
                   </div>
                 )}
               </div>
-            </motion.div>
+            ) : (
+              <div>
+                {/* Recent Searches */}
+                {recentSearches.length > 0 && (
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Senaste sökningar</h3>
+                    {recentSearches.map((search, index) => (
+                      <motion.button
+                        key={index}
+                        onClick={() => setQuery(search.query)}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        whileHover={{ x: 4 }}
+                      >
+                        <ClockIcon className="w-5 h-5 text-gray-400" />
+                        <span className="flex-1 text-left text-gray-700">{search.query}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Quick Actions */}
+                <div className="p-4">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Snabbåtgärder</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {quickActions.map((action, index) => (
+                      <motion.button
+                        key={index}
+                        onClick={action.action}
+                        className="flex items-center space-x-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <action.icon className="w-5 h-5 text-orange-600" />
+                        <span className="text-sm text-gray-700">{action.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

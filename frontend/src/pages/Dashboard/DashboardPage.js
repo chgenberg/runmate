@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Sparkles,
   Brain,
@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
-import toast from 'react-hot-toast';
 import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
 import CoachingResults from '../../components/AICoach/CoachingResults';
 

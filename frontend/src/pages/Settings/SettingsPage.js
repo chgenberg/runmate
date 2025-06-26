@@ -14,7 +14,6 @@ import {
   MapPin,
   Activity,
   Smartphone,
-  Globe,
   Lock,
   Heart,
   Zap,

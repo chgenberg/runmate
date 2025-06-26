@@ -11,10 +11,8 @@ import {
 import {
   Activity, Heart, TrendingUp, Clock, Flame,
   Zap, Mountain, BarChart3, Calendar,
-  Gauge, Apple, ChevronDown, ChevronUp,
-  MapPin, Wind, Droplets, Sun, Moon,
-  Trophy, Target, Award, Timer,
-  Footprints, Route, Smartphone, Brain
+  Gauge, Apple, ChevronDown,
+  Trophy, Route, Smartphone, Brain
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';

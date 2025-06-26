@@ -42,26 +42,26 @@ const DiscoverPage = () => {
     try {
       const response = await api.get('/users/discover', { params: filters });
       setRunners(response.data.users || []);
-    } catch (error) {
-      console.error('Error fetching runners:', error);
-      // Demo data
-      setRunners([
-        {
-          id: 1,
-          name: 'Emma Johansson',
-          age: 28,
-          location: 'Stockholm',
-          distance: 12,
-          bio: 'Marathonlöpare som älskar långdistans. Tränar för Berlin Marathon 2024.',
-          level: 'Avancerad',
-          pace: '4:45',
-          weeklyDistance: 65,
-          interests: ['Marathon', 'Trail', 'Intervaller'],
-          profilePicture: '/avatar2.png',
-          rating: 4.8,
-          totalRuns: 342,
-          achievements: ['Marathon Finisher', 'Sub 3:30', '100km Club']
-        },
+          } catch (error) {
+        console.error('Error fetching runners:', error);
+        // Demo data with all required fields
+        setRunners([
+          {
+            id: 1,
+            name: 'Emma Johansson',
+            age: 28,
+            location: 'Stockholm',
+            distance: 12,
+            bio: 'Marathonlöpare som älskar långdistans. Tränar för Berlin Marathon 2024.',
+            level: 'Avancerad',
+            pace: '4:45',
+            weeklyDistance: 65,
+            interests: ['Marathon', 'Trail', 'Intervaller'],
+            profilePicture: '/avatar2.png',
+            rating: 4.8,
+            totalRuns: 342,
+            achievements: ['Marathon Finisher', 'Sub 3:30', '100km Club']
+          },
         {
           id: 2,
           name: 'Marcus Andersson',
@@ -109,6 +109,12 @@ const DiscoverPage = () => {
 
     const currentRunner = runners[currentIndex];
     
+    // Safety check
+    if (!currentRunner) {
+      console.error('No current runner found');
+      return;
+    }
+    
     if (direction === 'right') {
       // Like
       try {
@@ -132,6 +138,15 @@ const DiscoverPage = () => {
 
   const currentRunner = runners[currentIndex];
   const hasMoreRunners = currentIndex < runners.length;
+
+  // Debug logging
+  console.log('DiscoverPage Debug:', {
+    runnersLength: runners.length,
+    currentIndex,
+    currentRunner,
+    hasCurrentRunnerInterests: currentRunner?.interests,
+    hasMoreRunners
+  });
 
   const levelColors = {
     'Nybörjare': 'green',
@@ -223,7 +238,7 @@ const DiscoverPage = () => {
         ) : hasMoreRunners ? (
           <div className="relative h-[600px] flex items-center justify-center" ref={constraintsRef}>
             <AnimatePresence>
-              {currentRunner && (
+              {currentRunner && currentRunner.id && (
                 <motion.div
                   key={currentRunner.id}
                   className="absolute w-full max-w-sm"

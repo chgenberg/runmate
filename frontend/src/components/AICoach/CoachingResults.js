@@ -1,21 +1,34 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Sparkles,
+  Download, 
+  Share2,
   Target,
-  Calendar,
-  Utensils,
-  Brain,
-  TrendingUp,
-  CheckCircle,
-  Clock,
+  Activity,
   Heart,
+  Utensils,
+  Moon,
+  Brain,
+  Smartphone,
+  BarChart3,
+  Calendar,
+  CheckCircle2,
+  Clock,
   Zap,
+  Apple,
+  Droplets,
+  Flame,
+  Shield,
+  TrendingUp,
   Award,
-  ChevronDown,
+  Timer,
+  Lightbulb,
+  Sparkles,
   ChevronUp,
-  Download,
-  Share
+  ChevronDown,
+  Sun,
+  Snowflake,
+  Wind
 } from 'lucide-react';
 
 const CoachingResults = ({ plan, isVisible, onClose }) => {
@@ -41,7 +54,9 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
     { id: 'training', label: 'Träning', icon: Calendar },
     { id: 'nutrition', label: 'Kost', icon: Utensils },
     { id: 'lifestyle', label: 'Livsstil', icon: Heart },
-    { id: 'progress', label: 'Uppföljning', icon: TrendingUp }
+    { id: 'technology', label: 'Teknologi', icon: Smartphone },
+    { id: 'progress', label: 'Uppföljning', icon: TrendingUp },
+    { id: 'calendar', label: 'Kalender', icon: Clock }
   ];
 
   return (
@@ -76,21 +91,21 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
                   <Download className="w-5 h-5" />
                 </button>
                 <button className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors">
-                  <Share className="w-5 h-5" />
+                  <Share2 className="w-5 h-5" />
                 </button>
-                <button
-                  onClick={onClose}
-                  className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors"
-                >
-                  ×
-                </button>
+                                  <button
+                    onClick={onClose}
+                    className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors"
+                  >
+                    ×
+                  </button>
               </div>
             </div>
 
             {/* Success indicators */}
             <div className="flex items-center space-x-6 mt-6">
               <div className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-green-300" />
+                <CheckCircle2 className="w-5 h-5 text-green-300" />
                 <span className="text-sm">15 frågor analyserade</span>
               </div>
               <div className="flex items-center space-x-2">
@@ -267,43 +282,262 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
                   className="space-y-6"
                 >
                   <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">Kostplan</h3>
-                      <button
-                        onClick={() => toggleSection('nutrition')}
-                        className="p-2 text-gray-500 hover:text-gray-700"
-                      >
-                        {expandedSections.nutrition ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                      </button>
-                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Komplett kostplan & näringsstrategi</h3>
                     
-                    <div className="space-y-4">
+                    {/* Macro Targets */}
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Makronutrient-mål</h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-green-50 rounded-xl p-4">
-                          <Utensils className="w-6 h-6 text-green-600 mb-2" />
-                          <h4 className="font-medium text-green-900">Måltider</h4>
-                          <p className="text-green-700 text-sm">5-6 måltider/dag</p>
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                              <span className="text-white text-sm font-bold">C</span>
+                            </div>
+                            <h5 className="font-semibold text-green-900">Kolhydrater</h5>
+                          </div>
+                          <p className="text-green-700 text-lg font-medium">
+                            {plan.nutritionPlan?.macroTargets?.carbs || '45-65% av totala kalorier'}
+                          </p>
+                          <p className="text-green-600 text-sm mt-1">Energi för träning</p>
                         </div>
-                        <div className="bg-yellow-50 rounded-xl p-4">
-                          <Zap className="w-6 h-6 text-yellow-600 mb-2" />
-                          <h4 className="font-medium text-yellow-900">Energi</h4>
-                          <p className="text-yellow-700 text-sm">Anpassat för dina mål</p>
+
+                        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                              <span className="text-white text-sm font-bold">P</span>
+                            </div>
+                            <h5 className="font-semibold text-orange-900">Protein</h5>
+                          </div>
+                          <p className="text-orange-700 text-lg font-medium">
+                            {plan.nutritionPlan?.macroTargets?.protein || '15-25% av totala kalorier'}
+                          </p>
+                          <p className="text-orange-600 text-sm mt-1">Muskelbyggnad & återhämtning</p>
                         </div>
-                        <div className="bg-purple-50 rounded-xl p-4">
-                          <Heart className="w-6 h-6 text-purple-600 mb-2" />
-                          <h4 className="font-medium text-purple-900">Näring</h4>
-                          <p className="text-purple-700 text-sm">Balanserade makron</p>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                              <span className="text-white text-sm font-bold">F</span>
+                            </div>
+                            <h5 className="font-semibold text-purple-900">Fett</h5>
+                          </div>
+                          <p className="text-purple-700 text-lg font-medium">
+                            {plan.nutritionPlan?.macroTargets?.fat || '20-35% av totala kalorier'}
+                          </p>
+                          <p className="text-purple-600 text-sm mt-1">Hormonproduktion & mättnad</p>
                         </div>
                       </div>
+                    </div>
 
-                      {expandedSections.nutrition && plan.rawPlan && (
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-medium text-gray-900 mb-3">Detaljerad kostplan</h4>
-                          <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {plan.rawPlan.split('LIVSSTILSRÅD:')[0].split('KOSTPLAN:')[1] || 'Detaljerad kostplan genereras...'}
+                    {/* Daily Meal Plan */}
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Daglig måltidsplan</h4>
+                      <div className="space-y-4">
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Sun className="w-5 h-5 text-yellow-600" />
+                            <h5 className="font-medium text-yellow-900">Frukost</h5>
+                            <span className="text-xs px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full">07:00</span>
+                          </div>
+                          <p className="text-yellow-800 text-sm">
+                            {plan.nutritionPlan?.dailyMealPlans?.breakfast || 'Havregrynsgröt med bär och nötter, kaffe'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Utensils className="w-5 h-5 text-green-600" />
+                            <h5 className="font-medium text-green-900">Lunch</h5>
+                            <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">12:00</span>
+                          </div>
+                          <p className="text-green-800 text-sm">
+                            {plan.nutritionPlan?.dailyMealPlans?.lunch || 'Quinoasallad med kyckling och grönsaker'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Moon className="w-5 h-5 text-blue-600" />
+                            <h5 className="font-medium text-blue-900">Middag</h5>
+                            <span className="text-xs px-2 py-1 bg-blue-200 text-blue-800 rounded-full">18:00</span>
+                          </div>
+                          <p className="text-blue-800 text-sm">
+                            {plan.nutritionPlan?.dailyMealPlans?.dinner || 'Lax med sötpotatis och broccoli'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Apple className="w-5 h-5 text-purple-600" />
+                            <h5 className="font-medium text-purple-900">Mellanmål</h5>
+                            <span className="text-xs px-2 py-1 bg-purple-200 text-purple-800 rounded-full">2-3 st/dag</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {plan.nutritionPlan?.dailyMealPlans?.snacks?.map((snack, index) => (
+                              <span key={index} className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                                {snack}
+                              </span>
+                            )) || [
+                              'Frukt och nötter',
+                              'Yoghurt med granola',
+                              'Proteinshake'
+                            ].map((snack, index) => (
+                              <span key={index} className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                                {snack}
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      )}
+                      </div>
+                    </div>
+
+                    {/* Hydration Strategy */}
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">💧 Hydratiseringsstrategi</h4>
+                      <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h5 className="font-medium text-cyan-900 mb-3">Dagligt intag</h5>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Droplets className="w-4 h-4 text-cyan-500" />
+                                <span className="text-sm text-cyan-800">
+                                  {plan.nutritionPlan?.hydrationStrategy?.daily || '35ml per kg kroppsvikt'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-cyan-900 mb-3">Träningsdagar</h5>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Activity className="w-4 h-4 text-cyan-500" />
+                                <span className="text-sm text-cyan-800">
+                                  {plan.nutritionPlan?.hydrationStrategy?.duringWorkout || '150-250ml var 15-20 min'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Supplementation */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">🧪 Supplementering</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4">
+                          <h5 className="font-medium text-emerald-900 mb-3">Grundläggande</h5>
+                          <ul className="space-y-2">
+                            {plan.nutritionPlan?.supplementation?.essential?.map((supplement, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <Shield className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-emerald-700">{supplement}</span>
+                              </li>
+                            )) || [
+                              'Vitamin D3',
+                              'Omega-3',
+                              'Magnesium'
+                            ].map((supplement, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <Shield className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-emerald-700">{supplement}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4">
+                          <h5 className="font-medium text-orange-900 mb-3">Prestanda</h5>
+                          <ul className="space-y-2">
+                            {plan.nutritionPlan?.supplementation?.performance?.map((supplement, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <Zap className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-orange-700">{supplement}</span>
+                              </li>
+                            )) || [
+                              'Kreatin',
+                              'Beta-alanin',
+                              'Koffein'
+                            ].map((supplement, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <Zap className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-orange-700">{supplement}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+                          <h5 className="font-medium text-blue-900 mb-3">Återhämtning</h5>
+                          <ul className="space-y-2">
+                            {plan.nutritionPlan?.supplementation?.recovery?.map((supplement, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <Heart className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-blue-700">{supplement}</span>
+                              </li>
+                            )) || [
+                              'Protein pulver',
+                              'BCAA',
+                              'Tart cherry juice'
+                            ].map((supplement, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <Heart className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-blue-700">{supplement}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sample Recipes */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">👨‍🍳 Exempelrecept</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {plan.nutritionPlan?.recipes?.map((recipe, index) => (
+                          <div key={index} className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4">
+                            <h5 className="font-medium text-amber-900 mb-2">{recipe.name}</h5>
+                            <div className="mb-3">
+                              <h6 className="text-sm font-medium text-amber-800 mb-1">Ingredienser:</h6>
+                              <div className="flex flex-wrap gap-1">
+                                {recipe.ingredients.map((ingredient, i) => (
+                                  <span key={i} className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full">
+                                    {ingredient}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-sm text-amber-700">{recipe.instructions}</p>
+                          </div>
+                        )) || [
+                          {
+                            name: 'Energirik frukost',
+                            ingredients: ['Havregryn', 'Banan', 'Blåbär', 'Mandelmjöl', 'Honung'],
+                            instructions: 'Blanda allt och låt stå 10 minuter'
+                          },
+                          {
+                            name: 'Post-workout smoothie',
+                            ingredients: ['Proteinpulver', 'Banan', 'Spenat', 'Mandelmjöl', 'Is'],
+                            instructions: 'Mixa alla ingredienser tills slätt'
+                          }
+                        ].map((recipe, index) => (
+                          <div key={index} className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4">
+                            <h5 className="font-medium text-amber-900 mb-2">{recipe.name}</h5>
+                            <div className="mb-3">
+                              <h6 className="text-sm font-medium text-amber-800 mb-1">Ingredienser:</h6>
+                              <div className="flex flex-wrap gap-1">
+                                {recipe.ingredients.map((ingredient, i) => (
+                                  <span key={i} className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full">
+                                    {ingredient}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-sm text-amber-700">{recipe.instructions}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -317,43 +551,296 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
                   exit={{ opacity: 0, y: -20 }}
                   className="space-y-6"
                 >
+                  {/* Sleep Optimization */}
                   <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">Livsstilsråd</h3>
-                      <button
-                        onClick={() => toggleSection('lifestyle')}
-                        className="p-2 text-gray-500 hover:text-gray-700"
-                      >
-                        {expandedSections.lifestyle ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                      </button>
-                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Sömnoptimering & återhämtning</h3>
                     
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-blue-50 rounded-xl p-4">
-                          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mb-3">
-                            <span className="text-white text-sm">😴</span>
-                          </div>
-                          <h4 className="font-medium text-blue-900">Sömn</h4>
-                          <p className="text-blue-700 text-sm">7-9 timmar per natt för optimal återhämtning</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+                        <div className="flex items-center space-x-3 mb-4">
+                          <Moon className="w-8 h-8 text-blue-600" />
+                          <h4 className="text-lg font-semibold text-blue-900">Sömnrutiner</h4>
                         </div>
-                        <div className="bg-indigo-50 rounded-xl p-4">
-                          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mb-3">
-                            <span className="text-white text-sm">🧘</span>
-                          </div>
-                          <h4 className="font-medium text-indigo-900">Stress</h4>
-                          <p className="text-indigo-700 text-sm">Mindfulness och avslappningstekniker</p>
+                        <div className="space-y-3">
+                          {plan.lifestylePlan?.sleepOptimization?.bedtimeRoutine?.map((routine, index) => (
+                            <div key={index} className="flex items-start space-x-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-blue-800">{routine}</span>
+                            </div>
+                          )) || [
+                            'Stäng av skärmar 1 timme innan',
+                            'Läs bok eller meditation',
+                            'Mörkt och svalt rum'
+                          ].map((routine, index) => (
+                            <div key={index} className="flex items-start space-x-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-blue-800">{routine}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
-                      {expandedSections.lifestyle && plan.rawPlan && (
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-medium text-gray-900 mb-3">Detaljerade livsstilsråd</h4>
-                          <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {plan.rawPlan.split('UPPFÖLJNING:')[0].split('LIVSSTILSRÅD:')[1] || 'Detaljerade livsstilsråd genereras...'}
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
+                        <div className="flex items-center space-x-3 mb-4">
+                          <Brain className="w-8 h-8 text-purple-600" />
+                          <h4 className="text-lg font-semibold text-purple-900">Mental träning</h4>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
+                            <span className="text-sm text-purple-800">
+                              {plan.lifestylePlan?.mentalTraining?.visualization || '5-10 min daglig målvisualisering'}
+                            </span>
+                          </div>
+                          <div className="flex items-start space-x-2">
+                            <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
+                            <span className="text-sm text-purple-800">
+                              {plan.lifestylePlan?.mentalTraining?.mindfulness || 'Närvarande under träning, fokus på andning'}
+                            </span>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    </div>
+
+                    {/* Biohacking Section */}
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">🔬 Biohacking & optimering</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                      <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Snowflake className="w-6 h-6 text-cyan-600" />
+                          <h5 className="font-medium text-cyan-900">Kyllexponering</h5>
+                        </div>
+                        <p className="text-sm text-cyan-700">
+                          {plan.lifestylePlan?.biohacking?.coldExposure || 'Kall dusch 2-3 min dagligen'}
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Flame className="w-6 h-6 text-red-600" />
+                          <h5 className="font-medium text-red-900">Värmeterapi</h5>
+                        </div>
+                        <p className="text-sm text-red-700">
+                          {plan.lifestylePlan?.biohacking?.heatTherapy || 'Sauna 15-20 min 2-3x/vecka'}
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Wind className="w-6 h-6 text-green-600" />
+                          <h5 className="font-medium text-green-900">Andningsteknik</h5>
+                        </div>
+                        <p className="text-sm text-green-700">
+                          {plan.lifestylePlan?.biohacking?.breathwork || 'Wim Hof metod eller Box breathing'}
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Sun className="w-6 h-6 text-yellow-600" />
+                          <h5 className="font-medium text-yellow-900">Ljusterapi</h5>
+                        </div>
+                        <p className="text-sm text-yellow-700">
+                          {plan.lifestylePlan?.biohacking?.lightTherapy || 'Morgonljus 10-15 min, blåljusfilter kvällar'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Circadian Optimization */}
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">🌅 Circadian rytm-optimering</h4>
+                    <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h5 className="font-medium text-amber-900 mb-3">Morgonrutiner</h5>
+                          <div className="space-y-2">
+                            <div className="flex items-start space-x-2">
+                              <Sun className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                              <span className="text-sm text-amber-800">
+                                {plan.lifestylePlan?.circadianOptimization?.morningLight || 'Naturligt ljus inom 30 min efter uppvaknande'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-amber-900 mb-3">Kvällsrutiner</h5>
+                          <div className="space-y-2">
+                            <div className="flex items-start space-x-2">
+                              <Moon className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                              <span className="text-sm text-amber-800">
+                                {plan.lifestylePlan?.circadianOptimization?.eveningDimming || 'Dimma ljus 2 timmar innan sänggåendet'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stress Management */}
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4 mt-8">🧘‍♂️ Avancerad stresshantering</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4">
+                        <h5 className="font-medium text-emerald-900 mb-3">Dagliga praktiker</h5>
+                        <ul className="space-y-2">
+                          {plan.lifestylePlan?.stressManagement?.dailyPractices?.map((practice, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-emerald-700">{practice}</span>
+                            </li>
+                          )) || [
+                            '10 min meditation',
+                            'Djupandning',
+                            'Gratitudjournal'
+                          ].map((practice, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-emerald-700">{practice}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-4">
+                        <h5 className="font-medium text-teal-900 mb-3">Veckoaktiviteter</h5>
+                        <ul className="space-y-2">
+                          {plan.lifestylePlan?.stressManagement?.weeklyActivities?.map((activity, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1.5 h-1.5 bg-teal-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-teal-700">{activity}</span>
+                            </li>
+                          )) || [
+                            'Yoga',
+                            'Naturpromenader',
+                            'Social tid'
+                          ].map((activity, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1.5 h-1.5 bg-teal-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-teal-700">{activity}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-4">
+                        <h5 className="font-medium text-rose-900 mb-3">Varningssignaler</h5>
+                        <ul className="space-y-2">
+                          {plan.lifestylePlan?.stressManagement?.stressSignals?.map((signal, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1.5 h-1.5 bg-rose-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-rose-700">{signal}</span>
+                            </li>
+                          )) || [
+                            'Förhöjd vilopuls',
+                            'Sömnproblem',
+                            'Irritation'
+                          ].map((signal, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <div className="w-1.5 h-1.5 bg-rose-500 rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-rose-700">{signal}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'technology' && (
+                <motion.div
+                  key="technology"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  {/* Recommended Apps */}
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Rekommenderade appar & verktyg</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {plan.technologyPlan?.recommendedApps?.map((app, index) => (
+                        <div key={index} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                              <Smartphone className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{app.name}</h4>
+                              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">{app.category}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">{app.purpose}</p>
+                        </div>
+                      )) || [
+                        { name: 'Strava', purpose: 'Träningsspårning och community', category: 'Träning' },
+                        { name: 'MyFitnessPal', purpose: 'Kaloriräkning och näring', category: 'Näring' },
+                        { name: 'Headspace', purpose: 'Meditation och mindfulness', category: 'Mental hälsa' },
+                        { name: 'Sleep Cycle', purpose: 'Sömnanalys och väckning', category: 'Sömn' }
+                      ].map((app, index) => (
+                        <div key={index} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                              <Smartphone className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{app.name}</h4>
+                              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">{app.category}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">{app.purpose}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Wearables */}
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Rekommenderade wearables</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {plan.technologyPlan?.wearables?.map((device, index) => (
+                        <div key={index} className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <Activity className="w-6 h-6 text-green-600" />
+                            <h5 className="font-medium text-gray-900">{device.device}</h5>
+                          </div>
+                          <p className="text-sm text-gray-600">{device.features}</p>
+                        </div>
+                      )) || [
+                        { device: 'Garmin Forerunner', features: 'GPS, pulsmätning, träningsanalys' },
+                        { device: 'Oura Ring', features: 'Sömn, HRV, återhämtning' },
+                        { device: 'Apple Watch', features: 'Allround spårning, appar' },
+                        { device: 'Polar H10', features: 'Exakt pulsmätning' }
+                      ].map((device, index) => (
+                        <div key={index} className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-4">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <Activity className="w-6 h-6 text-green-600" />
+                            <h5 className="font-medium text-gray-900">{device.device}</h5>
+                          </div>
+                          <p className="text-sm text-gray-600">{device.features}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Automation Tips */}
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Automationsförslag</h4>
+                    <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-4">
+                      <ul className="space-y-2">
+                        {plan.technologyPlan?.automationTips?.map((tip, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <Lightbulb className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">{tip}</span>
+                          </li>
+                        )) || [
+                          'Synka träningsdata automatiskt mellan appar',
+                          'Ställ in påminnelser för måltider och hydratisering',
+                          'Automatisk sömnspårning med smart klocka',
+                          'Veckovis analys av träningsdata',
+                          'Push-notiser för återhämtningsmätningar'
+                        ].map((tip, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <Lightbulb className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
                 </motion.div>
@@ -367,44 +854,206 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
                   exit={{ opacity: 0, y: -20 }}
                   className="space-y-6"
                 >
+                  {/* Enhanced Progress Tracking */}
                   <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">Uppföljning & Mål</h3>
-                      <button
-                        onClick={() => toggleSection('progress')}
-                        className="p-2 text-gray-500 hover:text-gray-700"
-                      >
-                        {expandedSections.progress ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Avancerad uppföljning & analys</h3>
+                    
+                    {/* Weekly Metrics */}
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Veckovisa mätningar</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {plan.progressTracking?.weeklyMetrics?.map((metric, index) => (
+                          <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <BarChart3 className="w-5 h-5 text-blue-600" />
+                              <h5 className="font-medium text-gray-900">{metric.metric}</h5>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">{metric.target}</p>
+                            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">{metric.unit}</span>
+                          </div>
+                        )) || [
+                          { metric: 'Total löpdistans', target: 'Progressiv ökning', unit: 'km' },
+                          { metric: 'Genomsnittspuls', target: 'Stabil eller sjunkande', unit: 'slag/min' },
+                          { metric: 'Sömnkvalitet', target: '7-9 timmar', unit: 'timmar' },
+                          { metric: 'Energinivå', target: '7-8/10', unit: 'skala' },
+                          { metric: 'Återhämtning', target: 'God HRV', unit: 'ms' }
+                        ].map((metric, index) => (
+                          <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <BarChart3 className="w-5 h-5 text-blue-600" />
+                              <h5 className="font-medium text-gray-900">{metric.metric}</h5>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">{metric.target}</p>
+                            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">{metric.unit}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Biomarkers */}
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Biomarkörer att följa</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {plan.progressTracking?.biomarkers?.map((marker, index) => (
+                          <div key={index} className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Heart className="w-5 h-5 text-green-600" />
+                              <h5 className="font-medium text-gray-900">{marker.marker}</h5>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">Optimal: {marker.optimal}</p>
+                            <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">{marker.frequency}</span>
+                          </div>
+                        )) || [
+                          { marker: 'Vilopuls', optimal: '40-60 slag/min', frequency: 'Dagligen' },
+                          { marker: 'HRV', optimal: 'Individuell baseline', frequency: 'Dagligen' },
+                          { marker: 'Sömneffektivitet', optimal: '>85%', frequency: 'Dagligen' },
+                          { marker: 'Stressnivå', optimal: '<30% av dagen', frequency: 'Dagligen' }
+                        ].map((marker, index) => (
+                          <div key={index} className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Heart className="w-5 h-5 text-green-600" />
+                              <h5 className="font-medium text-gray-900">{marker.marker}</h5>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">Optimal: {marker.optimal}</p>
+                            <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">{marker.frequency}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 8-Week Milestones */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">8-veckors milstolpar</h4>
+                      <div className="space-y-3">
+                        {plan.progressTracking?.milestones?.map((milestone, index) => (
+                          <div key={index} className="flex items-center space-x-4 p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-xl">
+                            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {milestone.week}
+                            </div>
+                            <div className="flex-1">
+                              <h5 className="font-medium text-gray-900">{milestone.target}</h5>
+                              <p className="text-sm text-gray-600">{milestone.celebration}</p>
+                            </div>
+                            <div className="flex space-x-1">
+                              {milestone.metrics.map((metric, i) => (
+                                <span key={i} className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
+                                  {metric}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )) || Array.from({length: 8}, (_, i) => ({
+                          week: i + 1,
+                          target: i < 2 ? 'Etablera rutiner' : i < 4 ? 'Förbättra uthållighet' : i < 6 ? 'Öka intensitet' : 'Maximera prestanda',
+                          metrics: ['Distans', 'Tid', 'Återhämtning'],
+                          celebration: (i + 1) % 2 === 0 ? 'Belöna dig själv med något kul!' : 'Reflektera över framstegen'
+                        })).map((milestone, index) => (
+                          <div key={index} className="flex items-center space-x-4 p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-xl">
+                            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {milestone.week}
+                            </div>
+                            <div className="flex-1">
+                              <h5 className="font-medium text-gray-900">{milestone.target}</h5>
+                              <p className="text-sm text-gray-600">{milestone.celebration}</p>
+                            </div>
+                            <div className="flex space-x-1">
+                              {milestone.metrics.map((metric, i) => (
+                                <span key={i} className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
+                                  {metric}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'calendar' && (
+                <motion.div
+                  key="calendar"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-gray-900">8-veckors träningskalender</h3>
+                      <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all">
+                        Exportera till kalender
                       </button>
                     </div>
                     
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-green-50 rounded-xl p-4">
-                          <TrendingUp className="w-6 h-6 text-green-600 mb-2" />
-                          <h4 className="font-medium text-green-900">Vecka 1-2</h4>
-                          <p className="text-green-700 text-sm">Etablera rutiner</p>
-                        </div>
-                        <div className="bg-orange-50 rounded-xl p-4">
-                          <Award className="w-6 h-6 text-orange-600 mb-2" />
-                          <h4 className="font-medium text-orange-900">Vecka 3-4</h4>
-                          <p className="text-orange-700 text-sm">Första förbättringar</p>
-                        </div>
-                        <div className="bg-purple-50 rounded-xl p-4">
-                          <Sparkles className="w-6 h-6 text-purple-600 mb-2" />
-                          <h4 className="font-medium text-purple-900">Månad 2+</h4>
-                          <p className="text-purple-700 text-sm">Märkbara resultat</p>
-                        </div>
-                      </div>
+                    {/* Calendar Grid */}
+                    <div className="space-y-6">
+                      {Array.from({length: 8}, (_, weekIndex) => (
+                        <div key={weekIndex} className="border border-gray-200 rounded-xl p-4">
+                          <h4 className="font-semibold text-gray-900 mb-4">Vecka {weekIndex + 1}</h4>
+                          <div className="grid grid-cols-7 gap-2">
+                            {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, dayIndex) => {
+                              const daySchedule = {
+                                0: { title: 'Lätt löpning + styrka', duration: 75, type: 'training' },
+                                1: { title: 'Intervallträning', duration: 45, type: 'training' },
+                                2: { title: 'Vila eller yoga', duration: 30, type: 'recovery' },
+                                3: { title: 'Medeldistans', duration: 60, type: 'training' },
+                                4: { title: 'Vila/lätt aktivitet', duration: 30, type: 'recovery' },
+                                5: { title: 'Lång löpning', duration: 90 + (weekIndex * 10), type: 'training' },
+                                6: { title: 'Aktiv vila', duration: 45, type: 'recovery' }
+                              }[dayIndex];
 
-                      {expandedSections.progress && plan.rawPlan && (
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-medium text-gray-900 mb-3">Detaljerad uppföljningsplan</h4>
-                          <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {plan.rawPlan.split('UPPFÖLJNING:')[1] || 'Detaljerad uppföljningsplan genereras...'}
+                              return (
+                                <div key={dayIndex} className="min-h-[100px]">
+                                  <div className="text-xs font-medium text-gray-500 mb-1">{day}</div>
+                                  {daySchedule && (
+                                    <div className={`p-2 rounded-lg text-xs ${
+                                      daySchedule.type === 'training' 
+                                        ? 'bg-gradient-to-br from-orange-100 to-red-100 text-orange-800' 
+                                        : 'bg-gradient-to-br from-green-100 to-teal-100 text-green-800'
+                                    }`}>
+                                      <div className="font-medium mb-1">{daySchedule.title}</div>
+                                      <div className="flex items-center space-x-1">
+                                        <Timer className="w-3 h-3" />
+                                        <span>{daySchedule.duration}min</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                      )}
+                      ))}
+                    </div>
+
+                    {/* Integration Instructions */}
+                    <div className="mt-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6">
+                      <h4 className="font-semibold text-gray-900 mb-4">Kalenderintegration</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">1</div>
+                          <div>
+                            <h5 className="font-medium text-gray-900">Exportera träningspass</h5>
+                            <p className="text-sm text-gray-600">Klicka på "Exportera till kalender" för att få en ICS-fil</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">2</div>
+                          <div>
+                            <h5 className="font-medium text-gray-900">Importera till din kalender</h5>
+                            <p className="text-sm text-gray-600">Öppna filen i Google Calendar, Apple Calendar eller Outlook</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
+                          <div>
+                            <h5 className="font-medium text-gray-900">Få påminnelser</h5>
+                            <p className="text-sm text-gray-600">Ställ in notifikationer för att aldrig missa ett träningspass</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

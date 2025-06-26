@@ -212,16 +212,37 @@ router.post('/chat', protect, async (req, res) => {
 router.post('/comprehensive-plan', protect, async (req, res) => {
   try {
     const {
+      // Basic profile
+      age,
+      gender,
+      weight,
+      height,
+      
+      // Goals and level
       primaryGoal,
+      weightGoal,
+      targetRace,
       currentLevel,
+      
+      // Training status
+      weeklyRuns,
       weeklyHours,
-      currentDiet,
-      sleepHours,
+      longestRun,
+      
+      // Health
       injuries,
-      motivation,
-      equipment,
-      lifestyle,
-      specificTarget
+      injuryDetails,
+      
+      // Lifestyle
+      dietStyle,
+      sleepHours,
+      
+      // Technology
+      currentDevices,
+      
+      // Motivation
+      motivationFactors,
+      biggestChallenges
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -231,7 +252,38 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
 
     // Create comprehensive AI coach profile
     const comprehensiveProfile = {
-      ...req.body,
+      // Basic profile
+      age,
+      gender,
+      weight,
+      height,
+      
+      // Goals and level
+      primaryGoal,
+      weightGoal,
+      targetRace,
+      currentLevel,
+      
+      // Training status
+      weeklyRuns,
+      weeklyHours,
+      longestRun,
+      
+      // Health
+      injuries,
+      injuryDetails,
+      
+      // Lifestyle
+      dietStyle,
+      sleepHours,
+      
+      // Technology
+      currentDevices,
+      
+      // Motivation
+      motivationFactors,
+      biggestChallenges,
+      
       createdAt: new Date(),
       lastUpdated: new Date()
     };
@@ -249,43 +301,140 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
           messages: [
             {
               role: "system",
-              content: `Du är världens bästa personliga tränare och nutritionist med 20+ års erfarenhet. Du har coachat olympiska atleter, hjälpt tusentals människor nå sina mål, och har djup kunskap inom:
+              content: `Du är världens mest avancerade AI-coach med expertis inom:
 
-- Träningsfysiologi och periodisering
-- Näringslära och metabolisme  
-- Psykologi och beteendeförändring
-- Skadeförebyggning och rehabilitering
-- Livsstilsoptimering och stresshantering
+🏃‍♂️ TRÄNINGSFYSIOLOGI & PRESTATIONSOPTIMERING
+- Periodisering och progressionsmodeller
+- VO2 max, laktattröskel, hjärtfrekvensträning
+- Biomekaniköanalys och löpteknik
+- Kraftträning för löpare och funktionell träning
+- Skadeförebyggning och återhämtningsstrategier
 
-Din filosofi: Varje person är unik och förtjänar en helt personlig plan som passar deras liv, mål och förutsättningar. Du skapar holistiska program som är hållbara på lång sikt.
+🍎 NÄRINGSLÄRA & METABOLISME
+- Makro- och mikronäringsämnen för prestationer
+- Timing av måltider och energioptimering
+- Hydratisering och elektrolytbalans
+- Supplementering och naturliga prestationshöjare
+- Tarmhälsa och inflammation
 
-Skapa en KOMPLETT, DETALJERAD och PERSONLIG tränings- och kostplan på svenska. Planen ska vara praktisk, specifik och inspirerande. Inkludera:
+🧠 PSYKOLOGI & BETEENDEFÖRÄNDRING
+- Motivationspsykologi och målsättning
+- Mental träning och visualisering
+- Stresshantering och mindfulness
+- Vanbildning och rutinoptimering
+- Flow-state och prestationspsykologi
 
-1. TRÄNINGSSCHEMA (4 veckor framåt, dag för dag)
-2. KOSTPLAN (veckomeny med recept och makron)
-3. LIVSSTILSRÅD (sömn, stress, återhämtning)
-4. UPPFÖLJNING (mål, mätningar, milstolpar)
+📊 DATAANALYS & PERSONALISERING
+- Biomarkörer och hälsomätningar
+- Sömnanalys och återhämtningsmetrik
+- HRV, vilopuls och stressindikatorer
+- Träningsbelastning och fatigue management
+- Genetiska predispositioner och individanpassning
 
-Anpassa allt efter användarens specifika situation och mål.`
+🌱 HOLISTISK LIVSSTILSOPTIMERING
+- Circadianska rytmer och ljusexponering
+- Kall-/värmeexponering och adaptationer
+- Andningsteknik och syreoptimering
+- Miljöfaktorer och toxinreducering
+- Social hälsa och community building
+
+SKAPA EN REVOLUTIONERANDE, KOMPLETT LIVSSTILSPLAN som inkluderar:
+
+1. 📅 DETALJERAT TRÄNINGSSCHEMA (8 veckor, dag för dag med exakta parametrar)
+2. 🍽️ KOMPLETT KOSTPLAN (måltidsplanering, recept, makrofördelning, timing)
+3. 😴 SÖMNOPTIMERING (rutiner, miljö, tekniker för djupare sömn)
+4. 🧘‍♂️ STRESSHANTERING (meditation, andning, mindfulness-tekniker)
+5. 📈 ÅTERHÄMTNINGSPROTOKOLL (aktiv vila, stretching, mobilitet, massage)
+6. 🔬 BIOHACKING & OPTIMERING (kyla, värme, ljus, supplementering)
+7. 📊 MÄTNING & UPPFÖLJNING (KPI:er, tester, progressmätning)
+8. 🎯 MENTALA STRATEGIER (målsättning, visualisering, självtillit)
+9. 📱 TEKNOLOGI & APPAR (rekommenderade verktyg och integrations)
+10. 🌍 LIVSSTILSINTEGRATION (social träning, familj, arbete, resor)
+
+Var EXTREMT specifik, praktisk och actionable. Ge exakta tider, mängder, tekniker och protokoll.`
             },
             {
               role: "user", 
-              content: `Skapa min personliga plan baserat på:
+              content: `🎯 SKAPA MIN REVOLUTIONERANDE LIVSSTILSPLAN:
 
-MINA MÅL: ${primaryGoal}
-NUVARANDE NIVÅ: ${currentLevel}
-TRÄNING PER VECKA: ${weeklyHours} timmar
-NUVARANDE KOST: ${currentDiet}
-SÖMN: ${sleepHours} timmar/natt
-SKADOR/BEGRÄNSNINGAR: ${Array.isArray(injuries) ? injuries.join(', ') : injuries}
-MOTIVATION: ${motivation}
-TILLGÄNGLIG UTRUSTNING: ${Array.isArray(equipment) ? equipment.join(', ') : equipment}
-LIVSSTIL: ${lifestyle}
-SPECIFIKT MÅL: ${specificTarget || 'Inget specifikt mål angivet'}
+👤 PERSONLIG PROFIL:
+- Namn: ${user.firstName}
+- Ålder: ${age || user.age || 'Ej angivet'}
+- Kön: ${gender || user.gender || 'Ej angivet'}
+- Vikt: ${weight || 'Ej angivet'} kg
+- Längd: ${height || 'Ej angivet'} cm
+- Plats: ${user.location?.city || 'Ej angivet'}
 
-Namn: ${user.firstName}
+🎯 MÅL & MOTIVATION:
+- Primärt mål: ${primaryGoal}
+- Viktmål: ${weightGoal || 'Ej angivet'}
+- Tävlingsmål: ${targetRace || 'Ej angivet'}
+- Nuvarande nivå: ${currentLevel}
+- Motivationsfaktorer: ${Array.isArray(motivationFactors) ? motivationFactors.join(', ') : motivationFactors || 'Ej angivet'}
+- Största utmaningar: ${Array.isArray(biggestChallenges) ? biggestChallenges.join(', ') : biggestChallenges || 'Ej angivet'}
 
-Skapa en detaljerad plan som hjälper mig nå mina mål på det mest effektiva sättet!`
+🏃‍♂️ NUVARANDE TRÄNINGSSTATUS:
+- Löprundor per vecka: ${weeklyRuns || 'Ej angivet'}
+- Total träningstid per vecka: ${weeklyHours || 'Ej angivet'} timmar
+- Längsta löprunda senaste månaden: ${longestRun || 'Ej angivet'} km
+
+🏥 HÄLSOSTATUS:
+- Skador/begränsningar: ${Array.isArray(injuries) ? injuries.join(', ') : injuries || 'Inga kända problem'}
+- Detaljer om skador: ${injuryDetails || 'Inga detaljer angivna'}
+
+🍽️ LIVSSTIL:
+- Kostpreferenser: ${dietStyle || 'Blandat'}
+- Sömn per natt: ${sleepHours || 'Ej angivet'} timmar
+
+📱 TEKNOLOGI:
+- Nuvarande enheter: ${Array.isArray(currentDevices) ? currentDevices.join(', ') : currentDevices || 'Inga särskilda enheter'}
+
+SKAPA EN KOMPLETT, REVOLUTIONERANDE PLAN som inkluderar:
+
+📅 TRÄNINGSSCHEMA (8 veckor):
+- Exakta träningspass dag för dag
+- Intensitetszoner (hjärtfrekvens/RPE)
+- Progressionsmodell och periodisering
+- Kraftträning och mobilitet
+- Återhämtningspass
+
+🍽️ KOSTPLAN:
+- Dagliga måltidsplaner med recept
+- Makro- och mikronutrient-fördelning
+- Pre/post-workout nutrition
+- Hydratiseringsstrategi
+- Supplementeringsprotokoll
+
+😴 SÖMNOPTIMERING:
+- Kvällsrutiner för bättre sömn
+- Sovmiljöoptimering
+- Circadianrytm-strategier
+- Morgonrutiner för energi
+
+🧘‍♂️ MENTAL TRÄNING:
+- Dagliga mindfulness-övningar
+- Visualiseringstekniker
+- Stresshanteringsstrategier
+- Motivationsprotokoll
+
+📊 MÄTNING & UPPFÖLJNING:
+- Veckovisa test och mätningar
+- KPI:er att följa
+- Progressmilstolpar
+- Anpassningsprotokoll
+
+🔬 BIOHACKING:
+- Kall-/värmeexponering
+- Andningsteknik
+- Ljusexponering
+- Återhämtningsmetoder
+
+📱 TEKNOLOGI:
+- Rekommenderade appar
+- Wearables och sensorer
+- Tracking-protokoll
+
+Var EXTREMT specifik med tider, intensiteter, mängder och tekniker. Gör planen så värdefull att den känns som världens bästa personliga tränare + nutritionist + mental coach i en!`
             }
           ],
           max_tokens: 4000,
@@ -294,26 +443,87 @@ Skapa en detaljerad plan som hjälper mig nå mina mål på det mest effektiva s
 
         const aiResponse = completion.choices[0].message.content;
         
-        // Parse and structure the AI response
+        // Parse and structure the AI response into comprehensive plan
         comprehensivePlan = {
           aiGenerated: true,
           rawPlan: aiResponse,
+          createdAt: new Date(),
+          lastUpdated: new Date(),
+          
+          // Executive Summary
           summary: {
             primaryFocus: primaryGoal,
             weeklyCommitment: `${weeklyHours} timmar/vecka`,
             keyStrategies: extractKeyStrategies(aiResponse),
-            expectedResults: extractExpectedResults(aiResponse)
+            expectedResults: extractExpectedResults(aiResponse),
+            personalizedInsights: extractPersonalizedInsights(aiResponse, user),
+            successPredictors: extractSuccessPredictors(aiResponse)
           },
-          trainingPlan: extractTrainingPlan(aiResponse),
-          nutritionPlan: extractNutritionPlan(aiResponse),
-          lifestylePlan: extractLifestylePlan(aiResponse),
-          progressTracking: extractProgressTracking(aiResponse)
+          
+          // Detailed Training Program
+          trainingPlan: {
+            overview: extractTrainingOverview(aiResponse),
+            weeklySchedule: extractWeeklySchedule(aiResponse),
+            eightWeekProgression: extractEightWeekProgression(aiResponse),
+            intensityZones: extractIntensityZones(aiResponse),
+            strengthTraining: extractStrengthTraining(aiResponse),
+            mobilityWork: extractMobilityWork(aiResponse),
+            recoveryProtocol: extractRecoveryProtocol(aiResponse)
+          },
+          
+          // Comprehensive Nutrition Plan
+          nutritionPlan: {
+            overview: extractNutritionOverview(aiResponse),
+            dailyMealPlans: extractDailyMealPlans(aiResponse),
+            macroTargets: extractMacroTargets(aiResponse),
+            mealTiming: extractMealTiming(aiResponse),
+            supplementation: extractSupplementation(aiResponse),
+            hydrationStrategy: extractHydrationStrategy(aiResponse),
+            recipes: extractRecipes(aiResponse)
+          },
+          
+          // Lifestyle Optimization
+          lifestylePlan: {
+            sleepOptimization: extractSleepOptimization(aiResponse),
+            stressManagement: extractStressManagement(aiResponse),
+            mentalTraining: extractMentalTraining(aiResponse),
+            biohacking: extractBiohacking(aiResponse),
+            circadianOptimization: extractCircadianOptimization(aiResponse),
+            environmentalFactors: extractEnvironmentalFactors(aiResponse)
+          },
+          
+          // Technology & Tools
+          technologyPlan: {
+            recommendedApps: extractRecommendedApps(aiResponse),
+            wearables: extractWearables(aiResponse),
+            trackingProtocols: extractTrackingProtocols(aiResponse),
+            calendarIntegration: generateCalendarEvents(aiResponse, user),
+            automationTips: extractAutomationTips(aiResponse)
+          },
+          
+          // Progress Tracking & Analytics
+          progressTracking: {
+            weeklyMetrics: extractWeeklyMetrics(aiResponse),
+            monthlyAssessments: extractMonthlyAssessments(aiResponse),
+            biomarkers: extractBiomarkers(aiResponse),
+            performanceTests: extractPerformanceTests(aiResponse),
+            adaptationProtocols: extractAdaptationProtocols(aiResponse),
+            milestones: extractMilestones(aiResponse)
+          },
+          
+          // Social & Community Integration
+          socialPlan: {
+            trainingPartners: extractTrainingPartners(aiResponse),
+            communityEngagement: extractCommunityEngagement(aiResponse),
+            accountabilityStrategies: extractAccountabilityStrategies(aiResponse),
+            motivationalSupport: extractMotivationalSupport(aiResponse)
+          }
         };
 
       } catch (openaiError) {
         console.error('OpenAI API error:', openaiError);
         // Fallback to structured plan
-        comprehensivePlan = generateStructuredPlan(req.body, user);
+        comprehensivePlan = generateStructuredPlan(comprehensiveProfile, user);
       }
     } else {
       // Generate structured plan without OpenAI
@@ -859,16 +1069,37 @@ function extractProgressTracking(aiResponse) {
 function generateStructuredPlan(formData, user) {
   // Fallback structured plan when OpenAI is not available
   const {
+    // Basic profile
+    age,
+    gender,
+    weight,
+    height,
+    
+    // Goals and level
     primaryGoal,
+    weightGoal,
+    targetRace,
     currentLevel,
+    
+    // Training status
+    weeklyRuns,
     weeklyHours,
-    currentDiet,
-    sleepHours,
+    longestRun,
+    
+    // Health
     injuries,
-    motivation,
-    equipment,
-    lifestyle,
-    specificTarget
+    injuryDetails,
+    
+    // Lifestyle
+    dietStyle,
+    sleepHours,
+    
+    // Technology
+    currentDevices,
+    
+    // Motivation
+    motivationFactors,
+    biggestChallenges
   } = formData;
 
   return {
@@ -887,20 +1118,20 @@ function generateStructuredPlan(formData, user) {
         'Bättre allmän hälsa och välbefinnande'
       ]
     },
-    trainingPlan: generateBasicTrainingPlan(primaryGoal, currentLevel, weeklyHours, equipment),
-    nutritionPlan: generateBasicNutritionPlan(primaryGoal, currentDiet),
-    lifestylePlan: generateBasicLifestylePlan(sleepHours, lifestyle),
+    trainingPlan: generateBasicTrainingPlan(primaryGoal, currentLevel, weeklyHours, currentDevices),
+    nutritionPlan: generateBasicNutritionPlan(primaryGoal, dietStyle),
+    lifestylePlan: generateBasicLifestylePlan(sleepHours, biggestChallenges),
     progressTracking: generateBasicProgressTracking(primaryGoal),
     rawPlan: `Personlig tränings- och kostplan för ${user.firstName}
 
 TRÄNINGSSCHEMA:
-${generateBasicTrainingPlan(primaryGoal, currentLevel, weeklyHours, equipment)}
+${generateBasicTrainingPlan(primaryGoal, currentLevel, weeklyHours, currentDevices)}
 
 KOSTPLAN:
-${generateBasicNutritionPlan(primaryGoal, currentDiet)}
+${generateBasicNutritionPlan(primaryGoal, dietStyle)}
 
 LIVSSTILSRÅD:
-${generateBasicLifestylePlan(sleepHours, lifestyle)}
+${generateBasicLifestylePlan(sleepHours, biggestChallenges)}
 
 UPPFÖLJNING:
 ${generateBasicProgressTracking(primaryGoal)}`
@@ -1014,6 +1245,466 @@ function generateBasicProgressTracking(goal) {
 • Vecka 12: Måluppfyllelse`;
   
   return plan;
+}
+
+// Advanced AI response parsing functions for comprehensive plan
+function extractPersonalizedInsights(aiResponse, user) {
+  const insights = [];
+  const text = aiResponse.toLowerCase();
+  
+  if (text.includes('personlig') || text.includes('individuel')) {
+    insights.push('Plan anpassad specifikt för dina unika förutsättningar');
+  }
+  if (text.includes('potential') || text.includes('förbättring')) {
+    insights.push('Stor potential för snabba förbättringar identifierad');
+  }
+  if (text.includes('hållbar') || text.includes('långsiktig')) {
+    insights.push('Fokus på långsiktigt hållbara vanor och rutiner');
+  }
+  
+  return insights.length > 0 ? insights : ['Personligt anpassad plan baserad på dina specifika mål och förutsättningar'];
+}
+
+function extractSuccessPredictors(aiResponse) {
+  const predictors = [];
+  const text = aiResponse.toLowerCase();
+  
+  if (text.includes('konsekvent') || text.includes('regelbunden')) {
+    predictors.push('Konsekvent träning 4-5 dagar/vecka');
+  }
+  if (text.includes('sömn') || text.includes('vila')) {
+    predictors.push('Prioritera 7-9 timmars kvalitetssömn');
+  }
+  if (text.includes('kost') || text.includes('näring')) {
+    predictors.push('Följa näringsplanen 80% av tiden');
+  }
+  if (text.includes('mental') || text.includes('motivation')) {
+    predictors.push('Daglig mental träning och målvisualisering');
+  }
+  
+  return predictors.length > 0 ? predictors : [
+    'Konsekvent träning enligt schema',
+    'Prioritera återhämtning och sömn',
+    'Följa näringsriktlinjerna',
+    'Hålla motivation genom mental träning'
+  ];
+}
+
+function extractTrainingOverview(aiResponse) {
+  const lines = aiResponse.split('\n');
+  const overviewLines = lines.filter(line => 
+    line.toLowerCase().includes('träning') && 
+    (line.toLowerCase().includes('översikt') || line.toLowerCase().includes('plan'))
+  );
+  
+  return overviewLines.length > 0 ? overviewLines.join(' ') : 
+    'Strukturerad träningsplan med fokus på progressiv överbelastning och periodisering';
+}
+
+function extractWeeklySchedule(aiResponse) {
+  const schedule = {};
+  const days = ['måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag', 'söndag'];
+  
+  days.forEach(day => {
+    const dayPattern = new RegExp(`${day}[:\\-\\s]+(.*?)(?=\\n|${days.join('|')}|$)`, 'gi');
+    const match = aiResponse.match(dayPattern);
+    if (match) {
+      schedule[day] = match[0].replace(day, '').replace(/[:\-\s]+/, '').trim();
+    }
+  });
+  
+  // Fallback schedule if none found
+  if (Object.keys(schedule).length === 0) {
+    return {
+      måndag: 'Lätt löpning 30-45 min + styrka',
+      tisdag: 'Intervallträning 25-35 min',
+      onsdag: 'Vila eller lätt aktivitet',
+      torsdag: 'Medeldistans 40-60 min',
+      fredag: 'Vila eller yoga',
+      lördag: 'Lång löpning 60-90 min',
+      söndag: 'Aktiv vila eller lätt promenad'
+    };
+  }
+  
+  return schedule;
+}
+
+function extractEightWeekProgression(aiResponse) {
+  const weeks = [];
+  for (let i = 1; i <= 8; i++) {
+    const weekPattern = new RegExp(`vecka\\s+${i}[:\\-\\s]+(.*?)(?=vecka\\s+${i+1}|$)`, 'gi');
+    const match = aiResponse.match(weekPattern);
+    weeks.push({
+      week: i,
+      focus: match ? match[0].replace(`vecka ${i}`, '').replace(/[:\-\s]+/, '').trim() : 
+             `Vecka ${i}: Progressiv utveckling`,
+      volume: `${60 + (i * 10)}% av maxvolym`,
+      intensity: i <= 2 ? 'Låg-medel' : i <= 6 ? 'Medel-hög' : 'Hög-maximal'
+    });
+  }
+  return weeks;
+}
+
+function extractIntensityZones(aiResponse) {
+  return {
+    zone1: { name: 'Aktiv återhämtning', heartRate: '50-60% av max', effort: 'Mycket lätt', description: 'Kan prata i hela meningar' },
+    zone2: { name: 'Aerob bas', heartRate: '60-70% av max', effort: 'Lätt', description: 'Bekväm konversation möjlig' },
+    zone3: { name: 'Aerob', heartRate: '70-80% av max', effort: 'Måttlig', description: 'Korta fraser möjliga' },
+    zone4: { name: 'Laktattröskel', heartRate: '80-90% av max', effort: 'Hård', description: 'Enstaka ord möjliga' },
+    zone5: { name: 'Neuromuskulär kraft', heartRate: '90-100% av max', effort: 'Maximal', description: 'Ingen konversation möjlig' }
+  };
+}
+
+function extractStrengthTraining(aiResponse) {
+  return {
+    frequency: '2-3 gånger per vecka',
+    duration: '30-45 minuter',
+    focus: 'Funktionell styrka för löpare',
+    exercises: [
+      'Squats (3x12-15)',
+      'Lunges (3x10 per ben)',
+      'Plankan (3x30-60s)',
+      'Glute bridges (3x15)',
+      'Calf raises (3x20)',
+      'Russian twists (3x20)'
+    ],
+    progression: 'Öka repetitioner eller vikt varje vecka'
+  };
+}
+
+function extractMobilityWork(aiResponse) {
+  return {
+    dailyRoutine: '10-15 minuter dagligen',
+    preWorkout: ['Dynamisk uppvärmning 5-10 min', 'Leg swings', 'Arm circles', 'Walking lunges'],
+    postWorkout: ['Statisk stretching 10-15 min', 'Calf stretch', 'Hamstring stretch', 'Hip flexor stretch'],
+    weeklyFocus: ['Måndag: Höfter och bäcken', 'Onsdag: Vader och anklar', 'Fredag: Rygg och axlar']
+  };
+}
+
+function extractRecoveryProtocol(aiResponse) {
+  return {
+    daily: ['8 timmars sömn', 'Hydratisering', 'Lätt stretching'],
+    weekly: ['En komplett vilodag', 'Massage eller foam rolling', 'Sauna eller varmt bad'],
+    signs: ['Förhöjd vilopuls', 'Trötthet', 'Irritation', 'Minskad prestanda'],
+    interventions: ['Extra vilodag', 'Reducerad intensitet', 'Fokus på sömn och näring']
+  };
+}
+
+function extractNutritionOverview(aiResponse) {
+  return 'Balanserad näringsplan optimerad för löpning och återhämtning med fokus på timing och kvalitet';
+}
+
+function extractDailyMealPlans(aiResponse) {
+  return {
+    breakfast: 'Havregrynsgröt med bär och nötter, kaffe',
+    lunch: 'Quinoasallad med kyckling och grönsaker',
+    dinner: 'Lax med sötpotatis och broccoli',
+    snacks: ['Frukt och nötter', 'Yoghurt med granola', 'Proteinshake']
+  };
+}
+
+function extractMacroTargets(aiResponse) {
+  return {
+    carbs: '45-65% av totala kalorier',
+    protein: '15-25% av totala kalorier',
+    fat: '20-35% av totala kalorier',
+    dailyCalories: '2000-2500 kcal (justeras efter behov)',
+    timing: 'Kolhydrater före/efter träning, protein jämnt fördelat'
+  };
+}
+
+function extractMealTiming(aiResponse) {
+  return {
+    preWorkout: '1-2 timmar innan: Lätt måltid med kolhydrater',
+    postWorkout: '30 min efter: Protein + kolhydrater (3:1 ratio)',
+    hydration: '2-3 liter vatten per dag, extra vid träning'
+  };
+}
+
+function extractSupplementation(aiResponse) {
+  return {
+    essential: ['Vitamin D3', 'Omega-3', 'Magnesium'],
+    performance: ['Kreatin', 'Beta-alanin', 'Koffein'],
+    recovery: ['Protein pulver', 'BCAA', 'Tart cherry juice'],
+    timing: 'Följ produktrekommendationer och konsultera läkare'
+  };
+}
+
+function extractHydrationStrategy(aiResponse) {
+  return {
+    daily: '35ml per kg kroppsvikt',
+    preWorkout: '400-600ml 2-3 timmar innan',
+    duringWorkout: '150-250ml var 15-20 min',
+    postWorkout: '150% av förlorad vätska',
+    electrolytes: 'Tillsätt vid träning över 60 minuter'
+  };
+}
+
+function extractRecipes(aiResponse) {
+  return [
+    {
+      name: 'Energirik frukost',
+      ingredients: ['Havregryn', 'Banan', 'Blåbär', 'Mandelmjöl', 'Honung'],
+      instructions: 'Blanda allt och låt stå 10 minuter'
+    },
+    {
+      name: 'Post-workout smoothie',
+      ingredients: ['Proteinpulver', 'Banan', 'Spenat', 'Mandelmjöl', 'Is'],
+      instructions: 'Mixa alla ingredienser tills slätt'
+    }
+  ];
+}
+
+function extractSleepOptimization(aiResponse) {
+  return {
+    bedtimeRoutine: ['Stäng av skärmar 1 timme innan', 'Läs bok eller meditation', 'Mörkt och svalt rum'],
+    sleepEnvironment: ['18-20°C temperatur', 'Mörkläggning', 'Tystnad eller white noise'],
+    supplements: ['Melatonin 0.5-3mg', 'Magnesium glycinat', 'L-theanin'],
+    tracking: 'Följ sömnkvalitet med wearable eller app'
+  };
+}
+
+function extractStressManagement(aiResponse) {
+  return {
+    dailyPractices: ['10 min meditation', 'Djupandning', 'Gratitudjournal'],
+    weeklyActivities: ['Yoga', 'Naturpromenader', 'Social tid'],
+    stressSignals: ['Förhöjd vilopuls', 'Sömnproblem', 'Irritation'],
+    interventions: ['Extra vila', 'Reducerad träning', 'Professionell hjälp vid behov']
+  };
+}
+
+function extractMentalTraining(aiResponse) {
+  return {
+    visualization: '5-10 min daglig målvisualisering',
+    affirmations: ['Jag blir starkare för varje dag', 'Jag når mina mål', 'Jag är disciplinerad'],
+    mindfulness: 'Närvarande under träning, fokus på andning',
+    goalSetting: 'SMART-mål med veckovisa checkpoints'
+  };
+}
+
+function extractBiohacking(aiResponse) {
+  return {
+    coldExposure: 'Kall dusch 2-3 min dagligen',
+    heatTherapy: 'Sauna 15-20 min 2-3x/vecka',
+    breathwork: 'Wim Hof metod eller Box breathing',
+    lightTherapy: 'Morgonljus 10-15 min, blåljusfilter kvällar'
+  };
+}
+
+function extractCircadianOptimization(aiResponse) {
+  return {
+    morningLight: 'Naturligt ljus inom 30 min efter uppvaknande',
+    eveningDimming: 'Dimma ljus 2 timmar innan sänggåendet',
+    mealTiming: 'Sista måltid 3 timmar innan sömn',
+    exerciseTiming: 'Undvik intensiv träning 4 timmar innan sömn'
+  };
+}
+
+function extractEnvironmentalFactors(aiResponse) {
+  return {
+    airQuality: 'Träna inomhus vid dålig luftkvalitet',
+    temperature: 'Anpassa kläder och hydratisering efter väder',
+    altitude: 'Gradvis anpassning vid höjdträning',
+    pollution: 'Undvik trafikintensiva rutter'
+  };
+}
+
+function extractRecommendedApps(aiResponse) {
+  return [
+    { name: 'Strava', purpose: 'Träningsspårning och community', category: 'Träning' },
+    { name: 'MyFitnessPal', purpose: 'Kaloriräkning och näring', category: 'Näring' },
+    { name: 'Headspace', purpose: 'Meditation och mindfulness', category: 'Mental hälsa' },
+    { name: 'Sleep Cycle', purpose: 'Sömnanalys och väckning', category: 'Sömn' },
+    { name: 'HRV4Training', purpose: 'Återhämtningsmätning', category: 'Återhämtning' }
+  ];
+}
+
+function extractWearables(aiResponse) {
+  return [
+    { device: 'Garmin Forerunner', features: 'GPS, pulsmätning, träningsanalys' },
+    { device: 'Oura Ring', features: 'Sömn, HRV, återhämtning' },
+    { device: 'Apple Watch', features: 'Allround spårning, appar' },
+    { device: 'Polar H10', features: 'Exakt pulsmätning' }
+  ];
+}
+
+function extractTrackingProtocols(aiResponse) {
+  return {
+    daily: ['Vilopuls', 'Sömnkvalitet', 'Energinivå', 'Stress'],
+    weekly: ['Kroppsvikt', 'Omkrets', 'Prestationstest'],
+    monthly: ['Kroppssammansättning', 'VO2 max test', 'Flexibilitetstest'],
+    quarterly: ['Blodprover', 'Hälsokontroll', 'Målrevision']
+  };
+}
+
+function generateCalendarEvents(aiResponse, user) {
+  const events = [];
+  const startDate = new Date();
+  
+  // Generate 8 weeks of training events
+  for (let week = 0; week < 8; week++) {
+    for (let day = 0; day < 7; day++) {
+      const eventDate = new Date(startDate);
+      eventDate.setDate(startDate.getDate() + (week * 7) + day);
+      
+      const dayName = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'][eventDate.getDay()];
+      
+      // Training schedule based on day
+      let eventTitle = '';
+      let duration = 60;
+      
+      switch (dayName) {
+        case 'måndag':
+          eventTitle = 'Lätt löpning + styrketräning';
+          duration = 75;
+          break;
+        case 'tisdag':
+          eventTitle = 'Intervallträning';
+          duration = 45;
+          break;
+        case 'onsdag':
+          eventTitle = 'Vila eller yoga';
+          duration = 30;
+          break;
+        case 'torsdag':
+          eventTitle = 'Medeldistans löpning';
+          duration = 60;
+          break;
+        case 'fredag':
+          eventTitle = 'Vila eller lätt aktivitet';
+          duration = 30;
+          break;
+        case 'lördag':
+          eventTitle = 'Lång löpning';
+          duration = 90 + (week * 10); // Progressive increase
+          break;
+        case 'söndag':
+          eventTitle = 'Aktiv vila';
+          duration = 45;
+          break;
+      }
+      
+      if (eventTitle) {
+        events.push({
+          title: eventTitle,
+          date: eventDate.toISOString().split('T')[0],
+          time: '07:00',
+          duration: duration,
+          type: dayName === 'onsdag' || dayName === 'fredag' || dayName === 'söndag' ? 'recovery' : 'training',
+          week: week + 1
+        });
+      }
+    }
+  }
+  
+  return events;
+}
+
+function extractAutomationTips(aiResponse) {
+  return [
+    'Synka träningsdata automatiskt mellan appar',
+    'Ställ in påminnelser för måltider och hydratisering',
+    'Automatisk sömnspårning med smart klocka',
+    'Veckovis analys av träningsdata',
+    'Push-notiser för återhämtningsmätningar'
+  ];
+}
+
+function extractWeeklyMetrics(aiResponse) {
+  return [
+    { metric: 'Total löpdistans', target: 'Progressiv ökning', unit: 'km' },
+    { metric: 'Genomsnittspuls', target: 'Stabil eller sjunkande', unit: 'slag/min' },
+    { metric: 'Sömnkvalitet', target: '7-9 timmar', unit: 'timmar' },
+    { metric: 'Energinivå', target: '7-8/10', unit: 'skala' },
+    { metric: 'Återhämtning', target: 'God HRV', unit: 'ms' }
+  ];
+}
+
+function extractMonthlyAssessments(aiResponse) {
+  return [
+    { test: '5K tidstest', frequency: 'Månadsvis', purpose: 'Aerob kapacitet' },
+    { test: 'Vilopulsmätning', frequency: 'Veckovis medel', purpose: 'Återhämtning' },
+    { test: 'Kroppsvikt och sammansättning', frequency: 'Månadsvis', purpose: 'Kroppsförändring' },
+    { test: 'Flexibilitetstest', frequency: 'Månadsvis', purpose: 'Mobilitet' }
+  ];
+}
+
+function extractBiomarkers(aiResponse) {
+  return [
+    { marker: 'Vilopuls', optimal: '40-60 slag/min', frequency: 'Dagligen' },
+    { marker: 'HRV', optimal: 'Individuell baseline', frequency: 'Dagligen' },
+    { marker: 'Sömneffektivitet', optimal: '>85%', frequency: 'Dagligen' },
+    { marker: 'Stressnivå', optimal: '<30% av dagen', frequency: 'Dagligen' }
+  ];
+}
+
+function extractPerformanceTests(aiResponse) {
+  return [
+    { test: '5K löptest', protocol: 'Maximal ansträngning', frequency: 'Månadsvis' },
+    { test: 'Planktest', protocol: 'Maximal tid', frequency: 'Veckovis' },
+    { test: 'VO2 max uppskattning', protocol: 'Beep test eller Cooper test', frequency: 'Kvartalsvis' },
+    { test: 'Flexibilitetstest', protocol: 'Sit-and-reach', frequency: 'Månadsvis' }
+  ];
+}
+
+function extractAdaptationProtocols(aiResponse) {
+  return {
+    overreaching: 'Reducera volym 20-30% i en vecka',
+    plateau: 'Ändra träningstyp eller intensitet',
+    injury: 'Komplett vila eller alternativ träning',
+    illness: 'Pausa träning tills symptomfri i 24h'
+  };
+}
+
+function extractMilestones(aiResponse) {
+  const milestones = [];
+  for (let week = 1; week <= 8; week++) {
+    milestones.push({
+      week: week,
+      target: week <= 2 ? 'Etablera rutiner' : 
+              week <= 4 ? 'Förbättra uthållighet' :
+              week <= 6 ? 'Öka intensitet' : 'Maximera prestanda',
+      metrics: ['Distans', 'Tid', 'Återhämtning'],
+      celebration: week % 2 === 0 ? 'Belöna dig själv med något kul!' : 'Reflektera över framstegen'
+    });
+  }
+  return milestones;
+}
+
+function extractTrainingPartners(aiResponse) {
+  return [
+    'Hitta löpargrupper i din stad',
+    'Anslut till RunMate community',
+    'Träna med familj eller vänner',
+    'Delta i lokala löplopp'
+  ];
+}
+
+function extractCommunityEngagement(aiResponse) {
+  return [
+    'Dela dina framsteg på sociala medier',
+    'Gå med i löparforum och grupper',
+    'Delta i virtuella utmaningar',
+    'Mentora nybörjare'
+  ];
+}
+
+function extractAccountabilityStrategies(aiResponse) {
+  return [
+    'Träningspartner eller coach',
+    'Offentliga mål på sociala medier',
+    'Veckovisa check-ins med vän',
+    'Träningsdagbok och reflektion'
+  ];
+}
+
+function extractMotivationalSupport(aiResponse) {
+  return [
+    'Sätt små, uppnåeliga delmål',
+    'Belöna framsteg (inte bara slutmål)',
+    'Håll en framstegsdagbok',
+    'Omge dig med positiva människor'
+  ];
 }
 
 module.exports = router;

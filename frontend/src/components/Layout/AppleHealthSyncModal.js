@@ -15,7 +15,7 @@ import {
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
-const AppleHealthSyncModal = ({ isOpen, onClose, onComplete }) => {
+const AppleHealthSyncModal = ({ isOpen, onClose, onComplete, showSkipOption = false }) => {
   const [syncStatus, setSyncStatus] = useState('idle'); // idle, syncing, success, error
   const [syncData, setSyncData] = useState(null);
   const [lastSync, setLastSync] = useState(null);
@@ -159,7 +159,12 @@ const AppleHealthSyncModal = ({ isOpen, onClose, onComplete }) => {
                   <Heart className="w-10 h-10 text-white" />
                 </motion.div>
                 <h2 className="text-2xl font-bold text-gray-900">Apple Health Sync</h2>
-                <p className="text-gray-600 mt-2">Synka dina träningspass från Apple Watch</p>
+                <p className="text-gray-600 mt-2">
+                  {showSkipOption 
+                    ? "Synka för bättre AI-analys (valfritt)"
+                    : "Synka dina träningspass från Apple Watch"
+                  }
+                </p>
               </div>
 
               {/* Stats */}
@@ -276,6 +281,18 @@ const AppleHealthSyncModal = ({ isOpen, onClose, onComplete }) => {
                     </div>
                     <p className="text-xs text-gray-600">Kalorier</p>
                   </div>
+                </div>
+              )}
+
+              {/* Skip button for onboarding */}
+              {showSkipOption && syncStatus === 'idle' && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={onClose}
+                    className="text-gray-500 hover:text-gray-700 text-sm underline transition-colors"
+                  >
+                    Hoppa över och fortsätt till AI-analys
+                  </button>
                 </div>
               )}
             </motion.div>

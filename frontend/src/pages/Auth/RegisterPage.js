@@ -7,14 +7,10 @@ import {
   EyeOff, 
   ArrowRight, 
   ArrowLeft,
-  MapPin,
-  Calendar,
-  User,
-  Mail,
-  Lock,
   Zap,
   Star,
-  Activity
+  Activity,
+  MapPin
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -165,63 +161,53 @@ const RegisterPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">Förnamn</label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          name="firstName"
-                          required
-                          value={formData.firstName}
-                          onChange={handleChange}
-                          className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                          placeholder="Anna"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="firstName"
+                        required
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        placeholder="Anna"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">Efternamn</label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          name="lastName"
-                          required
-                          value={formData.lastName}
-                          onChange={handleChange}
-                          className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                          placeholder="Svensson"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">E-postadress</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
-                        type="email"
-                        name="email"
+                        type="text"
+                        name="lastName"
                         required
-                        value={formData.email}
+                        value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                        placeholder="anna@exempel.se"
+                        className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        placeholder="Svensson"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">E-postadress</label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      placeholder="anna@exempel.se"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Lösenord</label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         name="password"
                         required
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Minst 8 tecken"
                       />
                       <button
@@ -237,14 +223,13 @@ const RegisterPage = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Bekräfta lösenord</label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         name="confirmPassword"
                         required
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Upprepa lösenordet"
                       />
                       <button
@@ -264,18 +249,15 @@ const RegisterPage = () => {
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Födelsedatum</label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="date"
-                        name="dateOfBirth"
-                        required
-                        value={formData.dateOfBirth}
-                        onChange={handleChange}
-                        max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                        className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      />
-                    </div>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      required
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                      max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                      className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    />
                     {formData.dateOfBirth && (
                       <p className="text-sm text-gray-500 flex items-center mt-1">
                         <Star className="w-4 h-4 mr-1 text-yellow-500" />
@@ -311,18 +293,15 @@ const RegisterPage = () => {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Var tränar du?</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="text"
-                        name="location"
-                        required
-                        value={formData.location}
-                        onChange={handleChange}
-                        className="w-full pl-10 pr-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                        placeholder="Stockholm, Sverige"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      name="location"
+                      required
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      placeholder="Stockholm, Sverige"
+                    />
                   </div>
 
                   <div className="space-y-2">

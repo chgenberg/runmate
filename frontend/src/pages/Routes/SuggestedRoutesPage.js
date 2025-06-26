@@ -1,562 +1,714 @@
-import React, { useState, useEffect } from 'react';
-import { MapPinIcon, ClockIcon, FireIcon, ChartBarIcon, SparklesIcon, PlayIcon, HeartIcon, ShareIcon, BookmarkIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import toast from 'react-hot-toast';
+import {
+  Clock, Mountain, Target, Zap, Navigation,
+  Search, Heart, Share, Play,
+  TrendingUp, Route, Filter
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import api from '../../services/api';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
+import RouteMap from '../../components/Activity/RouteMap';
+import RouteDetailModal from '../../components/Activity/RouteDetailModal';
+import StartRouteModal from '../../components/Activity/StartRouteModal';
 
 const SuggestedRoutesPage = () => {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [aiCoachData, setAiCoachData] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationPermission, setLocationPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
   const [filters, setFilters] = useState({
     distance: 'all',
     difficulty: 'all',
     terrain: 'all',
-    time: 'all'
+    source: 'all' // ai, osm, strava, popular
   });
-  const [viewMode, setViewMode] = useState('grid'); // grid or map
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('map'); // 'map', 'cards'
   const [favorites, setFavorites] = useState([]);
-  const [likes, setLikes] = useState({});
+  const [selectedRoute, setSelectedRoute] = useState(null);
+  const [showRouteDetail, setShowRouteDetail] = useState(false);
+  const [showStartRoute, setShowStartRoute] = useState(false);
+  const [routeToStart, setRouteToStart] = useState(null);
 
+  // Load user's AI coach data and location
   useEffect(() => {
-    loadUserData();
+    loadAiCoachData();
     getUserLocation();
-    generateRoutes();
+    loadFavorites();
   }, []);
 
-  const loadUserData = async () => {
+  const loadRoutes = useCallback(async () => {
+    if (!userLocation && locationPermission !== 'denied') return;
+    
+    setLoading(true);
     try {
-      // Load user's training data for personalization
-      await api.get('/activities/recent');
-      // Process data for AI recommendations
+      const routeSources = [];
+      const lat = userLocation?.lat || 59.3293; // Fallback to Stockholm
+      const lng = userLocation?.lng || 18.0686;
+      
+      console.log('Loading routes for coordinates:', { lat, lng, userLocation });
+
+      // 1. AI-baserade rutter baserat på coaching data
+      if (filters.source === 'all' || filters.source === 'ai') {
+        const aiRoutes = generateAiRoutes();
+        routeSources.push(...aiRoutes);
+      }
+
+      // 2. OpenStreetMap rutter via Overpass API
+      if (filters.source === 'all' || filters.source === 'osm') {
+        const osmRoutes = await loadOsmRoutes(lat, lng);
+        routeSources.push(...osmRoutes);
+      }
+
+      // 3. Populära community rutter
+      if (filters.source === 'all' || filters.source === 'popular') {
+        const popularRoutes = await loadPopularRoutes(lat, lng);
+        routeSources.push(...popularRoutes);
+      }
+
+      // 4. Strava Segments (mock for now)
+      if (filters.source === 'all' || filters.source === 'strava') {
+        const stravaRoutes = generateStravaRoutes();
+        routeSources.push(...stravaRoutes);
+      }
+
+      // Filter and sort routes
+      const filteredRoutes = filterRoutes(routeSources);
+      setRoutes(filteredRoutes);
+
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('Error loading routes:', error);
+      toast.error('Kunde inte ladda rutter');
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userLocation, filters, locationPermission]);
+
+  // Load routes when filters change
+  useEffect(() => {
+    loadRoutes();
+  }, [loadRoutes]);
+
+  const loadAiCoachData = async () => {
+    try {
+      const response = await api.get('/users/profile');
+      if (response.data.user.aiCoachData) {
+        setAiCoachData(response.data.user.aiCoachData);
+      }
+    } catch (error) {
+      console.error('Error loading AI coach data:', error);
     }
   };
 
   const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log('Location:', position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
+    if (!navigator.geolocation) {
+      console.log('Geolocation not supported, using Stockholm fallback');
+      setLocationPermission('denied');
+      setUserLocation({ lat: 59.3293, lng: 18.0686 }); // Fallback to Stockholm
+      return;
     }
+
+    console.log('Requesting user location...');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userCoords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        console.log('Got user location:', userCoords);
+        setUserLocation(userCoords);
+        setLocationPermission('granted');
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setLocationPermission('denied');
+        // Fallback to Stockholm for demo
+        console.log('Using Stockholm fallback due to location error');
+        setUserLocation({ lat: 59.3293, lng: 18.0686 });
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
   };
 
-  const generateRoutes = async () => {
-    setLoading(true);
+  const loadFavorites = async () => {
     try {
-      // AI-generated routes based on user profile and location
-      const generatedRoutes = [
-        {
-          id: 1,
-          name: 'Morgonrunda vid Långholmen',
-          distance: 5.2,
-          duration: 25,
-          difficulty: 'Lätt',
-          terrain: 'Park',
-          elevation: 45,
-          calories: 320,
-          description: 'Perfekt morgonrunda genom Långholmens naturområde. Mjuka stigar och vacker utsikt över vattnet.',
-          highlights: ['Naturområde', 'Vattenvy', 'Mjuka stigar', 'Hundvänlig'],
-          aiReason: 'Baserat på dina tidigare 5km-rundor och preferens för naturmiljöer',
-          matchScore: 95,
-          weather: { temp: 18, condition: 'Soligt', wind: 5 },
-          popularity: 89,
-          timeOfDay: ['Morgon', 'Eftermiddag'],
-          coordinates: [[59.3165, 18.0351], [59.3180, 18.0365], [59.3195, 18.0380]],
-          image: '/lopning1.png',
-          userPhotos: ['/avatar2.png', '/avatar2.png', '/avatar2.png'],
-          totalRuns: 234,
-          avgRating: 4.8
-        },
-        {
-          id: 2,
-          name: 'Intensiv stadslöpning - City Circuit',
-          distance: 8.5,
-          duration: 40,
-          difficulty: 'Medel',
-          terrain: 'Stad',
-          elevation: 120,
-          calories: 580,
-          description: 'Utmanande runda genom Stockholms city med varierad terräng och flera backar för intervallträning.',
-          highlights: ['Stadsvy', 'Backtträning', 'Belyst', 'Populär kvällsrutt'],
-          aiReason: 'Perfekt för ditt mål att förbättra hastighet och kondition',
-          matchScore: 88,
-          weather: { temp: 16, condition: 'Molnigt', wind: 8 },
-          popularity: 76,
-          timeOfDay: ['Kväll', 'Natt'],
-          coordinates: [[59.3293, 18.0686], [59.3308, 18.0701], [59.3323, 18.0716]],
-          image: '/lopning2.png',
-          userPhotos: ['/avatar2.png', '/avatar2.png'],
-          totalRuns: 156,
-          avgRating: 4.6
-        },
-        {
-          id: 3,
-          name: 'Lugn återhämtningsrunda - Humlegården',
-          distance: 3.8,
-          duration: 22,
-          difficulty: 'Lätt',
-          terrain: 'Park',
-          elevation: 25,
-          calories: 240,
-          description: 'Avslappnad runda i Humlegården, perfekt för återhämtningsdagar eller lätt jogging.',
-          highlights: ['Platt terräng', 'Skugga', 'Centralt', 'Café närhet'],
-          aiReason: 'Rekommenderad efter gårdagens intensiva pass - optimal för aktiv vila',
-          matchScore: 92,
-          weather: { temp: 20, condition: 'Halvklart', wind: 3 },
-          popularity: 94,
-          timeOfDay: ['Morgon', 'Lunch', 'Eftermiddag'],
-          coordinates: [[59.3425, 18.0758], [59.3440, 18.0773], [59.3455, 18.0788]],
-          image: '/lopning3.png',
-          userPhotos: ['/avatar2.png', '/avatar2.png', '/avatar2.png', '/avatar2.png'],
-          totalRuns: 412,
-          avgRating: 4.9
-        },
-        {
-          id: 4,
-          name: 'Långdistans utmaning - Djurgårdsrundan',
-          distance: 15.0,
-          duration: 75,
-          difficulty: 'Svår',
-          terrain: 'Blandat',
-          elevation: 280,
-          calories: 980,
-          description: 'Omfattande runda runt hela Djurgården. Varierad terräng och fantastiska vyer för den erfarne löparen.',
-          highlights: ['Lång distans', 'Scenisk', 'Utmanande', 'Milestone-rutt'],
-          aiReason: 'Du är redo för längre distanser - detta förbereder dig för halvmaraton',
-          matchScore: 82,
-          weather: { temp: 15, condition: 'Lätt regn', wind: 12 },
-          popularity: 68,
-          timeOfDay: ['Morgon', 'Förmiddag'],
-          coordinates: [[59.3165, 18.0686], [59.3180, 18.0701], [59.3195, 18.0716]],
-          image: '/lopning4.png',
-          userPhotos: ['/avatar2.png'],
-          totalRuns: 89,
-          avgRating: 4.7
-        },
-        {
-          id: 5,
-          name: 'Intervallträning - Gärdet Speed Track',
-          distance: 6.2,
-          duration: 32,
-          difficulty: 'Medel',
-          terrain: 'Blandat',
-          elevation: 95,
-          calories: 420,
-          description: 'Strukturerad intervallrunda med markerade sektioner för tempo, vila och sprint.',
-          highlights: ['Intervaller', 'Tidtagning', 'Öppet', 'Träningsgrupper'],
-          aiReason: 'Matchar ditt träningsschema - intervallpass på torsdagar',
-          matchScore: 91,
-          weather: { temp: 17, condition: 'Soligt', wind: 6 },
-          popularity: 83,
-          timeOfDay: ['Eftermiddag', 'Kväll'],
-          coordinates: [[59.3238, 18.0968], [59.3253, 18.0983], [59.3268, 18.0998]],
-          image: '/lopning5.png',
-          userPhotos: ['/avatar2.png', '/avatar2.png', '/avatar2.png'],
-          totalRuns: 267,
-          avgRating: 4.8
-        },
-        {
-          id: 6,
-          name: 'Solnedgångsrunda - Riddarholmen',
-          distance: 4.5,
-          duration: 28,
-          difficulty: 'Lätt',
-          terrain: 'Stad',
-          elevation: 35,
-          calories: 285,
-          description: 'Romantisk kvällsrunda med fantastisk utsikt över Gamla Stan och Mälaren.',
-          highlights: ['Solnedgång', 'Historisk', 'Instagram-vänlig', 'Datum-rutt'],
-          aiReason: 'Populär bland löpare i din ålder - perfekt social löprunda',
-          matchScore: 86,
-          weather: { temp: 19, condition: 'Klart', wind: 4 },
-          popularity: 91,
-          timeOfDay: ['Kväll'],
-          coordinates: [[59.3245, 18.0635], [59.3260, 18.0650], [59.3275, 18.0665]],
-          image: '/lopning6.png',
-          userPhotos: ['/avatar2.png', '/avatar2.png', '/avatar2.png', '/avatar2.png', '/avatar2.png'],
-          totalRuns: 345,
-          avgRating: 4.9
-        }
-      ];
-
-      setRoutes(generatedRoutes);
+      const response = await api.get('/users/favorite-routes');
+      setFavorites(response.data.favoriteRoutes || []);
     } catch (error) {
-      console.error('Error generating routes:', error);
-      toast.error('Kunde inte ladda föreslagna rutter');
-    } finally {
-      setLoading(false);
+      console.error('Error loading favorites:', error);
+      setFavorites([]);
     }
   };
 
-  const toggleFavorite = (routeId) => {
-    setFavorites(prev => 
-      prev.includes(routeId) 
-        ? prev.filter(id => id !== routeId)
-        : [...prev, routeId]
-    );
-    toast.success(
-      favorites.includes(routeId) ? 'Borttagen från favoriter' : 'Sparad till favoriter',
-      { icon: favorites.includes(routeId) ? '💔' : '❤️' }
-    );
-  };
-
-  const toggleLike = (routeId) => {
-    setLikes(prev => ({
-      ...prev,
-      [routeId]: !prev[routeId]
-    }));
-  };
-
-  const startRoute = (route) => {
-    toast.success(`Startar rutt: ${route.name}`, {
-      icon: '🏃‍♂️',
-      duration: 3000
-    });
-    // Here you would integrate with GPS tracking
-  };
-
-  const shareRoute = (route) => {
-    if (navigator.share) {
-      navigator.share({
-        title: route.name,
-        text: `Kolla in denna löprunda: ${route.name} - ${route.distance}km`,
-        url: window.location.href
+  const loadOsmRoutes = async (lat, lng) => {
+    try {
+      const response = await api.get('/routes/osm', {
+        params: {
+          lat,
+          lng,
+          radius: 20000, // 20km radius
+          limit: 10
+        }
       });
-    } else {
-      toast.success('Länk kopierad!', { icon: '📋' });
+      
+      return response.data.routes || [];
+
+    } catch (error) {
+      console.error('Error loading OSM routes:', error);
+      return [];
     }
   };
 
-  const filteredRoutes = routes.filter(route => {
-    if (filters.distance !== 'all') {
-      if (filters.distance === '5' && route.distance > 5) return false;
-      if (filters.distance === '10' && (route.distance <= 5 || route.distance > 10)) return false;
-      if (filters.distance === '15' && route.distance <= 10) return false;
+  const loadPopularRoutes = async (lat, lng) => {
+    try {
+      const response = await api.get('/routes/popular', {
+        params: { lat, lng, radius: 20 }
+      });
+      return response.data.routes || [];
+    } catch (error) {
+      console.error('Error loading popular routes:', error);
+      return [];
     }
-    if (filters.difficulty !== 'all' && route.difficulty !== filters.difficulty) return false;
-    if (filters.terrain !== 'all' && route.terrain !== filters.terrain) return false;
-    if (filters.time !== 'all' && !route.timeOfDay.includes(filters.time)) return false;
-    return true;
-  });
+  };
+
+  const generateAiRoutes = () => {
+    if (!aiCoachData || !userLocation) return [];
+
+    const baseRoutes = [];
+    const userGoals = aiCoachData.primaryGoals || [];
+    const currentLevel = aiCoachData.currentLevel || 'beginner';
+    const preferredDistance = aiCoachData.longestRun || 5;
+
+    // Generera rutter baserat på AI coaching data
+    if (userGoals.includes('lose_weight')) {
+      baseRoutes.push({
+        id: 'ai-weight-loss',
+        name: 'AI Viktminskning - Fettförbränningsrunda',
+        distance: Math.min(preferredDistance * 0.8, 8),
+        duration: Math.round(preferredDistance * 0.8 * 6),
+        difficulty: currentLevel === 'beginner' ? 'Lätt' : 'Medel',
+        terrain: 'Park',
+        elevation: 50,
+        calories: Math.round(preferredDistance * 0.8 * 70),
+        description: 'AI-optimerad rutt för optimal fettförbränning baserat på din profil.',
+        aiReason: 'Anpassad för ditt viktminsknings-mål med optimal intensitet',
+        matchScore: 95,
+        source: 'AI Coach',
+        highlights: ['Fettförbränning', 'Låg intensitet', 'Längre distans'],
+        coordinates: generateRouteCoordinates(userLocation, preferredDistance * 0.8),
+        image: '/lopning1.png'
+      });
+    }
+
+    if (userGoals.includes('improve_speed')) {
+      baseRoutes.push({
+        id: 'ai-speed',
+        name: 'AI Hastighet - Intervallträning',
+        distance: Math.min(preferredDistance * 0.6, 6),
+        duration: Math.round(preferredDistance * 0.6 * 5),
+        difficulty: 'Medel',
+        terrain: 'Blandat',
+        elevation: 80,
+        calories: Math.round(preferredDistance * 0.6 * 85),
+        description: 'AI-designad intervallrutt för hastighetsutveckling.',
+        aiReason: 'Perfekt för ditt mål att förbättra hastighet med strukturerade intervaller',
+        matchScore: 92,
+        source: 'AI Coach',
+        highlights: ['Intervaller', 'Hastighet', 'Strukturerad'],
+        coordinates: generateRouteCoordinates(userLocation, preferredDistance * 0.6),
+        image: '/lopning2.png'
+      });
+    }
+
+    if (userGoals.includes('build_endurance')) {
+      baseRoutes.push({
+        id: 'ai-endurance',
+        name: 'AI Uthållighet - Långdistans',
+        distance: Math.min(preferredDistance * 1.2, 15),
+        duration: Math.round(preferredDistance * 1.2 * 7),
+        difficulty: currentLevel === 'advanced' ? 'Medel' : 'Svår',
+        terrain: 'Natur',
+        elevation: 120,
+        calories: Math.round(preferredDistance * 1.2 * 75),
+        description: 'AI-planerad långdistansrutt för uthållighetsbyggande.',
+        aiReason: 'Gradvis ökning av distans för att bygga uthållighet säkert',
+        matchScore: 88,
+        source: 'AI Coach',
+        highlights: ['Uthållighet', 'Långdistans', 'Progressiv'],
+        coordinates: generateRouteCoordinates(userLocation, preferredDistance * 1.2),
+        image: '/lopning3.png'
+      });
+    }
+
+    return baseRoutes;
+  };
+
+  const generateStravaRoutes = () => {
+    // Mock Strava segments - i produktionen skulle detta kopplas till Strava API
+    return [
+      {
+        id: 'strava-1',
+        name: 'Strava Segment: Långholmen Loop',
+        distance: 5.2,
+        duration: 24,
+        difficulty: 'Medel',
+        terrain: 'Park',
+        elevation: 45,
+        calories: 320,
+        description: 'Populärt Strava-segment med tusentals löpare.',
+        source: 'Strava',
+        highlights: ['Strava KOM', 'Populärt', 'Tävlingsinriktat'],
+        coordinates: generateRouteCoordinates(userLocation, 5.2),
+        image: '/lopning5.png',
+        matchScore: 82,
+        stravaStats: {
+          attempts: 2847,
+          averageTime: '24:15',
+          kom: '18:32'
+        }
+      }
+    ];
+  };
+
+  const generateRouteCoordinates = (center, distance) => {
+    // Enkel algoritm för att generera rutt-koordinater
+    const coords = [];
+    const points = Math.max(10, Math.round(distance * 3));
+    // Better radius calculation: ~111km per degree latitude
+    const radiusLat = (distance / 111) * 0.3; // Smaller radius for more realistic routes
+    const radiusLng = radiusLat / Math.cos(center.lat * Math.PI / 180); // Adjust for longitude
+
+    for (let i = 0; i < points; i++) {
+      const angle = (i / points) * 2 * Math.PI;
+      const randomFactor = 0.7 + Math.random() * 0.6;
+      const lat = center.lat + Math.cos(angle) * radiusLat * randomFactor;
+      const lng = center.lng + Math.sin(angle) * radiusLng * randomFactor;
+      coords.push([lat, lng]);
+    }
+    
+    return coords;
+  };
+
+  const filterRoutes = (routes) => {
+    return routes.filter(route => {
+      if (filters.distance !== 'all') {
+        const distance = route.distance;
+        switch (filters.distance) {
+          case 'short': 
+            if (distance > 5) return false; 
+            break;
+          case 'medium': 
+            if (distance < 5 || distance > 10) return false; 
+            break;
+          case 'long': 
+            if (distance < 10) return false; 
+            break;
+          default:
+            break;
+        }
+      }
+      
+      if (filters.difficulty !== 'all' && route.difficulty !== filters.difficulty) {
+        return false;
+      }
+      
+      if (filters.terrain !== 'all' && route.terrain !== filters.terrain) {
+        return false;
+      }
+      
+      if (searchQuery && !route.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    }).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+  };
+
+  const toggleFavorite = async (routeId) => {
+    try {
+      const isFavorite = favorites.includes(routeId);
+      if (isFavorite) {
+        await api.delete(`/routes/${routeId}/favorite`);
+        setFavorites(prev => prev.filter(id => id !== routeId));
+        toast.success('Borttagen från favoriter');
+      } else {
+        await api.post(`/routes/${routeId}/favorite`);
+        setFavorites(prev => [...prev, routeId]);
+        toast.success('Tillagd till favoriter');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Kunde inte uppdatera favoriter');
+    }
+  };
+
+  const handleRouteSelect = (route) => {
+    setSelectedRoute(route);
+    setShowRouteDetail(true);
+  };
+
+  const handleRouteStart = (route) => {
+    setRouteToStart(route);
+    setShowStartRoute(true);
+  };
+
+  const handleStartTracking = (trackingData) => {
+    // This would integrate with a live tracking system
+    console.log('Starting route tracking:', trackingData);
+    
+    // For now, just navigate to a tracking page or show a placeholder
+    toast.success('Live-spårning skulle starta här (ej implementerat än)');
+    
+    // In a real implementation, this might navigate to:
+    // navigate('/app/live-tracking', { state: { trackingData } });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-600 mx-auto"></div>
-            <SparklesIcon className="w-6 h-6 text-orange-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-          </div>
-          <p className="mt-4 text-gray-600 font-medium">Analyserar din träningsdata...</p>
-          <p className="text-sm text-gray-500 mt-2">Genererar personliga ruttförslag</p>
-        </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <LoadingSpinner size="xl" text="Laddar rutter..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl shadow-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl">
-                <SparklesIcon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Föreslagna rutter</h1>
-                <p className="text-sm text-gray-600">AI-anpassade efter din träning</p>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <Route className="h-8 w-8 text-blue-600" />
+                Hitta löprutter
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {locationPermission === 'granted' 
+                  ? `Upptäck rutter inom 20 km från din position`
+                  : 'Upptäck rutter runt om i Sverige'
+                }
+              </p>
             </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => setViewMode(viewMode === 'grid' ? 'map' : 'grid')}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
-              >
-                {viewMode === 'grid' ? '🗺️' : '📱'}
-              </button>
-              <button
-                onClick={generateRoutes}
-                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:shadow-lg transition-all flex items-center space-x-2"
-              >
-                <SparklesIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Uppdatera</span>
-              </button>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'map' 
+                      ? 'bg-white text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Karta
+                </button>
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'cards' 
+                      ? 'bg-white text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Kort
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Smart Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm p-6 mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Smarta filter</h3>
-            <button
-              onClick={() => setFilters({ distance: 'all', difficulty: 'all', terrain: 'all', time: 'all' })}
-              className="text-sm text-orange-600 hover:text-orange-700"
-            >
-              Återställ
-            </button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Distans</label>
-              <select
-                value={filters.distance}
-                onChange={(e) => setFilters({...filters, distance: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              >
-                <option value="all">Alla distanser</option>
-                <option value="5">Under 5 km</option>
-                <option value="10">5-10 km</option>
-                <option value="15">Över 10 km</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Svårighetsgrad</label>
-              <select
-                value={filters.difficulty}
-                onChange={(e) => setFilters({...filters, difficulty: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              >
-                <option value="all">Alla nivåer</option>
-                <option value="Lätt">Lätt</option>
-                <option value="Medel">Medel</option>
-                <option value="Svår">Svår</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Terräng</label>
-              <select
-                value={filters.terrain}
-                onChange={(e) => setFilters({...filters, terrain: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              >
-                <option value="all">All terräng</option>
-                <option value="Park">Park</option>
-                <option value="Stad">Stad</option>
-                <option value="Blandat">Blandat</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tid på dagen</label>
-              <select
-                value={filters.time}
-                onChange={(e) => setFilters({...filters, time: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              >
-                <option value="all">Alla tider</option>
-                <option value="Morgon">Morgon</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Eftermiddag">Eftermiddag</option>
-                <option value="Kväll">Kväll</option>
-              </select>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Routes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence>
-            {filteredRoutes.map((route, index) => (
-              <motion.div
-                key={route.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -4 }}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all overflow-hidden group"
-              >
-                <div className="relative">
-                  <img
-                    src={route.image}
-                    alt={route.name}
-                    className="w-full h-56 object-cover"
-                  />
-                  {/* Match Score Badge */}
-                  <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
-                    <SparklesIcon className="w-4 h-4 text-yellow-400" />
-                    <span>{route.matchScore}% match</span>
-                  </div>
-                  
-                  {/* Difficulty Badge */}
-                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
-                    route.difficulty === 'Lätt' 
-                      ? 'bg-green-100 text-green-800'
-                      : route.difficulty === 'Medel'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {route.difficulty}
-                  </div>
-
-                  {/* Weather Info */}
-                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg text-sm">
-                    <span>{route.weather.condition} {route.weather.temp}°C</span>
-                  </div>
-
-                  {/* User Photos */}
-                  <div className="absolute bottom-4 right-4 flex -space-x-2">
-                    {route.userPhotos.slice(0, 3).map((photo, i) => (
-                      <img
-                        key={i}
-                        src={photo}
-                        alt=""
-                        className="w-8 h-8 rounded-full border-2 border-white"
-                      />
-                    ))}
-                    {route.totalRuns > 3 && (
-                      <div className="w-8 h-8 rounded-full bg-gray-800 text-white text-xs flex items-center justify-center border-2 border-white">
-                        +{route.totalRuns - 3}
-                      </div>
-                    )}
-                  </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Interactive Map */}
+        {viewMode === 'map' && (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Interaktiv ruttkarta</h2>
+                <div className="text-sm text-gray-500">
+                  {routes.length} rutter visas • Klicka på rutter för detaljer
                 </div>
+              </div>
+              
+              <RouteMap
+                routes={routes}
+                userLocation={userLocation}
+                selectedRoute={selectedRoute}
+                onRouteSelect={handleRouteSelect}
+                onRouteStart={handleRouteStart}
+                onRouteFavorite={toggleFavorite}
+                favorites={favorites}
+                height="500px"
+              />
+            </div>
+          </div>
+        )}
 
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{route.name}</h3>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className={i < Math.floor(route.avgRating) ? '⭐' : '☆'}>
+        {/* Filters and Search */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Filter className="h-5 w-5 text-gray-600" />
+            <h3 className="font-semibold text-gray-900">Filter och sök</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Search */}
+            <div className="lg:col-span-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Sök rutter..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Distance Filter */}
+            <select
+              value={filters.distance}
+              onChange={(e) => setFilters(prev => ({ ...prev, distance: e.target.value }))}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">Alla distanser</option>
+              <option value="short">Kort (0-5 km)</option>
+              <option value="medium">Medel (5-10 km)</option>
+              <option value="long">Lång (10+ km)</option>
+            </select>
+
+            {/* Difficulty Filter */}
+            <select
+              value={filters.difficulty}
+              onChange={(e) => setFilters(prev => ({ ...prev, difficulty: e.target.value }))}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">Alla svårigheter</option>
+              <option value="Lätt">Lätt</option>
+              <option value="Medel">Medel</option>
+              <option value="Svår">Svår</option>
+            </select>
+
+            {/* Source Filter */}
+            <select
+              value={filters.source}
+              onChange={(e) => setFilters(prev => ({ ...prev, source: e.target.value }))}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">Alla källor</option>
+              <option value="ai">AI Coach</option>
+              <option value="osm">OpenStreetMap</option>
+              <option value="popular">Populära</option>
+              <option value="strava">Strava</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Routes Grid - only show if cards view or as supplement to map */}
+        {(viewMode === 'cards' || viewMode === 'map') && (
+          <div>
+            {viewMode === 'map' && (
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">AI-rekommenderade rutter</h2>
+                <p className="text-gray-600">Baserat på din AI-coaching och preferenser</p>
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <AnimatePresence>
+                {routes
+                  .filter(route => viewMode === 'cards' || route.source === 'AI Coach')
+                  .slice(0, viewMode === 'map' ? 6 : routes.length)
+                  .map((route) => (
+                  <motion.div
+                    key={route.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
+                    onClick={() => handleRouteSelect(route)}
+                  >
+                    {/* Route Image */}
+                    <div className="relative h-48 bg-gradient-to-br from-blue-500 to-green-500">
+                      <img
+                        src={route.image}
+                        alt={route.name}
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      {/* Match Score Badge */}
+                      {route.matchScore && (
+                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium text-green-600">
+                          {route.matchScore}% match
+                        </div>
+                      )}
+                      
+                      {/* Source Badge */}
+                      <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium text-white">
+                        {route.source}
+                      </div>
+                      
+                      {/* Favorite Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(route.id);
+                        }}
+                        className="absolute bottom-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                      >
+                        <Heart 
+                          className={`h-5 w-5 ${
+                            favorites.includes(route.id) 
+                              ? 'text-red-500 fill-current' 
+                              : 'text-gray-600'
+                          }`} 
+                        />
+                      </button>
+                    </div>
+
+                    {/* Route Content */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {route.name}
+                      </h3>
+                      
+                      {route.aiReason && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                          <div className="flex items-start gap-2">
+                            <Target className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-blue-800">{route.aiReason}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <p className="text-gray-600 text-sm mb-4">
+                        {route.description}
+                      </p>
+
+                      {/* Route Stats */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Navigation className="h-4 w-4" />
+                          <span>{route.distance} km</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="h-4 w-4" />
+                          <span>{route.duration} min</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mountain className="h-4 w-4" />
+                          <span>{route.elevation} m</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Zap className="h-4 w-4" />
+                          <span>{route.calories} kcal</span>
+                        </div>
+                      </div>
+
+                      {/* Highlights */}
+                      {route.highlights && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {route.highlights.slice(0, 3).map((highlight, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                            >
+                              {highlight}
                             </span>
                           ))}
                         </div>
-                        <span className="text-sm text-gray-500">({route.totalRuns} löpningar)</span>
+                      )}
+
+                      {/* Strava Stats */}
+                      {route.stravaStats && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <TrendingUp className="h-4 w-4 text-orange-600" />
+                            <span className="text-sm font-medium text-orange-800">Strava Stats</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs text-orange-700">
+                            <div>{route.stravaStats.attempts} försök</div>
+                            <div>KOM: {route.stravaStats.kom}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRouteStart(route);
+                          }}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Play className="h-4 w-4" />
+                          Starta
+                        </button>
+                        <button 
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          <Share className="h-4 w-4 text-gray-600" />
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => toggleFavorite(route.id)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      {favorites.includes(route.id) ? (
-                        <BookmarkSolidIcon className="w-5 h-5 text-orange-600" />
-                      ) : (
-                        <BookmarkIcon className="w-5 h-5 text-gray-400" />
-                      )}
-                    </button>
-                  </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
 
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{route.description}</p>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPinIcon className="w-4 h-4 mr-1.5 text-orange-600" />
-                      {route.distance} km
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <ClockIcon className="w-4 h-4 mr-1.5 text-orange-600" />
-                      {route.duration} min
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <ChartBarIcon className="w-4 h-4 mr-1.5 text-orange-600" />
-                      {route.elevation}m höjd
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <FireIcon className="w-4 h-4 mr-1.5 text-orange-600" />
-                      {route.calories} kcal
-                    </div>
-                  </div>
-
-                  {/* Highlights */}
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {route.highlights.slice(0, 3).map((highlight, index) => (
-                      <span
-                        key={index}
-                        className="px-2.5 py-1 bg-orange-50 text-orange-700 text-xs rounded-full font-medium"
-                      >
-                        {highlight}
-                      </span>
-                    ))}
-                    {route.highlights.length > 3 && (
-                      <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                        +{route.highlights.length - 3}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* AI Reason */}
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg mb-4">
-                    <p className="text-xs text-blue-800 flex items-start">
-                      <SparklesIcon className="w-3 h-3 mr-1.5 mt-0.5 flex-shrink-0" />
-                      {route.aiReason}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => toggleLike(route.id)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        {likes[route.id] ? (
-                          <HeartSolidIcon className="w-5 h-5 text-red-500" />
-                        ) : (
-                          <HeartIcon className="w-5 h-5 text-gray-400" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => shareRoute(route)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        <ShareIcon className="w-5 h-5 text-gray-400" />
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => startRoute(route)}
-                      className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:shadow-lg transition-all flex items-center space-x-2 text-sm font-medium"
-                    >
-                      <PlayIcon className="w-4 h-4" />
-                      <span>Starta</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {filteredRoutes.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
-          >
-            <MapPinIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Inga rutter matchade dina filter</h3>
-            <p className="text-gray-600 mb-6">Prova att ändra dina filterinställningar</p>
+        {/* No Routes Found */}
+        {routes.length === 0 && !loading && (
+          <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+            <Route className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Inga rutter hittades</h3>
+            <p className="text-gray-600 mb-4">
+              Prova att justera dina filter eller sök efter något annat.
+            </p>
             <button
-              onClick={() => setFilters({ distance: 'all', difficulty: 'all', terrain: 'all', time: 'all' })}
-              className="px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors"
+              onClick={() => {
+                setFilters({ distance: 'all', difficulty: 'all', terrain: 'all', source: 'all' });
+                setSearchQuery('');
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
             >
-              Återställ filter
+              Rensa filter
             </button>
-          </motion.div>
+          </div>
         )}
       </div>
+
+      {/* Modals */}
+      <RouteDetailModal
+        route={selectedRoute}
+        isOpen={showRouteDetail}
+        onClose={() => {
+          setShowRouteDetail(false);
+          setSelectedRoute(null);
+        }}
+        onRouteStart={handleRouteStart}
+        onRouteFavorite={toggleFavorite}
+        favorites={favorites}
+        userLocation={userLocation}
+      />
+
+      <StartRouteModal
+        route={routeToStart}
+        isOpen={showStartRoute}
+        onClose={() => {
+          setShowStartRoute(false);
+          setRouteToStart(null);
+        }}
+        onStartTracking={handleStartTracking}
+        userLocation={userLocation}
+      />
     </div>
   );
 };

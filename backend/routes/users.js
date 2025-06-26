@@ -696,6 +696,118 @@ router.get('/stats/summary', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     
+    // Check if this is the test account
+    if (user.email === 'test@runmate.se') {
+      // Return comprehensive dummy data for test account
+      const dummyStats = {
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          points: 15420,
+          level: 12,
+          profilePhoto: user.profilePhoto
+        },
+        stats: {
+          // Basic metrics
+          totalActivities: 287,
+          totalDistance: 1842.7,
+          totalTime: 432000, // 120 hours in seconds
+          avgPace: 330, // 5:30 per km
+          
+          // Distance achievements
+          longestRun: 42.2,
+          avgRunDistance: 6.4,
+          
+          // Pace achievements
+          bestPace: 270, // 4:30 per km
+          avgPaceFormatted: '5:30',
+          bestPaceFormatted: '4:30',
+          
+          // Health metrics from Apple Health
+          totalCalories: 178500,
+          avgHeartRate: 152,
+          maxHeartRate: 189,
+          
+          // Elevation
+          totalElevation: 12450,
+          biggestClimb: 385,
+          
+          // Consistency metrics
+          weeklyConsistency: 4, // Active all 4 weeks
+          activeDays: 24, // Last 30 days
+          
+          // Monthly progress
+          thisMonth: {
+            distance: 185.3,
+            activities: 22,
+            time: 39600, // 11 hours
+            bestPace: 285,
+            bestPaceFormatted: '4:45'
+          },
+          
+          // Training insights
+          totalHours: 120.0,
+          avgRunTime: 42, // minutes
+          
+          // Additional Apple Health metrics
+          vo2Max: 52.3,
+          restingHeartRate: 48,
+          heartRateVariability: 65,
+          stepCount: 892340,
+          activeCalories: 142300,
+          standHours: 14,
+          exerciseMinutes: 7200,
+          
+          // Personal records
+          records: {
+            '5k': { time: '22:30', date: '2024-03-15', pace: '4:30' },
+            '10k': { time: '47:15', date: '2024-02-28', pace: '4:43' },
+            'halfMarathon': { time: '1:45:30', date: '2024-01-20', pace: '5:00' },
+            'marathon': { time: '3:52:45', date: '2023-10-15', pace: '5:30' }
+          },
+          
+          // Training zones distribution
+          trainingZones: {
+            recovery: 35, // percentage
+            aerobic: 40,
+            threshold: 20,
+            vo2max: 5
+          },
+          
+          // Weekly pattern
+          weeklyPattern: {
+            monday: { runs: 41, avgDistance: 5.2 },
+            tuesday: { runs: 45, avgDistance: 8.1 },
+            wednesday: { runs: 38, avgDistance: 6.5 },
+            thursday: { runs: 42, avgDistance: 10.2 },
+            friday: { runs: 35, avgDistance: 4.8 },
+            saturday: { runs: 48, avgDistance: 15.3 },
+            sunday: { runs: 38, avgDistance: 12.1 }
+          },
+          
+          // Seasonal performance
+          seasonalPerformance: {
+            spring: { distance: 485.2, avgPace: '5:25' },
+            summer: { distance: 523.8, avgPace: '5:20' },
+            autumn: { distance: 467.3, avgPace: '5:28' },
+            winter: { distance: 366.4, avgPace: '5:35' }
+          }
+        },
+        rankings: {
+          national: 342,
+          local: 28,
+          ageGroup: 45,
+          gender: 189
+        }
+      };
+      
+      return res.json({
+        success: true,
+        data: dummyStats
+      });
+    }
+    
     // Get activity statistics with enhanced metrics
     const activityStats = await Activity.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },

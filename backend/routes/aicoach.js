@@ -87,6 +87,142 @@ router.post('/profile', protect, async (req, res) => {
   }
 });
 
+// Get AI-recommended challenges based on user profile
+router.get('/recommended-challenges', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user || !user.aiCoachProfile) {
+      return res.status(400).json({ message: 'Complete AI Coach profile first' });
+    }
+
+    const Challenge = require('../models/Challenge');
+    
+    // Get all active challenges
+    const challenges = await Challenge.find({
+      status: 'active',
+      startDate: { $gte: new Date() }
+    }).populate('participants.user', 'firstName lastName profileImage');
+
+    // Score challenges based on user profile
+    const scoredChallenges = challenges.map(challenge => {
+      let score = 0;
+      const profile = user.aiCoachProfile;
+      
+      // Match challenge type with user goals
+      if (profile.primaryGoal === 'weight_loss' && challenge.type === 'activities') {
+        score += 30;
+      } else if (profile.primaryGoal === 'fitness' && challenge.type === 'distance') {
+        score += 30;
+      } else if (profile.primaryGoal === 'race_prep' && challenge.type === 'time') {
+        score += 30;
+      }
+      
+      // Match difficulty level
+      const challengeDifficulty = calculateChallengeDifficulty(challenge);
+      const userLevel = getLevelScore(profile.currentLevel);
+      const levelDiff = Math.abs(challengeDifficulty - userLevel);
+      score += Math.max(0, 25 - (levelDiff * 5));
+      
+      // Social preference matching
+      if (profile.social_preference === 'group' && challenge.participants.length > 5) {
+        score += 20;
+      } else if (profile.social_preference === 'partner' && challenge.participants.length <= 5) {
+        score += 20;
+      }
+      
+      // Time commitment matching
+      const challengeDuration = Math.ceil((new Date(challenge.endDate) - new Date(challenge.startDate)) / (1000 * 60 * 60 * 24));
+      if (profile.weekly_runs >= 3 && challengeDuration >= 21) {
+        score += 15;
+      } else if (profile.weekly_runs <= 2 && challengeDuration <= 14) {
+        score += 15;
+      }
+      
+      // Add randomness for variety
+      score += Math.random() * 10;
+      
+      return {
+        ...challenge.toObject(),
+        aiScore: score,
+        aiReasons: generateReasons(challenge, profile, score)
+      };
+    });
+    
+    // Sort by score and return top recommendations
+    const recommendations = scoredChallenges
+      .sort((a, b) => b.aiScore - a.aiScore)
+      .slice(0, 5);
+    
+    res.json({
+      recommendations,
+      profileUsed: {
+        primaryGoal: user.aiCoachProfile.primaryGoal,
+        currentLevel: user.aiCoachProfile.currentLevel,
+        weeklyRuns: user.aiCoachProfile.weekly_runs
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting AI challenge recommendations:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Helper functions for challenge recommendation
+function calculateChallengeDifficulty(challenge) {
+  const target = challenge.goal.target;
+  const unit = challenge.goal.unit;
+  const duration = Math.ceil((new Date(challenge.endDate) - new Date(challenge.startDate)) / (1000 * 60 * 60 * 24));
+  
+  let difficulty = 1;
+  
+  if (unit === 'km') {
+    const dailyTarget = target / duration;
+    if (dailyTarget > 10) difficulty = 5;
+    else if (dailyTarget > 7) difficulty = 4;
+    else if (dailyTarget > 5) difficulty = 3;
+    else if (dailyTarget > 3) difficulty = 2;
+  } else if (unit === 'activities') {
+    const weeklyTarget = (target / duration) * 7;
+    if (weeklyTarget > 5) difficulty = 5;
+    else if (weeklyTarget > 4) difficulty = 4;
+    else if (weeklyTarget > 3) difficulty = 3;
+    else if (weeklyTarget > 2) difficulty = 2;
+  }
+  
+  return difficulty;
+}
+
+function getLevelScore(level) {
+  const levels = {
+    'beginner': 1,
+    'casual': 2,
+    'regular': 3,
+    'experienced': 4,
+    'competitive': 5
+  };
+  return levels[level] || 3;
+}
+
+function generateReasons(challenge, profile, score) {
+  const reasons = [];
+  
+  if (score > 70) {
+    reasons.push('Perfekt matchning för din nivå');
+  }
+  if (challenge.participants.length > 10) {
+    reasons.push('Populär utmaning med många deltagare');
+  }
+  if (profile.primaryGoal === 'weight_loss' && challenge.type === 'activities') {
+    reasons.push('Bra för viktminskning');
+  }
+  if (profile.currentLevel === 'beginner' && calculateChallengeDifficulty(challenge) <= 2) {
+    reasons.push('Nybörjarvänlig');
+  }
+  
+  return reasons;
+}
+
 // Generate personalized training plan
 router.post('/generate-plan', protect, async (req, res) => {
   try {
@@ -250,6 +386,229 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Check if this is the test account OR if OpenAI is not available
+    if (user.email === 'test@runmate.se' || !openai) {
+      // Return comprehensive dummy data for test account or when OpenAI is not available
+      const dummyPlan = {
+        success: true,
+        plan: {
+          summary: {
+            name: 'Din Personliga Löparplan',
+            level: 'Medel',
+            goal: 'Förbättra hälsa & kondition',
+            duration: '12 veckor',
+            startDate: new Date().toLocaleDateString('sv-SE'),
+            primaryFocus: primaryGoal || 'fitness',
+            weeklyCommitment: `${weeklyHours || 4} timmar/vecka`,
+            keyStrategies: [
+              'Progressiv ökning av träningsvolym',
+              'Balanserad mix av intensiteter',
+              'Fokus på återhämtning och skadeförebyggning'
+            ],
+            expectedResults: [
+              'Förbättrad kondition med 15-20%',
+              'Ökad löphastighet med 30-45 sekunder/km',
+              'Starkare muskulatur och bättre löpteknik'
+            ]
+          },
+          training: {
+            weeklySchedule: [
+              { day: 'Måndag', type: 'Lätt löpning', duration: '30 min', pace: '6:00/km', description: 'Lugn start på veckan' },
+              { day: 'Tisdag', type: 'Vila', duration: '-', pace: '-', description: 'Återhämtning' },
+              { day: 'Onsdag', type: 'Intervaller', duration: '40 min', pace: '5:00-5:30/km', description: '5x3 min med 2 min vila' },
+              { day: 'Torsdag', type: 'Lätt löpning', duration: '25 min', pace: '6:00/km', description: 'Återhämtningslöpning' },
+              { day: 'Fredag', type: 'Vila', duration: '-', pace: '-', description: 'Förbered för helgen' },
+              { day: 'Lördag', type: 'Långpass', duration: '60 min', pace: '5:45/km', description: 'Bygger uthållighet' },
+              { day: 'Söndag', type: 'Styrka', duration: '30 min', pace: '-', description: 'Fokus på core och ben' }
+            ],
+            phases: [
+              {
+                name: 'Grundfas (Vecka 1-4)',
+                focus: 'Bygga uthållighet och vana',
+                weeklyDistance: '20-25 km',
+                keyWorkouts: [
+                  'Lätta löpningar 3-4 ggr/vecka',
+                  'Ett långpass per vecka (45-60 min)',
+                  'Styrketräning 1-2 ggr/vecka'
+                ]
+              },
+              {
+                name: 'Uppbyggnadsfas (Vecka 5-8)',
+                focus: 'Öka distans och tempo',
+                weeklyDistance: '25-35 km',
+                keyWorkouts: [
+                  'Intervallträning 1 gång/vecka',
+                  'Tempolöpning 1 gång/vecka',
+                  'Långpass upp till 90 min'
+                ]
+              },
+              {
+                name: 'Toppfas (Vecka 9-12)',
+                focus: 'Maximera prestation',
+                weeklyDistance: '35-40 km',
+                keyWorkouts: [
+                  'Snabbdistansträning',
+                  'Tävlingstempo-pass',
+                  'Tapering sista veckan'
+                ]
+              }
+            ],
+            progressionPlan: 'Öka distansen med max 10% per vecka',
+            recoveryProtocol: 'Minst 2 vilodagar per vecka, stretching efter varje pass'
+          },
+          nutrition: {
+            dailyCalories: 2400,
+            macros: {
+              carbs: '55%',
+              protein: '20%',
+              fat: '25%'
+            },
+            hydration: '2.5-3L per dag, extra 500ml per träningstimme',
+            preworkout: {
+              timing: '1-2 timmar innan',
+              options: [
+                'Havregrynsgröt med banan och honung',
+                'Toast med jordnötssmör och sylt',
+                'Smoothie med bär och yoghurt'
+              ]
+            },
+            postworkout: {
+              timing: 'Inom 30 minuter',
+              options: [
+                'Proteinshake med banan',
+                'Grekisk yoghurt med granola',
+                'Kycklingsmörgås med grönsaker'
+              ]
+            },
+            supplements: [
+              'D-vitamin: 2000 IE dagligen',
+              'Omega-3: 1000mg dagligen',
+              'Magnesium: 300mg före sömn'
+            ],
+            mealPlan: {
+              breakfast: 'Havregrynsgröt med bär, nötter och proteinpulver',
+              lunch: 'Kycklingsallad med quinoa och grönsaker',
+              dinner: 'Lax med sötpotatis och broccoli',
+              snacks: ['Äpple med mandlar', 'Grekisk yoghurt med honung']
+            }
+          },
+          lifestyle: {
+            sleep: {
+              hours: '7-9 timmar per natt',
+              routine: 'Lägg dig senast 22:30, vakna 06:00',
+              tips: [
+                'Undvik skärmar 1 timme före sömn',
+                'Håll sovrummet svalt (18-20°C)',
+                'Använd mörkläggningsgardiner'
+              ]
+            },
+            stressManagement: [
+              '10 min meditation dagligen',
+              'Djupandning 5 min före träning',
+              'Yoga 1 gång/vecka'
+            ],
+            crossTraining: [
+              'Simning 1 gång/vecka för aktiv återhämtning',
+              'Cykling som alternativ vid skador',
+              'Yoga för flexibilitet'
+            ],
+            injuryPrevention: [
+              'Dynamisk uppvärmning före alla pass',
+              'Foam rolling 10 min dagligen',
+              'Stärk höfter och core regelbundet'
+            ]
+          },
+          matches: {
+            score: 95,
+            topMatches: [
+              {
+                name: 'Emma Johansson',
+                matchScore: 98,
+                reason: 'Samma träningsmål och tempo',
+                location: 'Stockholm',
+                distance: '5 km bort'
+              },
+              {
+                name: 'Marcus Andersson',
+                matchScore: 94,
+                reason: 'Gillar morgonlöpning',
+                location: 'Solna',
+                distance: '8 km bort'
+              },
+              {
+                name: 'Sofia Lindberg',
+                matchScore: 92,
+                reason: 'Tränar för samma lopp',
+                location: 'Täby',
+                distance: '12 km bort'
+              },
+              {
+                name: 'Johan Nilsson',
+                matchScore: 90,
+                reason: 'Liknande träningsschema',
+                location: 'Bromma',
+                distance: '10 km bort'
+              },
+              {
+                name: 'Lisa Eriksson',
+                matchScore: 88,
+                reason: 'Söker träningspartner',
+                location: 'Kista',
+                distance: '6 km bort'
+              }
+            ]
+          },
+          progress: {
+            weeklyMetrics: [
+              'Distans per vecka',
+              'Genomsnittligt tempo',
+              'Total träningstid',
+              'Höjdmeter'
+            ],
+            monthlyAssessments: [
+              'Cooper-test (12 min löpning)',
+              '5K tidtagning',
+              'Vilopuls mätning',
+              'Kroppsmätningar'
+            ],
+            milestones: [
+              { week: 4, goal: 'Klara 5K utan stopp' },
+              { week: 8, goal: 'Förbättra 5K-tid med 2 minuter' },
+              { week: 12, goal: 'Klara 10K under 60 minuter' }
+            ]
+          },
+          aiEnhancements: `Baserat på din profil rekommenderar jag följande förbättringar:
+
+1. **Progressiv belastning**: Börja med 3 löppass per vecka och öka gradvis till 4-5 pass när kroppen anpassat sig.
+
+2. **Tempovariation**: Inkludera fartlek-träning varannan vecka för att förbättra både aerob och anaerob kapacitet.
+
+3. **Återhämtningsfokus**: Lägg till 15 minuters stretching efter varje pass och överväg massage var tredje vecka.
+
+4. **Näringsoptimering**: Fokusera på att äta tillräckligt med kolhydrater före längre pass och protein inom 30 minuter efter träning.
+
+5. **Sömnkvalitet**: Prioritera 8 timmars sömn per natt för optimal återhämtning och prestation.`,
+          generatedAt: new Date(),
+          planId: `plan_${Date.now()}`,
+          enhanced: false
+        },
+        profile: {
+          age: age || 35,
+          gender: gender || 'male',
+          weight: weight || 75,
+          height: height || 180,
+          primaryGoal: primaryGoal || 'fitness',
+          currentLevel: currentLevel || 'regular',
+          weeklyRuns: weeklyRuns || 3,
+          weeklyHours: weeklyHours || 4,
+          createdAt: new Date()
+        },
+        createdAt: new Date()
+      };
+
+      return res.json(dummyPlan);
+    }
+
     // Create comprehensive AI coach profile
     const comprehensiveProfile = {
       // Basic profile
@@ -393,7 +752,7 @@ SKAPA EN KOMPLETT, REVOLUTIONERANDE PLAN som inkluderar:
 
 📅 TRÄNINGSSCHEMA (8 veckor):
 - Exakta träningspass dag för dag
-- Intensitetszoner (hjärtfrekvens/RPE)
+- Intensitetszoner (hjärtfrekvens/RPE) 
 - Progressionsmodell och periodisering
 - Kraftträning och mobilitet
 - Återhämtningspass

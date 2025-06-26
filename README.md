@@ -237,3 +237,23 @@ Stort tack till:
 ---
 
 **Made with ❤️ in Sweden** 🇸🇪 # Railway deployment trigger Tue Jun 24 14:33:03 CEST 2025
+
+
+## OpenAI Setup
+
+To enable AI features, add your OpenAI API key to the backend .env file:
+
+1. Copy the example file:
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+
+2. Edit .env and add your OpenAI API key:
+   ```
+   OPENAI_API_KEY=your_actual_openai_api_key_here
+   ```
+
+3. Get your API key from: https://platform.openai.com/api-keys
+
+The app will work without OpenAI, but will use fallback responses instead of GPT-4o.

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { 
-  User, 
   Bell, 
   Shield, 
   LogOut, 
@@ -13,12 +13,27 @@ import {
   VolumeX,
   MapPin,
   Activity,
-  Check
+  Smartphone,
+  Globe,
+  Lock,
+  Heart,
+  Zap,
+  Brain,
+  Sparkles,
+  Settings,
+  Camera,
+  Mail,
+  Key,
+  HelpCircle,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
 import AppleHealthSync from '../../components/Settings/AppleHealthSync';
+import api from '../../services/api';
+import { toast } from 'react-hot-toast';
 
 const SettingsPage = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const [showAppleHealthSync, setShowAppleHealthSync] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -26,244 +41,474 @@ const SettingsPage = () => {
     matches: true,
     messages: true,
     activities: true,
-    challenges: false
+    challenges: false,
+    reminders: true
   });
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileData, setProfileData] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    phone: user?.phone || ''
+  });
 
   useEffect(() => {
-    // Load saved preferences
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setDarkMode(savedDarkMode);
   }, []);
-
-
 
   const handleToggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
     localStorage.setItem('darkMode', newDarkMode);
-    // Here you would apply dark mode to the app
   };
 
   const handleAppleHealthConnect = async () => {
-    // Simply show the Apple Health sync component
     setShowAppleHealthSync(true);
   };
 
-
+  const handleSaveProfile = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.put('/users/profile', profileData);
+      updateUser(response.data);
+      toast.success('Profil uppdaterad!');
+    } catch (error) {
+      toast.error('Kunde inte uppdatera profil');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
-  const settingsSections = [
-    {
-      title: 'Profil',
-      items: [
-        {
-          icon: User,
-          label: 'Redigera profil',
-          action: () => navigate('/app/profile'),
-          value: user?.name || 'Namn saknas'
-        }
-      ]
-    },
-    {
-      title: 'Integrationer',
-      items: [
-        {
-          icon: Activity,
-          label: 'Apple Health',
-          action: handleAppleHealthConnect,
-          value: showAppleHealthSync ? 'Konfigurerad' : 'Konfigurera Apple Health',
-          highlight: !showAppleHealthSync,
-          status: showAppleHealthSync ? 'connected' : 'disconnected'
-        }
-      ]
-    },
-    {
-      title: 'Notifieringar',
-      items: [
-        {
-          icon: Bell,
-          label: 'Nya matchningar',
-          toggle: true,
-          value: notifications.matches,
-          onChange: () => setNotifications(prev => ({ ...prev, matches: !prev.matches }))
-        },
-        {
-          icon: Bell,
-          label: 'Meddelanden',
-          toggle: true,
-          value: notifications.messages,
-          onChange: () => setNotifications(prev => ({ ...prev, messages: !prev.messages }))
-        },
-        {
-          icon: Bell,
-          label: 'Aktiviteter',
-          toggle: true,
-          value: notifications.activities,
-          onChange: () => setNotifications(prev => ({ ...prev, activities: !prev.activities }))
-        },
-        {
-          icon: Bell,
-          label: 'Utmaningar',
-          toggle: true,
-          value: notifications.challenges,
-          onChange: () => setNotifications(prev => ({ ...prev, challenges: !prev.challenges }))
-        }
-      ]
-    },
-    {
-      title: 'Inställningar',
-      items: [
-        {
-          icon: darkMode ? Moon : Sun,
-          label: 'Mörkt läge',
-          toggle: true,
-          value: darkMode,
-          onChange: handleToggleDarkMode
-        },
-        {
-          icon: soundEnabled ? Volume2 : VolumeX,
-          label: 'Ljud',
-          toggle: true,
-          value: soundEnabled,
-          onChange: () => setSoundEnabled(!soundEnabled)
-        },
-        {
-          icon: MapPin,
-          label: 'Platsåtkomst',
-          toggle: true,
-          value: locationEnabled,
-          onChange: () => setLocationEnabled(!locationEnabled)
-        }
-      ]
-    },
-    {
-      title: 'Sekretess & Säkerhet',
-      items: [
-        {
-          icon: Shield,
-          label: 'Integritetspolicy',
-          action: () => navigate('/privacy')
-        },
-        {
-          icon: Shield,
-          label: 'Användarvillkor',
-          action: () => navigate('/terms')
-        }
-      ]
-    }
-  ];
+  const ToggleSwitch = ({ value, onChange, disabled = false }) => (
+    <motion.button
+      onClick={onChange}
+      disabled={disabled}
+      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+        value ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gray-300'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      whileTap={{ scale: 0.95 }}
+    >
+      <motion.span
+        animate={{ x: value ? 20 : 2 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        className="inline-block h-5 w-5 transform rounded-full bg-white shadow-lg"
+      />
+    </motion.button>
+  );
+
+  const SettingCard = ({ icon: Icon, title, description, children, action, highlight }) => (
+    <motion.div
+      whileHover={{ y: -2 }}
+      className={`bg-white rounded-2xl p-6 shadow-lg border ${
+        highlight ? 'border-orange-200' : 'border-gray-100'
+      } transition-all`}
+    >
+      <div className="flex items-start gap-4">
+        <div className={`w-12 h-12 rounded-xl ${
+          highlight ? 'bg-gradient-to-br from-orange-400 to-red-500' : 'bg-gray-100'
+        } flex items-center justify-center flex-shrink-0`}>
+          <Icon className={`w-6 h-6 ${highlight ? 'text-white' : 'text-gray-600'}`} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+          <p className="text-sm text-gray-600 mb-3">{description}</p>
+          {children}
+        </div>
+        {action && (
+          <button
+            onClick={action}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
-        <div className="px-4 py-4">
-          <h1 className="text-2xl font-bold gradient-text">Inställningar</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 opacity-50" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-orange-200 to-red-200 rounded-full blur-3xl opacity-30" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-red-200 to-pink-200 rounded-full blur-3xl opacity-30" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <h1 className="text-5xl font-black mb-4">
+              <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                Inställningar
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Anpassa din RunMate-upplevelse och hantera dina preferenser
+            </p>
+          </motion.div>
+
+          {/* AI Settings Recommendation Box */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-4xl mx-auto mt-8"
+          >
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative bg-white rounded-3xl shadow-xl p-8 border border-orange-100">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <Brain className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                        Optimera med AI!
+                      </h2>
+                      <p className="text-gray-600">
+                        Låt vår AI analysera din träningsdata och ge personliga rekommendationer
+                      </p>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Få rekommendationer
+                  </motion.button>
+                </div>
+                
+                {/* Features */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
+                    <Zap className="w-5 h-5 text-orange-600" />
+                    <span className="text-sm font-medium text-gray-800">Optimerade notifieringar</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
+                    <Heart className="w-5 h-5 text-red-600" />
+                    <span className="text-sm font-medium text-gray-800">Hälsoinsikter</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
+                    <Settings className="w-5 h-5 text-pink-600" />
+                    <span className="text-sm font-medium text-gray-800">Smarta inställningar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Settings Content */}
-      <div className="pb-20 md:pb-8">
-
-
-        {/* Settings Sections */}
-        <div className="mt-6 space-y-6">
-          {settingsSections.map((section, sectionIndex) => (
-            <div key={sectionIndex} className="px-4">
-              <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
-                {section.title}
-              </h2>
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                {section.items.map((item, itemIndex) => (
-                  <div
-                    key={itemIndex}
-                    className={`flex items-center justify-between p-4 ${
-                      itemIndex !== section.items.length - 1 ? 'border-b border-gray-100' : ''
-                    } ${item.action && !item.toggle ? 'tap-highlight cursor-pointer hover:bg-gray-50' : ''}`}
-                    onClick={item.action && !item.toggle ? item.action : undefined}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        item.highlight ? 'bg-gradient-to-br from-primary-500 to-secondary-500' : 'bg-gray-100'
-                      }`}>
-                        <item.icon className={`w-5 h-5 ${
-                          item.highlight ? 'text-white' : 'text-gray-600'
-                        }`} />
-                      </div>
-                      <span className="font-medium text-gray-900">{item.label}</span>
-                    </div>
-                    
-                    {item.toggle ? (
-                      <button
-                        onClick={item.onChange}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          item.value ? 'bg-gradient-to-r from-primary-500 to-secondary-500' : 'bg-gray-300'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            item.value ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    ) : item.status ? (
-                      <div className="flex items-center space-x-2">
-                        {item.status === 'connected' ? (
-                          <>
-                            <span className="text-sm text-green-600 font-medium">{item.value}</span>
-                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                              <Check className="w-4 h-4 text-green-600" />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-sm text-primary-600 font-medium">{item.value}</span>
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
-                          </>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        {item.value && (
-                          <span className="text-sm text-gray-500">{item.value}</span>
-                        )}
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-                ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        {/* Profile Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Profil</h2>
+          <div className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100">
+            <div className="flex items-center gap-6 mb-8">
+              <div className="relative">
+                <img
+                  src={user?.profileImage || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=random`}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover"
+                />
+                <button className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Camera className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{user?.firstName} {user?.lastName}</h3>
+                <p className="text-gray-600">{user?.email}</p>
               </div>
             </div>
-          ))}
 
-          {/* Apple Health Sync Component */}
-          {showAppleHealthSync && (
-            <div className="px-4">
-              <AppleHealthSync />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Förnamn</label>
+                <input
+                  type="text"
+                  value={profileData.firstName}
+                  onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Efternamn</label>
+                <input
+                  type="text"
+                  value={profileData.lastName}
+                  onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">E-post</label>
+                <input
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                <input
+                  type="tel"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
             </div>
-          )}
 
-          {/* Logout Button */}
-          <div className="px-4 pt-4">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 p-4 bg-red-50 text-red-600 font-medium rounded-2xl hover:bg-red-100 transition-colors"
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSaveProfile}
+              disabled={isLoading}
+              className="mt-6 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
             >
-              <LogOut className="w-5 h-5" />
-              <span>Logga ut</span>
-            </button>
+              {isLoading ? 'Sparar...' : 'Spara ändringar'}
+            </motion.button>
           </div>
+        </motion.div>
 
-          {/* App Version */}
-          <div className="text-center py-6 text-sm text-gray-500">
-            RunMate v1.0.0
+        {/* Integrations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Integrationer</h2>
+          <div className="space-y-4">
+            <SettingCard
+              icon={Activity}
+              title="Apple Health"
+              description="Synka dina träningsdata automatiskt från Apple Health"
+              highlight={!showAppleHealthSync}
+              action={handleAppleHealthConnect}
+            >
+              {showAppleHealthSync && (
+                <div className="mt-4">
+                  <AppleHealthSync />
+                </div>
+              )}
+            </SettingCard>
+
+            <SettingCard
+              icon={Globe}
+              title="Strava"
+              description="Anslut ditt Strava-konto för att importera aktiviteter"
+              action={() => navigate('/app/settings/integrations')}
+            />
           </div>
+        </motion.div>
+
+        {/* Notifications */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Notifieringar</h2>
+          <div className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100 space-y-6">
+            {[
+              { key: 'matches', icon: Heart, title: 'Nya matchningar', desc: 'När någon vill springa med dig' },
+              { key: 'messages', icon: Mail, title: 'Meddelanden', desc: 'När du får nya meddelanden' },
+              { key: 'activities', icon: Activity, title: 'Aktiviteter', desc: 'Påminnelser om träningspass' },
+              { key: 'challenges', icon: Zap, title: 'Utmaningar', desc: 'Uppdateringar om dina utmaningar' },
+              { key: 'reminders', icon: Bell, title: 'Påminnelser', desc: 'Dagliga träningspåminnelser' }
+            ].map((item) => (
+              <div key={item.key} className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">{item.title}</h3>
+                    <p className="text-sm text-gray-600">{item.desc}</p>
+                  </div>
+                </div>
+                <ToggleSwitch
+                  value={notifications[item.key]}
+                  onChange={() => setNotifications({ ...notifications, [item.key]: !notifications[item.key] })}
+                />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Preferences */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Preferenser</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SettingCard
+              icon={darkMode ? Moon : Sun}
+              title="Mörkt läge"
+              description="Växla mellan ljust och mörkt tema"
+            >
+              <ToggleSwitch value={darkMode} onChange={handleToggleDarkMode} />
+            </SettingCard>
+
+            <SettingCard
+              icon={soundEnabled ? Volume2 : VolumeX}
+              title="Ljud"
+              description="Aktivera eller inaktivera ljudeffekter"
+            >
+              <ToggleSwitch value={soundEnabled} onChange={() => setSoundEnabled(!soundEnabled)} />
+            </SettingCard>
+
+            <SettingCard
+              icon={MapPin}
+              title="Platsåtkomst"
+              description="Tillåt appen att använda din plats"
+            >
+              <ToggleSwitch value={locationEnabled} onChange={() => setLocationEnabled(!locationEnabled)} />
+            </SettingCard>
+
+            <SettingCard
+              icon={Smartphone}
+              title="Push-notiser"
+              description="Ta emot notiser på din enhet"
+            >
+              <ToggleSwitch value={true} onChange={() => {}} />
+            </SettingCard>
+          </div>
+        </motion.div>
+
+        {/* Security & Privacy */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Säkerhet & Integritet</h2>
+          <div className="space-y-4">
+            <SettingCard
+              icon={Key}
+              title="Ändra lösenord"
+              description="Uppdatera ditt kontolösenord"
+              action={() => navigate('/app/settings/password')}
+            />
+
+            <SettingCard
+              icon={Shield}
+              title="Integritetspolicy"
+              description="Läs om hur vi hanterar dina data"
+              action={() => navigate('/privacy')}
+            />
+
+            <SettingCard
+              icon={FileText}
+              title="Användarvillkor"
+              description="Läs våra användarvillkor"
+              action={() => navigate('/terms')}
+            />
+
+            <SettingCard
+              icon={Lock}
+              title="Tvåfaktorsautentisering"
+              description="Lägg till ett extra säkerhetslager"
+              action={() => navigate('/app/settings/2fa')}
+            />
+          </div>
+        </motion.div>
+
+        {/* Support */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Support</h2>
+          <div className="space-y-4">
+            <SettingCard
+              icon={HelpCircle}
+              title="Hjälpcenter"
+              description="Få svar på vanliga frågor"
+              action={() => navigate('/faq')}
+            />
+
+            <SettingCard
+              icon={Mail}
+              title="Kontakta oss"
+              description="Skicka oss ett meddelande"
+              action={() => window.location.href = 'mailto:support@runmate.se'}
+            />
+          </div>
+        </motion.div>
+
+        {/* Danger Zone */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Kontohantering</h2>
+          <div className="bg-red-50 rounded-3xl p-8 border border-red-200">
+            <div className="flex items-start gap-4 mb-6">
+              <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-semibold text-red-900 mb-2">Farlig zon</h3>
+                <p className="text-red-700 text-sm">
+                  Dessa åtgärder är permanenta och kan inte ångras. Var försiktig.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white text-red-600 font-medium rounded-xl border border-red-200 hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                Logga ut
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors"
+              >
+                <AlertCircle className="w-5 h-5" />
+                Radera konto
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* App Version */}
+        <div className="text-center py-8 text-sm text-gray-500">
+          RunMate v2.0.0 • Made with ❤️ in Sweden
         </div>
       </div>
     </div>

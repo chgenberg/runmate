@@ -19,7 +19,9 @@ import DiscoverPage from './pages/Discover/DiscoverPage';
 import ChallengesPage from './pages/Challenges/ChallengesPage';
 import ChallengeDetailPage from './pages/Challenges/ChallengeDetailPage';
 import StatisticsPage from './pages/Statistics/StatisticsPage';
+import SuggestedRoutesPage from './pages/Routes/SuggestedRoutesPage';
 import SettingsPage from './pages/Settings/SettingsPage';
+import AICoachResultsPage from './pages/AICoach/AICoachResultsPage';
 
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
@@ -74,16 +76,20 @@ function App() {
                 <Layout />
               </ProtectedRoute>
             }>
-              {/* Core 4 navigation items */}
+              {/* Core navigation items */}
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="challenges" element={<ChallengesPage />} />
               <Route path="challenges/:id" element={<ChallengeDetailPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
+              <Route path="routes" element={<SuggestedRoutesPage />} />
               
               {/* Settings accessible via profile icon */}
               <Route path="settings" element={<SettingsPage />} />
+              
+              {/* AI Coach Results */}
+              <Route path="aicoach/results" element={<AICoachResultsPage />} />
             </Route>
             
             {/* Catch all route */}

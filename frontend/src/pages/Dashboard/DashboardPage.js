@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { 
   Sparkles,
   Brain,
@@ -8,10 +9,7 @@ import {
   Play,
   CheckCircle,
   ArrowRight,
-  Zap,
-  Users,
-  Trophy,
-  BarChart3
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
@@ -20,6 +18,7 @@ import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const DashboardPage = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
   const [showCoachingResults, setShowCoachingResults] = useState(false);
   const [hasCompletedAnalysis, setHasCompletedAnalysis] = useState(false);
@@ -55,11 +54,21 @@ const DashboardPage = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // Check if we should open AI Coach from navigation state
+  useEffect(() => {
+    if (location.state?.openAICoach) {
+      setShowAIOnboarding(true);
+      // Clear the state to prevent reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const handleStartAIAnalysis = () => {
     setShowAIOnboarding(true);
   };
 
   const handleAIOnboardingComplete = (plan) => {
+    console.log('AI Onboarding Complete - Received plan:', plan);
     setCoachingPlan(plan);
     setHasCompletedAnalysis(true);
     setShowCoachingResults(true);
@@ -70,6 +79,9 @@ const DashboardPage = () => {
       hasCompletedAIAnalysis: true,
       aiCoachPlan: plan
     }));
+    
+    // Refresh dashboard data
+    fetchDashboardData();
   };
 
   if (isLoading) {
@@ -103,13 +115,25 @@ const DashboardPage = () => {
             <Sparkles className="w-10 h-10 text-white" />
           </motion.div>
           
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-            Välkommen till RunMate! 👋
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 uppercase">
+            VÄLKOMMEN TILL RUNMATE! 👋
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {user?.name ? `Hej ${user.name}! ` : 'Hej! '}
-            Låt oss hjälpa dig nå dina löpmål med personlig AI-träningsanalys.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 uppercase">
+            {user?.name ? `HEJ ${user.name.toUpperCase()}! ` : 'HEJ! '}
+            LÅT OSS HJÄLPA DIG NÅ DINA LÖPMÅL MED PERSONLIG AI-TRÄNINGSANALYS.
           </p>
+
+          {/* AI Analysis Button - Right under welcome text */}
+          <motion.button
+            onClick={handleStartAIAnalysis}
+            className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3 mx-auto uppercase"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Sparkles className="w-6 h-6" />
+            STARTA MIN AI-ANALYS
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </motion.button>
         </motion.div>
 
         {!hasCompletedAnalysis ? (
@@ -131,13 +155,13 @@ const DashboardPage = () => {
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                       <Brain className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
+                    <span className="text-sm font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-full uppercase">
                       GRATIS AI-ANALYS
                     </span>
                   </div>
                   
-                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Få din kompletta träningsanalys
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 uppercase">
+                    FÅ DIN KOMPLETTA TRÄNINGSANALYS
                   </h2>
                   <p className="text-lg text-gray-600 mb-8">
                     Vår AI-coach analyserar dina mål, nuvarande kondition och skapar en personlig 
@@ -164,17 +188,6 @@ const DashboardPage = () => {
                       </motion.div>
                     ))}
                   </div>
-
-                  <motion.button
-                    onClick={handleStartAIAnalysis}
-                    className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Sparkles className="w-6 h-6" />
-                    Starta min AI-analys
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </motion.button>
                 </div>
 
                 {/* Visual */}
@@ -216,7 +229,7 @@ const DashboardPage = () => {
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3 mb-4">
                 <CheckCircle className="w-6 h-6 text-green-500" />
-                <h2 className="text-xl font-semibold text-gray-900">AI-analys genomförd</h2>
+                <h2 className="text-xl font-semibold text-gray-900 uppercase">AI-ANALYS GENOMFÖRD</h2>
               </div>
               <p className="text-gray-600">
                 Din personliga träningsplan är redo! Kolla din AI Coach för detaljerade rekommendationer.
@@ -230,7 +243,7 @@ const DashboardPage = () => {
                   <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-blue-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Total distans</span>
+                  <span className="text-sm font-medium text-gray-600 uppercase">TOTAL DISTANS</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">
                   {dashboardData?.stats?.totalDistance || 0} km
@@ -242,7 +255,7 @@ const DashboardPage = () => {
                   <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                     <Play className="w-5 h-5 text-green-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Aktiviteter</span>
+                  <span className="text-sm font-medium text-gray-600 uppercase">AKTIVITETER</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">
                   {dashboardData?.stats?.totalRuns || 0}
@@ -254,7 +267,7 @@ const DashboardPage = () => {
                   <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                     <Target className="w-5 h-5 text-purple-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Genomsnittsfart</span>
+                  <span className="text-sm font-medium text-gray-600 uppercase">GENOMSNITTSFART</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">
                   {dashboardData?.stats?.avgPace ? `${Math.floor(dashboardData.stats.avgPace / 60)}:${(dashboardData.stats.avgPace % 60).toString().padStart(2, '0')}` : '0:00'} /km
@@ -263,38 +276,6 @@ const DashboardPage = () => {
             </div>
           </motion.div>
         )}
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-              <Users className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Hitta löparvänner</h3>
-            <p className="text-gray-600 text-sm">Upptäck och träna med andra löpare i ditt område.</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
-              <Trophy className="w-6 h-6 text-yellow-600" />
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Utmaningar</h3>
-            <p className="text-gray-600 text-sm">Delta i spännande löputmaningar och tävla med andra.</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Statistik</h3>
-            <p className="text-gray-600 text-sm">Följ din utveckling och se detaljerad träningsstatistik.</p>
-          </div>
-        </motion.div>
       </div>
 
       {/* AI Onboarding Modal */}

@@ -236,6 +236,9 @@ try {
   app.use('/api/aicoach', require('./routes/aicoach'));
   console.log('✓ AI Coach routes loaded');
   
+  app.use('/api/routes', require('./routes/routes'));
+  console.log('✓ Routes API loaded');
+  
   // app.use('/api/notifications', notificationRoutes); // Temporarily disabled
   
   console.log('✓ All API routes loaded successfully');

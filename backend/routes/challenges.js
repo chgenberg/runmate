@@ -4,6 +4,8 @@ const Challenge = require('../models/Challenge');
 const Activity = require('../models/Activity');
 const { protect } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
+const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // Helper function to update challenge status based on dates
 const updateChallengeStatus = async (challenge) => {
@@ -24,10 +26,147 @@ const updateChallengeStatus = async (challenge) => {
   return challenge;
 };
 
-// Get all public challenges + user's private challenges
+// Get all challenges
 router.get('/', protect, async (req, res) => {
   try {
-    const { status, type, page = 1, limit = 50 } = req.query;
+    const user = await User.findById(req.user._id);
+    
+    // Check if this is the test account
+    if (user.email === 'test@runmate.se') {
+      // Return comprehensive dummy challenges
+      const now = new Date();
+      
+      const dummyChallenges = [
+        {
+          _id: '685d0296439c46ef7272b07a',
+          title: '100 km på 30 dagar',
+          description: 'Spring 100 kilometer under 30 dagar och utmana dig själv!',
+          type: 'distance',
+          goal: { target: 100, unit: 'km', isCollective: false },
+          startDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
+          endDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000),
+          creator: { firstName: 'RunMate', lastName: 'Team' },
+          participants: Array(6).fill(null).map(() => ({ user: {}, isActive: true })),
+          status: 'active',
+          visibility: 'public',
+          participantCount: 6,
+          daysRemaining: 20,
+          isJoined: true,
+          progressPercentage: 85.2,
+          myProgress: { value: 85.2, percentage: 85.2 }
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          title: 'Maraton-förberedelse',
+          description: 'Träna tillsammans inför Stockholm Marathon!',
+          type: 'distance',
+          goal: { target: 500, unit: 'km', isCollective: false },
+          startDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+          endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),
+          creator: { firstName: 'Anna', lastName: 'Svensson' },
+          participants: Array(23).fill(null).map(() => ({ user: {}, isActive: true })),
+          status: 'active',
+          visibility: 'public',
+          participantCount: 23,
+          daysRemaining: 60,
+          isJoined: false,
+          progressPercentage: 0
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          title: 'Höjdmeter-utmaningen',
+          description: 'Klättra 1000 höjdmeter på en månad!',
+          type: 'elevation',
+          goal: { target: 1000, unit: 'meters', isCollective: false },
+          startDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+          endDate: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000),
+          creator: { firstName: 'Erik', lastName: 'Berg' },
+          participants: Array(12).fill(null).map(() => ({ user: {}, isActive: true })),
+          status: 'active',
+          visibility: 'public',
+          participantCount: 12,
+          daysRemaining: 25,
+          isJoined: true,
+          progressPercentage: 42.5,
+          myProgress: { value: 425, percentage: 42.5 }
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          title: 'Veckans snabbaste 5K',
+          description: 'Vem springer snabbast 5 kilometer denna vecka?',
+          type: 'time',
+          goal: { target: 5, unit: 'km', winCondition: 'fastest_time' },
+          startDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+          endDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+          creator: { firstName: 'Lisa', lastName: 'Quick' },
+          participants: Array(8).fill(null).map(() => ({ user: {}, isActive: true })),
+          status: 'active',
+          visibility: 'public',
+          participantCount: 8,
+          daysRemaining: 5,
+          isJoined: false,
+          progressPercentage: 0
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          title: 'Daglig löpning i December',
+          description: 'Spring minst 2 km varje dag i december!',
+          type: 'activities',
+          goal: { target: 31, unit: 'activities', isCollective: false },
+          startDate: new Date('2024-12-01'),
+          endDate: new Date('2024-12-31'),
+          creator: { firstName: 'Kalle', lastName: 'December' },
+          participants: Array(45).fill(null).map(() => ({ user: {}, isActive: true })),
+          status: 'upcoming',
+          visibility: 'public',
+          participantCount: 45,
+          daysRemaining: Math.ceil((new Date('2024-12-01') - now) / (1000 * 60 * 60 * 24)),
+          isJoined: true,
+          progressPercentage: 0,
+          myProgress: { value: 0, percentage: 0 }
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          title: 'Team Stockholm 1000K',
+          description: 'Tillsammans springer vi 1000 km!',
+          type: 'distance',
+          goal: { target: 1000, unit: 'km', isCollective: true },
+          startDate: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000),
+          endDate: new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000),
+          creator: { firstName: 'Stockholm', lastName: 'Runners' },
+          participants: Array(67).fill(null).map(() => ({ user: {}, isActive: true })),
+          status: 'active',
+          visibility: 'public',
+          participantCount: 67,
+          daysRemaining: 45,
+          isJoined: true,
+          progressPercentage: 68.5,
+          myProgress: { value: 12.3, percentage: 1.23 }
+        }
+      ];
+      
+      // Filter based on query parameters
+      let filteredChallenges = dummyChallenges;
+      
+      if (req.query.status) {
+        filteredChallenges = filteredChallenges.filter(c => c.status === req.query.status);
+      }
+      
+      if (req.query.joined === 'true') {
+        filteredChallenges = filteredChallenges.filter(c => c.isJoined);
+      }
+      
+      if (req.query.type) {
+        filteredChallenges = filteredChallenges.filter(c => c.type === req.query.type);
+      }
+      
+      return res.json(filteredChallenges);
+    }
+    
+    // Original code for real users continues below...
+    const { status, joined, type } = req.query;
+    
+    const { page = 1, limit = 50 } = req.query;
     
     const query = {
       $or: [
@@ -238,6 +377,226 @@ router.post('/', protect, [
 // Get specific challenge
 router.get('/:id', protect, async (req, res) => {
   try {
+    const user = await User.findById(req.user._id);
+    
+    // Check if this is the test account viewing any challenge
+    if (user.email === 'test@runmate.se') {
+      // Create comprehensive dummy challenge data
+      const now = new Date();
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - 10); // Started 10 days ago
+      const endDate = new Date(now);
+      endDate.setDate(endDate.getDate() + 20); // Ends in 20 days
+      
+      const dummyParticipants = [
+        {
+          user: {
+            _id: new mongoose.Types.ObjectId(),
+            firstName: 'Emma',
+            lastName: 'Johansson',
+            profileImage: '/api/placeholder/150/150',
+            username: 'emma_runner'
+          },
+          progress: { distance: 78.5, time: 18900, activities: 12, elevation: 450 },
+          isActive: true,
+          joinedAt: startDate,
+          lastActivityAt: new Date(now.getTime() - 2 * 60 * 60 * 1000), // 2 hours ago
+          achievements: [
+            { type: 'milestone', value: 25, earnedAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 50, earnedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 75, earnedAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000) }
+          ]
+        },
+        {
+          user: {
+            _id: new mongoose.Types.ObjectId(),
+            firstName: 'Marcus',
+            lastName: 'Andersson',
+            profileImage: '/api/placeholder/150/150',
+            username: 'marcus_runs'
+          },
+          progress: { distance: 92.3, time: 21600, activities: 15, elevation: 580 },
+          isActive: true,
+          joinedAt: startDate,
+          lastActivityAt: new Date(now.getTime() - 5 * 60 * 60 * 1000), // 5 hours ago
+          achievements: [
+            { type: 'milestone', value: 25, earnedAt: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 50, earnedAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 75, earnedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000) }
+          ]
+        },
+        {
+          user: {
+            _id: new mongoose.Types.ObjectId(),
+            firstName: 'Sofia',
+            lastName: 'Lindberg',
+            profileImage: '/api/placeholder/150/150',
+            username: 'sofia_athlete'
+          },
+          progress: { distance: 65.8, time: 16200, activities: 10, elevation: 320 },
+          isActive: true,
+          joinedAt: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000),
+          lastActivityAt: new Date(now.getTime() - 12 * 60 * 60 * 1000), // 12 hours ago
+          achievements: [
+            { type: 'milestone', value: 25, earnedAt: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 50, earnedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000) }
+          ]
+        },
+        {
+          user: {
+            _id: req.user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImage: user.profileImage,
+            username: user.username || 'test_user'
+          },
+          progress: { distance: 85.2, time: 19800, activities: 14, elevation: 410 },
+          isActive: true,
+          joinedAt: startDate,
+          lastActivityAt: new Date(now.getTime() - 1 * 60 * 60 * 1000), // 1 hour ago
+          achievements: [
+            { type: 'milestone', value: 25, earnedAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 50, earnedAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 75, earnedAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000) }
+          ]
+        },
+        {
+          user: {
+            _id: new mongoose.Types.ObjectId(),
+            firstName: 'Johan',
+            lastName: 'Nilsson',
+            profileImage: '/api/placeholder/150/150',
+            username: 'johan_runner'
+          },
+          progress: { distance: 45.6, time: 11400, activities: 8, elevation: 210 },
+          isActive: true,
+          joinedAt: new Date(startDate.getTime() + 5 * 24 * 60 * 60 * 1000),
+          lastActivityAt: new Date(now.getTime() - 24 * 60 * 60 * 1000), // 1 day ago
+          achievements: [
+            { type: 'milestone', value: 25, earnedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) }
+          ]
+        },
+        {
+          user: {
+            _id: new mongoose.Types.ObjectId(),
+            firstName: 'Lisa',
+            lastName: 'Eriksson',
+            profileImage: '/api/placeholder/150/150',
+            username: 'lisa_runs'
+          },
+          progress: { distance: 72.1, time: 17100, activities: 11, elevation: 380 },
+          isActive: true,
+          joinedAt: new Date(startDate.getTime() + 1 * 24 * 60 * 60 * 1000),
+          lastActivityAt: new Date(now.getTime() - 3 * 60 * 60 * 1000), // 3 hours ago
+          achievements: [
+            { type: 'milestone', value: 25, earnedAt: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000) },
+            { type: 'milestone', value: 50, earnedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) }
+          ]
+        }
+      ];
+      
+      // Calculate progress for each participant
+      const enrichedParticipants = dummyParticipants.map(p => {
+        const progressValue = p.progress.distance;
+        const progressPercentage = Math.min((progressValue / 100) * 100, 100);
+        
+        return {
+          ...p,
+          progressValue,
+          progressPercentage
+        };
+      });
+      
+      const dummyChallenge = {
+        _id: req.params.id,
+        title: '100 km på 30 dagar',
+        description: 'Spring 100 kilometer under 30 dagar och utmana dig själv! Perfekt för att bygga upp din löprutin.',
+        type: 'distance',
+        goal: {
+          target: 100,
+          unit: 'km',
+          isCollective: false,
+          winCondition: 'highest_individual'
+        },
+        startDate,
+        endDate,
+        duration: 30,
+        creator: {
+          _id: new mongoose.Types.ObjectId(),
+          firstName: 'RunMate',
+          lastName: 'Team',
+          profileImage: '/api/placeholder/150/150',
+          username: 'runmate_official'
+        },
+        participants: enrichedParticipants,
+        status: 'active',
+        visibility: 'public',
+        maxParticipants: 50,
+        allowedActivityTypes: ['running'],
+        rewards: {
+          points: 500,
+          badges: ['100km Hero'],
+          milestones: [
+            { at: 25, reward: '🥉 Brons', points: 100 },
+            { at: 50, reward: '🥈 Silver', points: 200 },
+            { at: 75, reward: '🥇 Guld', points: 300 },
+            { at: 100, reward: '💎 Diamant', points: 500 }
+          ]
+        },
+        totalProgress: {
+          distance: enrichedParticipants.reduce((sum, p) => sum + p.progress.distance, 0),
+          time: enrichedParticipants.reduce((sum, p) => sum + p.progress.time, 0),
+          activities: enrichedParticipants.reduce((sum, p) => sum + p.progress.activities, 0),
+          elevation: enrichedParticipants.reduce((sum, p) => sum + p.progress.elevation, 0)
+        },
+        // Calculated fields
+        daysRemaining: Math.max(0, Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))),
+        participantCount: enrichedParticipants.length,
+        isJoined: true,
+        progressPercentage: 85.2, // User's progress
+        myProgress: {
+          value: 85.2,
+          percentage: 85.2
+        },
+        // Activity feed
+        recentActivities: [
+          {
+            user: 'Marcus Andersson',
+            activity: 'sprang 8.5 km',
+            time: '2 timmar sedan',
+            pace: '5:15/km'
+          },
+          {
+            user: 'Emma Johansson',
+            activity: 'sprang 12.3 km',
+            time: '5 timmar sedan',
+            pace: '5:45/km'
+          },
+          {
+            user: 'Du',
+            activity: 'sprang 6.2 km',
+            time: '1 timme sedan',
+            pace: '5:30/km'
+          },
+          {
+            user: 'Sofia Lindberg',
+            activity: 'sprang 5.8 km',
+            time: '12 timmar sedan',
+            pace: '6:00/km'
+          },
+          {
+            user: 'Lisa Eriksson',
+            activity: 'sprang 10.1 km',
+            time: '1 dag sedan',
+            pace: '5:20/km'
+          }
+        ]
+      };
+      
+      return res.json(dummyChallenge);
+    }
+    
+    // Original code for real challenges continues below...
     let challenge = await Challenge.findById(req.params.id)
       .populate('creator', 'firstName lastName profileImage username')
       .populate('participants.user', 'firstName lastName profileImage username');

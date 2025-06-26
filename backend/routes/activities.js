@@ -120,6 +120,108 @@ router.post('/', protect, upload.array('images', 5), async (req, res) => {
 // @access  Private
 router.get('/', protect, async (req, res) => {
     try {
+        const user = await User.findById(req.user.id);
+        
+        // Check if this is the test account
+        if (user.email === 'test@runmate.se') {
+            // Generate comprehensive dummy activities
+            const now = new Date();
+            const dummyActivities = [];
+            
+            // Generate activities for the last 3 months
+            for (let i = 0; i < 90; i++) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                
+                // Skip some days randomly to make it realistic
+                if (Math.random() > 0.7) continue;
+                
+                // Morning or evening run
+                const isMorning = Math.random() > 0.5;
+                date.setHours(isMorning ? 6 : 18, Math.floor(Math.random() * 60), 0);
+                
+                // Vary the activity type
+                const activityTypes = [
+                    { type: 'easy', distance: [5, 8], pace: [330, 360], hr: [135, 145] },
+                    { type: 'tempo', distance: [8, 12], pace: [290, 310], hr: [155, 165] },
+                    { type: 'interval', distance: [6, 10], pace: [270, 290], hr: [165, 175] },
+                    { type: 'long', distance: [15, 25], pace: [340, 370], hr: [140, 150] },
+                    { type: 'recovery', distance: [3, 5], pace: [360, 390], hr: [125, 135] }
+                ];
+                
+                const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+                const distance = activityType.distance[0] + Math.random() * (activityType.distance[1] - activityType.distance[0]);
+                const avgPace = activityType.pace[0] + Math.random() * (activityType.pace[1] - activityType.pace[0]);
+                const avgHr = activityType.hr[0] + Math.random() * (activityType.hr[1] - activityType.hr[0]);
+                const duration = distance * avgPace;
+                
+                dummyActivities.push({
+                    _id: new mongoose.Types.ObjectId(),
+                    userId: req.user.id,
+                    title: activityType.type === 'easy' ? 'Lugn löpning' :
+                           activityType.type === 'tempo' ? 'Tempopass' :
+                           activityType.type === 'interval' ? 'Intervaller' :
+                           activityType.type === 'long' ? 'Långpass' : 'Återhämtning',
+                    description: `${activityType.type.charAt(0).toUpperCase() + activityType.type.slice(1)} träningspass`,
+                    distance: Math.round(distance * 10) / 10,
+                    duration: Math.round(duration),
+                    elevationGain: Math.round(Math.random() * 150),
+                    activityType: 'running',
+                    startTime: date,
+                    sportType: 'running',
+                    calories: Math.round(distance * 65),
+                    averagePace: Math.round(avgPace),
+                    averageHeartRate: Math.round(avgHr),
+                    maxHeartRate: Math.round(avgHr + 10 + Math.random() * 15),
+                    source: 'apple_health',
+                    pointsEarned: Math.round(distance * 10),
+                    photos: [],
+                    route: [],
+                    startLocation: {
+                        lat: 59.3293 + (Math.random() - 0.5) * 0.1,
+                        lng: 18.0686 + (Math.random() - 0.5) * 0.1,
+                        address: 'Stockholm, Sverige'
+                    }
+                });
+            }
+            
+            // Sort by date descending
+            dummyActivities.sort((a, b) => b.startTime - a.startTime);
+            
+            // Filter by period if requested
+            const { period } = req.query;
+            let filteredActivities = dummyActivities;
+            
+            if (period) {
+                const now = new Date();
+                let startDate;
+                
+                switch (period) {
+                    case 'week':
+                        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'month':
+                        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'year':
+                        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                        break;
+                    default:
+                        startDate = new Date(0); // All time
+                }
+                
+                filteredActivities = dummyActivities.filter(activity => 
+                    new Date(activity.startTime) >= startDate
+                );
+            }
+            
+            return res.json({
+                activities: filteredActivities,
+                total: filteredActivities.length
+            });
+        }
+        
+        // Original code for real users
         const activities = await Activity.find({ userId: req.user.id }).sort({ startTime: -1 });
         res.json(activities);
     } catch (error) {

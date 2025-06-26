@@ -15,7 +15,6 @@ import {
   ChevronDown,
   ChevronRight,
   Sparkles,
-  Clock,
   Zap,
   Trophy,
   TrendingUp,

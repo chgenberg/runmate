@@ -80,15 +80,6 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
   const [loadingMessage, setLoadingMessage] = useState('');
   const navigate = useNavigate();
 
-  const loadingMessages = [
-    "Analyserar dina svar...",
-    "Beräknar förbättringsmöjligheter...",
-    "Skapar träningsschema...",
-    "Ställer in kostplan...",
-    "Optimerar för dina mål...",
-    "Slutför din personliga plan..."
-  ];
-
   const questions = [
     {
       id: 'primary_goal',

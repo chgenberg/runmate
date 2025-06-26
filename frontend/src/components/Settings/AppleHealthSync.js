@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Heart, 
   Download, 
@@ -19,7 +19,8 @@ const AppleHealthSync = () => {
     lastImport: null,
     isLoading: false
   });
-
+  const isRefreshingRef = useRef(false);
+  const lastToastTimeRef = useRef(0);
 
   useEffect(() => {
     checkSyncStatus();
@@ -42,30 +43,42 @@ const AppleHealthSync = () => {
   };
 
   const refreshStats = async () => {
+    // Prevent multiple simultaneous refreshes
+    if (isRefreshingRef.current) {
+      return;
+    }
+
+    // Prevent showing toast if one was shown recently (within 3 seconds)
+    const now = Date.now();
+    if (now - lastToastTimeRef.current < 3000) {
+      return;
+    }
+
     try {
+      isRefreshingRef.current = true;
       setSyncStatus(prev => ({ ...prev, isLoading: true }));
       
       // Anropa refresh stats endpoint
       const response = await api.post('/health/refresh-stats');
       
       if (response.data.success) {
+        lastToastTimeRef.current = now;
         toast.success(`🎉 Statistik uppdaterad! ${response.data.stats.totalActivities} träningspass, ${response.data.stats.totalDistance}km`, {
-          duration: 4000
+          duration: 4000,
+          id: 'stats-refresh' // Use a unique ID to prevent duplicate toasts
         });
         
         // Uppdatera status också
         await checkSyncStatus();
-        
-        // Trigga profiluppdatering om det finns en callback
-        if (typeof refreshStats === 'function') {
-          refreshStats();
-        }
       }
     } catch (error) {
       console.error('Error refreshing stats:', error);
-      toast.error('Kunde inte uppdatera statistik');
+      toast.error('Kunde inte uppdatera statistik', {
+        id: 'stats-refresh-error'
+      });
     } finally {
       setSyncStatus(prev => ({ ...prev, isLoading: false }));
+      isRefreshingRef.current = false;
     }
   };
 
@@ -267,7 +280,7 @@ const AppleHealthSync = () => {
           
           <button
             onClick={refreshStats}
-            disabled={syncStatus.isLoading}
+            disabled={syncStatus.isLoading || isRefreshingRef.current}
             className="w-full bg-blue-100 text-blue-700 font-medium py-2 px-4 rounded-xl hover:bg-blue-200 transition-all flex items-center justify-center space-x-2"
           >
             <Activity className={`w-4 h-4 ${syncStatus.isLoading ? 'animate-spin' : ''}`} />

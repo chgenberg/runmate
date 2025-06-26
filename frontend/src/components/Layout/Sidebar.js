@@ -9,12 +9,15 @@ import {
   Route,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Menu,
+  X
 } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const navigationItems = [
     {
@@ -68,10 +71,10 @@ const Sidebar = () => {
       animate={isCollapsed ? 'collapsed' : 'expanded'}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      {/* Collapse/Expand Button */}
+      {/* Collapse/Expand Button - Desktop only */}
       <motion.button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-4 top-20 w-8 h-8 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-10 group"
+        className="hidden lg:flex absolute -right-4 top-20 w-8 h-8 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl transition-all items-center justify-center z-10 group"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -84,7 +87,7 @@ const Sidebar = () => {
 
       {/* Header */}
       <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-between lg:justify-center">
           <AnimatePresence mode="wait">
             {!isCollapsed ? (
               <motion.div
@@ -120,6 +123,14 @@ const Sidebar = () => {
               </motion.div>
             )}
           </AnimatePresence>
+          
+          {/* Mobile close button */}
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
       </div>
 
@@ -130,7 +141,11 @@ const Sidebar = () => {
           const active = isActive(item.path);
           
           return (
-            <Link key={item.path} to={item.path}>
+            <Link 
+              key={item.path} 
+              to={item.path}
+              onClick={() => setIsMobileOpen(false)}
+            >
               <motion.div
                 className={`
                   relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'} p-4 rounded-2xl transition-all duration-200 group overflow-hidden
@@ -263,6 +278,42 @@ const Sidebar = () => {
 
   return (
     <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all"
+      >
+        <Menu className="w-6 h-6 text-gray-700" />
+      </button>
+
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileOpen(false)}
+            className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="lg:hidden fixed left-0 top-0 h-full w-[280px] z-50"
+          >
+            <SidebarContent />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <SidebarContent />

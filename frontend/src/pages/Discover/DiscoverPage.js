@@ -37,6 +37,7 @@ const DiscoverPage = () => {
   const [filters, setFilters] = useState({
     ageRange: [18, 65],
     distance: 50,
+    level: 'all',
     activityLevel: 'all',
     goals: []
   });
@@ -274,25 +275,25 @@ const DiscoverPage = () => {
         <div className={`${isAiMatch ? 'bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 border-2 border-orange-300 shadow-2xl' : 'bg-white shadow-lg'} ${isMobile && viewMode === 'stack' ? 'h-full rounded-none' : 'rounded-2xl'} overflow-hidden ${viewMode === 'stack' && isMobile ? 'cursor-grab active:cursor-grabbing' : ''} ${viewMode === 'scroll' ? 'hover:shadow-xl transition-shadow' : ''}`}>
           {/* AI Match Special Header */}
           {isAiMatch && (
-            <div className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-4 py-2 text-center">
+            <div className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-3 py-1.5 text-center">
               <div className="flex items-center justify-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                <span className="font-bold text-sm">AI SUPERMATCH - {runner.matchReason}</span>
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-3 h-3" />
+                <span className="font-bold text-xs">AI SUPERMATCH - {runner.matchReason}</span>
+                <Sparkles className="w-3 h-3" />
               </div>
             </div>
           )}
 
           <div className={`${viewMode === 'scroll' ? 'flex flex-col md:flex-row' : ''}`}>
             {/* Left side - Profile picture and basic info */}
-            <div className={`${viewMode === 'scroll' ? 'md:w-1/3 p-6' : 'relative'}`}>
+            <div className={`${viewMode === 'scroll' ? 'md:w-1/3 p-4 md:p-6' : 'relative'}`}>
               {viewMode === 'stack' ? (
                 // Stack view header
-                <div className="relative h-32 bg-gradient-to-br from-blue-500 to-purple-600">
+                <div className="relative h-24 md:h-32 bg-gradient-to-br from-blue-500 to-purple-600">
                   <div className="absolute inset-0 bg-black/20" />
                   
-                  {/* Profile Picture - Smaller */}
-                  <div className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
+                  {/* Profile Picture - Smaller on mobile */}
+                  <div className="absolute -bottom-10 md:-bottom-12 left-4 md:left-6 w-20 md:w-24 h-20 md:h-24 rounded-full border-4 border-white overflow-hidden bg-white">
                     <img
                       src={runner.profilePicture}
                       alt={runner.name}
@@ -304,12 +305,12 @@ const DiscoverPage = () => {
                   </div>
 
                   {/* Level Badge */}
-                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
+                  <div className={`absolute top-2 md:top-4 right-2 md:right-4 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
                     {runner.level}
                   </div>
 
                   {/* Rating */}
-                  <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                  <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
                     <Star className="w-3 h-3 text-yellow-500 fill-current" />
                     <span className="font-bold text-xs">{runner.rating.toFixed(1)}</span>
                   </div>
@@ -317,7 +318,7 @@ const DiscoverPage = () => {
               ) : (
                 // List view profile section
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-gray-200">
+                  <div className="w-24 md:w-32 h-24 md:h-32 rounded-full overflow-hidden mb-3 md:mb-4 border-4 border-gray-200">
                     <img
                       src={runner.profilePicture}
                       alt={runner.name}
@@ -327,15 +328,15 @@ const DiscoverPage = () => {
                       }}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900">
                     {runner.name}{runner.age && `, ${runner.age}`}
                   </h3>
-                  <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                  <p className="text-xs md:text-sm text-gray-600 flex items-center gap-1 mt-1">
                     <MapPin className="w-3 h-3" />
                     {runner.location} • {runner.distance} km bort
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <div className={`px-3 py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
+                    <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
                       {runner.level}
                     </div>
                     <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
@@ -381,15 +382,15 @@ const DiscoverPage = () => {
             </div>
 
             {/* Right side - Content */}
-            <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-6' : 'pt-16 px-6 pb-6'}`}>
+            <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-4 md:p-6' : 'pt-14 md:pt-16 px-4 md:px-6 pb-4 md:pb-6'}`}>
               {viewMode === 'stack' && (
                 <>
                   {/* Name and Location for stack view */}
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-gray-900">
+                  <div className="mb-3 md:mb-4">
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900">
                       {runner.name}{runner.age && `, ${runner.age}`}
                     </h3>
-                    <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                    <p className="text-xs md:text-sm text-gray-600 flex items-center gap-1 mt-1">
                       <MapPin className="w-3 h-3" />
                       {runner.location} • {runner.distance} km bort
                     </p>
@@ -457,32 +458,32 @@ const DiscoverPage = () => {
 
               {/* Action Buttons for mobile or stack view */}
               {(isMobile || viewMode === 'stack') && (
-                <div className="flex gap-4 mt-4 justify-center">
+                <div className="flex gap-3 md:gap-4 mt-4 justify-center">
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleSwipe('left', runner.id)}
-                    className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <X className="w-8 h-8" />
+                    <X className="w-6 h-6 md:w-8 md:h-8" />
                   </motion.button>
                   {isAiMatch ? (
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleAiMatchMessage(runner.id)}
-                      className="w-16 h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
+                      className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
                     >
-                      <MessageCircle className="w-8 h-8" />
+                      <MessageCircle className="w-6 h-6 md:w-8 md:h-8" />
                     </motion.button>
                   ) : (
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleSwipe('right', runner.id)}
-                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                      className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
                     >
-                      <Heart className="w-8 h-8" />
+                      <Heart className="w-6 h-6 md:w-8 md:h-8" />
                     </motion.button>
                   )}
                 </div>
@@ -537,59 +538,59 @@ const DiscoverPage = () => {
             exit={{ scale: 0.9, opacity: 0 }}
             className="fixed inset-0 flex items-center justify-center z-[60] p-4"
           >
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4">
-                  <Heart className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full">
+              <div className="text-center mb-4 md:mb-6">
+                <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4">
+                  <Heart className="w-7 h-7 md:w-8 md:h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Så fungerar matchning</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900">Så fungerar matchning</h2>
               </div>
 
-              <div className="space-y-4 mb-6">
+              <div className="space-y-3 md:space-y-4 mb-6">
                 <div className="flex items-start gap-3">
-                  <div className="bg-green-100 rounded-full p-2 mt-1">
-                    <Heart className="w-4 h-4 text-green-600" />
+                  <div className="bg-green-100 rounded-full p-1.5 md:p-2 mt-0.5 md:mt-1">
+                    <Heart className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Gilla löpare</h3>
-                    <p className="text-sm text-gray-600">Swipa höger eller klicka på hjärtat för att gilla någon</p>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">Gilla löpare</h3>
+                    <p className="text-xs md:text-sm text-gray-600">Swipa höger eller klicka på hjärtat för att gilla någon</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="bg-yellow-100 rounded-full p-2 mt-1">
-                    <Sparkles className="w-4 h-4 text-yellow-600" />
+                  <div className="bg-yellow-100 rounded-full p-1.5 md:p-2 mt-0.5 md:mt-1">
+                    <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-yellow-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">AI-matchningar</h3>
-                    <p className="text-sm text-gray-600">Dina top 5 AI-matchningar kan du skriva till direkt utan att matcha!</p>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">AI-matchningar</h3>
+                    <p className="text-xs md:text-sm text-gray-600">Dina top 5 AI-matchningar kan du skriva till direkt utan att matcha!</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="bg-purple-100 rounded-full p-2 mt-1">
-                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                  <div className="bg-purple-100 rounded-full p-1.5 md:p-2 mt-0.5 md:mt-1">
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Det blir en match!</h3>
-                    <p className="text-sm text-gray-600">När båda gillar varandra kan ni börja chatta</p>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">Det blir en match!</h3>
+                    <p className="text-xs md:text-sm text-gray-600">När båda gillar varandra kan ni börja chatta</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="bg-red-100 rounded-full p-2 mt-1">
-                    <X className="w-4 h-4 text-red-600" />
+                  <div className="bg-red-100 rounded-full p-1.5 md:p-2 mt-0.5 md:mt-1">
+                    <X className="w-3 h-3 md:w-4 md:h-4 text-red-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Skippa</h3>
-                    <p className="text-sm text-gray-600">Swipa vänster eller klicka på X för att gå vidare</p>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">Skippa</h3>
+                    <p className="text-xs md:text-sm text-gray-600">Swipa vänster eller klicka på X för att gå vidare</p>
                   </div>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowInfoModal(false)}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 md:py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all"
               >
                 Förstått!
               </button>
@@ -618,32 +619,32 @@ const DiscoverPage = () => {
             exit={{ scale: 0.9, opacity: 0 }}
             className="fixed inset-0 flex items-center justify-center z-[110] p-4"
           >
-            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full relative">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 max-w-lg w-full relative">
               {/* Close button */}
               <button
                 onClick={() => setShowAIPopup(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="absolute top-3 right-3 md:top-4 md:right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
               </button>
 
-              <div className="text-center mb-6">
+              <div className="text-center mb-4 md:mb-6">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mb-4"
+                  className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mb-4"
                 >
-                  <Brain className="w-10 h-10 text-white" />
+                  <Brain className="w-8 h-8 md:w-10 md:h-10 text-white" />
                 </motion.div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2 uppercase">FÅ AI-MATCHNINGAR!</h2>
-                <p className="text-gray-600">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 uppercase">FÅ AI-MATCHNINGAR!</h2>
+                <p className="text-sm md:text-base text-gray-600">
                   Slutför din AI-coachprofil för att få de 5 bästa matchningarna baserat på dina träningsmål och preferenser.
                 </p>
               </div>
 
               {/* Benefits */}
-              <div className="space-y-3 mb-8">
+              <div className="space-y-2.5 md:space-y-3 mb-6 md:mb-8">
                 {[
                   { icon: Target, text: 'Målanalys', desc: 'Hitta löpare med samma mål' },
                   { icon: Users, text: 'Matchningar', desc: '5 perfekta träningspartners' },
@@ -657,12 +658,12 @@ const DiscoverPage = () => {
                     transition={{ delay: 0.1 * index }}
                     className="flex items-center gap-3"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
-                      <benefit.icon className="w-5 h-5 text-purple-600" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
+                      <benefit.icon className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
                     </div>
                     <div className="text-left">
-                      <p className="font-semibold text-gray-900">{benefit.text}</p>
-                      <p className="text-sm text-gray-600">{benefit.desc}</p>
+                      <p className="font-semibold text-gray-900 text-sm md:text-base">{benefit.text}</p>
+                      <p className="text-xs md:text-sm text-gray-600">{benefit.desc}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -673,14 +674,14 @@ const DiscoverPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleStartAIAnalysis}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 md:py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase text-sm md:text-base"
               >
-                <Sparkles className="w-5 h-5" />
+                <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                 STARTA AI-ANALYS
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
               </motion.button>
 
-              <p className="text-center text-sm text-gray-500 mt-4">
+              <p className="text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
                 Tar bara 5 minuter • Helt gratis
               </p>
             </div>
@@ -691,14 +692,14 @@ const DiscoverPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 pb-20 lg:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Header */}
-        <div className="text-center mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
+        <div className="text-center mb-4 md:mb-6">
+          <h1 className="text-2xl md:text-4xl font-black text-gray-900 mb-1 md:mb-2">
             HITTA DIN LÖPARVÄN
           </h1>
-          <p className="text-base md:text-lg text-gray-600">
+          <p className="text-sm md:text-lg text-gray-600">
             Upptäck löpare i ditt område
           </p>
         </div>
@@ -708,22 +709,22 @@ const DiscoverPage = () => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-4 md:mb-6"
           >
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-4 md:p-6 text-white shadow-xl">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3 text-center md:text-left">
-                  <Brain className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0" />
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl md:rounded-2xl p-3 md:p-6 text-white shadow-xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
+                <div className="flex items-center gap-2 md:gap-3 text-center md:text-left">
+                  <Brain className="w-6 h-6 md:w-10 md:h-10 flex-shrink-0" />
                   <div>
-                    <h3 className="font-bold text-lg md:text-xl">Få AI-matchningar!</h3>
-                    <p className="text-sm md:text-base opacity-90">Låt vår AI hitta dina perfekta löparvänner</p>
+                    <h3 className="font-bold text-sm md:text-xl">Få AI-matchningar!</h3>
+                    <p className="text-xs md:text-base opacity-90">Låt vår AI hitta dina perfekta löparvänner</p>
                   </div>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleStartAIAnalysis}
-                  className="bg-white text-purple-600 px-6 py-2 md:py-3 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
+                  className="bg-white text-purple-600 px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold text-xs md:text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
                 >
                   Starta AI-analys
                 </motion.button>
@@ -733,13 +734,13 @@ const DiscoverPage = () => {
         )}
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 md:gap-4 mb-4 md:mb-6">
+          <div className="flex items-center gap-2 md:gap-3">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowFilters(!showFilters)}
-              className="bg-white px-4 py-2 rounded-xl shadow-md flex items-center gap-2 text-sm md:text-base"
+              className="bg-white px-3 md:px-4 py-2 rounded-lg md:rounded-xl shadow-md flex items-center gap-2 text-xs md:text-base"
             >
               <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
               Filter
@@ -749,7 +750,7 @@ const DiscoverPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowInfoModal(true)}
-              className="bg-white p-2 rounded-xl shadow-md"
+              className="bg-white p-2 rounded-lg md:rounded-xl shadow-md"
             >
               <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
             </motion.button>
@@ -760,7 +761,7 @@ const DiscoverPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setViewMode('stack')}
-              className={`px-4 py-2 rounded-xl text-sm md:text-base ${
+              className={`px-3 md:px-4 py-2 rounded-lg md:rounded-xl text-xs md:text-base ${
                 viewMode === 'stack' 
                   ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
                   : 'bg-white text-gray-600 shadow-md'
@@ -772,7 +773,7 @@ const DiscoverPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setViewMode('scroll')}
-              className={`px-4 py-2 rounded-xl text-sm md:text-base ${
+              className={`px-3 md:px-4 py-2 rounded-lg md:rounded-xl text-xs md:text-base ${
                 viewMode === 'scroll' 
                   ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
                   : 'bg-white text-gray-600 shadow-md'
@@ -790,17 +791,17 @@ const DiscoverPage = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-gradient-to-b from-white to-gray-50 border-b shadow-lg overflow-hidden"
+              className="bg-gradient-to-b from-white to-gray-50 border-b shadow-lg overflow-hidden rounded-xl mb-4"
             >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+              <div className="p-4 md:p-6 space-y-4 md:space-y-6">
                 {/* Distance Slider */}
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-blue-500" />
+                <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2 md:mb-3">
+                    <label className="text-xs md:text-sm font-semibold text-gray-700 flex items-center gap-2">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
                       Max avstånd
                     </label>
-                    <span className="text-lg font-bold text-blue-600">{filters.distance} km</span>
+                    <span className="text-sm md:text-lg font-bold text-blue-600">{filters.distance} km</span>
                   </div>
                   <div className="relative">
                     <input
@@ -818,9 +819,9 @@ const DiscoverPage = () => {
                 </div>
                 
                 {/* Level Buttons */}
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <label className="text-sm font-semibold text-gray-700 mb-3 block flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
+                <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 shadow-sm">
+                  <label className="text-xs md:text-sm font-semibold text-gray-700 mb-2 md:mb-3 block flex items-center gap-2">
+                    <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
                     Nivå
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -830,7 +831,7 @@ const DiscoverPage = () => {
                         onClick={() => setFilters({ ...filters, level })}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                        className={`px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl font-medium transition-all text-xs md:text-sm ${
                           filters.level === level
                             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -846,7 +847,7 @@ const DiscoverPage = () => {
           )}
         </AnimatePresence>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="flex items-center justify-center h-[600px]">
               <div className="text-center">

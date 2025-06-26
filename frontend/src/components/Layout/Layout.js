@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { User, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Sidebar from './Sidebar';
-import MobileNav from './MobileNav';
 import AICoachOnboarding from '../AICoach/AICoachOnboarding';
 import api from '../../services/api';
 
@@ -118,11 +117,6 @@ const Layout = () => {
             <Outlet />
           </div>
         </main>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="lg:hidden">
-        <MobileNav />
       </div>
 
       {/* AI Onboarding Modal */}

@@ -349,36 +349,35 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
   try {
     const {
       // Basic profile
-      age,
-      gender,
-      weight,
-      height,
+      ageGroup,
       
       // Goals and level
       primaryGoal,
-      weightGoal,
-      targetRace,
       currentLevel,
+      trainingExperience,
       
       // Training status
       weeklyRuns,
       weeklyHours,
-      longestRun,
+      distancePreference,
+      pacePreference,
+      personalBest5k,
       
-      // Health
-      injuries,
-      injuryDetails,
+      // Preferences
+      preferredTime,
+      preferredEnvironment,
+      socialPreference,
+      musicPreference,
       
-      // Lifestyle
+      // Health and lifestyle
+      healthConcerns,
       dietStyle,
-      sleepHours,
-      
-      // Technology
-      currentDevices,
-      
-      // Motivation
+      sleepQuality,
+      stressLevel,
       motivationFactors,
-      biggestChallenges
+      
+      // Matching profile
+      matchingProfile
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -386,31 +385,71 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if this is the test account OR if OpenAI is not available
-    if (user.email === 'test@runmate.se' || !openai) {
-      // Return comprehensive dummy data for test account or when OpenAI is not available
-      const dummyPlan = {
-        success: true,
-        plan: {
-          summary: {
-            name: 'Din Personliga Löparplan',
-            level: 'Medel',
-            goal: 'Förbättra hälsa & kondition',
-            duration: '12 veckor',
-            startDate: new Date().toLocaleDateString('sv-SE'),
-            primaryFocus: primaryGoal || 'fitness',
-            weeklyCommitment: `${weeklyHours || 4} timmar/vecka`,
-            keyStrategies: [
-              'Progressiv ökning av träningsvolym',
-              'Balanserad mix av intensiteter',
-              'Fokus på återhämtning och skadeförebyggning'
-            ],
-            expectedResults: [
-              'Förbättrad kondition med 15-20%',
-              'Ökad löphastighet med 30-45 sekunder/km',
-              'Starkare muskulatur och bättre löpteknik'
-            ]
-          },
+    // Save AI coach profile
+    user.aiCoachProfile = {
+      ageGroup,
+      primaryGoal,
+      currentLevel,
+      trainingExperience,
+      weeklyRuns,
+      weeklyHours,
+      distancePreference,
+      pacePreference,
+      personalBest5k,
+      preferredTime,
+      preferredEnvironment,
+      socialPreference,
+      musicPreference,
+      healthConcerns,
+      dietStyle,
+      sleepQuality,
+      stressLevel,
+      motivationFactors,
+      matchingProfile,
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+    await user.save();
+
+    // Generate personalized plan based on form data
+    const levelMap = {
+      'beginner': 'Nybörjare',
+      'occasional': 'Tillfällig',
+      'regular': 'Regelbunden',
+      'advanced': 'Avancerad'
+    };
+    
+    const goalMap = {
+      'first_5k': 'Springa första 5K',
+      'improve_time': 'Förbättra tid',
+      'marathon': 'Marathon-träning',
+      'health': 'Förbättra hälsa',
+      'weight_loss': 'Gå ner i vikt',
+      'social': 'Hitta löparvänner'
+    };
+    
+    const comprehensivePlan = {
+      success: true,
+      plan: {
+        summary: {
+          name: 'Din Personliga Löparplan',
+          level: levelMap[currentLevel] || 'Medel',
+          goal: goalMap[primaryGoal] || 'Förbättra hälsa & kondition',
+          duration: '12 veckor',
+          startDate: new Date().toLocaleDateString('sv-SE'),
+          primaryFocus: primaryGoal || 'health',
+          weeklyCommitment: `${weeklyHours || '3-4'} timmar/vecka`,
+          keyStrategies: [
+            'Progressiv ökning av träningsvolym',
+            'Balanserad mix av intensiteter',
+            'Fokus på återhämtning och skadeförebyggning'
+          ],
+          expectedResults: [
+            'Förbättrad kondition med 15-20%',
+            'Ökad löphastighet med 30-45 sekunder/km',
+            'Starkare muskulatur och bättre löpteknik'
+          ]
+        },
           training: {
             weeklySchedule: [
               { day: 'Måndag', type: 'Lätt löpning', duration: '30 min', pace: '6:00/km', description: 'Lugn start på veckan' },
@@ -606,54 +645,12 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
         createdAt: new Date()
       };
 
-      return res.json(dummyPlan);
+      return res.json(comprehensivePlan);
+    } catch (error) {
+      console.error('Error creating comprehensive plan:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
-
-    // Create comprehensive AI coach profile
-    const comprehensiveProfile = {
-      // Basic profile
-      age,
-      gender,
-      weight,
-      height,
-      
-      // Goals and level
-      primaryGoal,
-      weightGoal,
-      targetRace,
-      currentLevel,
-      
-      // Training status
-      weeklyRuns,
-      weeklyHours,
-      longestRun,
-      
-      // Health
-      injuries,
-      injuryDetails,
-      
-      // Lifestyle
-      dietStyle,
-      sleepHours,
-      
-      // Technology
-      currentDevices,
-      
-      // Motivation
-      motivationFactors,
-      biggestChallenges,
-      
-      createdAt: new Date(),
-      lastUpdated: new Date()
-    };
-
-    user.aiCoachProfile = comprehensiveProfile;
-    await user.save();
-
-    let comprehensivePlan = {};
-
-    // Generate comprehensive plan with OpenAI if available
-    if (openai) {
+  });
       try {
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini",

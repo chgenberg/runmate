@@ -19,9 +19,7 @@ import {
   Clock,
   Activity,
   Smile,
-  Calendar,
-  MessageSquare,
-  CheckCircle
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';

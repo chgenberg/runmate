@@ -8,7 +8,6 @@ import {
   Video,
   MoreVertical,
   MapPin,
-  Clock,
   Check,
   CheckCheck,
   Trophy,
@@ -38,30 +37,6 @@ const ChatConversationPage = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    loadChatInfo();
-    loadMessages();
-    
-    if (socket) {
-      socket.emit('join-chat', chatId);
-      
-      socket.on('new-message', handleNewMessage);
-      socket.on('user-typing', handleUserTyping);
-      socket.on('user-stopped-typing', handleUserStoppedTyping);
-      
-      return () => {
-        socket.emit('leave-chat', chatId);
-        socket.off('new-message', handleNewMessage);
-        socket.off('user-typing', handleUserTyping);
-        socket.off('user-stopped-typing', handleUserStoppedTyping);
-      };
-    }
-  }, [chatId, socket, handleUserTyping, loadChatInfo, loadMessages]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const loadChatInfo = useCallback(async () => {
     try {
@@ -198,6 +173,30 @@ const ChatConversationPage = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    loadChatInfo();
+    loadMessages();
+    
+    if (socket) {
+      socket.emit('join-chat', chatId);
+      
+      socket.on('new-message', handleNewMessage);
+      socket.on('user-typing', handleUserTyping);
+      socket.on('user-stopped-typing', handleUserStoppedTyping);
+      
+      return () => {
+        socket.emit('leave-chat', chatId);
+        socket.off('new-message', handleNewMessage);
+        socket.off('user-typing', handleUserTyping);
+        socket.off('user-stopped-typing', handleUserStoppedTyping);
+      };
+    }
+  }, [chatId, socket, handleUserTyping, loadChatInfo, loadMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const getChatTitle = () => {
     if (!chatInfo) return 'Chatt';

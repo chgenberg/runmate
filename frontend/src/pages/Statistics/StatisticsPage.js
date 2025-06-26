@@ -284,11 +284,59 @@ const StatisticsPage = () => {
       const statsData = statsResponse.data.data.stats;
       const activitiesData = activitiesResponse.data.activities || [];
 
+      // Filter activities based on selected period
+      const now = new Date();
+      let filteredActivities = activitiesData;
+      
+      switch (selectedPeriod) {
+        case 'today':
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          filteredActivities = activitiesData.filter(act => {
+            const actDate = new Date(act.startTime);
+            return actDate >= today && actDate < tomorrow;
+          });
+          break;
+        case 'week':
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          filteredActivities = activitiesData.filter(act => new Date(act.startTime) >= weekAgo);
+          break;
+        case 'month':
+          const monthAgo = new Date();
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          filteredActivities = activitiesData.filter(act => new Date(act.startTime) >= monthAgo);
+          break;
+        case 'year':
+          const yearAgo = new Date();
+          yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+          filteredActivities = activitiesData.filter(act => new Date(act.startTime) >= yearAgo);
+          break;
+        default:
+          // 'all' - use all activities
+          break;
+      }
+
+      // Calculate filtered stats
+      const filteredStats = {
+        ...statsData,
+        totalDistance: filteredActivities.reduce((sum, act) => sum + (act.distance || 0), 0),
+        totalActivities: filteredActivities.length,
+        totalHours: filteredActivities.reduce((sum, act) => sum + (act.duration || 0), 0) / 3600,
+        totalCalories: filteredActivities.reduce((sum, act) => sum + (act.calories || 0), 0),
+        totalElevation: filteredActivities.reduce((sum, act) => sum + (act.elevationGain || 0), 0),
+        avgHeartRate: filteredActivities.length > 0 ? 
+          Math.round(filteredActivities.reduce((sum, act) => sum + (act.averageHeartRate || 0), 0) / filteredActivities.length) : 0,
+        maxHeartRate: Math.max(...filteredActivities.map(act => act.maxHeartRate || 0), 0)
+      };
+
       // Simulate Apple Health specific data
       const appleHealth = {
         stepCount: Math.floor(Math.random() * 5000) + 8000,
-        activeCalories: statsData.totalCalories || 2240,
-        exerciseMinutes: Math.floor((statsData.totalHours || 4) * 60),
+        activeCalories: filteredStats.totalCalories || 2240,
+        exerciseMinutes: Math.floor((filteredStats.totalHours || 4) * 60),
         standHours: Math.floor(Math.random() * 4) + 10,
         restingHeartRate: Math.floor(Math.random() * 10) + 55,
         vo2Max: Math.floor(Math.random() * 10) + 40,
@@ -296,15 +344,19 @@ const StatisticsPage = () => {
         heartRateVariability: Math.floor(Math.random() * 20) + 40
       };
 
-      setStats(statsData);
+      setStats(filteredStats);
       setAppleHealthData(appleHealth);
       
       // Prepare data for charts
-      prepareChartData(activitiesData, { ...statsData, ...appleHealth });
+      prepareChartData(filteredActivities, { ...filteredStats, ...appleHealth });
       
     } catch (error) {
       console.error('Error loading statistics:', error);
-      toast.error('Kunde inte ladda statistik');
+      // Only show error toast once per error
+      if (!error.isToastShown) {
+        toast.error('Kunde inte ladda statistik');
+        error.isToastShown = true;
+      }
     } finally {
       setLoading(false);
     }
@@ -328,36 +380,36 @@ const StatisticsPage = () => {
       id: 'distance',
       icon: Activity,
       label: 'Total Distans',
-      value: `${stats?.totalDistance || 14} km`,
+      value: `${Math.round((stats?.totalDistance || 14) * 10) / 10} km`,
       subValue: `${stats?.totalActivities || 2} aktiviteter`,
-      change: stats?.thisMonth?.distance > 0 ? `+${stats.thisMonth.distance} km denna månad` : '+14 km denna månad',
+      change: stats?.thisMonth?.distance > 0 ? `+${Math.round(stats.thisMonth.distance * 10) / 10} km denna månad` : '+14 km denna månad',
       gradient: gradients.distance,
       details: [
-        { label: 'Genomsnitt per pass', value: `${(stats?.totalDistance / stats?.totalActivities || 7).toFixed(1)} km` },
+        { label: 'Genomsnitt per pass', value: `${((stats?.totalDistance || 14) / (stats?.totalActivities || 2)).toFixed(1)} km` },
         { label: 'Längsta löpning', value: `${stats?.longestRun || 10} km` },
-        { label: 'Denna vecka', value: `${stats?.thisWeek?.distance || 14} km` }
+        { label: 'Denna vecka', value: `${Math.round((stats?.thisWeek?.distance || 14) * 10) / 10} km` }
       ]
     },
     {
       id: 'time',
       icon: Clock,
       label: 'Total Tid',
-      value: `${stats?.totalHours || 4} h`,
-      subValue: `Ø ${stats?.avgRunTime || 120} min/pass`,
+      value: `${Math.round((stats?.totalHours || 4) * 10) / 10} h`,
+      subValue: `Ø ${Math.round((stats?.totalHours || 4) * 60 / (stats?.totalActivities || 2))} min/pass`,
       change: `Genomsnitt: ${stats?.avgPaceFormatted || '6:00'}/km`,
       gradient: gradients.time,
       details: [
         { label: 'Längsta pass', value: `${stats?.longestRunTime || 150} min` },
-        { label: 'Träning denna vecka', value: `${stats?.thisWeek?.hours || 4} h` },
-        { label: 'Aktivitetsminuter', value: `${appleHealthData?.exerciseMinutes || 240} min` }
+        { label: 'Träning denna vecka', value: `${Math.round((stats?.thisWeek?.hours || 4) * 10) / 10} h` },
+        { label: 'Aktivitetsminuter', value: `${Math.round((stats?.totalHours || 4) * 60)} min` }
       ]
     },
     {
       id: 'heartRate',
       icon: Heart,
       label: 'Puls',
-      value: `${stats?.avgHeartRate || 0} bpm`,
-      subValue: `Max: ${stats?.maxHeartRate || 0} bpm`,
+      value: `${Math.round(stats?.avgHeartRate || 0)} bpm`,
+      subValue: `Max: ${Math.round(stats?.maxHeartRate || 0)} bpm`,
       change: `Vila: ${appleHealthData?.restingHeartRate || 60} bpm`,
       gradient: gradients.heartRate,
       details: [
@@ -370,13 +422,13 @@ const StatisticsPage = () => {
       id: 'elevation',
       icon: Mountain,
       label: 'Höjdmeter',
-      value: `${stats?.totalElevation || 1111} m`,
+      value: `${Math.round(stats?.totalElevation || 1111)} m`,
       subValue: `Största: ${stats?.biggestClimb || 555} m`,
       change: `${stats?.weeklyConsistency || 2}/4 veckor aktiv`,
       gradient: gradients.elevation,
       details: [
-        { label: 'Genomsnitt per pass', value: `${(stats?.totalElevation / stats?.totalActivities || 555).toFixed(0)} m` },
-        { label: 'Denna vecka', value: `${stats?.thisWeek?.elevation || 400} m` },
+        { label: 'Genomsnitt per pass', value: `${Math.round((stats?.totalElevation || 1111) / (stats?.totalActivities || 2))} m` },
+        { label: 'Denna vecka', value: `${Math.round(stats?.thisWeek?.elevation || 400)} m` },
         { label: 'Trappor', value: `${Math.floor((stats?.totalElevation || 1111) / 3)} våningar` }
       ]
     },
@@ -384,13 +436,13 @@ const StatisticsPage = () => {
       id: 'calories',
       icon: Flame,
       label: 'Kalorier',
-      value: `${stats?.totalCalories || 2240} kcal`,
-      subValue: `Aktiva: ${appleHealthData?.activeCalories || 2240} kcal`,
-      change: `Ø ${Math.floor((stats?.totalCalories || 2240) / (stats?.totalActivities || 2))} kcal/pass`,
+      value: `${Math.round(stats?.totalCalories || 2240)} kcal`,
+      subValue: `Aktiva: ${Math.round(appleHealthData?.activeCalories || 2240)} kcal`,
+      change: `Ø ${Math.round((stats?.totalCalories || 2240) / (stats?.totalActivities || 2))} kcal/pass`,
       gradient: gradients.calories,
       details: [
-        { label: 'Genomsnitt per km', value: `${Math.floor((stats?.totalCalories || 2240) / (stats?.totalDistance || 14))} kcal` },
-        { label: 'Denna vecka', value: `${stats?.thisWeek?.calories || 800} kcal` },
+        { label: 'Genomsnitt per km', value: `${Math.round((stats?.totalCalories || 2240) / (stats?.totalDistance || 14))} kcal` },
+        { label: 'Denna vecka', value: `${Math.round(stats?.thisWeek?.calories || 800)} kcal` },
         { label: 'Högsta förbrukning', value: `${stats?.maxCalories || 1500} kcal` }
       ]
     },
@@ -461,6 +513,7 @@ const StatisticsPage = () => {
           {/* Period Selector */}
           <div className="flex overflow-x-auto scrollbar-hide -mx-4 px-4 space-x-2 mb-4">
             {[
+              { id: 'today', label: 'Idag' },
               { id: 'week', label: 'Vecka' },
               { id: 'month', label: 'Månad' },
               { id: 'year', label: 'År' },

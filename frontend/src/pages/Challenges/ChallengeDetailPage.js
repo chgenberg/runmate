@@ -19,7 +19,8 @@ import {
   Activity,
   Medal,
   Timer,
-  TrendingUp
+  TrendingUp,
+  MessageCircle
 } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -348,6 +349,11 @@ const ChallengeDetailPage = () => {
     }
   };
 
+  const handleGroupChat = () => {
+    // Navigate to group chat for this challenge
+    navigate(`/app/chat/${challenge._id}`);
+  };
+
   // Sharing functions
   const getChallengeUrl = () => {
     return `${window.location.origin}/app/challenges/${challenge._id}`;
@@ -538,16 +544,25 @@ const ChallengeDetailPage = () => {
             </div>
           </div>
           
-          {/* Join/Leave Button */}
-          <div className="mt-6">
+          {/* Action Buttons */}
+          <div className="mt-6 space-y-3">
             {isParticipant ? (
-              <button
-                onClick={handleLeave}
-                disabled={isJoining}
-                className="w-full btn btn-glass"
-              >
-                Lämna utmaning
-              </button>
+              <>
+                <button
+                  onClick={handleGroupChat}
+                  className="w-full btn btn-primary"
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Gruppchatt
+                </button>
+                <button
+                  onClick={handleLeave}
+                  disabled={isJoining}
+                  className="w-full btn btn-glass"
+                >
+                  Lämna utmaning
+                </button>
+              </>
             ) : (
               <button
                 onClick={handleJoin}

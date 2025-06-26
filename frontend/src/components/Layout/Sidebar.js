@@ -7,6 +7,7 @@ import {
   Trophy,
   BarChart3,
   MapPin,
+  MessageCircle,
   LogOut
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,6 +19,7 @@ const Sidebar = () => {
     { path: '/app/dashboard', label: 'Översikt', icon: Home },
     { path: '/app/discover', label: 'Hitta löparvänner', icon: Users },
     { path: '/app/challenges', label: 'Utmaningar', icon: Trophy },
+    { path: '/app/chat', label: 'Chatt', icon: MessageCircle },
     { path: '/app/statistics', label: 'Statistik', icon: BarChart3 },
     { path: '/app/routes', label: 'Hitta rutter', icon: MapPin },
   ];

@@ -197,6 +197,10 @@ router.get('/', protect, async (req, res) => {
                 let startDate;
                 
                 switch (period) {
+                    case 'today':
+                        startDate = new Date(now);
+                        startDate.setHours(0, 0, 0, 0);
+                        break;
                     case 'week':
                         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
                         break;

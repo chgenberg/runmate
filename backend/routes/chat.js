@@ -3,6 +3,35 @@ const router = express.Router();
 const Chat = require('../models/Chat');
 const { protect: auth } = require('../middleware/auth');
 
+// Get all conversations for the current user (alias for compatibility)
+router.get('/conversations', auth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    
+    const chats = await Chat.getUserChats(req.user._id, page, limit);
+    
+    // Add unread count for each chat
+    const chatsWithUnread = chats.map(chat => ({
+      ...chat.toObject(),
+      unreadCount: chat.getUnreadCount(req.user._id)
+    }));
+    
+    res.json({
+      success: true,
+      conversations: chatsWithUnread,
+      page,
+      hasMore: chats.length === limit
+    });
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while fetching conversations' 
+    });
+  }
+});
+
 // Get all chats for the current user
 router.get('/', auth, async (req, res) => {
   try {
@@ -121,6 +150,103 @@ router.post('/direct/:userId', auth, async (req, res) => {
   }
 });
 
+// Get conversation info
+router.get('/conversations/:chatId', auth, async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    
+    const chat = await Chat.findById(chatId)
+      .populate('participants', 'firstName lastName profilePhoto email');
+    
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+    
+    // Check if user is participant
+    if (!chat.participants.some(p => p._id.equals(req.user._id))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+    
+    res.json({
+      success: true,
+      conversation: {
+        _id: chat._id,
+        type: chat.chatType === 'direct' ? 'match' : 'challenge',
+        name: chat.name,
+        participants: chat.participants,
+        lastMessage: chat.lastMessage,
+        lastActivity: chat.lastActivity
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while fetching conversation' 
+    });
+  }
+});
+
+// Get messages for a specific conversation
+router.get('/conversations/:chatId/messages', auth, async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    
+    const chat = await Chat.findById(chatId)
+      .populate('participants', 'firstName lastName profilePhoto email')
+      .populate('messages.sender', 'firstName lastName profilePhoto');
+    
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: 'Chat not found'
+      });
+    }
+    
+    // Check if user is participant
+    if (!chat.participants.some(p => p._id.equals(req.user._id))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+    
+    // Get messages with pagination (newest first, then reverse for display)
+    const totalMessages = chat.messages.filter(m => !m.isDeleted).length;
+    const startIndex = Math.max(0, totalMessages - (page * limit));
+    const endIndex = totalMessages - ((page - 1) * limit);
+    
+    const messages = chat.messages
+      .filter(m => !m.isDeleted)
+      .slice(startIndex, endIndex)
+      .reverse();
+    
+    res.json({
+      success: true,
+      messages,
+      pagination: {
+        page,
+        hasMore: startIndex > 0,
+        totalMessages
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while fetching messages' 
+    });
+  }
+});
+
 // Get messages for a specific chat
 router.get('/:chatId/messages', auth, async (req, res) => {
   try {
@@ -177,6 +303,78 @@ router.get('/:chatId/messages', auth, async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Server error while fetching messages' 
+    });
+  }
+});
+
+// Send a message to conversation
+router.post('/conversations/:chatId/messages', auth, async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const { content, messageType = 'text' } = req.body;
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message content cannot be empty'
+      });
+    }
+    
+    const chat = await Chat.findById(chatId);
+    
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: 'Chat not found'
+      });
+    }
+    
+    // Check if user is participant
+    if (!chat.participants.some(p => p.equals(req.user._id))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+    
+    await chat.addMessage(req.user._id, content.trim(), messageType);
+    
+    // Get the newly added message with populated sender
+    await chat.populate('messages.sender', 'firstName lastName profilePhoto');
+    const newMessage = chat.messages[chat.messages.length - 1];
+    
+    // Emit to WebSocket for real-time updates
+    if (req.io) {
+      // Emit to all participants except sender
+      chat.participants.forEach(participantId => {
+        if (!participantId.equals(req.user._id)) {
+          req.io.to(`user_${participantId}`).emit('new_message', {
+            chatId: chat._id,
+            message: newMessage,
+            chat: {
+              _id: chat._id,
+              lastMessage: chat.lastMessage,
+              lastActivity: chat.lastActivity
+            }
+          });
+        }
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: newMessage,
+      chat: {
+        _id: chat._id,
+        lastMessage: chat.lastMessage,
+        lastActivity: chat.lastActivity
+      }
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while sending message' 
     });
   }
 });

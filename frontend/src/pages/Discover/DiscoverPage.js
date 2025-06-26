@@ -167,6 +167,11 @@ const DiscoverPage = () => {
               <span>Det blev en match! Nu kan ni chatta!</span>
             </div>
           );
+          
+          // Auto-navigate to chat after a short delay
+          setTimeout(() => {
+            navigate(`/app/chat/${userId}`);
+          }, 2000);
         } else {
           toast.success(
             <div className="flex items-center gap-2">
@@ -209,6 +214,11 @@ const DiscoverPage = () => {
         setRunners(prev => prev.filter(r => r.id !== userId));
       }, 300);
     }
+  };
+
+  const handleStartChat = (userId) => {
+    // Navigate directly to chat with this user
+    navigate(`/app/chat/${userId}`);
   };
 
   const handleAiMatchMessage = (userId) => {
@@ -346,6 +356,14 @@ const DiscoverPage = () => {
                       >
                         <X className="w-7 h-7" />
                       </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleStartChat(runner.id)}
+                        className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                      >
+                        <MessageCircle className="w-7 h-7" />
+                      </motion.button>
                       {isAiMatch ? (
                         <motion.button
                           whileHover={{ scale: 1.1 }}
@@ -353,7 +371,7 @@ const DiscoverPage = () => {
                           onClick={() => handleAiMatchMessage(runner.id)}
                           className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
                         >
-                          <MessageCircle className="w-7 h-7" />
+                          <Sparkles className="w-7 h-7" />
                         </motion.button>
                       ) : (
                         <motion.button
@@ -457,6 +475,14 @@ const DiscoverPage = () => {
                   >
                     <X className="w-6 h-6 md:w-8 md:h-8" />
                   </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleStartChat(runner.id)}
+                    className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                  >
+                    <MessageCircle className="w-6 h-6 md:w-8 md:h-8" />
+                  </motion.button>
                   {isAiMatch ? (
                     <motion.button
                       whileHover={{ scale: 1.1 }}
@@ -464,7 +490,7 @@ const DiscoverPage = () => {
                       onClick={() => handleAiMatchMessage(runner.id)}
                       className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
                     >
-                      <MessageCircle className="w-6 h-6 md:w-8 md:h-8" />
+                      <Sparkles className="w-6 h-6 md:w-8 md:h-8" />
                     </motion.button>
                   ) : (
                     <motion.button

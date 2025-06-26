@@ -24,6 +24,8 @@ import SettingsPage from './pages/Settings/SettingsPage';
 import AICoachResultsPage from './pages/AICoach/AICoachResultsPage';
 import ActivitiesPage from './pages/Activity/ActivitiesPage';
 import LogActivityPage from './pages/Activity/LogActivityPage';
+import ChatPage from './pages/Chat/ChatPage';
+import ChatConversationPage from './pages/Chat/ChatConversationPage';
 
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
@@ -84,6 +86,8 @@ function App() {
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="challenges" element={<ChallengesPage />} />
               <Route path="challenges/:id" element={<ChallengeDetailPage />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="chat/:chatId" element={<ChatConversationPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
               <Route path="routes" element={<SuggestedRoutesPage />} />
               

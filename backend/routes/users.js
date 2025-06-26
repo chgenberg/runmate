@@ -373,8 +373,15 @@ router.get('/discover', auth, async (req, res) => {
 
     const { maxDistance = 50, ageRange = '18-99', activityLevel, sportTypes } = req.query;
     
-    // Parse age range
-    const [minAge, maxAge] = ageRange.split('-').map(Number);
+    // Parse age range - handle both string and array formats
+    let minAge, maxAge;
+    if (Array.isArray(ageRange)) {
+      [minAge, maxAge] = ageRange.map(Number);
+    } else if (typeof ageRange === 'string') {
+      [minAge, maxAge] = ageRange.split('-').map(Number);
+    } else {
+      [minAge, maxAge] = [18, 99];
+    }
     const currentYear = new Date().getFullYear();
     const maxBirthYear = currentYear - minAge;
     const minBirthYear = currentYear - maxAge;

@@ -17,6 +17,7 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import DiscoverPage from './pages/Discover/DiscoverPage';
 import ChallengesPage from './pages/Challenges/ChallengesPage';
+import ChallengeDetailPage from './pages/Challenges/ChallengeDetailPage';
 import StatisticsPage from './pages/Statistics/StatisticsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 
@@ -78,6 +79,7 @@ function App() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="challenges" element={<ChallengesPage />} />
+              <Route path="challenges/:id" element={<ChallengeDetailPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
               
               {/* Settings accessible via profile icon */}

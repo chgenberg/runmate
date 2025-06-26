@@ -22,6 +22,8 @@ import StatisticsPage from './pages/Statistics/StatisticsPage';
 import SuggestedRoutesPage from './pages/Routes/SuggestedRoutesPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import AICoachResultsPage from './pages/AICoach/AICoachResultsPage';
+import ActivitiesPage from './pages/Activity/ActivitiesPage';
+import LogActivityPage from './pages/Activity/LogActivityPage';
 
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
@@ -84,6 +86,10 @@ function App() {
               <Route path="challenges/:id" element={<ChallengeDetailPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
               <Route path="routes" element={<SuggestedRoutesPage />} />
+              
+              {/* Activity routes */}
+              <Route path="activities" element={<ActivitiesPage />} />
+              <Route path="log-activity" element={<LogActivityPage />} />
               
               {/* Settings accessible via profile icon */}
               <Route path="settings" element={<SettingsPage />} />

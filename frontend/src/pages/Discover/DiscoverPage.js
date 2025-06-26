@@ -74,18 +74,31 @@ const DiscoverPage = () => {
         // Fetch AI matches if profile is complete
         fetchAiMatches();
       } else {
-        // Show AI popup after a short delay if no profile
-        setTimeout(() => {
-          setShowAIPopup(true);
-        }, 1000);
+        // Check if we've already shown the popup this session
+        const hasShownPopup = sessionStorage.getItem('hasShownAIPopup');
+        
+        if (!hasShownPopup) {
+          // Show AI popup after a short delay if no profile
+          setTimeout(() => {
+            setShowAIPopup(true);
+            sessionStorage.setItem('hasShownAIPopup', 'true');
+          }, 1000);
+        }
       }
     } catch (error) {
       console.error('Error checking AI profile:', error);
       setHasAiProfile(false);
-      // Show AI popup on error too
-      setTimeout(() => {
-        setShowAIPopup(true);
-      }, 1000);
+      
+      // Check if we've already shown the popup this session
+      const hasShownPopup = sessionStorage.getItem('hasShownAIPopup');
+      
+      if (!hasShownPopup) {
+        // Show AI popup on error too
+        setTimeout(() => {
+          setShowAIPopup(true);
+          sessionStorage.setItem('hasShownAIPopup', 'true');
+        }, 1000);
+      }
     }
   }, [fetchAiMatches]);
 
@@ -385,45 +398,45 @@ const DiscoverPage = () => {
               )}
 
               {/* Bio */}
-              <p className="text-sm text-gray-700 mb-4 line-clamp-2">{runner.bio}</p>
+              <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">{runner.bio}</p>
 
               {/* Stats Grid - Main Focus */}
-              <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-4 mb-4`}>
-                <div className="grid grid-cols-3 gap-4">
+              <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-3 md:p-4 mb-3 md:mb-4`}>
+                <div className="grid grid-cols-3 gap-2 md:gap-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
-                      <Zap className="w-4 h-4 text-orange-500" />
+                      <Zap className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
                     </div>
-                    <p className="text-lg font-bold text-gray-900">{runner.pace}</p>
-                    <p className="text-xs text-gray-500">min/km</p>
+                    <p className="text-sm md:text-lg font-bold text-gray-900">{runner.pace}</p>
+                    <p className="text-[10px] md:text-xs text-gray-500">min/km</p>
                   </div>
                   <div className="text-center border-x border-gray-200">
                     <div className="flex items-center justify-center mb-1">
-                      <Activity className="w-4 h-4 text-blue-500" />
+                      <Activity className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
                     </div>
-                    <p className="text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
-                    <p className="text-xs text-gray-500">km/vecka</p>
+                    <p className="text-sm md:text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
+                    <p className="text-[10px] md:text-xs text-gray-500">km/vecka</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
-                      <TrendingUp className="w-4 h-4 text-green-500" />
+                      <TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
                     </div>
-                    <p className="text-lg font-bold text-gray-900">{runner.longestRun}</p>
-                    <p className="text-xs text-gray-500">längsta (km)</p>
+                    <p className="text-sm md:text-lg font-bold text-gray-900">{runner.longestRun}</p>
+                    <p className="text-[10px] md:text-xs text-gray-500">längsta (km)</p>
                   </div>
                 </div>
 
                 {/* Additional Stats */}
-                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm text-gray-700">
+                <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200">
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
+                    <span className="text-[10px] md:text-sm text-gray-700">
                       <span className="font-bold">{runner.totalRuns}</span> löprundor
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm text-gray-700">
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <Calendar className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
+                    <span className="text-[10px] md:text-sm text-gray-700">
                       Föredrar <span className="font-bold">{runner.favoriteTime}</span>
                     </span>
                   </div>
@@ -431,11 +444,11 @@ const DiscoverPage = () => {
               </div>
 
               {/* Interests/Goals */}
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
                 {runner.interests.slice(0, 4).map((interest, idx) => (
                   <span
                     key={idx}
-                    className={`px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-xs font-medium`}
+                    className={`px-2 md:px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] md:text-xs font-medium`}
                   >
                     {interest}
                   </span>
@@ -678,267 +691,294 @@ const DiscoverPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <Users className="h-6 w-6 text-blue-600" />
-                Hitta löparvänner
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Upptäck löpare i din närhet
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {/* Info Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowInfoModal(true)}
-                className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
-              >
-                <Info className="w-5 h-5" />
-              </motion.button>
-
-              {/* View Mode Toggle */}
-              <div className="bg-gray-100 rounded-lg p-1 flex">
-                <button
-                  onClick={() => setViewMode('scroll')}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'scroll' 
-                      ? 'bg-white text-gray-900 shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Lista
-                </button>
-                <button
-                  onClick={() => setViewMode('stack')}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'stack' 
-                      ? 'bg-white text-gray-900 shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Kort
-                </button>
-              </div>
-
-              {/* Filter Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowFilters(!showFilters)}
-                className={`p-2 rounded-lg transition-colors ${
-                  showFilters ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                <SlidersHorizontal className="w-5 h-5" />
-              </motion.button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+        {/* Header */}
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
+            HITTA DIN LÖPARVÄN
+          </h1>
+          <p className="text-base md:text-lg text-gray-600">
+            Upptäck löpare i ditt område
+          </p>
         </div>
-      </div>
 
-      {/* Filters */}
-      <AnimatePresence>
-        {showFilters && (
+        {/* AI Banner - Only show if no AI profile */}
+        {!hasAiProfile && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="bg-gradient-to-b from-white to-gray-50 border-b shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-              {/* Distance Slider */}
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-blue-500" />
-                    Max avstånd
-                  </label>
-                  <span className="text-lg font-bold text-blue-600">{filters.distance} km</span>
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-4 md:p-6 text-white shadow-xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3 text-center md:text-left">
+                  <Brain className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-lg md:text-xl">Få AI-matchningar!</h3>
+                    <p className="text-sm md:text-base opacity-90">Låt vår AI hitta dina perfekta löparvänner</p>
+                  </div>
                 </div>
-                <div className="relative">
-                  <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    value={filters.distance}
-                    onChange={(e) => setFilters({ ...filters, distance: e.target.value })}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                    style={{
-                      background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${filters.distance}%, #E5E7EB ${filters.distance}%, #E5E7EB 100%)`
-                    }}
-                  />
-                </div>
-              </div>
-              
-              {/* Level Buttons */}
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <label className="text-sm font-semibold text-gray-700 mb-3 block flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-yellow-500" />
-                  Nivå
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {['all', 'Nybörjare', 'Medel', 'Avancerad'].map((level) => (
-                    <motion.button
-                      key={level}
-                      onClick={() => setFilters({ ...filters, level })}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        filters.level === level
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {level === 'all' ? '🌟 Alla' : level === 'Nybörjare' ? '🌱 Nybörjare' : level === 'Medel' ? '💪 Medel' : '🚀 Avancerad'}
-                    </motion.button>
-                  ))}
-                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleStartAIAnalysis}
+                  className="bg-white text-purple-600 px-6 py-2 md:py-3 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
+                >
+                  Starta AI-analys
+                </motion.button>
               </div>
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {loading ? (
-          <div className="flex items-center justify-center h-[600px]">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <Users className="w-8 h-8 text-blue-600 animate-pulse" />
-              </div>
-              <p className="text-gray-600">Laddar löpare...</p>
-            </div>
+        {/* Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowFilters(!showFilters)}
+              className="bg-white px-4 py-2 rounded-xl shadow-md flex items-center gap-2 text-sm md:text-base"
+            >
+              <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
+              Filter
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowInfoModal(true)}
+              className="bg-white p-2 rounded-xl shadow-md"
+            >
+              <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
+            </motion.button>
           </div>
-        ) : (
-          <div className={viewMode === 'scroll' ? 'space-y-6' : ''}>
-            {/* AI Matches Section - Removed the large section, only show matches if completed */}
-            {hasAiProfile && aiMatches.length > 0 && (
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-yellow-500" />
-                  <h2 className="text-xl font-bold text-gray-900">Dina AI-supermatchningar</h2>
-                  <span className="text-sm text-gray-600">- Skriv direkt utan att matcha!</span>
+
+          <div className="flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setViewMode('stack')}
+              className={`px-4 py-2 rounded-xl text-sm md:text-base ${
+                viewMode === 'stack' 
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
+                  : 'bg-white text-gray-600 shadow-md'
+              }`}
+            >
+              Kort
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setViewMode('scroll')}
+              className={`px-4 py-2 rounded-xl text-sm md:text-base ${
+                viewMode === 'scroll' 
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
+                  : 'bg-white text-gray-600 shadow-md'
+              }`}
+            >
+              Lista
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-gradient-to-b from-white to-gray-50 border-b shadow-lg overflow-hidden"
+            >
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                {/* Distance Slider */}
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-blue-500" />
+                      Max avstånd
+                    </label>
+                    <span className="text-lg font-bold text-blue-600">{filters.distance} km</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      value={filters.distance}
+                      onChange={(e) => setFilters({ ...filters, distance: e.target.value })}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${filters.distance}%, #E5E7EB ${filters.distance}%, #E5E7EB 100%)`
+                      }}
+                    />
+                  </div>
                 </div>
                 
-                <div className={viewMode === 'scroll' ? 'space-y-4' : 'relative h-[600px]'}>
-                  {viewMode === 'scroll' ? (
-                    aiMatches.map((match) => (
-                      <RunnerCard key={match.id} runner={match} isAiMatch={true} />
-                    ))
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {aiMatches.slice(0, 3).map((match) => (
-                        <RunnerCard key={match.id} runner={match} isAiMatch={true} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Regular Runners */}
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-gray-600" />
-                Andra löpare i närheten
-              </h2>
-              
-              {viewMode === 'stack' ? (
-                <div className={`relative ${window.innerWidth < 768 ? 'h-screen -mx-4 -mt-6' : 'h-[600px]'} flex items-center justify-center`} ref={constraintsRef}>
-                  {/* Mobile swipe instructions */}
-                  {window.innerWidth < 768 && hasMoreRunners && (
-                    <div className="absolute top-4 left-0 right-0 z-10 px-8">
-                      <div className="bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 flex items-center justify-between text-white text-sm">
-                        <span className="flex items-center gap-1">
-                          <ChevronLeft className="w-4 h-4" />
-                          Nej
-                        </span>
-                        <span className="font-medium">Swipa för att välja</span>
-                        <span className="flex items-center gap-1">
-                          Ja
-                          <ChevronRight className="w-4 h-4" />
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <AnimatePresence>
-                    {hasMoreRunners && currentRunner && (
-                      <RunnerCard 
-                        key={currentRunner.id} 
-                        runner={currentRunner} 
-                        index={currentIndex}
-                      />
-                    )}
-                  </AnimatePresence>
-
-                  {/* Action Buttons for Stack Mode Desktop */}
-                  {hasMoreRunners && window.innerWidth >= 768 && (
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4">
+                {/* Level Buttons */}
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <label className="text-sm font-semibold text-gray-700 mb-3 block flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    Nivå
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {['all', 'Nybörjare', 'Medel', 'Avancerad'].map((level) => (
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleSwipe('left', currentRunner.id)}
-                        className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        <X className="w-8 h-8" />
-                      </motion.button>
-                      
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleSwipe('right', currentRunner.id)}
-                        className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
-                      >
-                        <Heart className="w-8 h-8" />
-                      </motion.button>
-                    </div>
-                  )}
-
-                  {/* No more runners */}
-                  {!hasMoreRunners && (
-                    <div className="text-center">
-                      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-10 h-10 text-gray-400" />
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        Inga fler löpare just nu
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Kom tillbaka senare för att se fler profiler
-                      </p>
-                      <motion.button
+                        key={level}
+                        onClick={() => setFilters({ ...filters, level })}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          setCurrentIndex(0);
-                          fetchRunners();
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                        className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                          filters.level === level
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                       >
-                        Uppdatera
+                        {level === 'all' ? '🌟 Alla' : level === 'Nybörjare' ? '🌱 Nybörjare' : level === 'Medel' ? '💪 Medel' : '🚀 Avancerad'}
                       </motion.button>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {runners.map((runner) => (
-                    <RunnerCard key={runner.id} runner={runner} />
-                  ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-[600px]">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                  <Users className="w-8 h-8 text-blue-600 animate-pulse" />
+                </div>
+                <p className="text-gray-600">Laddar löpare...</p>
+              </div>
+            </div>
+          ) : (
+            <div className={viewMode === 'scroll' ? 'space-y-6' : ''}>
+              {/* AI Matches Section - Removed the large section, only show matches if completed */}
+              {hasAiProfile && aiMatches.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="w-5 h-5 text-yellow-500" />
+                    <h2 className="text-xl font-bold text-gray-900">Dina AI-supermatchningar</h2>
+                    <span className="text-sm text-gray-600">- Skriv direkt utan att matcha!</span>
+                  </div>
+                  
+                  <div className={viewMode === 'scroll' ? 'space-y-4' : 'relative h-[600px]'}>
+                    {viewMode === 'scroll' ? (
+                      aiMatches.map((match) => (
+                        <RunnerCard key={match.id} runner={match} isAiMatch={true} />
+                      ))
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {aiMatches.slice(0, 3).map((match) => (
+                          <RunnerCard key={match.id} runner={match} isAiMatch={true} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
+
+              {/* Regular Runners */}
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-gray-600" />
+                  Andra löpare i närheten
+                </h2>
+                
+                {viewMode === 'stack' ? (
+                  <div className={`relative ${window.innerWidth < 768 ? 'h-screen -mx-4 -mt-6' : 'h-[600px]'} flex items-center justify-center`} ref={constraintsRef}>
+                    {/* Mobile swipe instructions */}
+                    {window.innerWidth < 768 && hasMoreRunners && (
+                      <div className="absolute top-4 left-0 right-0 z-10 px-8">
+                        <div className="bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 flex items-center justify-between text-white text-sm">
+                          <span className="flex items-center gap-1">
+                            <ChevronLeft className="w-4 h-4" />
+                            Nej
+                          </span>
+                          <span className="font-medium">Swipa för att välja</span>
+                          <span className="flex items-center gap-1">
+                            Ja
+                            <ChevronRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <AnimatePresence>
+                      {hasMoreRunners && currentRunner && (
+                        <RunnerCard 
+                          key={currentRunner.id} 
+                          runner={currentRunner} 
+                          index={currentIndex}
+                        />
+                      )}
+                    </AnimatePresence>
+
+                    {/* Action Buttons for Stack Mode Desktop */}
+                    {hasMoreRunners && window.innerWidth >= 768 && (
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleSwipe('left', currentRunner.id)}
+                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <X className="w-8 h-8" />
+                        </motion.button>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleSwipe('right', currentRunner.id)}
+                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                        >
+                          <Heart className="w-8 h-8" />
+                        </motion.button>
+                      </div>
+                    )}
+
+                    {/* No more runners */}
+                    {!hasMoreRunners && (
+                      <div className="text-center">
+                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Users className="w-10 h-10 text-gray-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          Inga fler löpare just nu
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                          Kom tillbaka senare för att se fler profiler
+                        </p>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setCurrentIndex(0);
+                            fetchRunners();
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                        >
+                          Uppdatera
+                        </motion.button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {runners.map((runner) => (
+                      <RunnerCard key={runner.id} runner={runner} />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Info Modal */}

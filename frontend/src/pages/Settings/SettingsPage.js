@@ -107,9 +107,10 @@ const SettingsPage = () => {
   const SettingCard = ({ icon: Icon, title, description, children, action, highlight }) => (
     <motion.div
       whileHover={{ y: -2 }}
+      onClick={action && !children ? action : undefined}
       className={`bg-white rounded-2xl p-6 shadow-lg border ${
         highlight ? 'border-orange-200' : 'border-gray-100'
-      } transition-all`}
+      } transition-all ${action && !children ? 'cursor-pointer hover:shadow-xl' : ''}`}
     >
       <div className="flex items-start gap-4">
         <div className={`w-12 h-12 rounded-xl ${
@@ -122,14 +123,30 @@ const SettingsPage = () => {
           <p className="text-sm text-gray-600 mb-3">{description}</p>
           {children}
         </div>
-        {action && (
-          <button
-            onClick={action}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+        {action && !children && (
+          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
         )}
+      </div>
+    </motion.div>
+  );
+
+  const PreferenceCard = ({ icon: Icon, title, description, value, onChange }) => (
+    <motion.div
+      whileHover={{ y: -2 }}
+      onClick={onChange}
+      className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all cursor-pointer hover:shadow-xl group"
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-gray-200 transition-colors">
+          <Icon className="w-6 h-6 text-gray-600" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+          <p className="text-sm text-gray-600">{description}</p>
+        </div>
+        <div className="pointer-events-none">
+          <ToggleSwitch value={value} onChange={() => {}} />
+        </div>
       </div>
     </motion.div>
   );
@@ -313,13 +330,6 @@ const SettingsPage = () => {
                 </div>
               )}
             </SettingCard>
-
-            <SettingCard
-              icon={Globe}
-              title="Strava"
-              description="Anslut ditt Strava-konto för att importera aktiviteter"
-              action={() => navigate('/app/settings/integrations')}
-            />
           </div>
         </motion.div>
 
@@ -367,37 +377,37 @@ const SettingsPage = () => {
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Preferenser</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SettingCard
+            <PreferenceCard
               icon={darkMode ? Moon : Sun}
               title="Mörkt läge"
               description="Växla mellan ljust och mörkt tema"
-            >
-              <ToggleSwitch value={darkMode} onChange={handleToggleDarkMode} />
-            </SettingCard>
+              value={darkMode}
+              onChange={handleToggleDarkMode}
+            />
 
-            <SettingCard
+            <PreferenceCard
               icon={soundEnabled ? Volume2 : VolumeX}
               title="Ljud"
               description="Aktivera eller inaktivera ljudeffekter"
-            >
-              <ToggleSwitch value={soundEnabled} onChange={() => setSoundEnabled(!soundEnabled)} />
-            </SettingCard>
+              value={soundEnabled}
+              onChange={() => setSoundEnabled(!soundEnabled)}
+            />
 
-            <SettingCard
+            <PreferenceCard
               icon={MapPin}
               title="Platsåtkomst"
               description="Tillåt appen att använda din plats"
-            >
-              <ToggleSwitch value={locationEnabled} onChange={() => setLocationEnabled(!locationEnabled)} />
-            </SettingCard>
+              value={locationEnabled}
+              onChange={() => setLocationEnabled(!locationEnabled)}
+            />
 
-            <SettingCard
+            <PreferenceCard
               icon={Smartphone}
               title="Push-notiser"
               description="Ta emot notiser på din enhet"
-            >
-              <ToggleSwitch value={true} onChange={() => {}} />
-            </SettingCard>
+              value={true}
+              onChange={() => {}}
+            />
           </div>
         </motion.div>
 

@@ -9,7 +9,9 @@ import {
   Play,
   CheckCircle,
   ArrowRight,
-  Zap
+  Zap,
+  Heart,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
@@ -188,30 +190,46 @@ const DashboardPage = () => {
                       </motion.div>
                     ))}
                   </div>
+
+                  {/* Features */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
+                      <Zap className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-800 break-words">Optimerade notifieringar</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
+                      <Heart className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-800 break-words">Hälsoinsikter</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
+                      <Settings className="w-5 h-5 text-pink-600 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-800 break-words">Smarta inställningar</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Visual */}
                 <div className="relative">
-                  <div className="bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl p-8 text-center">
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <Target className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                        <p className="text-sm font-semibold text-gray-700">Målanalys</p>
+                  <div className="bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl p-4 md:p-8 text-center">
+                    <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
+                      <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm">
+                        <Target className="w-6 h-6 md:w-8 md:h-8 text-orange-500 mx-auto mb-2" />
+                        <p className="text-xs md:text-sm font-semibold text-gray-700 break-words">Målanalys</p>
                       </div>
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <TrendingUp className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                        <p className="text-sm font-semibold text-gray-700">Progressplan</p>
+                      <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm">
+                        <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-green-500 mx-auto mb-2" />
+                        <p className="text-xs md:text-sm font-semibold text-gray-700 break-words">Progressplan</p>
                       </div>
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <Zap className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                        <p className="text-sm font-semibold text-gray-700">Träningsschema</p>
+                      <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm">
+                        <Zap className="w-6 h-6 md:w-8 md:h-8 text-blue-500 mx-auto mb-2" />
+                        <p className="text-xs md:text-sm font-semibold text-gray-700 break-words">Träningsschema</p>
                       </div>
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <Brain className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                        <p className="text-sm font-semibold text-gray-700">AI-coaching</p>
+                      <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm">
+                        <Brain className="w-6 h-6 md:w-8 md:h-8 text-purple-500 mx-auto mb-2" />
+                        <p className="text-xs md:text-sm font-semibold text-gray-700 break-words">AI-coaching</p>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs md:text-sm text-gray-600">
                       15 frågor • 5 minuter • Livslång plan
                     </p>
                   </div>

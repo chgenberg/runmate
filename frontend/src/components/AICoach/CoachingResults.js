@@ -28,10 +28,50 @@ import { toast } from 'react-hot-toast';
 const CoachingResults = ({ plan, isVisible, onClose }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  if (!isVisible || !plan) return null;
+  if (!isVisible) return null;
+
+  // Add safety check and default plan structure
+  const safePlan = plan || {
+    summary: {
+      duration: '12 veckor',
+      weeklyCommitment: '3-4 timmar',
+      primaryFocus: 'Hälsa',
+      level: 'Medel'
+    },
+    training: {
+      weeklySchedule: [
+        { day: 'Måndag', type: 'Lätt löpning', duration: '30 min', pace: 'Lugnt tempo' },
+        { day: 'Onsdag', type: 'Intervaller', duration: '45 min', pace: 'Varierande' },
+        { day: 'Fredag', type: 'Distans', duration: '60 min', pace: 'Medeltempo' },
+        { day: 'Söndag', type: 'Långpass', duration: '90 min', pace: 'Lugnt tempo' }
+      ],
+      phases: []
+    },
+    nutrition: {
+      dailyCalories: '2400-2600 kcal',
+      macros: {
+        carbs: '50-60%',
+        protein: '20-25%',
+        fat: '20-25%'
+      },
+      hydration: '3.0-3.5 L'
+    },
+    lifestyle: {
+      sleep: {
+        hours: '7-9 timmar',
+        tips: ['Gå och lägg dig samma tid varje dag', 'Undvik skärmar 1 timme före sömn']
+      },
+      stressManagement: ['Meditation 10 min/dag', 'Yoga eller stretching'],
+      crossTraining: ['Simning', 'Cykling', 'Styrketräning'],
+      injuryPrevention: ['Uppvärmning före varje pass', 'Stretching efter träning']
+    },
+    matches: {
+      topMatches: []
+    }
+  };
 
   // Log plan structure for debugging
-  console.log('Coaching Results Plan:', plan);
+  console.log('Coaching Results Plan:', safePlan);
 
   const handleExport = () => {
     toast.success('Din träningsplan exporteras som PDF...');
@@ -72,19 +112,19 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-            <div className="text-2xl font-bold">{plan.summary?.duration || '12 veckor'}</div>
+            <div className="text-2xl font-bold">{safePlan.summary?.duration || '12 veckor'}</div>
             <div className="text-white/80 text-sm">Program längd</div>
           </div>
           <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-            <div className="text-2xl font-bold">{plan.summary?.weeklyCommitment || '3-4 timmar'}</div>
+            <div className="text-2xl font-bold">{safePlan.summary?.weeklyCommitment || '3-4 timmar'}</div>
             <div className="text-white/80 text-sm">Per vecka</div>
           </div>
           <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-            <div className="text-2xl font-bold">{plan.summary?.primaryFocus || 'Hälsa'}</div>
+            <div className="text-2xl font-bold">{safePlan.summary?.primaryFocus || 'Hälsa'}</div>
             <div className="text-white/80 text-sm">Huvudfokus</div>
           </div>
           <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-            <div className="text-2xl font-bold">{plan.summary?.level || 'Medel'}</div>
+            <div className="text-2xl font-bold">{safePlan.summary?.level || 'Medel'}</div>
             <div className="text-white/80 text-sm">Svårighetsgrad</div>
           </div>
         </div>
@@ -169,7 +209,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <h4 className="text-xl font-bold text-gray-900 mb-4">Veckoschema</h4>
         <div className="space-y-3">
-          {(plan.training?.weeklySchedule || []).map((workout, index) => (
+          {(safePlan.training?.weeklySchedule || []).map((workout, index) => (
             <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white font-bold">
@@ -194,7 +234,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
       {/* Training Phases */}
       <div className="space-y-4">
         <h4 className="text-xl font-bold text-gray-900">Träningsfaser</h4>
-        {plan.training?.phases?.map((phase, index) => (
+        {safePlan.training?.phases?.map((phase, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, x: -20 }}
@@ -243,9 +283,9 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
             <div className="flex items-center justify-between mb-4">
               <h5 className="font-medium text-gray-900">Kalorier</h5>
               <span className="text-2xl font-bold text-orange-600">
-                {typeof plan.nutrition?.dailyCalories === 'number' 
-                  ? `${plan.nutrition.dailyCalories} kcal`
-                  : plan.nutrition?.dailyCalories || '2400-2600 kcal'}
+                {typeof safePlan.nutrition?.dailyCalories === 'number' 
+                  ? `${safePlan.nutrition.dailyCalories} kcal`
+                  : safePlan.nutrition?.dailyCalories || '2400-2600 kcal'}
               </span>
             </div>
             
@@ -253,7 +293,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Kolhydrater</span>
-                  <span className="font-medium">{plan.nutrition?.macros?.carbs || '50-60%'}</span>
+                  <span className="font-medium">{safePlan.nutrition?.macros?.carbs || '50-60%'}</span>
                 </div>
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div className="h-full bg-blue-500" style={{ width: '55%' }} />
@@ -263,7 +303,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Protein</span>
-                  <span className="font-medium">{plan.nutrition?.macros?.protein || '20-25%'}</span>
+                  <span className="font-medium">{safePlan.nutrition?.macros?.protein || '20-25%'}</span>
                 </div>
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div className="h-full bg-green-500" style={{ width: '22.5%' }} />
@@ -273,7 +313,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Fett</span>
-                  <span className="font-medium">{plan.nutrition?.macros?.fat || '20-25%'}</span>
+                  <span className="font-medium">{safePlan.nutrition?.macros?.fat || '20-25%'}</span>
                 </div>
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div className="h-full bg-yellow-500" style={{ width: '22.5%' }} />
@@ -286,7 +326,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
             <h5 className="font-medium text-gray-900 mb-4">Vätska</h5>
             <div className="flex items-center gap-3 mb-4">
               <Droplets className="w-8 h-8 text-blue-500" />
-              <span className="text-2xl font-bold text-blue-600">{plan.nutrition?.hydration || '3.0-3.5 L'}</span>
+              <span className="text-2xl font-bold text-blue-600">{safePlan.nutrition?.hydration || '3.0-3.5 L'}</span>
             </div>
             <p className="text-sm text-gray-600">
               Öka med 500-750ml på träningsdagar
@@ -302,9 +342,9 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
             <Coffee className="w-5 h-5 text-orange-600" />
             Före träning
           </h5>
-          <p className="text-sm text-gray-700 mb-3">{plan.nutrition?.preworkout?.timing || '1-2 timmar före'}</p>
+          <p className="text-sm text-gray-700 mb-3">{safePlan.nutrition?.preworkout?.timing || '1-2 timmar före'}</p>
           <ul className="space-y-2">
-            {(plan.nutrition?.preworkout?.options || []).map((option, i) => (
+            {(safePlan.nutrition?.preworkout?.options || []).map((option, i) => (
               <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-orange-500 mt-0.5" />
                 {option}
@@ -318,9 +358,9 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
             <Apple className="w-5 h-5 text-green-600" />
             Efter träning
           </h5>
-          <p className="text-sm text-gray-700 mb-3">{plan.nutrition?.postworkout?.timing || 'Inom 30-60 min'}</p>
+          <p className="text-sm text-gray-700 mb-3">{safePlan.nutrition?.postworkout?.timing || 'Inom 30-60 min'}</p>
           <ul className="space-y-2">
-            {(plan.nutrition?.postworkout?.options || []).map((option, i) => (
+            {(safePlan.nutrition?.postworkout?.options || []).map((option, i) => (
               <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
                 {option}
@@ -331,11 +371,11 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
       </div>
 
       {/* Supplements */}
-      {plan.nutrition?.supplements && (
+      {safePlan.nutrition?.supplements && (
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <h5 className="font-semibold text-gray-900 mb-4">Rekommenderade kosttillskott</h5>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {plan.nutrition.supplements.map((supplement, i) => (
+            {safePlan.nutrition.supplements.map((supplement, i) => (
               <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <Star className="w-5 h-5 text-yellow-500" />
                 <span className="text-sm text-gray-700">{supplement}</span>
@@ -360,11 +400,11 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
           Sömn & Återhämtning
         </h4>
         <div className="mb-4">
-          <p className="text-2xl font-bold text-indigo-600">{plan.lifestyle?.sleep?.hours || '7-9 timmar'}</p>
+          <p className="text-2xl font-bold text-indigo-600">{safePlan.lifestyle?.sleep?.hours || '7-9 timmar'}</p>
           <p className="text-gray-600">Rekommenderad sömn per natt</p>
         </div>
         <div className="space-y-2">
-          {(plan.lifestyle?.sleep?.tips || []).map((tip, i) => (
+          {(safePlan.lifestyle?.sleep?.tips || []).map((tip, i) => (
             <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
               <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5" />
               {tip}
@@ -380,7 +420,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
           Stresshantering
         </h4>
         <div className="space-y-3">
-          {(plan.lifestyle?.stressManagement || []).map((method, i) => (
+          {(safePlan.lifestyle?.stressManagement || []).map((method, i) => (
             <div key={i} className="p-4 bg-purple-50 rounded-xl border border-purple-100">
               <p className="text-gray-800">{method}</p>
             </div>
@@ -395,7 +435,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
           Kompletterande träning
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {(plan.lifestyle?.crossTraining || []).map((activity, i) => (
+          {(safePlan.lifestyle?.crossTraining || []).map((activity, i) => (
             <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
               <Activity className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-700">{activity}</span>
@@ -411,7 +451,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
           Skadeförebyggande
         </h4>
         <div className="space-y-2">
-          {(plan.lifestyle?.injuryPrevention || []).map((tip, i) => (
+          {(safePlan.lifestyle?.injuryPrevention || []).map((tip, i) => (
             <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
               <CheckCircle className="w-4 h-4 text-red-500 mt-0.5" />
               {tip}
@@ -433,7 +473,7 @@ const CoachingResults = ({ plan, isVisible, onClose }) => {
         <p className="text-gray-600 mb-6">Baserat på dina preferenser och träningsstil</p>
         
         <div className="space-y-4">
-          {(plan.matches?.topMatches || []).map((match, i) => (
+          {(safePlan.matches?.topMatches || []).map((match, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -20 }}

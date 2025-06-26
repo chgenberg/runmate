@@ -5,6 +5,25 @@ const Activity = require('../models/Activity');
 const { protect } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 
+// Helper function to update challenge status based on dates
+const updateChallengeStatus = async (challenge) => {
+  const now = new Date();
+  let newStatus = challenge.status;
+  
+  if (challenge.status === 'upcoming' && now >= challenge.startDate) {
+    newStatus = 'active';
+  } else if (challenge.status === 'active' && now > challenge.endDate) {
+    newStatus = 'completed';
+  }
+  
+  if (newStatus !== challenge.status) {
+    challenge.status = newStatus;
+    await challenge.save();
+  }
+  
+  return challenge;
+};
+
 // Get all public challenges + user's private challenges
 router.get('/', protect, async (req, res) => {
   try {
@@ -219,13 +238,16 @@ router.post('/', protect, [
 // Get specific challenge
 router.get('/:id', protect, async (req, res) => {
   try {
-    const challenge = await Challenge.findById(req.params.id)
+    let challenge = await Challenge.findById(req.params.id)
       .populate('creator', 'firstName lastName profileImage username')
       .populate('participants.user', 'firstName lastName profileImage username');
     
     if (!challenge) {
       return res.status(404).json({ message: 'Challenge not found' });
     }
+    
+    // Update status based on current date
+    challenge = await updateChallengeStatus(challenge);
     
     // Check if user can view this challenge
     const canView = challenge.visibility === 'public' || 
@@ -303,11 +325,14 @@ router.get('/:id', protect, async (req, res) => {
 router.post('/:id/join', protect, async (req, res) => {
   try {
     const { joinCode } = req.body;
-    const challenge = await Challenge.findById(req.params.id);
+    let challenge = await Challenge.findById(req.params.id);
     
     if (!challenge) {
       return res.status(404).json({ message: 'Challenge not found' });
     }
+    
+    // Update status based on current date before checking joinability
+    challenge = await updateChallengeStatus(challenge);
     
     // Check if challenge is joinable
     if (challenge.status !== 'upcoming' && challenge.status !== 'active') {

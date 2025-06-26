@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Clock, Mountain, Target, Zap, Navigation,
+  Clock, Mountain, Zap, Navigation,
   Search, Heart, Share, Play,
   TrendingUp, Route, Filter, MapPin, 
-  Sparkles, Wind, Trees, Building,
-  Sun, Moon, Cloud, ChevronDown,
-  X, Info, Award, Users, Calendar,
+  Sparkles, Trees,
+  Cloud,
+  X, Award, Users,
   BarChart3, Compass, Footprints
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -189,6 +189,7 @@ const SuggestedRoutesPage = () => {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation, filters, locationPermission]);
 
   // Load routes when filters change

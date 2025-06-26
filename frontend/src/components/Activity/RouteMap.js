@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, Navigation, Clock, Mountain, Zap, Play, Heart, Star, TrendingUp, Users, Sparkles } from 'lucide-react';
+import { MapPin, Navigation, Clock, Mountain, Zap, Play, Heart, Star, TrendingUp, Sparkles } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in react-leaflet

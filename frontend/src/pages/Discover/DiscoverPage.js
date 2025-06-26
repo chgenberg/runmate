@@ -257,9 +257,11 @@ const DiscoverPage = () => {
                       )}
                       
                       {/* Level Badge */}
-                      <div className={`absolute top-4 right-4 px-3 py-1 rounded-full bg-${levelColors[currentRunner.level]}-500 text-white font-semibold text-sm`}>
-                        {currentRunner.level}
-                      </div>
+                      {currentRunner.level && (
+                        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full bg-${levelColors[currentRunner.level] || 'gray'}-500 text-white font-semibold text-sm`}>
+                          {currentRunner.level}
+                        </div>
+                      )}
                       
                       {/* Rating */}
                       <div className="absolute top-4 left-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -307,7 +309,7 @@ const DiscoverPage = () => {
 
                       {/* Interests */}
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {currentRunner.interests.map((interest, index) => (
+                        {(currentRunner.interests || []).map((interest, index) => (
                           <span
                             key={index}
                             className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"

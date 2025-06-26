@@ -35,9 +35,10 @@ const DiscoverPage = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
+    ageRange: [18, 65],
     distance: 50,
-    pace: 'all',
-    level: 'all'
+    activityLevel: 'all',
+    goals: []
   });
   const [viewMode, setViewMode] = useState('stack'); // 'stack' or 'scroll'
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -46,8 +47,10 @@ const DiscoverPage = () => {
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
   const [showCoachingResults, setShowCoachingResults] = useState(false);
   const [coachingPlan, setCoachingPlan] = useState(null);
-  const [isAiSectionMinimized, setIsAiSectionMinimized] = useState(false);
   const [showAIPopup, setShowAIPopup] = useState(false);
+  const [isLikeModalOpen, setIsLikeModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
 
   const constraintsRef = useRef(null);
 

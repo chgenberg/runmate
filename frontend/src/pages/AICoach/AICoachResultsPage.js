@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Target, Calendar, TrendingUp, Activity, 
-  Clock, MapPin, Users, Heart, Apple, 
-  Moon, Brain, AlertCircle, CheckCircle,
-  Download, Share2, ChevronRight, ArrowLeft
-} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { 
+  ArrowLeft, Sparkles, Heart, TrendingUp, Activity, Apple, Moon, Dumbbell
+} from 'lucide-react';
+import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const AICoachResultsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [coachingPlan] = useState(location.state?.plan);
   const [activeTab, setActiveTab] = useState('overview');
-  const [coachingPlan, setCoachingPlan] = useState(location.state?.plan || null);
 
   useEffect(() => {
     if (!coachingPlan) {

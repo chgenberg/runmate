@@ -285,7 +285,6 @@ const StatisticsPage = () => {
       const activitiesData = activitiesResponse.data.activities || [];
 
       // Filter activities based on selected period
-      const now = new Date();
       let filteredActivities = activitiesData;
       
       switch (selectedPeriod) {

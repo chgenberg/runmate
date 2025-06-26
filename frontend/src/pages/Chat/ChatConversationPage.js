@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,13 +8,12 @@ import {
   Video,
   MoreVertical,
   MapPin,
+  Clock,
   Check,
   CheckCheck,
-  Smile,
-  Paperclip,
-  Image,
   Trophy,
-  Users
+  Users,
+  Paperclip
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
@@ -58,13 +57,13 @@ const ChatConversationPage = () => {
         socket.off('user-stopped-typing', handleUserStoppedTyping);
       };
     }
-  }, [chatId, socket]);
+  }, [chatId, socket, handleUserTyping, loadChatInfo, loadMessages]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const loadChatInfo = async () => {
+  const loadChatInfo = useCallback(async () => {
     try {
       const response = await api.get(`/chat/conversations/${chatId}`);
       setChatInfo(response.data.conversation);
@@ -94,9 +93,9 @@ const ChatConversationPage = () => {
         });
       }
     }
-  };
+  }, [chatId, user]);
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       const response = await api.get(`/chat/conversations/${chatId}/messages`);
       setMessages(response.data.messages || []);
@@ -129,17 +128,17 @@ const ChatConversationPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [chatId, user]);
 
   const handleNewMessage = (message) => {
     setMessages(prev => [...prev, message]);
   };
 
-  const handleUserTyping = (data) => {
+  const handleUserTyping = useCallback((data) => {
     if (data.userId !== user._id) {
       setTypingUsers(prev => [...prev.filter(id => id !== data.userId), data.userName]);
     }
-  };
+  }, [user._id]);
 
   const handleUserStoppedTyping = (data) => {
     setTypingUsers(prev => prev.filter(name => name !== data.userName));
@@ -153,7 +152,7 @@ const ChatConversationPage = () => {
     setNewMessage('');
 
     try {
-      const response = await api.post(`/chat/conversations/${chatId}/messages`, {
+      await api.post(`/chat/conversations/${chatId}/messages`, {
         content: messageContent
       });
 

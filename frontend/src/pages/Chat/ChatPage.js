@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -16,14 +16,12 @@ import {
   Zap,
   Heart,
   MapPin,
-  Bell,
-  Settings,
   Clock,
-  TrendingUp,
   Activity,
   Smile,
   Calendar,
-  Target
+  MessageSquare,
+  CheckCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
@@ -40,13 +38,9 @@ const ChatPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
+  const [showQuickActions] = useState(false);
 
-  useEffect(() => {
-    loadChats();
-  }, []);
-
-  const loadChats = async () => {
+  const loadChats = useCallback(async () => {
     try {
       const response = await api.get('/chat/conversations');
       setChats(response.data.conversations || []);
@@ -146,7 +140,13 @@ const ChatPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadChats();
+  }, [loadChats]);
+
+
 
   const filteredChats = chats.filter(chat => {
     if (activeTab === 'matches' && chat.type !== 'match') return false;

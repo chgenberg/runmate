@@ -48,9 +48,6 @@ const DiscoverPage = () => {
   const [showCoachingResults, setShowCoachingResults] = useState(false);
   const [coachingPlan, setCoachingPlan] = useState(null);
   const [showAIPopup, setShowAIPopup] = useState(false);
-  const [isLikeModalOpen, setIsLikeModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [users, setUsers] = useState([]);
 
   const constraintsRef = useRef(null);
 

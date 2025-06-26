@@ -2,9 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Sparkles, Heart, TrendingUp, Activity, Apple, Moon, Dumbbell
+  ArrowLeft, 
+  Target, 
+  Activity, 
+  Apple, 
+  Heart, 
+  TrendingUp, 
+  Moon, 
+  Calendar,
+  Download,
+  Share2,
+  ChevronRight,
+  CheckCircle
 } from 'lucide-react';
-import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const AICoachResultsPage = () => {
   const location = useLocation();

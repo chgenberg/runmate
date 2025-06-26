@@ -11,7 +11,11 @@ import {
   Utensils,
   Smartphone,
   Users,
-  CheckCircle2
+  CheckCircle2,
+  Target,
+  Activity,
+  Clock,
+  Heart
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';

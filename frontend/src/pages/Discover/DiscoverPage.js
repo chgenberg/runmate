@@ -41,7 +41,28 @@ const DiscoverPage = () => {
     setLoading(true);
     try {
       const response = await api.get('/users/discover', { params: filters });
-      setRunners(response.data.users || []);
+      const backendUsers = response.data.users || [];
+      
+      // Map backend data to frontend format
+      const mappedUsers = backendUsers.map(user => ({
+        id: user._id,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        age: user.dateOfBirth ? new Date().getFullYear() - new Date(user.dateOfBirth).getFullYear() : 
+             user.birthDate ? new Date().getFullYear() - new Date(user.birthDate).getFullYear() : 25,
+        location: user.location?.city || 'Okänd stad',
+        distance: user.distance || Math.floor(Math.random() * 50) + 1,
+        bio: user.bio || 'Gillar att springa och träffa nya människor!',
+        level: user.activityLevel || 'Medel',
+        pace: user.avgPace || `${Math.floor(Math.random() * 2) + 4}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
+        weeklyDistance: user.weeklyDistance || Math.floor(Math.random() * 50) + 20,
+        interests: user.sportTypes || user.sports || user.preferredRunTypes || ['Löpning', 'Träning'],
+        profilePicture: user.profilePicture || user.photos?.[0] || '/avatar2.png',
+        rating: 4.0 + Math.random() * 1.0, // Random rating between 4.0-5.0
+        totalRuns: user.trainingStats?.totalRuns || Math.floor(Math.random() * 200) + 50,
+        achievements: ['Löpare', 'Träningsentusiast'] // Default achievements
+      }));
+      
+      setRunners(mappedUsers);
           } catch (error) {
         console.error('Error fetching runners:', error);
         // Demo data with all required fields
@@ -139,14 +160,7 @@ const DiscoverPage = () => {
   const currentRunner = runners[currentIndex];
   const hasMoreRunners = currentIndex < runners.length;
 
-  // Debug logging
-  console.log('DiscoverPage Debug:', {
-    runnersLength: runners.length,
-    currentIndex,
-    currentRunner,
-    hasCurrentRunnerInterests: currentRunner?.interests,
-    hasMoreRunners
-  });
+
 
   const levelColors = {
     'Nybörjare': 'green',

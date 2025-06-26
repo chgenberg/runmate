@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { User, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Sidebar from './Sidebar';
+import MobileNav from './MobileNav';
 import AICoachOnboarding from '../AICoach/AICoachOnboarding';
 import api from '../../services/api';
 
@@ -28,11 +29,20 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header - Mobile only */}
       <header className="lg:hidden bg-white border-b border-gray-200 shadow-sm relative z-30">
-        <div className="flex items-center justify-end px-4 py-3">
-          {/* AI Icon - Mobile */}
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">R</span>
+            </div>
+            <span className="font-bold text-gray-900">RunMate</span>
+          </div>
+
+          {/* Right side icons */}
           <div className="flex items-center gap-3">
+            {/* AI Icon - Mobile */}
             {!hasCompletedAnalysis && (
               <motion.button
                 onClick={() => setShowAIOnboarding(true)}
@@ -68,11 +78,13 @@ const Layout = () => {
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
-        <Sidebar />
+        {/* Sidebar - Desktop only */}
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-0">
+        <main className="flex-1 lg:ml-64">
           {/* Desktop Header */}
           <div className="hidden lg:block bg-white border-b border-gray-200 shadow-sm">
             <div className="flex items-center justify-end px-6 py-4">
@@ -113,19 +125,30 @@ const Layout = () => {
           </div>
 
           {/* Page Content */}
-          <div className="min-h-screen">
+          <div className="min-h-screen pb-16 lg:pb-0">
             <Outlet />
           </div>
         </main>
       </div>
 
+      {/* Mobile Navigation */}
+      <MobileNav />
+
       {/* AI Onboarding Modal */}
       <AICoachOnboarding 
         isOpen={showAIOnboarding}
-        onClose={() => setShowAIOnboarding(false)}
-        onComplete={(plan) => {
-          setHasCompletedAnalysis(true);
+        onClose={() => {
           setShowAIOnboarding(false);
+          // Refresh analysis status after closing
+          const checkAnalysisStatus = async () => {
+            try {
+              const response = await api.get('/dashboard');
+              setHasCompletedAnalysis(response.data?.hasCompletedAIAnalysis || false);
+            } catch (error) {
+              console.error('Error checking analysis status:', error);
+            }
+          };
+          checkAnalysisStatus();
         }}
       />
     </div>

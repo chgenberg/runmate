@@ -26,7 +26,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
-import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const DiscoverPage = () => {
   const navigate = useNavigate();
@@ -46,8 +45,6 @@ const DiscoverPage = () => {
   const [hasAiProfile, setHasAiProfile] = useState(false);
   const [aiMatches, setAiMatches] = useState([]);
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
-  const [showCoachingResults, setShowCoachingResults] = useState(false);
-  const [coachingPlan, setCoachingPlan] = useState(null);
   const [showAIPopup, setShowAIPopup] = useState(false);
 
   const constraintsRef = useRef(null);
@@ -154,14 +151,7 @@ const DiscoverPage = () => {
     setShowAIOnboarding(true);
   };
 
-  const handleAIOnboardingComplete = (plan) => {
-    setCoachingPlan(plan);
-    setHasAiProfile(true);
-    setShowCoachingResults(true);
-    
-    // Fetch AI matches after completing onboarding
-    fetchAiMatches();
-  };
+
 
   const handleSwipe = async (direction, userId) => {
     if (direction === 'right') {
@@ -991,16 +981,14 @@ const DiscoverPage = () => {
       {/* AI Onboarding Modal */}
       <AICoachOnboarding 
         isOpen={showAIOnboarding}
-        onClose={() => setShowAIOnboarding(false)}
-        onComplete={handleAIOnboardingComplete}
+        onClose={() => {
+          setShowAIOnboarding(false);
+          // Check if analysis is complete after closing
+          checkAiProfile();
+        }}
       />
 
-      {/* Coaching Results Modal */}
-      <CoachingResults 
-        plan={coachingPlan}
-        isVisible={showCoachingResults}
-        onClose={() => setShowCoachingResults(false)}
-      />
+
     </div>
   );
 };

@@ -514,7 +514,7 @@ const SuggestedRoutesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-20 lg:pb-0">
       {/* Hero Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
         <div className="absolute inset-0 bg-black/20"></div>

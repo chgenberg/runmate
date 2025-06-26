@@ -95,7 +95,7 @@ function App() {
               <Route path="settings" element={<SettingsPage />} />
               
               {/* AI Coach Results */}
-              <Route path="aicoach/results" element={<AICoachResultsPage />} />
+              <Route path="ai-coach-results" element={<AICoachResultsPage />} />
             </Route>
             
             {/* Catch all route */}

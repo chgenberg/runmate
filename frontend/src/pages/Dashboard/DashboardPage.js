@@ -16,15 +16,12 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
-import CoachingResults from '../../components/AICoach/CoachingResults';
 
 const DashboardPage = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
-  const [showCoachingResults, setShowCoachingResults] = useState(false);
   const [hasCompletedAnalysis, setHasCompletedAnalysis] = useState(false);
-  const [coachingPlan, setCoachingPlan] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,22 +66,7 @@ const DashboardPage = () => {
     setShowAIOnboarding(true);
   };
 
-  const handleAIOnboardingComplete = (plan) => {
-    console.log('AI Onboarding Complete - Received plan:', plan);
-    setCoachingPlan(plan);
-    setHasCompletedAnalysis(true);
-    setShowCoachingResults(true);
-    
-    // Update dashboard data to reflect completion
-    setDashboardData(prev => ({
-      ...prev,
-      hasCompletedAIAnalysis: true,
-      aiCoachPlan: plan
-    }));
-    
-    // Refresh dashboard data
-    fetchDashboardData();
-  };
+
 
   if (isLoading) {
     return (
@@ -300,15 +282,9 @@ const DashboardPage = () => {
       <AICoachOnboarding 
         isOpen={showAIOnboarding}
         onClose={() => setShowAIOnboarding(false)}
-        onComplete={handleAIOnboardingComplete}
       />
 
-      {/* Coaching Results Modal */}
-      <CoachingResults 
-        plan={coachingPlan}
-        isVisible={showCoachingResults}
-        onClose={() => setShowCoachingResults(false)}
-      />
+
     </div>
   );
 };

@@ -8,8 +8,8 @@ import {
   Sparkles,
   Brain
 } from 'lucide-react';
-import AppleHealthSyncModal from '../Layout/AppleHealthSyncModal';
 import api from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 // Matchning scoring system
 const calculateMatchScore = (userAnswers, otherUserAnswers) => {
@@ -72,12 +72,13 @@ const calculateMatchScore = (userAnswers, otherUserAnswers) => {
   return Math.round((score / maxScore) * 100);
 };
 
-const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
+const AICoachOnboarding = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showAppleHealth, setShowAppleHealth] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const navigate = useNavigate();
 
   const loadingMessages = [
     "Analyserar dina svar...",
@@ -282,13 +283,8 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Last question - check if mobile device for Apple Health integration
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (isMobile && answers.age_group !== '56+') {
-        setShowAppleHealth(true);
-      } else {
-        handleSubmit();
-      }
+      // Last question - directly submit
+      handleSubmit();
     }
   };
 
@@ -298,13 +294,29 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
     }
   };
 
-  const handleAppleHealthComplete = () => {
-    setShowAppleHealth(false);
-    handleSubmit();
-  };
+
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    
+    // Show loading messages
+    const messages = [
+      'Läser in svar...',
+      'Analyserar svar...',
+      'Planerar träningsschema...',
+      'Planerar kostschema...',
+      'Skapar översikt...'
+    ];
+    
+    let messageIndex = 0;
+    setLoadingMessage(messages[0]);
+    
+    const messageInterval = setInterval(() => {
+      messageIndex++;
+      if (messageIndex < messages.length) {
+        setLoadingMessage(messages[messageIndex]);
+      }
+    }, 1500);
     
     try {
       // Prepare complete data for API
@@ -357,20 +369,22 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
       const response = await api.post('/aicoach/comprehensive-plan', apiData);
 
       if (response.data.success) {
+        clearInterval(messageInterval);
+        
+        // Navigate to results page with plan data
         setTimeout(() => {
-          setIsLoading(false);
-          toast.success('�� Din personliga träningsplan är klar!', {
-            duration: 4000
+          navigate('/app/ai-coach-results', { 
+            state: { plan: response.data.plan },
+            replace: true 
           });
           onClose();
-          onComplete(response.data.plan);
-        }, 2000);
+        }, 500);
       } else {
         throw new Error('Failed to generate plan');
       }
     } catch (error) {
       console.error('Error creating comprehensive plan:', error);
-      setIsLoading(false);
+      clearInterval(messageInterval);
       
       // Enhanced demo fallback with complete data
       const demoResponse = {
@@ -433,14 +447,14 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
         }
       };
       
+      // Navigate to results page with demo plan
       setTimeout(() => {
-        setIsLoading(false);
-        toast.success('🎉 Din personliga träningsplan är klar!', {
-          duration: 4000
+        navigate('/app/ai-coach-results', { 
+          state: { plan: demoResponse.plan },
+          replace: true 
         });
         onClose();
-        onComplete(demoResponse.plan);
-      }, 2000);
+      }, 500);
     }
   };
 
@@ -880,6 +894,25 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
                             // Set loading state
                             setIsLoading(true);
                             
+                            // Show loading messages
+                            const messages = [
+                              'Läser in svar...',
+                              'Analyserar svar...',
+                              'Planerar träningsschema...',
+                              'Planerar kostschema...',
+                              'Skapar översikt...'
+                            ];
+                            
+                            let messageIndex = 0;
+                            setLoadingMessage(messages[0]);
+                            
+                            const messageInterval = setInterval(() => {
+                              messageIndex++;
+                              if (messageIndex < messages.length) {
+                                setLoadingMessage(messages[messageIndex]);
+                              }
+                            }, 1500);
+                            
                             try {
                               // Generate comprehensive plan with demo data
                               const response = await api.post('/aicoach/comprehensive-plan', {
@@ -919,6 +952,8 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
                               console.log('API Response:', response.data);
 
                               if (response.data && response.data.plan) {
+                                clearInterval(messageInterval);
+                                
                                 // Save the plan to user's dashboard
                                 await api.post('/dashboard', {
                                   hasCompletedAIAnalysis: true,
@@ -926,18 +961,101 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
                                   currentPlan: response.data.plan
                                 });
 
-                                // Close modal and show results
-                                onComplete(response.data.plan);
-                                onClose();
+                                // Navigate to results page
+                                setTimeout(() => {
+                                  navigate('/app/ai-coach-results', { 
+                                    state: { plan: response.data.plan },
+                                    replace: true 
+                                  });
+                                  onClose();
+                                }, 500);
                               } else {
                                 console.error('No plan in response:', response.data);
                                 toast.error('Kunde inte generera träningsplan');
+                                setIsLoading(false);
                               }
                             } catch (error) {
                               console.error('Error generating demo plan:', error);
-                              toast.error('Kunde inte generera demo-plan');
-                            } finally {
-                              setIsLoading(false);
+                              clearInterval(messageInterval);
+                              
+                              // Generate demo plan
+                              const demoData = {
+                                age_group: '26-35',
+                                primaryGoal: 'fitness',
+                                currentLevel: 'regular',
+                                trainingFrequency: '3',
+                                weeklyHours: '3-5',
+                                distancePreference: '5-10',
+                                pacePreference: '5:30-6:00',
+                                environment: 'both',
+                                preferredTime: 'morning'
+                              };
+                              
+                              const demoPlan = {
+                                summary: {
+                                  name: 'Din Personliga Löparplan',
+                                  level: 'regular',
+                                  goal: 'fitness',
+                                  duration: '12 veckor',
+                                  startDate: new Date().toLocaleDateString('sv-SE')
+                                },
+                                training: {
+                                  weeklySchedule: generateWeeklySchedule(demoData),
+                                  phases: [
+                                    {
+                                      name: 'Grundfas (Vecka 1-4)',
+                                      focus: 'Bygga uthållighet och vana',
+                                      weeklyDistance: calculateWeeklyDistance(demoData, 1),
+                                      keyWorkouts: generateKeyWorkouts(demoData, 'base')
+                                    },
+                                    {
+                                      name: 'Uppbyggnadsfas (Vecka 5-8)',
+                                      focus: 'Öka distans och tempo',
+                                      weeklyDistance: calculateWeeklyDistance(demoData, 2),
+                                      keyWorkouts: generateKeyWorkouts(demoData, 'build')
+                                    },
+                                    {
+                                      name: 'Toppfas (Vecka 9-12)',
+                                      focus: 'Maximera prestation',
+                                      weeklyDistance: calculateWeeklyDistance(demoData, 3),
+                                      keyWorkouts: generateKeyWorkouts(demoData, 'peak')
+                                    }
+                                  ],
+                                  progressionPlan: generateProgressionPlan(demoData),
+                                  recoveryProtocol: generateRecoveryProtocol(demoData)
+                                },
+                                nutrition: {
+                                  dailyCalories: calculateDailyCalories(demoData),
+                                  macros: {
+                                    carbs: '50-60%',
+                                    protein: '20-25%',
+                                    fat: '20-25%'
+                                  },
+                                  hydration: calculateHydration(demoData),
+                                  preworkout: generatePreWorkoutMeal(demoData),
+                                  postworkout: generatePostWorkoutMeal(demoData),
+                                  supplements: generateSupplements(demoData)
+                                },
+                                lifestyle: {
+                                  sleep: generateSleepRecommendation(demoData),
+                                  stressManagement: generateStressManagement(demoData),
+                                  crossTraining: generateCrossTraining(demoData),
+                                  injuryPrevention: generateInjuryPrevention(demoData)
+                                },
+                                matches: {
+                                  score: 95,
+                                  topMatches: generateTopMatches(demoData)
+                                }
+                              };
+                              
+                              // Navigate to results page with demo plan
+                              setTimeout(() => {
+                                navigate('/app/ai-coach-results', { 
+                                  state: { plan: demoPlan },
+                                  replace: true 
+                                });
+                                onClose();
+                              }, 500);
                             }
                           }}
                           className="text-purple-600 hover:text-purple-700 transition-colors text-sm font-medium flex items-center gap-1"
@@ -997,43 +1115,47 @@ const AICoachOnboarding = ({ isOpen, onClose, onComplete }) => {
                 <Brain className="w-10 h-10 text-white" />
               </motion.div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                AI-analys pågår...
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                AI-analys pågår
               </h3>
 
-              <div className="space-y-3">
-                {loadingMessages.map((message, index) => (
+              <motion.p
+                key={loadingMessage}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-lg text-gray-700 mb-6"
+              >
+                {loadingMessage}
+              </motion.p>
+
+              <div className="flex justify-center gap-2">
+                {[0, 1, 2, 3, 4].map((index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-3 text-left"
-                  >
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      className="w-2 h-2 bg-orange-500 rounded-full"
-                    />
-                    <span className="text-gray-700">{message}</span>
-                  </motion.div>
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.5, 1, 0.5]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      delay: index * 0.2
+                    }}
+                    className="w-2 h-2 bg-orange-500 rounded-full"
+                  />
                 ))}
               </div>
+
+              <p className="text-sm text-gray-500 mt-6">
+                Detta kan ta upp till 30 sekunder...
+              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Apple Health Modal */}
-      {showAppleHealth && (
-        <AppleHealthSyncModal
-          isOpen={showAppleHealth}
-          onClose={() => {
-            setShowAppleHealth(false);
-            handleSubmit();
-          }}
-          onComplete={handleAppleHealthComplete}
-        />
-      )}
+
     </>
   );
 };

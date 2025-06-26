@@ -81,7 +81,7 @@ const ChallengeCard = ({ challenge, currentUserId, index, showAIScore = false })
       'custom': Zap
     };
     const Icon = icons[type] || Trophy;
-    return <Icon className="w-5 h-5 text-white" />;
+    return <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />;
   };
 
   const getGoalDisplay = () => {
@@ -107,26 +107,26 @@ const ChallengeCard = ({ challenge, currentUserId, index, showAIScore = false })
       className="group"
     >
       <Link to={`/app/challenges/${challenge._id}`}>
-        <div className="relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
+        <div className="relative bg-white rounded-2xl md:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100">
           {/* Gradient accent top */}
           <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${getDifficultyColor(challenge.type)}`} />
           
           {/* AI Score Badge */}
           {showAIScore && challenge.aiScore && (
-            <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            <div className="absolute top-3 right-3 md:top-4 md:right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 md:px-3 py-1 rounded-full shadow-lg">
               {Math.round(challenge.aiScore)}% match
             </div>
           )}
           
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getDifficultyColor(challenge.type)} flex items-center justify-center shadow-lg`}>
+            <div className="flex items-start justify-between mb-3 md:mb-4">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br ${getDifficultyColor(challenge.type)} flex items-center justify-center shadow-lg`}>
                   {getIcon(challenge.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-gray-900 group-hover:text-orange-600 transition-colors truncate">
+                  <h3 className="text-sm md:text-base font-bold text-gray-900 group-hover:text-orange-600 transition-colors truncate">
                     {challenge.title}
                   </h3>
                   <p className="text-xs text-gray-500">
@@ -135,36 +135,36 @@ const ChallengeCard = ({ challenge, currentUserId, index, showAIScore = false })
                 </div>
               </div>
               {isJoined && (
-                <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                <div className="px-2 md:px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
                   Deltar
                 </div>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
               {challenge.description}
             </p>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              <div className="text-center bg-gray-50 rounded-lg p-2">
-                <div className="text-lg font-bold text-gray-900">{participantCount}</div>
+            <div className="grid grid-cols-3 gap-2 mb-3 md:mb-4">
+              <div className="text-center bg-gray-50 rounded-lg p-1.5 md:p-2">
+                <div className="text-base md:text-lg font-bold text-gray-900">{participantCount}</div>
                 <div className="text-xs text-gray-500">Deltagare</div>
               </div>
-              <div className="text-center bg-gray-50 rounded-lg p-2">
-                <div className="text-lg font-bold text-gray-900">{daysRemaining}</div>
+              <div className="text-center bg-gray-50 rounded-lg p-1.5 md:p-2">
+                <div className="text-base md:text-lg font-bold text-gray-900">{daysRemaining}</div>
                 <div className="text-xs text-gray-500">Dagar kvar</div>
               </div>
-              <div className="text-center bg-gray-50 rounded-lg p-2">
-                <div className="text-sm font-bold text-gray-900 leading-tight">{getGoalDisplay()}</div>
+              <div className="text-center bg-gray-50 rounded-lg p-1.5 md:p-2">
+                <div className="text-xs md:text-sm font-bold text-gray-900 leading-tight">{getGoalDisplay()}</div>
                 <div className="text-xs text-gray-500">Mål</div>
               </div>
             </div>
 
             {/* Progress Bar */}
             {isJoined && (
-              <div className="mb-4">
+              <div className="mb-3 md:mb-4">
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="text-gray-600">Din framsteg</span>
                   <span className="font-medium text-gray-900">{Math.round(progress)}%</span>
@@ -182,7 +182,7 @@ const ChallengeCard = ({ challenge, currentUserId, index, showAIScore = false })
 
             {/* AI Reasons */}
             {showAIScore && challenge.aiReasons && challenge.aiReasons.length > 0 && (
-              <div className="mb-4 space-y-1">
+              <div className="mb-3 md:mb-4 space-y-1">
                 {challenge.aiReasons.slice(0, 2).map((reason, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs text-gray-600">
                     <Sparkles className="w-3 h-3 text-orange-500" />
@@ -198,19 +198,19 @@ const ChallengeCard = ({ challenge, currentUserId, index, showAIScore = false })
                 {challenge.participants.slice(0, 5).map((p, i) => (
                   <img
                     key={p.user?._id || i} 
-                    className="w-8 h-8 rounded-full border-2 border-white"
+                    className="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-white"
                     src={p.user?.profileImage || `https://ui-avatars.com/api/?name=${p.user?.firstName}+${p.user?.lastName}&background=random`}
                     alt=""
                   />
                 ))}
                 {participantCount > 5 && (
-                  <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
+                  <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
                     <span className="text-xs font-medium text-gray-600">+{participantCount - 5}</span>
                   </div>
                 )}
               </div>
               
-              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" />
+              <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-gray-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" />
             </div>
           </div>
         </div>
@@ -338,25 +338,25 @@ const ChallengesPage = () => {
   const completedChallenges = myChallenges.filter(c => c.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 pb-20 lg:pb-0">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 opacity-50" />
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-orange-200 to-red-200 rounded-full blur-3xl opacity-30" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-red-200 to-pink-200 rounded-full blur-3xl opacity-30" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 md:pt-8 md:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <h1 className="text-5xl font-black mb-4">
+            <h1 className="text-3xl md:text-5xl font-black mb-3 md:mb-4">
               <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                 Utmaningar
               </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto mb-6 md:mb-8">
               Tävla med andra löpare, sätt nya rekord och nå dina mål tillsammans
             </p>
           </motion.div>
@@ -366,18 +366,18 @@ const ChallengesPage = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="max-w-4xl mx-auto mb-8"
+            className="max-w-4xl mx-auto mb-6 md:mb-8"
           >
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-              <div className="relative bg-white rounded-3xl shadow-xl border border-orange-100 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl md:rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
+              <div className="relative bg-white rounded-2xl md:rounded-3xl shadow-xl border border-orange-100 overflow-hidden">
                 {/* Minimize/Maximize Button */}
                 <button
                   onClick={() => setIsAIBoxMinimized(!isAIBoxMinimized)}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors"
                 >
                   <ChevronRight 
-                    className={`w-5 h-5 text-gray-600 transition-transform ${
+                    className={`w-4 h-4 md:w-5 md:h-5 text-gray-600 transition-transform ${
                       isAIBoxMinimized ? 'rotate-90' : '-rotate-90'
                     }`}
                   />
@@ -390,18 +390,18 @@ const ChallengesPage = () => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="p-8"
+                      className="p-6 md:p-8"
                     >
-                      <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
-                            <Brain className="w-8 h-8 text-white" />
+                      <div className="flex items-center justify-between flex-wrap gap-3 md:gap-4">
+                        <div className="flex items-center gap-3 md:gap-4">
+                          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg">
+                            <Brain className="w-6 h-6 md:w-8 md:h-8 text-white" />
                           </div>
                           <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
                               Få AI-utmaningar!
                             </h2>
-                            <p className="text-gray-600">
+                            <p className="text-sm md:text-base text-gray-600">
                               Låt vår AI hitta perfekta utmaningar baserat på din träningsnivå
                             </p>
                           </div>
@@ -411,16 +411,16 @@ const ChallengesPage = () => {
                           whileTap={{ scale: 0.95 }}
                           onClick={handleAIRecommendations}
                           disabled={loadingAI}
-                          className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50"
+                          className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-4 md:px-6 py-2.5 md:py-3 rounded-lg md:rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50 text-sm md:text-base"
                         >
                           {loadingAI ? (
                             <>
-                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                              <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white" />
                               Analyserar...
                             </>
                           ) : (
                             <>
-                              <Sparkles className="w-5 h-5" />
+                              <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                               Aktivera AI
                             </>
                           )}
@@ -428,18 +428,18 @@ const ChallengesPage = () => {
                       </div>
                       
                       {/* Features */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                        <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
-                          <Target className="w-5 h-5 text-orange-600" />
-                          <span className="text-sm font-medium text-gray-800">Anpassade efter din nivå</span>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-4 md:mt-6">
+                        <div className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 bg-orange-50 rounded-lg md:rounded-xl">
+                          <Target className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+                          <span className="text-xs md:text-sm font-medium text-gray-800">Anpassade efter din nivå</span>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
-                          <Trophy className="w-5 h-5 text-red-600" />
-                          <span className="text-sm font-medium text-gray-800">Realistiska mål</span>
+                        <div className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 bg-red-50 rounded-lg md:rounded-xl">
+                          <Trophy className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
+                          <span className="text-xs md:text-sm font-medium text-gray-800">Realistiska mål</span>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
-                          <Users className="w-5 h-5 text-pink-600" />
-                          <span className="text-sm font-medium text-gray-800">Matcha med likasinnade</span>
+                        <div className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 bg-pink-50 rounded-lg md:rounded-xl">
+                          <Users className="w-4 h-4 md:w-5 md:h-5 text-pink-600" />
+                          <span className="text-xs md:text-sm font-medium text-gray-800">Matcha med likasinnade</span>
                         </div>
                       </div>
                     </motion.div>
@@ -449,10 +449,10 @@ const ChallengesPage = () => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="p-4 flex items-center justify-center gap-3"
+                      className="p-3 md:p-4 flex items-center justify-center gap-2 md:gap-3"
                     >
-                      <Brain className="w-6 h-6 text-orange-500" />
-                      <span className="font-medium text-gray-700">AI-utmaningar</span>
+                      <Brain className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
+                      <span className="font-medium text-sm md:text-base text-gray-700">AI-utmaningar</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -465,30 +465,30 @@ const ChallengesPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 max-w-4xl mx-auto"
           >
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between mb-2">
-                <Trophy className="w-8 h-8 text-orange-500" />
-                <span className="text-3xl font-bold text-gray-900">{totalChallenges}</span>
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-orange-500" />
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">{totalChallenges}</span>
               </div>
-              <p className="text-gray-600 text-sm">Totala utmaningar</p>
+              <p className="text-gray-600 text-xs md:text-sm">Totala utmaningar</p>
             </div>
             
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between mb-2">
-                <Flame className="w-8 h-8 text-red-500" />
-                <span className="text-3xl font-bold text-gray-900">{activeChallenges}</span>
+                <Flame className="w-6 h-6 md:w-8 md:h-8 text-red-500" />
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">{activeChallenges}</span>
               </div>
-              <p className="text-gray-600 text-sm">Aktiva utmaningar</p>
+              <p className="text-gray-600 text-xs md:text-sm">Aktiva utmaningar</p>
             </div>
             
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-8 h-8 text-green-500" />
-                <span className="text-3xl font-bold text-gray-900">{completedChallenges}</span>
+                <Award className="w-6 h-6 md:w-8 md:h-8 text-green-500" />
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">{completedChallenges}</span>
               </div>
-              <p className="text-gray-600 text-sm">Avklarade</p>
+              <p className="text-gray-600 text-xs md:text-sm">Avklarade</p>
             </div>
           </motion.div>
         </div>

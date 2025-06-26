@@ -512,74 +512,76 @@ const StatisticsPage = () => {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Expandable Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {metricCards.map((card, index) => (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all"
-              onClick={() => setExpandedCard(expandedCard === card.id ? null : card.id)}
-              whileHover={{ scale: 1.02 }}
-            >
-              {/* Card Header */}
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div 
-                    className="p-3 rounded-xl text-white shadow-lg"
-                    style={{ 
-                      background: `linear-gradient(135deg, ${card.gradient[0]}, ${card.gradient[1]})` 
-                    }}
-                  >
-                    <card.icon className="w-6 h-6" />
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Apple className="w-4 h-4 text-gray-400" />
-                    <motion.div
-                      animate={{ rotate: expandedCard === card.id ? 180 : 0 }}
-                      transition={{ duration: 0.3 }}
+        {/* Expandable Metric Cards - Only show on overview tab */}
+        {selectedMetric === 'overview' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {metricCards.map((card, index) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all"
+                onClick={() => setExpandedCard(expandedCard === card.id ? null : card.id)}
+                whileHover={{ scale: 1.02 }}
+              >
+                {/* Card Header */}
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div 
+                      className="p-3 rounded-xl text-white shadow-lg"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${card.gradient[0]}, ${card.gradient[1]})` 
+                      }}
                     >
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    </motion.div>
+                      <card.icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Apple className="w-4 h-4 text-gray-400" />
+                      <motion.div
+                        animate={{ rotate: expandedCard === card.id ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                      </motion.div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                    <p className="text-sm font-medium text-gray-700">{card.label}</p>
+                    <p className="text-xs text-gray-500">{card.subValue}</p>
+                    {card.change && (
+                      <p className="text-xs font-medium text-orange-600">{card.change}</p>
+                    )}
                   </div>
                 </div>
-                
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                  <p className="text-sm font-medium text-gray-700">{card.label}</p>
-                  <p className="text-xs text-gray-500">{card.subValue}</p>
-                  {card.change && (
-                    <p className="text-xs font-medium text-orange-600">{card.change}</p>
-                  )}
-                </div>
-              </div>
 
-              {/* Expanded Details */}
-              <AnimatePresence>
-                {expandedCard === card.id && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="border-t border-gray-100"
-                  >
-                    <div className="p-4 space-y-3">
-                      {card.details.map((detail, idx) => (
-                        <div key={idx} className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">{detail.label}</span>
-                          <span className="text-sm font-semibold text-gray-900">{detail.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
+                {/* Expanded Details */}
+                <AnimatePresence>
+                  {expandedCard === card.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="border-t border-gray-100"
+                    >
+                      <div className="p-4 space-y-3">
+                        {card.details.map((detail, idx) => (
+                          <div key={idx} className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">{detail.label}</span>
+                            <span className="text-sm font-semibold text-gray-900">{detail.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Dynamic Content based on selected metric */}
         <AnimatePresence mode="wait">

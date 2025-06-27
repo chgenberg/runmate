@@ -239,6 +239,9 @@ try {
   app.use('/api/routes', require('./routes/routes'));
   console.log('✓ Routes API loaded');
   
+  app.use('/api/races', require('./routes/races'));
+  console.log('✓ Races API loaded');
+  
   // app.use('/api/notifications', notificationRoutes); // Temporarily disabled
   
   console.log('✓ All API routes loaded successfully');

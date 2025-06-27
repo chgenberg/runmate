@@ -177,11 +177,10 @@ const create30RealUsers = async () => {
     
     console.log('🚀 Skapar 30 realistiska svenska användare...');
     
-    // Ta bort befintliga testanvändare (behåll test@runmate.se)
+    // Ta bort befintliga testanvändare
     await User.deleteMany({ 
-      email: { $ne: 'test@runmate.se' },
       $or: [
-        { email: /test\d+@runmate\.se/ },
+        { email: /test\d*@runmate\.se/ },
         { source: 'generated' }
       ]
     });
@@ -197,6 +196,39 @@ const create30RealUsers = async () => {
     
     const users = [];
     const allActivities = [];
+    
+    // Skapa huvudkonto test@runmate.se först
+    const mainUser = new User({
+      email: 'test@runmate.se',
+      password: 'password123',
+      firstName: 'Christopher',
+      lastName: 'Genberg',
+      dateOfBirth: new Date('1995-06-15'),
+      gender: 'male',
+      bio: 'Löpare från Stockholm som älskar att utforska nya rutter och träffa nya träningspartners! Tränar för mitt första maraton.',
+      profilePhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&auto=format',
+      profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&auto=format',
+      photos: ['https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&auto=format'],
+      activityLevel: 'serious',
+      sportTypes: ['running'],
+      location: {
+        city: 'Stockholm',
+        country: 'Sweden',
+        coordinates: [18.0686, 59.3293]
+      },
+      avgPace: 350, // 5:50 min/km
+      weeklyDistance: 50,
+      preferredTrainingTimes: ['morning'],
+      isProfileComplete: true,
+      isEmailVerified: true,
+      points: 1500,
+      level: 5,
+      source: 'main'
+    });
+    
+    await mainUser.save();
+    users.push(mainUser);
+    console.log('✓ Skapade huvudkonto: Christopher Genberg (test@runmate.se)');
     
     for (let i = 1; i <= 30; i++) {
       // Slumpa kön
@@ -227,7 +259,7 @@ const create30RealUsers = async () => {
       // Skapa användare
       const userData = {
         email: `test${i}@runmate.se`,
-        password: await bcrypt.hash('password123', 10),
+        password: 'password123',
         firstName: selectedName.first,
         lastName: selectedName.last,
         dateOfBirth: birthDate,
@@ -284,7 +316,7 @@ const create30RealUsers = async () => {
     
     // Visa sammanfattning
     console.log('\n🎉 === SAMMANFATTNING ===');
-    console.log(`✓ Skapade ${users.length} realistiska svenska användare`);
+    console.log(`✓ Skapade ${users.length} användare (1 huvudkonto + 30 testanvändare)`);
     console.log(`✓ Genererade ${allActivities.length} träningsaktiviteter`);
     console.log(`✓ Fördelning över ${swedishLocations.length} svenska städer`);
     

@@ -71,7 +71,8 @@ const io = socketIo(server, {
   cors: {
     origin: [
       'http://localhost:3000',
-      'http://localhost:3001', 
+      'http://localhost:3001',
+      'http://localhost:3002',
       'https://staging-rummate-frontend-production.up.railway.app',
       'https://staging-runmate-frontend-production.up.railway.app'
     ],
@@ -95,6 +96,7 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3002',
     'https://staging-rummate-frontend-production.up.railway.app',
     'https://staging-runmate-frontend-production.up.railway.app'
   ],

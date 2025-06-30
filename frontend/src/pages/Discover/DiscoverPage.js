@@ -37,7 +37,6 @@ const DiscoverPage = () => {
     ageRange: [18, 65],
     distance: 50,
     level: 'all',
-    activityLevel: 'all',
     goals: []
   });
   const [viewMode, setViewMode] = useState('stack'); // 'stack' or 'scroll'
@@ -191,8 +190,20 @@ const DiscoverPage = () => {
         console.error('Error liking runner:', error);
         toast.error('Något gick fel, försök igen');
       }
+
+      // For likes, move to next runner in stack mode
+      if (viewMode === 'stack') {
+        setTimeout(() => {
+          setCurrentIndex(prev => prev + 1);
+        }, 300);
+      } else {
+        // In scroll mode, remove the card after animation
+        setTimeout(() => {
+          setRunners(prev => prev.filter(r => r.id !== userId));
+        }, 300);
+      }
     } else {
-      // Skip - remove from feed
+      // Skip - remove from feed immediately
       setRunners(prev => prev.filter(r => r.id !== userId));
       toast(
         <div className="flex items-center gap-2">
@@ -201,18 +212,9 @@ const DiscoverPage = () => {
         </div>,
         { duration: 2000 }
       );
-    }
-
-    // Move to next runner in stack mode or remove from list in scroll mode
-    if (viewMode === 'stack') {
-      setTimeout(() => {
-        setCurrentIndex(prev => prev + 1);
-      }, 300);
-    } else {
-      // In scroll mode, remove the card after animation
-      setTimeout(() => {
-        setRunners(prev => prev.filter(r => r.id !== userId));
-      }, 300);
+      
+      // For skips, don't change currentIndex since we removed the user from the list
+      // The next user will automatically be at the same index
     }
   };
 

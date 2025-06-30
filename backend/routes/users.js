@@ -371,7 +371,19 @@ router.get('/discover', auth, async (req, res) => {
       return res.status(404).json({ message: 'Användare inte funnen' });
     }
 
-    const { maxDistance = 50, ageRange = '18-99', activityLevel, sportTypes } = req.query;
+    const { maxDistance = 50, distance, ageRange = '18-99', activityLevel, level, sportTypes } = req.query;
+    
+    // Handle distance parameter (frontend sends 'distance', backend expects 'maxDistance')
+    const finalMaxDistance = distance || maxDistance;
+    
+    // Handle level parameter (frontend sends 'level', backend expects 'activityLevel')
+    // Only use activityLevel if it's not 'all', otherwise ignore both level and activityLevel
+    let finalActivityLevel = null;
+    if (level && level !== 'all') {
+      finalActivityLevel = level;
+    } else if (activityLevel && activityLevel !== 'all') {
+      finalActivityLevel = activityLevel;
+    }
     
     // Parse age range - handle both string and array formats
     let minAge, maxAge;
@@ -401,8 +413,8 @@ router.get('/discover', auth, async (req, res) => {
     }
 
     // Activity level filter
-    if (activityLevel && activityLevel !== '') {
-      query.activityLevel = activityLevel;
+    if (finalActivityLevel) {
+      query.activityLevel = finalActivityLevel;
     }
 
     // Sport types filter
@@ -462,7 +474,7 @@ router.get('/discover', auth, async (req, res) => {
     // Filter by distance if specified - temporarily disabled for debugging
     const filteredUsers = usersWithDistance;
 
-    console.log(`Returning ${filteredUsers.length} users after distance filtering (maxDistance: ${maxDistance})`);
+    console.log(`Returning ${filteredUsers.length} users after distance filtering (maxDistance: ${finalMaxDistance})`);
     res.json({ users: filteredUsers });
   } catch (error) {
     console.error('Error discovering users:', error);

@@ -19,10 +19,10 @@ const MatchesPage = () => {
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get('/users/discover');
-            setUsers(response.data.users || []);
+            const response = await api.get('/users/matches');
+            setUsers(response.data.matches || []);
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error fetching matches:', error);
             setUsers([]);
         } finally {
             setLoading(false);
@@ -207,8 +207,8 @@ const MatchesPage = () => {
                         <ChevronLeft className="w-6 h-6" />
                     </button>
                     <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-gray-900">Hitta löparkompisar</h1>
-                        <p className="text-sm text-gray-600">Swipa för att hitta din perfekta match</p>
+                        <h1 className="text-2xl font-bold text-gray-900">Dina matchningar</h1>
+                        <p className="text-sm text-gray-600">Personer som du och de har gillat varandra</p>
                     </div>
                 </div>
             </div>
@@ -230,8 +230,8 @@ const MatchesPage = () => {
                         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Heart className="w-12 h-12 text-gray-400" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Inga fler löpare just nu</h3>
-                        <p className="text-gray-600">Kom tillbaka senare för att se nya medlemmar</p>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Inga matchningar än</h3>
+                        <p className="text-gray-600">Börja swipa i Upptäck för att hitta dina första matchningar</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

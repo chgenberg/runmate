@@ -26,6 +26,7 @@ import ActivitiesPage from './pages/Activity/ActivitiesPage';
 import LogActivityPage from './pages/Activity/LogActivityPage';
 import ChatPage from './pages/Chat/ChatPage';
 import ChatConversationPage from './pages/Chat/ChatConversationPage';
+import MatchesPage from './pages/Matches/MatchesPage';
 
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
@@ -106,6 +107,9 @@ function App() {
               
               {/* AI Coach Results */}
               <Route path="ai-coach-results" element={<AICoachResultsPage />} />
+              
+              {/* Matches Page */}
+              <Route path="matches" element={<MatchesPage />} />
             </Route>
             
             {/* Catch all route */}

@@ -529,11 +529,27 @@ router.post('/swipe', auth, async (req, res) => {
         if (!currentUser.matches) currentUser.matches = [];
         if (!swipedUser.matches) swipedUser.matches = [];
         
-        if (!currentUser.matches.includes(swipedUserId)) {
-          currentUser.matches.push(swipedUserId);
+        // Check if match already exists
+        const currentUserHasMatch = currentUser.matches.some(match => 
+          match.userId && match.userId.toString() === swipedUserId
+        );
+        const swipedUserHasMatch = swipedUser.matches.some(match => 
+          match.userId && match.userId.toString() === req.user.id
+        );
+        
+        if (!currentUserHasMatch) {
+          currentUser.matches.push({
+            userId: swipedUserId,
+            matchedAt: new Date(),
+            status: 'pending'
+          });
         }
-        if (!swipedUser.matches.includes(req.user.id)) {
-          swipedUser.matches.push(req.user.id);
+        if (!swipedUserHasMatch) {
+          swipedUser.matches.push({
+            userId: req.user.id,
+            matchedAt: new Date(),
+            status: 'pending'
+          });
         }
       }
     }
@@ -1118,6 +1134,40 @@ router.get('/leaderboard/public', async (req, res) => {
       success: false, 
       message: 'Failed to fetch leaderboard' 
     });
+  }
+});
+
+// @route   GET api/users/test-endpoint
+// @desc    Test endpoint
+// @access  Private
+router.get('/test-endpoint', auth, async (req, res) => {
+  res.json({ success: true, message: 'Test endpoint works', userId: req.user.id });
+});
+
+// @route   GET api/users/matches
+// @desc    Get user's matches
+// @access  Private
+router.get('/matches', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('matches');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Användare inte funnen' });
+    }
+
+    // Return raw matches data for debugging
+    res.json({
+      success: true,
+      matches: user.matches || [],
+      debug: {
+        userId: req.user.id,
+        matchesCount: user.matches ? user.matches.length : 0,
+        rawMatches: user.matches
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching matches:', error);
+    res.status(500).json({ message: 'Serverfel: ' + error.message });
   }
 });
 

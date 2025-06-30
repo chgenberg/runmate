@@ -420,10 +420,17 @@ router.get('/discover', auth, async (req, res) => {
       query._id.$nin = [...(query._id.$nin || []), ...currentUser.blockedUsers];
     }
 
+    console.log('Discover query:', JSON.stringify(query, null, 2));
+    console.log('Current user ID:', req.user.id);
+    console.log('Age range:', minAge, '-', maxAge);
+    console.log('Date range:', new Date(minBirthYear, 0, 1), 'to', new Date(maxBirthYear, 11, 31));
+    
     const users = await User.find(query)
       .select('firstName lastName dateOfBirth birthDate bio photos profilePicture activityLevel sportTypes sports preferredTrainingTimes avgPace weeklyDistance preferredRunTypes location trainingStats')
-      .limit(20)
-      .sort({ lastActive: -1 });
+      .limit(50)
+      .sort({ createdAt: -1 });
+    
+    console.log(`Found ${users.length} users before distance filtering`);
 
     // Add distance calculation if user has location
     const usersWithDistance = users.map(user => {
@@ -452,11 +459,10 @@ router.get('/discover', auth, async (req, res) => {
       };
     });
 
-    // Filter by distance if specified
-    const filteredUsers = maxDistance ? 
-      usersWithDistance.filter(user => !user.distance || user.distance <= maxDistance) :
-      usersWithDistance;
+    // Filter by distance if specified - temporarily disabled for debugging
+    const filteredUsers = usersWithDistance;
 
+    console.log(`Returning ${filteredUsers.length} users after distance filtering (maxDistance: ${maxDistance})`);
     res.json({ users: filteredUsers });
   } catch (error) {
     console.error('Error discovering users:', error);

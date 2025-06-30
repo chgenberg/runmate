@@ -55,7 +55,7 @@ const RaceCoachCalendarPage = () => {
     };
     
     setPlan({ ...plan, calendarEvents: events });
-  }, []);
+  }, [generateDailyWorkout, getTrainingPhase]);
 
   useEffect(() => {
     const navigationPlan = location.state?.plan;
@@ -73,15 +73,15 @@ const RaceCoachCalendarPage = () => {
     }
   }, [location.state, navigate, generateCalendarEvents]);
 
-  const getTrainingPhase = (weeksUntilRace, phases) => {
+  const getTrainingPhase = useCallback((weeksUntilRace, phases) => {
     // Determine which training phase we're in
     if (weeksUntilRace <= 2) return 'taper';
     if (weeksUntilRace <= 6) return 'peak';
     if (weeksUntilRace <= 12) return 'build';
     return 'base';
-  };
+  }, []);
 
-  const generateDailyWorkout = (dayOfWeek, phase, weeksUntilRace, plan) => {
+  const generateDailyWorkout = useCallback((dayOfWeek, phase, weeksUntilRace, plan) => {
     const workoutSchedule = {
       0: { type: 'rest', title: 'Vila', icon: '😴' }, // Sunday
       1: { type: 'easy', title: 'Lätt löpning', duration: '30-45 min', icon: '🏃' }, // Monday
@@ -106,9 +106,9 @@ const RaceCoachCalendarPage = () => {
       nutrition: generateDailyNutrition(baseWorkout.type),
       recovery: generateDailyRecovery(baseWorkout.type)
     };
-  };
+  }, [generateDailyNutrition, generateDailyRecovery]);
 
-  const generateDailyNutrition = (workoutType) => {
+  const generateDailyNutrition = useCallback((workoutType) => {
     const nutritionPlans = {
       rest: {
         calories: 2200,
@@ -144,9 +144,9 @@ const RaceCoachCalendarPage = () => {
     };
     
     return nutritionPlans[workoutType] || nutritionPlans.easy;
-  };
+  }, []);
 
-  const generateDailyRecovery = (workoutType) => {
+  const generateDailyRecovery = useCallback((workoutType) => {
     const recoveryPlans = {
       rest: ['Lätt stretching', 'Foam rolling', 'Tidigt till sängs'],
       easy: ['Stretching 10 min', 'Varm dusch'],
@@ -156,7 +156,7 @@ const RaceCoachCalendarPage = () => {
     };
     
     return recoveryPlans[workoutType] || recoveryPlans.easy;
-  };
+  }, []);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();

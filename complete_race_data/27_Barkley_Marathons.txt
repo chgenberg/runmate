@@ -1,0 +1,42 @@
+===========================================================================
+KOMPLETT LÖPPINFORMATION: BARKLEY MARATHONS
+===========================================================================
+
+📍 GRUNDLÄGGANDE INFORMATION:
+─────────────────────────────────────────────
+Namn: Barkley Marathons
+Distans: Ultramaraton (161 km)
+Plats: Tennessee, USA
+Datum: Se officiell webbplats
+Webbplats: https://en.wikipedia.org/wiki/Barkley_Marathons
+
+🏔️ BANPROFIL OCH TERRÄNG:
+─────────────────────────────────────────────
+Höjdmeter: Information saknas
+Terrängtyp: Extrem bergsterräng
+Svårighetsgrad: Omöjlig
+
+⏱️ PRAKTISK INFORMATION:
+─────────────────────────────────────────────
+Tidsgräns: Se regler
+Max deltagare: Varierar
+Anmälan: Se webbplats
+
+🏃‍♂️ SUPPORT OCH SERVICE:
+─────────────────────────────────────────────
+Vattenstationer: Fullständiga aidstationer
+Crew-support: Se regler
+Drop bags: Se regler
+
+⭐ SÄRSKILDA DRAG:
+─────────────────────────────────────────────
+Unikt Tennessee, USA-lopp
+
+🌤️ KLIMAT:
+─────────────────────────────────────────────
+Lokalt klimat
+
+📊 METADATA:
+─────────────────────────────────────────────
+Insamlad: 2025-06-27 09:21:34
+Källa: Kombination webscraping + expertkunskap

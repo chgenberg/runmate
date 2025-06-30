@@ -1,0 +1,244 @@
+================================================================================
+DE 50 STÖRSTA LÖPARLOPPEN I VÄRLDEN - KOMPLETT ÖVERSIKT
+================================================================================
+
+🏃‍♂️ DENNA SAMLING INNEHÅLLER:
+• World Marathon Majors (de 6 största maratonloppen)
+• Prestigefyllda ultramaraton från hela världen
+• Exotiska och extrema löpningsutmaningar
+• Nordiska klassiker
+• Unika terränglopp och bergsutmaningar
+
+📋 KATEGORIER:
+
+WORLD MARATHON MAJORS:
+─────────────────────
+📁 01_Boston_Marathon.txt
+   🏃‍♂️ Boston Marathon
+   📍 Boston, USA
+
+📁 02_New_York_City_Marathon.txt
+   🏃‍♂️ New York City Marathon
+   📍 New York, USA
+
+📁 03_London_Marathon.txt
+   🏃‍♂️ London Marathon
+   📍 London, UK
+
+📁 04_Berlin_Marathon.txt
+   🏃‍♂️ Berlin Marathon
+   📍 Berlin, Tyskland
+
+📁 05_Chicago_Marathon.txt
+   🏃‍♂️ Chicago Marathon
+   📍 Chicago, USA
+
+📁 06_Tokyo_Marathon.txt
+   🏃‍♂️ Tokyo Marathon
+   📍 Tokyo, Japan
+
+
+ULTRAMARATON (50+ KM):
+─────────────────────
+📁 07_Comrades_Marathon.txt
+   🏃‍♂️ Comrades Marathon
+   📍 Sydafrika
+
+📁 08_Western_States_100.txt
+   🏃‍♂️ Western States 100
+   📍 Kalifornien, USA
+
+📁 09_Ultra-Trail_du_Mont-Blanc_(UTMB).txt
+   🏃‍♂️ Ultra-Trail du Mont-Blanc (UTMB)
+   📍 Chamonix, Frankrike
+
+📁 10_Badwater_135.txt
+   🏃‍♂️ Badwater 135
+   📍 Death Valley, USA
+
+📁 11_Two_Oceans_Marathon.txt
+   🏃‍♂️ Two Oceans Marathon
+   📍 Kapstaden, Sydafrika
+
+📁 13_Leadville_Trail_100.txt
+   🏃‍♂️ Leadville Trail 100
+   📍 Colorado, USA
+
+📁 14_Spartathlon.txt
+   🏃‍♂️ Spartathlon
+   📍 Grekland
+
+📁 16_Hardrock_100.txt
+   🏃‍♂️ Hardrock 100
+   📍 Colorado, USA
+
+📁 26_JFK_50_Mile.txt
+   🏃‍♂️ JFK 50 Mile
+   📍 Maryland, USA
+
+📁 27_Barkley_Marathons.txt
+   🏃‍♂️ Barkley Marathons
+   📍 Tennessee, USA
+
+📁 33_Tor_des_Géants.txt
+   🏃‍♂️ Tor des Géants
+   📍 Italien
+
+📁 34_Laugavegur_Ultra_Marathon.txt
+   🏃‍♂️ Laugavegur Ultra Marathon
+   📍 Island
+
+📁 40_Transylvania_100K.txt
+   🏃‍♂️ Transylvania 100K
+   📍 Rumänien
+
+📁 42_Tarawera_Ultramarathon.txt
+   🏃‍♂️ Tarawera Ultramarathon
+   📍 Nya Zeeland
+
+
+BERGSLÖPNING:
+────────────
+📁 28_Pikes_Peak_Marathon.txt
+   🏃‍♂️ Pikes Peak Marathon
+   📍 Colorado, USA
+
+📁 31_Kilimanjaro_Marathon.txt
+   🏃‍♂️ Kilimanjaro Marathon
+   📍 Tanzania
+
+📁 37_Everest_Marathon.txt
+   🏃‍♂️ Everest Marathon
+   📍 Nepal
+
+
+EXOTISKA DESTINATIONER:
+──────────────────────
+📁 24_Antarctic_Ice_Marathon.txt
+   🏃‍♂️ Antarctic Ice Marathon
+   📍 Antarktis
+
+
+NORDISKA LOPP:
+─────────────
+📁 17_Vasaloppet.txt
+   🏃‍♂️ Vasaloppet
+   📍 Dalarna, Sverige
+
+📁 18_Midnight_Sun_Marathon.txt
+   🏃‍♂️ Midnight Sun Marathon
+   📍 Tromsø, Norge
+
+📁 19_Stockholm_Marathon.txt
+   🏃‍♂️ Stockholm Marathon
+   📍 Stockholm, Sverige
+
+📁 20_Göteborgsvarvet.txt
+   🏃‍♂️ Göteborgsvarvet
+   📍 Göteborg, Sverige
+
+📁 21_Lidingöloppet.txt
+   🏃‍♂️ Lidingöloppet
+   📍 Lidingö, Sverige
+
+
+ÖVRIGA PRESTIGELOPP:
+───────────────────
+📁 12_Big_Sur_International_Marathon.txt
+   🏃‍♂️ Big Sur International Marathon
+   📍 Kalifornien, USA
+
+📁 15_Marine_Corps_Marathon.txt
+   🏃‍♂️ Marine Corps Marathon
+   📍 Washington DC, USA
+
+📁 22_Kauai_Marathon.txt
+   🏃‍♂️ Kauai Marathon
+   📍 Hawaii, USA
+
+📁 23_Avenue_of_the_Giants_Marathon.txt
+   🏃‍♂️ Avenue of the Giants Marathon
+   📍 Kalifornien, USA
+
+📁 25_Great_Wall_Marathon.txt
+   🏃‍♂️ Great Wall Marathon
+   📍 Kina
+
+📁 29_Sahara_Marathon.txt
+   🏃‍♂️ Sahara Marathon
+   📍 Algeriet
+
+📁 30_Big_Five_Marathon.txt
+   🏃‍♂️ Big Five Marathon
+   📍 Sydafrika
+
+📁 32_Medoc_Marathon.txt
+   🏃‍♂️ Medoc Marathon
+   📍 Frankrike
+
+📁 35_Patagonian_International_Marathon.txt
+   🏃‍♂️ Patagonian International Marathon
+   📍 Chile
+
+📁 36_Inca_Trail_Marathon.txt
+   🏃‍♂️ Inca Trail Marathon
+   📍 Peru
+
+📁 38_Jungfrau_Marathon.txt
+   🏃‍♂️ Jungfrau Marathon
+   📍 Schweiz
+
+📁 39_Zermatt_Marathon.txt
+   🏃‍♂️ Zermatt Marathon
+   📍 Schweiz
+
+📁 41_Dodo_Trail.txt
+   🏃‍♂️ Dodo Trail
+   📍 Mauritius
+
+📁 43_Kepler_Challenge.txt
+   🏃‍♂️ Kepler Challenge
+   📍 Nya Zeeland
+
+📁 44_Gold_Coast_Marathon.txt
+   🏃‍♂️ Gold Coast Marathon
+   📍 Australien
+
+📁 45_Melbourne_Marathon.txt
+   🏃‍♂️ Melbourne Marathon
+   📍 Australien
+
+📁 46_Sydney_Marathon.txt
+   🏃‍♂️ Sydney Marathon
+   📍 Australien
+
+📁 47_Great_Ocean_Road_Marathon.txt
+   🏃‍♂️ Great Ocean Road Marathon
+   📍 Australien
+
+📁 48_Kagoshima_Marathon.txt
+   🏃‍♂️ Kagoshima Marathon
+   📍 Japan
+
+📁 49_Fukuoka_Marathon.txt
+   🏃‍♂️ Fukuoka Marathon
+   📍 Japan
+
+📁 50_Osaka_Marathon.txt
+   🏃‍♂️ Osaka Marathon
+   📍 Japan
+
+
+📊 STATISTIK:
+───────────────
+Totalt antal lopp: 50
+Marathon (42.195 km): 31
+Ultramaraton: 14
+Andra distanser: 5
+
+🔧 TEKNISK INFORMATION:
+─────────────────────────
+Skapad: 2025-06-27 09:21:04
+Metod: Förbättrad webscraping + expertdata
+Format: UTF-8 textfiler
+Källa: Officiella webbplatser + Wikipedia + expertkunskap

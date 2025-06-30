@@ -22,6 +22,7 @@ import StatisticsPage from './pages/Statistics/StatisticsPage';
 import SuggestedRoutesPage from './pages/Routes/SuggestedRoutesPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import AICoachResultsPage from './pages/AICoach/AICoachResultsPage';
+import RaceCoachCalendarPage from './pages/AICoach/RaceCoachCalendarPage';
 import ActivitiesPage from './pages/Activity/ActivitiesPage';
 import LogActivityPage from './pages/Activity/LogActivityPage';
 import ChatPage from './pages/Chat/ChatPage';
@@ -107,6 +108,9 @@ function App() {
               
               {/* AI Coach Results */}
               <Route path="ai-coach-results" element={<AICoachResultsPage />} />
+              
+              {/* Race Coach Calendar */}
+              <Route path="race-coach-calendar" element={<RaceCoachCalendarPage />} />
               
               {/* Matches Page */}
               <Route path="matches" element={<MatchesPage />} />

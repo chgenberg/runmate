@@ -1,0 +1,38 @@
+===========================================================================
+KOMPLETT LÖPPINFORMATION: ULTRA-TRAIL DU MONT-BLANC (UTMB)
+===========================================================================
+
+📍 GRUNDLÄGGANDE INFORMATION:
+─────────────────────────────────────────────
+Namn: Ultra-Trail du Mont-Blanc (UTMB)
+Distans: Ultramaraton (171 km)
+Plats: Chamonix, Frankrike
+Datum: Slutet av augusti
+Webbplats: https://utmb.world/
+
+🏔️ BANPROFIL OCH TERRÄNG:
+─────────────────────────────────────────────
+Höjdmeter: 10,000+ meter total höjdskillnad
+Terrängtyp: Bergsled, teknisk trail
+Svårighetsgrad: Extrem
+
+⏱️ PRAKTISK INFORMATION:
+─────────────────────────────────────────────
+Tidsgräns: 46.5 timmar
+Max deltagare: Varierar
+Anmälan: Se webbplats
+
+🏃‍♂️ SUPPORT OCH SERVICE:
+─────────────────────────────────────────────
+Vattenstationer: Enligt regler
+Crew-support: Se regler
+Drop bags: Se regler
+
+🌤️ KLIMAT:
+─────────────────────────────────────────────
+Kan vara extremt kallt i bergen
+
+📊 METADATA:
+─────────────────────────────────────────────
+Insamlad: 2025-06-27 09:21:18
+Källa: Kombination webscraping + expertkunskap

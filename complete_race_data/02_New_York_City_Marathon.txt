@@ -1,0 +1,42 @@
+===========================================================================
+KOMPLETT LÖPPINFORMATION: NEW YORK CITY MARATHON
+===========================================================================
+
+📍 GRUNDLÄGGANDE INFORMATION:
+─────────────────────────────────────────────
+Namn: New York City Marathon
+Distans: Marathon (42.195 km)
+Plats: New York, USA
+Datum: Första söndagen i november
+Webbplats: https://www.tcsnycmarathon.org/
+
+🏔️ BANPROFIL OCH TERRÄNG:
+─────────────────────────────────────────────
+Höjdmeter: 276 meter total höjdskillnad
+Terrängtyp: Asfalt genom alla fem stadsdelar
+Svårighetsgrad: Medel
+
+⏱️ PRAKTISK INFORMATION:
+─────────────────────────────────────────────
+Tidsgräns: 6.5 timmar
+Max deltagare: 50,000+ löpare
+Anmälan: Lotteri eller kvalifikationstid
+
+🏃‍♂️ SUPPORT OCH SERVICE:
+─────────────────────────────────────────────
+Vattenstationer: Vattenstationer varje 1.6 km
+Crew-support: Se regler
+Drop bags: Se regler
+
+⭐ SÄRSKILDA DRAG:
+─────────────────────────────────────────────
+Går genom alla fem NYC-stadsdelar, Verrazzano-Narrows Bridge
+
+🌤️ KLIMAT:
+─────────────────────────────────────────────
+Oftast svalt novemberväder
+
+📊 METADATA:
+─────────────────────────────────────────────
+Insamlad: 2025-06-27 09:21:04
+Källa: Kombination webscraping + expertkunskap

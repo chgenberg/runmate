@@ -11,16 +11,20 @@ import {
   ArrowRight,
   Zap,
   Heart,
-  Settings
+  Settings,
+  Trophy,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
+import RaceCoachOnboarding from '../../components/AICoach/RaceCoachOnboarding';
 
 const DashboardPage = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
+  const [showRaceCoachOnboarding, setShowRaceCoachOnboarding] = useState(false);
   const [hasCompletedAnalysis, setHasCompletedAnalysis] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +70,9 @@ const DashboardPage = () => {
     setShowAIOnboarding(true);
   };
 
-
+  const handleStartRaceCoach = () => {
+    setShowRaceCoachOnboarding(true);
+  };
 
   if (isLoading) {
     return (
@@ -108,16 +114,29 @@ const DashboardPage = () => {
           </p>
 
           {/* AI Analysis Button - Right under welcome text */}
-          <motion.button
-            onClick={handleStartAIAnalysis}
-            className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-2xl font-bold text-base lg:text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3 mx-auto uppercase"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Sparkles className="w-5 h-5 lg:w-6 lg:h-6" />
-            STARTA MIN AI-ANALYS
-            <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.button
+              onClick={handleStartAIAnalysis}
+              className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-2xl font-bold text-base lg:text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3 mx-auto uppercase"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Sparkles className="w-5 h-5 lg:w-6 lg:h-6" />
+              STARTA MIN AI-ANALYS
+              <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+            
+            <motion.button
+              onClick={handleStartRaceCoach}
+              className="group bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-2xl font-bold text-base lg:text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3 mx-auto uppercase"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Trophy className="w-5 h-5 lg:w-6 lg:h-6" />
+              FÖRBERED FÖR LOPP
+              <Calendar className="w-4 h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </div>
         </motion.div>
 
         {!hasCompletedAnalysis ? (
@@ -283,7 +302,12 @@ const DashboardPage = () => {
         isOpen={showAIOnboarding}
         onClose={() => setShowAIOnboarding(false)}
       />
-
+      
+      {/* Race Coach Onboarding Modal */}
+      <RaceCoachOnboarding 
+        isOpen={showRaceCoachOnboarding}
+        onClose={() => setShowRaceCoachOnboarding(false)}
+      />
 
     </div>
   );

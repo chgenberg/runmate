@@ -5,11 +5,11 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
-  Brain
+  Sparkles
 } from 'lucide-react';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import AILoadingScreen from './AILoadingScreen';
 
 // Matchning scoring system
 const calculateMatchScore = (userAnswers, otherUserAnswers) => {
@@ -76,8 +76,8 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [validationError, setValidationError] = useState('');
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [validationError, setValidationError] = useState('');
   const navigate = useNavigate();
 
   const questions = [
@@ -285,29 +285,8 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
     }
   };
 
-
-
   const handleSubmit = async () => {
     setIsLoading(true);
-    
-    // Show loading messages
-    const messages = [
-      'Läser in svar...',
-      'Analyserar svar...',
-      'Planerar träningsschema...',
-      'Planerar kostschema...',
-      'Skapar översikt...'
-    ];
-    
-    let messageIndex = 0;
-    setLoadingMessage(messages[0]);
-    
-    const messageInterval = setInterval(() => {
-      messageIndex++;
-      if (messageIndex < messages.length) {
-        setLoadingMessage(messages[messageIndex]);
-      }
-    }, 1500);
     
     try {
       // Prepare complete data for API
@@ -360,8 +339,6 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
       const response = await api.post('/aicoach/comprehensive-plan', apiData);
 
       if (response.data.success) {
-        clearInterval(messageInterval);
-        
         // Navigate to results page with plan data
         setTimeout(() => {
           navigate('/app/ai-coach-results', { 
@@ -369,13 +346,13 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
             replace: true 
           });
           onClose();
-        }, 500);
+          setIsLoading(false);
+        }, 1000);
       } else {
         throw new Error('Failed to generate plan');
       }
     } catch (error) {
       console.error('Error creating comprehensive plan:', error);
-      clearInterval(messageInterval);
       
       // Enhanced demo fallback with complete data
       const demoResponse = {
@@ -445,7 +422,8 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
           replace: true 
         });
         onClose();
-      }, 500);
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
@@ -1088,63 +1066,14 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
         )}
       </AnimatePresence>
 
-      {/* Loading overlay */}
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center"
-          >
-            <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6"
-              >
-                <Brain className="w-10 h-10 text-white" />
-              </motion.div>
-
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                AI-analys pågår
-              </h3>
-
-              <motion.p
-                key={loadingMessage}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="text-lg text-gray-700 mb-6"
-              >
-                {loadingMessage}
-              </motion.p>
-
-              <div className="flex justify-center gap-2">
-                {[0, 1, 2, 3, 4].map((index) => (
-                  <motion.div
-                    key={index}
-                    animate={{
-                      scale: [1, 1.5, 1],
-                      opacity: [0.5, 1, 0.5]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      delay: index * 0.2
-                    }}
-                    className="w-2 h-2 bg-orange-500 rounded-full"
-                  />
-                ))}
-              </div>
-
-              <p className="text-sm text-gray-500 mt-6">
-                Detta kan ta upp till 30 sekunder...
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* AI Loading Screen */}
+      <AILoadingScreen 
+        isVisible={isLoading} 
+        onComplete={() => {
+          // This will be called when loading animation completes
+          // The actual navigation happens in handleSubmit
+        }} 
+      />
 
 
     </>

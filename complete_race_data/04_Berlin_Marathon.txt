@@ -1,0 +1,42 @@
+===========================================================================
+KOMPLETT LÖPPINFORMATION: BERLIN MARATHON
+===========================================================================
+
+📍 GRUNDLÄGGANDE INFORMATION:
+─────────────────────────────────────────────
+Namn: Berlin Marathon
+Distans: Marathon (42.195 km)
+Plats: Berlin, Tyskland
+Datum: Slutet av september
+Webbplats: https://www.bmw-berlin-marathon.com/
+
+🏔️ BANPROFIL OCH TERRÄNG:
+─────────────────────────────────────────────
+Höjdmeter: Mycket platt, <50 meter
+Terrängtyp: Asfalt, mycket snabb bana
+Svårighetsgrad: Lätt (snabbaste maratonbanan)
+
+⏱️ PRAKTISK INFORMATION:
+─────────────────────────────────────────────
+Tidsgräns: 6 timmar 15 minuter
+Max deltagare: 40,000+ löpare
+Anmälan: Lotteri
+
+🏃‍♂️ SUPPORT OCH SERVICE:
+─────────────────────────────────────────────
+Vattenstationer: Vattenstationer varje 5 km
+Crew-support: Se regler
+Drop bags: Se regler
+
+⭐ SÄRSKILDA DRAG:
+─────────────────────────────────────────────
+Världsrekordsbana, passerar Brandenburger Tor
+
+🌤️ KLIMAT:
+─────────────────────────────────────────────
+Behagligt septemberväder
+
+📊 METADATA:
+─────────────────────────────────────────────
+Insamlad: 2025-06-27 09:21:08
+Källa: Kombination webscraping + expertkunskap

@@ -1,0 +1,42 @@
+===========================================================================
+KOMPLETT LÖPPINFORMATION: COMRADES MARATHON
+===========================================================================
+
+📍 GRUNDLÄGGANDE INFORMATION:
+─────────────────────────────────────────────
+Namn: Comrades Marathon
+Distans: Ultramaraton (89 km)
+Plats: Sydafrika
+Datum: Slutet av maj/början av juni
+Webbplats: https://www.comrades.com/
+
+🏔️ BANPROFIL OCH TERRÄNG:
+─────────────────────────────────────────────
+Höjdmeter: 1,400+ meter (växlar uppåt/nedåt år för år)
+Terrängtyp: Asfalt, mycket kuperat
+Svårighetsgrad: Mycket hög
+
+⏱️ PRAKTISK INFORMATION:
+─────────────────────────────────────────────
+Tidsgräns: 12 timmar
+Max deltagare: 20,000 löpare
+Anmälan: Kvalifikationsmaraton krävs
+
+🏃‍♂️ SUPPORT OCH SERVICE:
+─────────────────────────────────────────────
+Vattenstationer: Fullständiga aidstationer varje 10-15 km
+Crew-support: Se regler
+Drop bags: Se regler
+
+⭐ SÄRSKILDA DRAG:
+─────────────────────────────────────────────
+Världens äldsta och största ultramaraton
+
+🌤️ KLIMAT:
+─────────────────────────────────────────────
+Kallt sydafrikanskt vinterväder
+
+📊 METADATA:
+─────────────────────────────────────────────
+Insamlad: 2025-06-27 09:21:12
+Källa: Kombination webscraping + expertkunskap

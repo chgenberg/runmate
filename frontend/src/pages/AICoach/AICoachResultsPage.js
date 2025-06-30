@@ -209,12 +209,31 @@ const AICoachResultsPage = () => {
               Veckoschema
             </h3>
             <div className="space-y-3">
-              {Object.entries(plan.training?.weeklySchedule || {}).map(([day, workout]) => (
-                <div key={day} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-24 font-medium text-gray-700">{day}</div>
-                  <div className="flex-1 text-gray-600">{workout}</div>
-                </div>
-              ))}
+              {Array.isArray(plan.training?.weeklySchedule) ? (
+                // New format: array of objects
+                plan.training.weeklySchedule.map((workout, index) => (
+                  <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <div className="w-20 font-medium text-gray-700">{workout.day}</div>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{workout.type}</div>
+                      <div className="text-sm text-gray-600">{workout.description}</div>
+                      {workout.duration !== '-' && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {workout.duration} {workout.pace !== '-' && `• ${workout.pace}`}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                // Old format: object with day keys
+                Object.entries(plan.training?.weeklySchedule || {}).map(([day, workout]) => (
+                  <div key={day} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-24 font-medium text-gray-700">{day}</div>
+                    <div className="flex-1 text-gray-600">{workout}</div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -257,18 +276,24 @@ const AICoachResultsPage = () => {
             </h3>
             <div className="bg-orange-50 rounded-xl p-4">
               <p className="text-sm text-gray-700 mb-2">
-                <strong>Mellan pass:</strong> {plan.training?.recoveryProtocol?.betweenRuns}
+                <strong>Mellan pass:</strong> {plan.training?.recovery?.betweenSessions || 'Minst 1 vilodag mellan hårda pass'}
               </p>
               <p className="text-sm text-gray-700 mb-3">
-                <strong>Veckovis:</strong> {plan.training?.recoveryProtocol?.weekly}
+                <strong>Veckovis:</strong> {plan.training?.recovery?.weekly || '1-2 kompletta vilodagar per vecka'}
               </p>
               <div className="space-y-2">
-                {plan.training?.recoveryProtocol?.methods?.map((method, idx) => (
-                  <div key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                    <CheckCircle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                    {method}
-                  </div>
-                ))}
+                <div className="flex items-start gap-2 text-sm text-gray-600">
+                  <CheckCircle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                  {plan.training?.recovery?.stretching || 'Stretching 10-15 min efter varje pass'}
+                </div>
+                <div className="flex items-start gap-2 text-sm text-gray-600">
+                  <CheckCircle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                  {plan.training?.recovery?.foamRolling || 'Foam rolling 2-3 ggr/vecka'}
+                </div>
+                <div className="flex items-start gap-2 text-sm text-gray-600">
+                  <CheckCircle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                  {plan.training?.recovery?.activeRecovery || 'Lätt yoga eller simning på vilodagar'}
+                </div>
               </div>
             </div>
           </div>

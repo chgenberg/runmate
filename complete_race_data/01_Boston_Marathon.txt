@@ -1,0 +1,42 @@
+===========================================================================
+KOMPLETT LÖPPINFORMATION: BOSTON MARATHON
+===========================================================================
+
+📍 GRUNDLÄGGANDE INFORMATION:
+─────────────────────────────────────────────
+Namn: Boston Marathon
+Distans: Marathon (42.195 km)
+Plats: Boston, USA
+Datum: Tredje måndagen i april
+Webbplats: https://www.baa.org/races/boston-marathon
+
+🏔️ BANPROFIL OCH TERRÄNG:
+─────────────────────────────────────────────
+Höjdmeter: 137 meter nedförsbacke totalt
+Terrängtyp: Asfalt, kuperad med nedförsbackar
+Svårighetsgrad: Medel-Hög (krav på kvalifikationstid)
+
+⏱️ PRAKTISK INFORMATION:
+─────────────────────────────────────────────
+Tidsgräns: 6 timmar
+Max deltagare: 30,000 löpare
+Anmälan: Kvalifikationstid krävs
+
+🏃‍♂️ SUPPORT OCH SERVICE:
+─────────────────────────────────────────────
+Vattenstationer: Vattenstationer varje 5 km
+Crew-support: Se regler
+Drop bags: Se regler
+
+⭐ SÄRSKILDA DRAG:
+─────────────────────────────────────────────
+Världens äldsta årliga marathon, Heartbreak Hill
+
+🌤️ KLIMAT:
+─────────────────────────────────────────────
+Kan vara varierande väder i april
+
+📊 METADATA:
+─────────────────────────────────────────────
+Insamlad: 2025-06-27 09:21:04
+Källa: Kombination webscraping + expertkunskap

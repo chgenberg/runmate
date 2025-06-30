@@ -308,11 +308,11 @@ const DiscoverPage = () => {
             <div className={`${viewMode === 'scroll' ? 'md:w-1/3 p-4 md:p-6' : 'relative'}`}>
               {viewMode === 'stack' ? (
                 // Stack view header
-                <div className="relative h-24 md:h-32 bg-gradient-to-br from-blue-500 to-purple-600">
+                <div className={`relative ${isMobile ? 'h-20' : 'h-32'} bg-gradient-to-br from-blue-500 to-purple-600`}>
                   <div className="absolute inset-0 bg-black/20" />
                   
                   {/* Profile Picture - Smaller on mobile */}
-                  <div className="absolute -bottom-10 md:-bottom-12 left-4 md:left-6 w-20 md:w-24 h-20 md:h-24 rounded-full border-4 border-white overflow-hidden bg-white cursor-pointer hover:scale-105 transition-transform"
+                  <div className={`absolute ${isMobile ? '-bottom-8 left-3 w-16 h-16' : '-bottom-12 left-6 w-24 h-24'} rounded-full border-4 border-white overflow-hidden bg-white cursor-pointer hover:scale-105 transition-transform`}
                        onClick={() => window.open(`/profile/${runner.id}`, '_blank')}
                        title="Klicka för att se profil">
                     <img
@@ -326,14 +326,14 @@ const DiscoverPage = () => {
                   </div>
 
                   {/* Level Badge */}
-                  <div className={`absolute top-2 md:top-4 right-2 md:right-4 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
+                  <div className={`absolute ${isMobile ? 'top-2 right-2 px-2 py-0.5 text-[10px]' : 'top-4 right-4 px-3 py-1 text-xs'} rounded-full text-white font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
                     {runner.level}
                   </div>
 
                   {/* Rating */}
-                  <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
-                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                    <span className="font-bold text-xs">{runner.rating.toFixed(1)}</span>
+                  <div className={`absolute ${isMobile ? 'bottom-2 right-2' : 'bottom-4 right-4'} flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full`}>
+                    <Star className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} text-yellow-500 fill-current`} />
+                    <span className={`font-bold ${isMobile ? 'text-[11px]' : 'text-xs'}`}>{runner.rating.toFixed(1)}</span>
                   </div>
                 </div>
               ) : (
@@ -422,15 +422,15 @@ const DiscoverPage = () => {
             </div>
 
             {/* Right side - Content */}
-            <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-4 md:p-6' : 'pt-14 md:pt-16 px-4 md:px-6 pb-4 md:pb-6'}`}>
+            <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-4 md:p-6' : isMobile ? 'pt-10 px-3 pb-3' : 'pt-16 px-6 pb-6'}`}>
               {viewMode === 'stack' && (
                 <>
                   {/* Name and Location for stack view */}
-                  <div className="mb-3 md:mb-4">
-                    <h3 className="text-lg md:text-xl font-bold text-gray-900">
+                  <div className={`${isMobile ? 'mb-2' : 'mb-4'}`}>
+                    <h3 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold text-gray-900`}>
                       {runner.name}{runner.age && `, ${runner.age}`}
                     </h3>
-                    <p className="text-xs md:text-sm text-gray-600 flex items-center gap-1 mt-1">
+                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 flex items-center gap-1 mt-0.5`}>
                       <MapPin className="w-3 h-3" />
                       {runner.location} • {runner.distance} km bort
                     </p>
@@ -439,45 +439,45 @@ const DiscoverPage = () => {
               )}
 
               {/* Bio */}
-              <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">{runner.bio}</p>
+              <p className={`${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'} text-gray-700 line-clamp-2`}>{runner.bio}</p>
 
               {/* Stats Grid - Main Focus */}
               <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-3 md:p-4 mb-3 md:mb-4`}>
                 <div className="grid grid-cols-3 gap-2 md:gap-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
-                      <Zap className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
+                      <Zap className="w-4 h-4 text-orange-500" />
                     </div>
-                    <p className="text-sm md:text-lg font-bold text-gray-900">{runner.pace}</p>
-                    <p className="text-[10px] md:text-xs text-gray-500">min/km</p>
+                    <p className="text-base md:text-lg font-bold text-gray-900">{runner.pace}</p>
+                    <p className="text-[11px] md:text-xs text-gray-500">min/km</p>
                   </div>
                   <div className="text-center border-x border-gray-200">
                     <div className="flex items-center justify-center mb-1">
-                      <Activity className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
+                      <Activity className="w-4 h-4 text-blue-500" />
                     </div>
-                    <p className="text-sm md:text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
-                    <p className="text-[10px] md:text-xs text-gray-500">km/vecka</p>
+                    <p className="text-base md:text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
+                    <p className="text-[11px] md:text-xs text-gray-500">km/vecka</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
-                      <TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
+                      <TrendingUp className="w-4 h-4 text-green-500" />
                     </div>
-                    <p className="text-sm md:text-lg font-bold text-gray-900">{runner.longestRun}</p>
-                    <p className="text-[10px] md:text-xs text-gray-500">längsta (km)</p>
+                    <p className="text-base md:text-lg font-bold text-gray-900">{runner.longestRun}</p>
+                    <p className="text-[11px] md:text-xs text-gray-500">längsta (km)</p>
                   </div>
                 </div>
 
-                {/* Additional Stats */}
-                <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200">
+                {/* Additional Stats - Hidden on mobile in stack view */}
+                <div className={`grid grid-cols-2 gap-2 md:gap-4 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200 ${viewMode === 'stack' && isMobile ? 'hidden' : ''}`}>
                   <div className="flex items-center gap-1 md:gap-2">
                     <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
-                    <span className="text-[10px] md:text-sm text-gray-700">
+                    <span className="text-[11px] md:text-sm text-gray-700">
                       <span className="font-bold">{runner.totalRuns}</span> löprundor
                     </span>
                   </div>
                   <div className="flex items-center gap-1 md:gap-2">
                     <Calendar className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
-                    <span className="text-[10px] md:text-sm text-gray-700">
+                    <span className="text-[11px] md:text-sm text-gray-700">
                       Föredrar <span className="font-bold">{runner.favoriteTime}</span>
                     </span>
                   </div>
@@ -761,83 +761,145 @@ const DiscoverPage = () => {
           </p>
         </div>
 
-        {/* AI Banner - Only show if no AI profile */}
-        {!hasAiProfile && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 md:mb-6"
-          >
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl md:rounded-2xl p-3 md:p-6 text-white shadow-xl">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
-                <div className="flex items-center gap-2 md:gap-3 text-center md:text-left">
-                  <Brain className="w-6 h-6 md:w-10 md:h-10 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-bold text-sm md:text-xl">Få AI-matchningar!</h3>
-                    <p className="text-xs md:text-base opacity-90">Låt vår AI hitta dina perfekta löparvänner</p>
-                  </div>
-                </div>
+        {/* Mobile Controls Bar */}
+        <div className="md:hidden mb-4">
+          <div className="bg-white rounded-xl shadow-md p-2 flex items-center justify-between">
+            {/* Left side - Filter and Info */}
+            <div className="flex items-center gap-1">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowFilters(!showFilters)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <SlidersHorizontal className="w-5 h-5 text-gray-600" />
+              </motion.button>
+              
+              {!hasAiProfile && (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleStartAIAnalysis}
-                  className="bg-white text-purple-600 px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold text-xs md:text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
+                  className="p-2 rounded-lg hover:bg-purple-100 transition-colors"
                 >
-                  Starta AI-analys
+                  <Sparkles className="w-5 h-5 text-purple-600" />
                 </motion.button>
-              </div>
+              )}
             </div>
-          </motion.div>
-        )}
 
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 md:gap-4 mb-4 md:mb-6">
-          <div className="flex items-center gap-2 md:gap-3">
+            {/* Center - View Mode Toggle */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('stack')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  viewMode === 'stack' 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600'
+                }`}
+              >
+                Kort
+              </button>
+              <button
+                onClick={() => setViewMode('scroll')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  viewMode === 'scroll' 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600'
+                }`}
+              >
+                Lista
+              </button>
+            </div>
+
+            {/* Right side - Info */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowFilters(!showFilters)}
-              className="bg-white px-3 md:px-4 py-2 rounded-lg md:rounded-xl shadow-md flex items-center gap-2 text-xs md:text-base"
-            >
-              <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
-              Filter
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowInfoModal(true)}
-              className="bg-white p-2 rounded-lg md:rounded-xl shadow-md"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
+              <Info className="w-5 h-5 text-gray-600" />
             </motion.button>
           </div>
+        </div>
 
-          <div className="flex items-center gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setViewMode('stack')}
-              className={`px-3 md:px-4 py-2 rounded-lg md:rounded-xl text-xs md:text-base ${
-                viewMode === 'stack' 
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
-                  : 'bg-white text-gray-600 shadow-md'
-              }`}
+        {/* Desktop Controls - Hidden on mobile */}
+        <div className="hidden md:block">
+          {/* AI Banner - Only show if no AI profile */}
+          {!hasAiProfile && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6"
             >
-              Kort
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setViewMode('scroll')}
-              className={`px-3 md:px-4 py-2 rounded-lg md:rounded-xl text-xs md:text-base ${
-                viewMode === 'scroll' 
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
-                  : 'bg-white text-gray-600 shadow-md'
-              }`}
-            >
-              Lista
-            </motion.button>
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white shadow-xl">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Brain className="w-10 h-10 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-bold text-xl">Få AI-matchningar!</h3>
+                      <p className="text-base opacity-90">Låt vår AI hitta dina perfekta löparvänner</p>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleStartAIAnalysis}
+                    className="bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
+                  >
+                    Starta AI-analys
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Desktop Controls */}
+          <div className="flex justify-between items-center gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-white px-4 py-2 rounded-xl shadow-md flex items-center gap-2"
+              >
+                <SlidersHorizontal className="w-5 h-5" />
+                Filter
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowInfoModal(true)}
+                className="bg-white p-2 rounded-xl shadow-md"
+              >
+                <Info className="w-5 h-5 text-gray-600" />
+              </motion.button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setViewMode('stack')}
+                className={`px-4 py-2 rounded-xl ${
+                  viewMode === 'stack' 
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-600 shadow-md'
+                }`}
+              >
+                Kort
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setViewMode('scroll')}
+                className={`px-4 py-2 rounded-xl ${
+                  viewMode === 'scroll' 
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-600 shadow-md'
+                }`}
+              >
+                Lista
+              </motion.button>
+            </div>
           </div>
         </div>
 
@@ -918,11 +980,11 @@ const DiscoverPage = () => {
             <div className={viewMode === 'scroll' ? 'space-y-6' : ''}>
               {/* AI Matches Section - Removed the large section, only show matches if completed */}
               {hasAiProfile && aiMatches.length > 0 && (
-                <div className="mb-8">
+                <div className="mb-8" id="ai-matches-section">
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-5 h-5 text-yellow-500" />
                     <h2 className="text-xl font-bold text-gray-900">Dina AI-supermatchningar</h2>
-                    <span className="text-sm text-gray-600">- Skriv direkt utan att matcha!</span>
+                    <span className="text-sm text-gray-600 hidden md:inline">- Skriv direkt utan att matcha!</span>
                   </div>
                   
                   <div className={viewMode === 'scroll' ? 'space-y-4' : 'relative h-[600px]'}>
@@ -1055,6 +1117,29 @@ const DiscoverPage = () => {
         }}
       />
 
+      {/* Floating AI Button for Mobile - Show when user has AI profile */}
+      {hasAiProfile && window.innerWidth < 768 && aiMatches.length > 0 && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => {
+            // Scroll to AI matches section or show in modal
+            const aiSection = document.getElementById('ai-matches-section');
+            if (aiSection) {
+              aiSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+          className="fixed bottom-24 right-4 w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-lg flex items-center justify-center z-40"
+        >
+          <Sparkles className="w-6 h-6 text-white" />
+          {aiMatches.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {aiMatches.length}
+            </span>
+          )}
+        </motion.button>
+      )}
 
     </div>
   );

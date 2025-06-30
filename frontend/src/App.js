@@ -30,6 +30,9 @@ import ChatConversationPage from './pages/Chat/ChatConversationPage';
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
 
+// Profile Pages
+import PublicProfilePage from './pages/Profile/PublicProfilePage';
+
 // Legal Pages (for footer)
 import PrivacyPage from './pages/Legal/PrivacyPage';
 import FAQPage from './pages/Legal/FAQPage';
@@ -63,6 +66,9 @@ function App() {
             <Route path="/" element={<PublicRoute><SuperLanding /></PublicRoute>} />
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+            
+            {/* Public Profile */}
+            <Route path="/profile/:userId" element={<PublicProfilePage />} />
             
             {/* Legal and Company Pages */}
             <Route path="/privacy" element={<PrivacyPage />} />

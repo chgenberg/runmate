@@ -23,56 +23,7 @@ const RaceCoachCalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [completedWorkouts, setCompletedWorkouts] = useState({});
   
-  const generateCalendarEvents = useCallback((plan) => {
-    // Generate daily training events based on the plan
-    const events = {};
-    const startDate = new Date();
-    const raceDate = new Date(plan.raceDate);
-    
-    // Generate events for each day until race
-    let currentDate = new Date(startDate);
-    while (currentDate <= raceDate) {
-      const dateKey = currentDate.toISOString().split('T')[0];
-      const dayOfWeek = currentDate.getDay();
-      const weeksUntilRace = Math.floor((raceDate - currentDate) / (1000 * 60 * 60 * 24 * 7));
-      
-      // Determine training phase
-      const phase = getTrainingPhase(weeksUntilRace, plan.trainingPhases);
-      
-      // Generate workout for this day
-      events[dateKey] = generateDailyWorkout(dayOfWeek, phase, weeksUntilRace, plan);
-      
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    // Add race day
-    events[raceDate.toISOString().split('T')[0]] = {
-      type: 'race',
-      title: plan.race.name,
-      description: `${plan.race.distance} i ${plan.race.location}`,
-      icon: '🏆',
-      color: 'from-yellow-400 to-orange-500'
-    };
-    
-    setPlan({ ...plan, calendarEvents: events });
-  }, [generateDailyWorkout, getTrainingPhase]);
-
-  useEffect(() => {
-    const navigationPlan = location.state?.plan;
-    const storedPlan = localStorage.getItem('raceCoachPlan');
-    
-    if (navigationPlan) {
-      setPlan(navigationPlan);
-      localStorage.setItem('raceCoachPlan', JSON.stringify(navigationPlan));
-      generateCalendarEvents(navigationPlan);
-    } else if (storedPlan) {
-      setPlan(JSON.parse(storedPlan));
-    } else {
-      toast.error('Ingen träningsplan hittades');
-      navigate('/app/dashboard');
-    }
-  }, [location.state, navigate, generateCalendarEvents]);
-
+  // Helper functions defined first to avoid use-before-define errors
   const getTrainingPhase = useCallback((weeksUntilRace, phases) => {
     // Determine which training phase we're in
     if (weeksUntilRace <= 2) return 'taper';
@@ -80,33 +31,6 @@ const RaceCoachCalendarPage = () => {
     if (weeksUntilRace <= 12) return 'build';
     return 'base';
   }, []);
-
-  const generateDailyWorkout = useCallback((dayOfWeek, phase, weeksUntilRace, plan) => {
-    const workoutSchedule = {
-      0: { type: 'rest', title: 'Vila', icon: '😴' }, // Sunday
-      1: { type: 'easy', title: 'Lätt löpning', duration: '30-45 min', icon: '🏃' }, // Monday
-      2: { type: 'interval', title: 'Intervaller', duration: '45-60 min', icon: '⚡' }, // Tuesday
-      3: { type: 'recovery', title: 'Återhämtning', duration: '20-30 min', icon: '🚶' }, // Wednesday
-      4: { type: 'tempo', title: 'Tempopass', duration: '40-50 min', icon: '💪' }, // Thursday
-      5: { type: 'rest', title: 'Vila', icon: '😴' }, // Friday
-      6: { type: 'long', title: 'Långpass', duration: '60-120 min', icon: '⏱️' } // Saturday
-    };
-    
-    const baseWorkout = workoutSchedule[dayOfWeek];
-    
-    // Adjust based on phase
-    if (phase === 'taper' && baseWorkout.type !== 'rest') {
-      baseWorkout.duration = baseWorkout.duration?.split('-')[0] + ' min';
-      baseWorkout.intensity = 'Lätt';
-    }
-    
-    return {
-      ...baseWorkout,
-      phase,
-      nutrition: generateDailyNutrition(baseWorkout.type),
-      recovery: generateDailyRecovery(baseWorkout.type)
-    };
-  }, [generateDailyNutrition, generateDailyRecovery]);
 
   const generateDailyNutrition = useCallback((workoutType) => {
     const nutritionPlans = {
@@ -157,6 +81,83 @@ const RaceCoachCalendarPage = () => {
     
     return recoveryPlans[workoutType] || recoveryPlans.easy;
   }, []);
+
+  const generateDailyWorkout = useCallback((dayOfWeek, phase, weeksUntilRace, plan) => {
+    const workoutSchedule = {
+      0: { type: 'rest', title: 'Vila', icon: '😴' }, // Sunday
+      1: { type: 'easy', title: 'Lätt löpning', duration: '30-45 min', icon: '🏃' }, // Monday
+      2: { type: 'interval', title: 'Intervaller', duration: '45-60 min', icon: '⚡' }, // Tuesday
+      3: { type: 'recovery', title: 'Återhämtning', duration: '20-30 min', icon: '🚶' }, // Wednesday
+      4: { type: 'tempo', title: 'Tempopass', duration: '40-50 min', icon: '💪' }, // Thursday
+      5: { type: 'rest', title: 'Vila', icon: '😴' }, // Friday
+      6: { type: 'long', title: 'Långpass', duration: '60-120 min', icon: '⏱️' } // Saturday
+    };
+    
+    const baseWorkout = workoutSchedule[dayOfWeek];
+    
+    // Adjust based on phase
+    if (phase === 'taper' && baseWorkout.type !== 'rest') {
+      baseWorkout.duration = baseWorkout.duration?.split('-')[0] + ' min';
+      baseWorkout.intensity = 'Lätt';
+    }
+    
+    return {
+      ...baseWorkout,
+      phase,
+      nutrition: generateDailyNutrition(baseWorkout.type),
+      recovery: generateDailyRecovery(baseWorkout.type)
+    };
+  }, [generateDailyNutrition, generateDailyRecovery]);
+
+  const generateCalendarEvents = useCallback((plan) => {
+    // Generate daily training events based on the plan
+    const events = {};
+    const startDate = new Date();
+    const raceDate = new Date(plan.raceDate);
+    
+    // Generate events for each day until race
+    let currentDate = new Date(startDate);
+    while (currentDate <= raceDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay();
+      const weeksUntilRace = Math.floor((raceDate - currentDate) / (1000 * 60 * 60 * 24 * 7));
+      
+      // Determine training phase
+      const phase = getTrainingPhase(weeksUntilRace, plan.trainingPhases);
+      
+      // Generate workout for this day
+      events[dateKey] = generateDailyWorkout(dayOfWeek, phase, weeksUntilRace, plan);
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Add race day
+    events[raceDate.toISOString().split('T')[0]] = {
+      type: 'race',
+      title: plan.race.name,
+      description: `${plan.race.distance} i ${plan.race.location}`,
+      icon: '🏆',
+      color: 'from-yellow-400 to-orange-500'
+    };
+    
+    setPlan({ ...plan, calendarEvents: events });
+  }, [generateDailyWorkout, getTrainingPhase]);
+
+  useEffect(() => {
+    const navigationPlan = location.state?.plan;
+    const storedPlan = localStorage.getItem('raceCoachPlan');
+    
+    if (navigationPlan) {
+      setPlan(navigationPlan);
+      localStorage.setItem('raceCoachPlan', JSON.stringify(navigationPlan));
+      generateCalendarEvents(navigationPlan);
+    } else if (storedPlan) {
+      setPlan(JSON.parse(storedPlan));
+    } else {
+      toast.error('Ingen träningsplan hittades');
+      navigate('/app/dashboard');
+    }
+  }, [location.state, navigate, generateCalendarEvents]);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();

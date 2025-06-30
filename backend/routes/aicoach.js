@@ -632,14 +632,12 @@ router.post('/comprehensive-plan', protect, async (req, res) => {
           enhanced: false
         },
         profile: {
-          age: age || 35,
-          gender: gender || 'male',
-          weight: weight || 75,
-          height: height || 180,
+          ageGroup: ageGroup || '25-35',
           primaryGoal: primaryGoal || 'fitness',
           currentLevel: currentLevel || 'regular',
           weeklyRuns: weeklyRuns || 3,
           weeklyHours: weeklyHours || 4,
+          trainingExperience: trainingExperience || 'beginner',
           createdAt: new Date()
         },
         createdAt: new Date()

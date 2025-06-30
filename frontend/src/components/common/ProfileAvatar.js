@@ -78,29 +78,35 @@ const ProfileAvatar = ({
   const avatarColor = getAvatarColor(user);
 
   return (
-    <div className={`relative ${className}`}>
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-xl`}>
+    <div className={`relative inline-block ${className}`}>
+      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-xl bg-white`}>
         {hasProfileImage ? (
           <img
             src={src}
             alt="Profilbild"
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
           />
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${avatarColor} flex items-center justify-center`}>
-            {initials ? (
-              <span className={`text-white font-bold ${
-                size === 'sm' ? 'text-xs' : 
-                size === 'md' ? 'text-2xl' : 
-                size === 'lg' ? 'text-3xl' : 'text-4xl'
-              }`}>
-                {initials}
-              </span>
-            ) : (
-              <User className={`${iconSizes[size]} text-white`} />
-            )}
-          </div>
-        )}
+        ) : null}
+        <div 
+          className={`w-full h-full bg-gradient-to-br ${avatarColor} flex items-center justify-center ${hasProfileImage ? 'hidden' : ''}`}
+          style={hasProfileImage ? { display: 'none' } : {}}
+        >
+          {initials ? (
+            <span className={`text-white font-bold ${
+              size === 'sm' ? 'text-xs' : 
+              size === 'md' ? 'text-2xl' : 
+              size === 'lg' ? 'text-3xl' : 'text-4xl'
+            }`}>
+              {initials}
+            </span>
+          ) : (
+            <User className={`${iconSizes[size]} text-white`} />
+          )}
+        </div>
       </div>
       
       {showEditIcon && onEdit && EditIcon && (

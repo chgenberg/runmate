@@ -202,7 +202,7 @@ const TopBar = ({ onMenuClick }) => {
             {/* Profile Picture */}
             <motion.button
               onClick={() => navigate('/app/profile')}
-              className="relative"
+              className="relative flex items-center justify-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

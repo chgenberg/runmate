@@ -49,8 +49,14 @@ const protect = async (req, res, next) => {
       const lastUpdate = req.user.lastActive;
       const now = new Date();
       if (!lastUpdate || now - lastUpdate > 60000) { // 1 minute
+        // Use atomic update to avoid version conflicts
+        await User.findByIdAndUpdate(req.user._id, { 
+          lastActive: now 
+        }, { 
+          runValidators: false,
+          timestamps: false 
+        });
         req.user.lastActive = now;
-        await req.user.save();
       }
 
       next();

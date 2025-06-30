@@ -277,49 +277,50 @@ const ChatPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 pb-20 lg:pb-0">
       {/* Enhanced Header with Gradient */}
       <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-4 md:py-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between mb-8"
+            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 md:mb-8"
           >
             <div>
               <motion.h1 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3"
+                className="text-2xl md:text-4xl font-bold mb-1 md:mb-2 flex items-center gap-2 md:gap-3"
               >
-                <MessageCircle className="w-8 h-8" />
+                <MessageCircle className="w-6 h-6 md:w-8 md:h-8" />
                 Mina Chattar
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-white/90 text-lg"
+                className="text-white/90 text-sm md:text-lg"
               >
                 Håll kontakten med dina löparvänner och utmaningsgrupper
               </motion.p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className="p-3 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all"
+                className="p-2 md:p-3 bg-white/20 backdrop-blur-sm rounded-lg md:rounded-xl hover:bg-white/30 transition-all"
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="w-4 h-4 md:w-5 md:h-5" />
               </motion.button>
               
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowNewChatModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-orange-600 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-white text-orange-600 rounded-lg md:rounded-xl font-semibold text-sm md:text-base shadow-lg hover:shadow-xl transition-all"
               >
-                <Plus className="w-5 h-5" />
-                Ny Chatt
+                <Plus className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">Ny Chatt</span>
+                <span className="sm:hidden">Ny</span>
               </motion.button>
             </div>
           </motion.div>

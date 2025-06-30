@@ -250,12 +250,12 @@ const ChatConversationPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50 overflow-hidden">
       {/* Header */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white/90 backdrop-blur-sm border-b border-gray-200 p-3 md:p-4 flex items-center justify-between shadow-sm"
+        className="bg-white/90 backdrop-blur-sm border-b border-gray-200 p-3 md:p-4 flex items-center justify-between shadow-sm flex-shrink-0"
       >
         <div className="flex items-center space-x-2 md:space-x-3">
           <motion.button
@@ -308,7 +308,7 @@ const ChatConversationPage = () => {
       </motion.div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 pb-20 lg:pb-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 pb-4">
         {messages.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -448,10 +448,10 @@ const ChatConversationPage = () => {
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white/90 backdrop-blur-sm border-t border-gray-200 p-3 md:p-4 pb-safe"
+        className="bg-white/90 backdrop-blur-sm border-t border-gray-200 p-3 md:p-4 pb-safe flex-shrink-0"
       >
-        <div className="flex items-end space-x-3">
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <div className="flex items-end space-x-2 md:space-x-3">
+          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden md:block">
             <Paperclip className="h-5 w-5 text-gray-600" />
           </button>
           
@@ -470,13 +470,13 @@ const ChatConversationPage = () => {
                 }
               }}
               placeholder="Skriv ett meddelande..."
-              className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white/80 backdrop-blur-sm text-sm max-h-32"
+              className="w-full px-3 md:px-4 py-2 md:py-3 pr-20 md:pr-12 border border-gray-200 rounded-xl md:rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white/80 backdrop-blur-sm text-sm max-h-32"
               rows={1}
-              style={{ minHeight: '44px' }}
+              style={{ minHeight: '40px' }}
             />
             
-            {/* Quick emoji buttons */}
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+            {/* Quick emoji buttons - Hidden on mobile */}
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 hidden md:flex items-center space-x-1">
               {['🏃‍♂️', '👍', '❤️', '😊'].map((emoji, index) => (
                 <button
                   key={index}
@@ -494,7 +494,7 @@ const ChatConversationPage = () => {
             whileTap={{ scale: 0.95 }}
             onClick={handleSendMessage}
             disabled={!newMessage.trim() || sending}
-            className={`p-3 rounded-full transition-all duration-200 ${
+            className={`p-2 md:p-3 rounded-full transition-all duration-200 ${
               newMessage.trim() && !sending
                 ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
                 : 'bg-gray-100 text-gray-400'

@@ -1144,7 +1144,7 @@ function generateStructuredPlan(formData, user) {
   // Fallback structured plan when OpenAI is not available
   const {
     // Basic profile
-    age,
+    ageGroup,
     gender,
     weight,
     height,

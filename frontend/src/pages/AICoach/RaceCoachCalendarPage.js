@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -23,23 +23,7 @@ const RaceCoachCalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [completedWorkouts, setCompletedWorkouts] = useState({});
   
-  useEffect(() => {
-    const navigationPlan = location.state?.plan;
-    const storedPlan = localStorage.getItem('raceCoachPlan');
-    
-    if (navigationPlan) {
-      setPlan(navigationPlan);
-      localStorage.setItem('raceCoachPlan', JSON.stringify(navigationPlan));
-      generateCalendarEvents(navigationPlan);
-    } else if (storedPlan) {
-      setPlan(JSON.parse(storedPlan));
-    } else {
-      toast.error('Ingen träningsplan hittades');
-      navigate('/app/dashboard');
-    }
-  }, [location.state, navigate]);
-
-  const generateCalendarEvents = (plan) => {
+  const generateCalendarEvents = useCallback((plan) => {
     // Generate daily training events based on the plan
     const events = {};
     const startDate = new Date();
@@ -71,7 +55,23 @@ const RaceCoachCalendarPage = () => {
     };
     
     setPlan({ ...plan, calendarEvents: events });
-  };
+  }, []);
+
+  useEffect(() => {
+    const navigationPlan = location.state?.plan;
+    const storedPlan = localStorage.getItem('raceCoachPlan');
+    
+    if (navigationPlan) {
+      setPlan(navigationPlan);
+      localStorage.setItem('raceCoachPlan', JSON.stringify(navigationPlan));
+      generateCalendarEvents(navigationPlan);
+    } else if (storedPlan) {
+      setPlan(JSON.parse(storedPlan));
+    } else {
+      toast.error('Ingen träningsplan hittades');
+      navigate('/app/dashboard');
+    }
+  }, [location.state, navigate, generateCalendarEvents]);
 
   const getTrainingPhase = (weeksUntilRace, phases) => {
     // Determine which training phase we're in

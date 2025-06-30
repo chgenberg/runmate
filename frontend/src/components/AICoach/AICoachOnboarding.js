@@ -1069,6 +1069,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
       {/* AI Loading Screen */}
       <AILoadingScreen 
         isVisible={isLoading} 
+        message={loadingMessage}
         onComplete={() => {
           // This will be called when loading animation completes
           // The actual navigation happens in handleSubmit

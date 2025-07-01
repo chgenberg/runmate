@@ -12,13 +12,15 @@ import {
   Activity, Heart, TrendingUp, Clock, Flame,
   Zap, Mountain, BarChart3, Calendar,
   Gauge, Apple, ChevronDown,
-  Trophy, Route, Smartphone, Brain
+  Trophy, Route, Smartphone, Brain, ArrowRight
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 
 const StatisticsPage = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedMetric, setSelectedMetric] = useState('overview');
@@ -369,6 +371,50 @@ const StatisticsPage = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <LoadingSpinner size="xl" text="Laddar Apple Health statistik..." />
+      </div>
+    );
+  }
+
+  // Check if we have any data
+  const hasData = stats?.totalActivities > 0 || stats?.totalDistance > 0;
+
+  if (!hasData && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full"
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Activity className="w-10 h-10 text-orange-600" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Ingen träningsdata ännu
+            </h2>
+            
+            <p className="text-gray-600 mb-8">
+              Synka din Apple Health data för att se din statistik och träningshistorik här.
+            </p>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/app/settings')}
+              className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 mx-auto"
+            >
+              <Apple className="w-5 h-5" />
+              Synka Apple Health
+              <ArrowRight className="w-5 h-5" />
+            </motion.button>
+            
+            <p className="text-sm text-gray-500 mt-6">
+              Du kan också logga aktiviteter manuellt
+            </p>
+          </div>
+        </motion.div>
       </div>
     );
   }

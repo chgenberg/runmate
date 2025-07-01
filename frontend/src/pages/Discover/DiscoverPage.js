@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
+import RaceCoachOnboarding from '../../components/AICoach/RaceCoachOnboarding';
 
 const DiscoverPage = () => {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const DiscoverPage = () => {
   const [aiMatches, setAiMatches] = useState([]);
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
   const [showAIPopup, setShowAIPopup] = useState(false);
+  const [showRaceCoachOnboarding, setShowRaceCoachOnboarding] = useState(false);
 
   const constraintsRef = useRef(null);
 
@@ -148,7 +150,7 @@ const DiscoverPage = () => {
 
   const handleStartAIAnalysis = () => {
     setShowAIPopup(false);
-    setShowAIOnboarding(true);
+    setShowRaceCoachOnboarding(true);
   };
 
   const handleSwipe = async (direction, userId) => {
@@ -694,19 +696,19 @@ const DiscoverPage = () => {
                 >
                   <Brain className="w-8 h-8 md:w-10 md:h-10 text-white" />
                 </motion.div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 uppercase">FÅ AI-MATCHNINGAR!</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 uppercase">FÖRBERED FÖR LOPP</h2>
                 <p className="text-sm md:text-base text-gray-600">
-                  Slutför din AI-coachprofil för att få de 5 bästa matchningarna baserat på dina träningsmål och preferenser.
+                  Välj från 50 världskända lopp och få en personlig träningsplan som tar dig till mållinjen!
                 </p>
               </div>
 
               {/* Benefits */}
               <div className="space-y-2.5 md:space-y-3 mb-6 md:mb-8">
                 {[
-                  { icon: Target, text: 'Målanalys', desc: 'Hitta löpare med samma mål' },
-                  { icon: Users, text: 'Matchningar', desc: '5 perfekta träningspartners' },
-                  { icon: MessageCircle, text: 'Direkt chatt', desc: 'Skriv utan att matcha' },
-                  { icon: Trophy, text: 'Träna ihop', desc: 'Nå era mål tillsammans' }
+                  { icon: Target, text: 'Välj lopp', desc: 'Från 50 världskända lopp' },
+                  { icon: Users, text: 'Träningsplan', desc: 'Personlig plan för ditt lopp' },
+                  { icon: MessageCircle, text: 'Veckoschema', desc: 'Strukturerad träning' },
+                  { icon: Trophy, text: 'Nå målet', desc: 'Kom i form till loppet' }
                 ].map((benefit, index) => (
                   <motion.div
                     key={index}
@@ -734,7 +736,7 @@ const DiscoverPage = () => {
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 md:py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase text-sm md:text-base"
               >
                 <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-                STARTA AI-ANALYS
+                FÖRBERED FÖR LOPP
                 <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
               </motion.button>
 
@@ -834,8 +836,8 @@ const DiscoverPage = () => {
                   <div className="flex items-center gap-3">
                     <Brain className="w-10 h-10 flex-shrink-0" />
                     <div>
-                      <h3 className="font-bold text-xl">Få AI-matchningar!</h3>
-                      <p className="text-base opacity-90">Låt vår AI hitta dina perfekta löparvänner</p>
+                      <h3 className="font-bold text-xl">Förbered för lopp!</h3>
+                      <p className="text-base opacity-90">Få en personlig träningsplan för ditt nästa lopp</p>
                     </div>
                   </div>
                   <motion.button
@@ -844,7 +846,7 @@ const DiscoverPage = () => {
                     onClick={handleStartAIAnalysis}
                     className="bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
                   >
-                    Starta AI-analys
+                    Förbered för lopp
                   </motion.button>
                 </div>
               </div>
@@ -1115,6 +1117,12 @@ const DiscoverPage = () => {
           // Check if analysis is complete after closing
           checkAiProfile();
         }}
+      />
+      
+      {/* Race Coach Onboarding Modal */}
+      <RaceCoachOnboarding 
+        isOpen={showRaceCoachOnboarding}
+        onClose={() => setShowRaceCoachOnboarding(false)}
       />
 
       {/* Floating AI Button for Mobile - Show when user has AI profile */}

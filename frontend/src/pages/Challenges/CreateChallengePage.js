@@ -329,7 +329,8 @@ const CreateChallengePage = () => {
                       placeholder="Ex: Vårens stora löputmaning"
                       className={`w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border ${
                         errors.title ? 'border-red-300' : 'border-gray-200'
-                      } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
+                      } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white text-gray-900`}
+                      style={{ color: '#111827', backgroundColor: '#ffffff' }}
                       required
                     />
                     {errors.title && (
@@ -349,7 +350,8 @@ const CreateChallengePage = () => {
                       rows="4"
                       className={`w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border ${
                         errors.description ? 'border-red-300' : 'border-gray-200'
-                      } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none`}
+                      } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none bg-white text-gray-900`}
+                      style={{ color: '#111827', backgroundColor: '#ffffff' }}
                       required
                     />
                     {errors.description && (
@@ -442,7 +444,8 @@ const CreateChallengePage = () => {
                         min="1"
                         className={`w-full px-3 md:px-4 py-2.5 md:py-3 pr-16 md:pr-20 text-sm md:text-base rounded-xl border ${
                           errors.target ? 'border-red-300' : 'border-gray-200'
-                        } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
+                        } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white text-gray-900`}
+                        style={{ color: '#111827', backgroundColor: '#ffffff' }}
                       />
                       <div className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-lg">
                         <span className="text-xs md:text-sm font-semibold text-gray-700">{formData.goal.unit}</span>
@@ -504,7 +507,8 @@ const CreateChallengePage = () => {
                       onChange={date => setFormData(p => ({...p, startDate: date}))}
                       minDate={new Date()}
                       dateFormat="yyyy-MM-dd"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white text-gray-900"
+                      style={{ color: '#111827', backgroundColor: '#ffffff' }}
                     />
                   </div>
                   
@@ -517,7 +521,8 @@ const CreateChallengePage = () => {
                       onChange={date => setFormData(p => ({...p, endDate: date}))}
                       minDate={formData.startDate}
                       dateFormat="yyyy-MM-dd"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white text-gray-900"
+                      style={{ color: '#111827', backgroundColor: '#ffffff' }}
                     />
                   </div>
                 </div>

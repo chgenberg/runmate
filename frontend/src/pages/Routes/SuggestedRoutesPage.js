@@ -450,8 +450,11 @@ const SuggestedRoutesPage = () => {
         return false;
       }
       
-      if (searchQuery && !route.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
+      if (searchQuery) {
+        const name = String(route.name || '').toLowerCase();
+        if (!name.includes(searchQuery.toLowerCase())) {
+          return false;
+        }
       }
       
       return true;

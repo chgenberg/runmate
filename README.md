@@ -1,5 +1,7 @@
 # RunMate - Advanced Running Social Platform
 
+<!-- Trigger deployment: 2025-07-01 15:41 - Force Railway sync -->
+
 En komplett löpsocial plattform med GPS-spårning, utmaningar och AI-baserad matchning.
 
 ## 🚀 Nyhet: GPS-spårning

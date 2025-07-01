@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,12 +14,7 @@ import {
   Calendar,
   Clock,
   Sparkles,
-  TrendingUp,
-  Lightbulb,
-  Moon,
-  Sun,
-  CloudRain,
-  Info
+  Lightbulb
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 

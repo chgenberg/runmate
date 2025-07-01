@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Activity, Utensils, Heart, Calendar, Sparkles, Trophy, MapPin, Clock, TrendingUp } from 'lucide-react';
+import { Brain, Activity, Utensils, Heart, Calendar, Sparkles, MapPin } from 'lucide-react';
 
 const AILoadingScreen = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -91,7 +91,7 @@ const AILoadingScreen = ({ onComplete }) => {
       clearInterval(stepInterval);
       clearInterval(factInterval);
     };
-  }, [onComplete]);
+  }, [onComplete, loadingSteps.length, funFacts.length]);
 
   const CurrentIcon = loadingSteps[currentStep].icon;
 

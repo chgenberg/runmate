@@ -83,19 +83,65 @@ const RaceCoachCalendarPage = () => {
   }, []);
 
   const generateDailyWorkout = useCallback((dayOfWeek, phase, weeksUntilRace, plan) => {
+    // Use actual training schedule from AI coach if available
+    if (plan.training?.weeklySchedule) {
+      const dayNames = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
+      const dayName = dayNames[dayOfWeek];
+      
+      // Find matching workout from AI coach plan
+      const aiWorkout = plan.training.weeklySchedule.find(w => w.day === dayName);
+      
+      if (aiWorkout) {
+        const typeMap = {
+          'Vila': { type: 'rest', icon: '😴' },
+          'Lugn löpning': { type: 'easy', icon: '🏃' },
+          'Intervaller': { type: 'interval', icon: '⚡' },
+          'Tempopass': { type: 'tempo', icon: '💪' },
+          'Långpass': { type: 'long', icon: '⏱️' },
+          'Styrketräning': { type: 'strength', icon: '💪' },
+          'Återhämtning': { type: 'recovery', icon: '🚶' }
+        };
+        
+        const workoutType = typeMap[aiWorkout.type] || { type: 'easy', icon: '🏃' };
+        
+        return {
+          type: workoutType.type,
+          title: aiWorkout.type,
+          duration: aiWorkout.duration,
+          icon: workoutType.icon,
+          description: aiWorkout.description,
+          time: aiWorkout.time,
+          location: aiWorkout.location,
+          phase,
+          nutrition: plan.nutrition ? {
+            calories: plan.nutrition.dailyCalories || 2400,
+            focus: plan.nutrition.focus || 'Balanserad kost',
+            hydration: plan.nutrition.hydration || '2.5-3L vatten',
+            preworkout: plan.nutrition.preWorkout,
+            postworkout: plan.nutrition.postWorkout
+          } : generateDailyNutrition(workoutType.type),
+          recovery: plan.recovery ? [
+            plan.recovery.weeklyPlan?.stretching || 'Stretching 10-15 min',
+            plan.recovery.weeklyPlan?.activeRecovery || 'Lätt aktivitet',
+            plan.recovery.sleepPriority || 'God sömn'
+          ] : generateDailyRecovery(workoutType.type)
+        };
+      }
+    }
+    
+    // Fallback to default schedule if no AI plan available
     const workoutSchedule = {
-      0: { type: 'rest', title: 'Vila', icon: '😴' }, // Sunday
-      1: { type: 'easy', title: 'Lätt löpning', duration: '30-45 min', icon: '🏃' }, // Monday
-      2: { type: 'interval', title: 'Intervaller', duration: '45-60 min', icon: '⚡' }, // Tuesday
-      3: { type: 'recovery', title: 'Återhämtning', duration: '20-30 min', icon: '🚶' }, // Wednesday
-      4: { type: 'tempo', title: 'Tempopass', duration: '40-50 min', icon: '💪' }, // Thursday
-      5: { type: 'rest', title: 'Vila', icon: '😴' }, // Friday
-      6: { type: 'long', title: 'Långpass', duration: '60-120 min', icon: '⏱️' } // Saturday
+      0: { type: 'rest', title: 'Vila', icon: '😴' },
+      1: { type: 'easy', title: 'Lätt löpning', duration: '30-45 min', icon: '🏃' },
+      2: { type: 'interval', title: 'Intervaller', duration: '45-60 min', icon: '⚡' },
+      3: { type: 'recovery', title: 'Återhämtning', duration: '20-30 min', icon: '🚶' },
+      4: { type: 'tempo', title: 'Tempopass', duration: '40-50 min', icon: '💪' },
+      5: { type: 'rest', title: 'Vila', icon: '😴' },
+      6: { type: 'long', title: 'Långpass', duration: '60-120 min', icon: '⏱️' }
     };
     
     const baseWorkout = workoutSchedule[dayOfWeek];
     
-    // Adjust based on phase
     if (phase === 'taper' && baseWorkout.type !== 'rest') {
       baseWorkout.duration = baseWorkout.duration?.split('-')[0] + ' min';
       baseWorkout.intensity = 'Lätt';
@@ -148,16 +194,57 @@ const RaceCoachCalendarPage = () => {
     const storedPlan = localStorage.getItem('raceCoachPlan');
     
     if (navigationPlan) {
-      setPlan(navigationPlan);
-      localStorage.setItem('raceCoachPlan', JSON.stringify(navigationPlan));
-      generateCalendarEvents(navigationPlan);
+      // Convert structured AI coach plan to calendar format
+      const calendarPlan = convertStructuredPlanToCalendar(navigationPlan);
+      setPlan(calendarPlan);
+      localStorage.setItem('raceCoachPlan', JSON.stringify(calendarPlan));
+      generateCalendarEvents(calendarPlan);
     } else if (storedPlan) {
-      setPlan(JSON.parse(storedPlan));
+      const parsedPlan = JSON.parse(storedPlan);
+      setPlan(parsedPlan);
+      if (!parsedPlan.calendarEvents) {
+        generateCalendarEvents(parsedPlan);
+      }
     } else {
       toast.error('Ingen träningsplan hittades');
       navigate('/app/dashboard');
     }
   }, [location.state, navigate, generateCalendarEvents]);
+
+  // Convert structured AI coach plan to calendar format
+  const convertStructuredPlanToCalendar = (structuredPlan) => {
+    // Extract race info from structured plan
+    const race = {
+      name: structuredPlan.raceGoal?.name || structuredPlan.goal?.race || 'Ditt Valda Lopp',
+      location: structuredPlan.raceGoal?.location || structuredPlan.goal?.location || 'Din Plats',
+      distance: structuredPlan.raceGoal?.distance || structuredPlan.goal?.distance || '42.195 km'
+    };
+    
+    // Extract race date from plan or calculate based on training duration
+    let raceDate;
+    if (structuredPlan.raceGoal?.date) {
+      raceDate = new Date(structuredPlan.raceGoal.date);
+    } else if (structuredPlan.training?.duration) {
+      raceDate = new Date();
+      const weeks = parseInt(structuredPlan.training.duration.match(/(\d+)/)?.[1] || '12');
+      raceDate.setDate(raceDate.getDate() + (weeks * 7));
+    } else {
+      raceDate = new Date();
+      raceDate.setDate(raceDate.getDate() + (12 * 7)); // Default 12 weeks
+    }
+    
+    return {
+      ...structuredPlan,
+      race,
+      raceDate: raceDate.toISOString(),
+      trainingPhases: structuredPlan.training?.phases || [
+        { name: 'Grundfas', weeks: 12 },
+        { name: 'Uppbyggnadsfas', weeks: 8 },
+        { name: 'Toppfas', weeks: 4 },
+        { name: 'Nedtrappning', weeks: 2 }
+      ]
+    };
+  };
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -347,7 +434,7 @@ const RaceCoachCalendarPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">💪</span>
-                  <span className="text-sm text-gray-600">Tempopass</span>
+                  <span className="text-sm text-gray-600">Tempo/Styrka</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">⏱️</span>
@@ -409,6 +496,12 @@ const RaceCoachCalendarPage = () => {
                         <h4 className="font-semibold text-gray-900">{selectedEvent.title}</h4>
                         {selectedEvent.duration && (
                           <p className="text-sm text-gray-600">{selectedEvent.duration}</p>
+                        )}
+                        {selectedEvent.time && (
+                          <p className="text-sm text-purple-600">⏰ {selectedEvent.time}</p>
+                        )}
+                        {selectedEvent.location && (
+                          <p className="text-sm text-purple-600">📍 {selectedEvent.location}</p>
                         )}
                       </div>
                     </div>

@@ -8,37 +8,24 @@ import {
   Plus,
   Heart,
   Trophy,
-  Target,
-  TrendingUp,
-  Users2,
-  Star,
-  Settings,
   Zap,
   CheckCheck,
-  Check
+  Check,
+  Star
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSocket } from '../../contexts/SocketContext';
 import api from '../../services/api';
 import NewChatModal from '../../components/Chat/NewChatModal';
-import ProfileAvatar from '../../components/common/ProfileAvatar';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 
 const ChatPage = () => {
   const { user } = useAuth();
-  const { socket, isConnected } = useSocket();
   const navigate = useNavigate();
   const [chats, setChats] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
-  const [chatStats, setChatStats] = useState({
-    totalChats: 0,
-    activeChats: 0,
-    totalMessages: 0,
-    newMatches: 0
-  });
 
   const loadChats = useCallback(async () => {
     try {

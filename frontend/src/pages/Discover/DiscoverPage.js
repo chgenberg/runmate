@@ -53,29 +53,7 @@ const DiscoverPage = () => {
 
   const constraintsRef = useRef(null);
 
-  // Swipe animations
-  const swipeVariants = {
-    enter: (direction) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-      scale: 0.8,
-      rotate: direction > 0 ? 15 : -15,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      rotate: 0,
-    },
-    exit: (direction) => ({
-      zIndex: 0,
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-      scale: 0.8,
-      rotate: direction < 0 ? 15 : -15,
-    }),
-  };
+  // Swipe animations - currently unused but kept for future implementation
 
   const fetchAiMatches = useCallback(async () => {
     try {

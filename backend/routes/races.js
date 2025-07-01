@@ -227,86 +227,18 @@ router.get('/stats/summary', async (req, res) => {
   }
 });
 
-// Get all races from txt files
+// Get all races from manual data (replaces file reading for Railway compatibility)
 router.get('/race-files', async (req, res) => {
   try {
-    const raceDataDir = path.join(__dirname, '../../complete_race_data');
-    const files = await fs.readdir(raceDataDir);
-    
-    // Filter out non-race files and sort by number
-    const raceFiles = files
-      .filter(file => file.endsWith('.txt') && file !== '00_KOMPLETT_INDEX.txt')
-      .sort((a, b) => {
-        const numA = parseInt(a.split('_')[0]);
-        const numB = parseInt(b.split('_')[0]);
-        return numA - numB;
-      });
-    
-    const races = await Promise.all(
-      raceFiles.map(async (file) => {
-        const filePath = path.join(raceDataDir, file);
-        const content = await fs.readFile(filePath, 'utf-8');
-        
-        // Parse the race data from the txt file
-        const lines = content.split('\n');
-        let raceData = {
-          id: file.replace('.txt', ''),
-          ranking: parseInt(file.split('_')[0]),
-          name: '',
-          distance: '',
-          location: '',
-          date: '',
-          website: '',
-          elevation: '',
-          terrain: '',
-          difficulty: '',
-          timeLimit: '',
-          maxParticipants: '',
-          uniqueFeatures: '',
-          climate: ''
-        };
-        
-        // Parse the content
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          if (line.includes('Namn:')) {
-            raceData.name = line.split('Namn:')[1].trim();
-          } else if (line.includes('Distans:')) {
-            raceData.distance = line.split('Distans:')[1].trim();
-          } else if (line.includes('Plats:')) {
-            raceData.location = line.split('Plats:')[1].trim();
-          } else if (line.includes('Datum:')) {
-            raceData.date = line.split('Datum:')[1].trim();
-          } else if (line.includes('Webbplats:')) {
-            raceData.website = line.split('Webbplats:')[1].trim();
-          } else if (line.includes('Höjdmeter:')) {
-            raceData.elevation = line.split('Höjdmeter:')[1].trim();
-          } else if (line.includes('Terrängtyp:')) {
-            raceData.terrain = line.split('Terrängtyp:')[1].trim();
-          } else if (line.includes('Svårighetsgrad:')) {
-            raceData.difficulty = line.split('Svårighetsgrad:')[1].trim();
-          } else if (line.includes('Tidsgräns:')) {
-            raceData.timeLimit = line.split('Tidsgräns:')[1].trim();
-          } else if (line.includes('Max deltagare:')) {
-            raceData.maxParticipants = line.split('Max deltagare:')[1].trim();
-          } else if (line.includes('Unikt')) {
-            raceData.uniqueFeatures = line.trim();
-          } else if (line.includes('Lokalt klimat')) {
-            raceData.climate = line.trim();
-          }
-        }
-        
-        return raceData;
-      })
-    );
+    const { worldsTop50Races } = require('../scripts/manualRaceData');
     
     res.json({
       success: true,
-      count: races.length,
-      races
+      count: worldsTop50Races.length,
+      races: worldsTop50Races
     });
   } catch (error) {
-    console.error('Error reading race files:', error);
+    console.error('Error loading race data:', error);
     res.status(500).json({
       success: false,
       message: 'Error loading race data'

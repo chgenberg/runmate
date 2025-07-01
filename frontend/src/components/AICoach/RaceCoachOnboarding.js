@@ -1,3 +1,5 @@
+// AI Race Coach Modal - Modern Interactive Design v2.0
+// Updated with enhanced animations and improved UX
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

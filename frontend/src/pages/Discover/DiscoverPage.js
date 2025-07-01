@@ -47,7 +47,6 @@ const DiscoverPage = () => {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [hasAiProfile, setHasAiProfile] = useState(false);
   const [aiMatches, setAiMatches] = useState([]);
-  const [showAIOnboarding, setShowAIOnboarding] = useState(false);
   const [showAIPopup, setShowAIPopup] = useState(false);
   const [showRaceCoachOnboarding, setShowRaceCoachOnboarding] = useState(false);
 
@@ -535,59 +534,7 @@ const DiscoverPage = () => {
                     </div>
                   </div>
                   
-                  {/* Action buttons for desktop list view */}
-                  {!isMobile && viewMode === 'scroll' && (
-                    <div className="flex gap-3 mt-4 justify-center">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleSwipe('left', runner.id)}
-                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
-                        title="Inte intresserad"
-                      >
-                        <X className="w-5 h-5" />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(`/profile/${runner.id}`)}
-                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
-                        title="Visa profil"
-                      >
-                        <User className="w-5 h-5" />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleStartChat(runner.id)}
-                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-purple-500 text-purple-500 hover:bg-purple-50 transition-colors"
-                        title="Skicka meddelande"
-                      >
-                        <MessageCircle className="w-5 h-5" />
-                      </motion.button>
-                      {isAiMatch ? (
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleAiMatchMessage(runner.id)}
-                          className="w-12 h-12 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
-                          title="AI Supermatch"
-                        >
-                          <Sparkles className="w-5 h-5" />
-                        </motion.button>
-                      ) : (
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleSwipe('right', runner.id)}
-                          className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
-                          title="Gilla"
-                        >
-                          <Heart className="w-5 h-5" />
-                        </motion.button>
-                      )}
-                    </div>
-                  )}
+
                 </div>
 
                 {/* Right side - Content */}

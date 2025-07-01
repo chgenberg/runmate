@@ -167,7 +167,7 @@ const RegisterPage = () => {
                         required
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Anna"
                       />
                     </div>
@@ -179,7 +179,7 @@ const RegisterPage = () => {
                         required
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Svensson"
                       />
                     </div>
@@ -193,7 +193,7 @@ const RegisterPage = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       placeholder="anna@exempel.se"
                     />
                   </div>
@@ -207,7 +207,7 @@ const RegisterPage = () => {
                         required
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full px-3 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 pr-10 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Minst 8 tecken"
                       />
                       <button
@@ -229,7 +229,7 @@ const RegisterPage = () => {
                         required
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className="w-full px-3 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 pr-10 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Upprepa lösenordet"
                       />
                       <button
@@ -256,7 +256,7 @@ const RegisterPage = () => {
                       value={formData.dateOfBirth}
                       onChange={handleChange}
                       max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     />
                     {formData.dateOfBirth && (
                       <p className="text-xs text-gray-500 flex items-center mt-1">
@@ -281,11 +281,11 @@ const RegisterPage = () => {
                           className={`p-2.5 rounded-xl border-2 transition-all transform hover:scale-105 ${
                             formData.gender === option.value
                               ? 'border-primary-500 bg-primary-50 shadow-md'
-                              : 'border-gray-200 hover:border-gray-300'
+                              : 'border-gray-200 hover:border-gray-300 bg-white'
                           }`}
                         >
                           <div className="text-xl mb-0.5">{option.emoji}</div>
-                          <div className="text-xs font-medium">{option.label}</div>
+                          <div className="text-xs font-medium text-gray-900">{option.label}</div>
                         </button>
                       ))}
                     </div>
@@ -299,7 +299,7 @@ const RegisterPage = () => {
                       required
                       value={formData.location}
                       onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       placeholder="Stockholm, Sverige"
                     />
                   </div>
@@ -311,7 +311,7 @@ const RegisterPage = () => {
                       rows="3"
                       value={formData.bio}
                       onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                      className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
                       placeholder="Vad motiverar dig? Vilka mål har du?"
                     />
                   </div>

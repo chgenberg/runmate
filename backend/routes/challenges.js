@@ -296,6 +296,44 @@ router.get('/my-challenges', protect, async (req, res) => {
   }
 });
 
+// Get create page data (if needed)
+router.get('/create', protect, async (req, res) => {
+  try {
+    // Return any data needed for the create page
+    res.json({
+      success: true,
+      message: 'Create challenge page data',
+      challengeTypes: ['distance', 'time', 'activities', 'elevation', 'custom'],
+      presetGoals: {
+        distance: [10, 25, 50, 100, 200],
+        time: [5, 10, 20, 30, 50],
+        elevation: [500, 1000, 2000, 5000, 10000],
+        activities: [5, 10, 15, 20, 30]
+      }
+    });
+  } catch (error) {
+    console.error('Create page data error:', error);
+    res.status(500).json({ message: 'Failed to load create page data' });
+  }
+});
+
+// Get create page leaderboard (if needed)
+router.get('/create/leaderboard', protect, async (req, res) => {
+  try {
+    // Return simplified leaderboard for create page
+    res.json({
+      success: true,
+      data: {
+        leaderboard: [],
+        message: 'No leaderboard data needed for create page'
+      }
+    });
+  } catch (error) {
+    console.error('Create leaderboard error:', error);
+    res.status(500).json({ message: 'Failed to load create leaderboard' });
+  }
+});
+
 // Create new challenge
 router.post('/', protect, [
   body('title').trim().isLength({ min: 2, max: 100 }),

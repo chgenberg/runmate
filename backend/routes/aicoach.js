@@ -3882,112 +3882,539 @@ router.get('/test-race-plan', (req, res) => {
       <p>Med över 20 000 deltagare årligen är detta ett lopp som kombinerar utmaning med en fantastisk atmosfär. Publikstödet är enastående, särskilt genom de centrala delarna av staden.</p>
       
       <p><strong>Banprofil:</strong> Relativt platt med några utmanande backar, perfekt för både nybörjare och erfarna löpare som siktar på personbästa.</p>
+      
+      <p>Baserat på din nuvarande träningshistoria från Apple Health (47 aktiviteter, 8.5km genomsnitt) är du på god väg att nå ditt mål. Din konsistenta träning med 4 pass per vecka ger en stark grund för marathonförberedelsen.</p>
     `,
     training: {
-      weeklySchedule: {
-        monday: { type: 'Vila', duration: '-' },
-        tuesday: { type: 'Intervaller', duration: '45 min' },
-        wednesday: { type: 'Lätt jogg', duration: '30 min' },
-        thursday: { type: 'Tempopass', duration: '40 min' },
-        friday: { type: 'Vila', duration: '-' },
-        saturday: { type: 'Långpass', duration: '90 min' },
-        sunday: { type: 'Återhämtning', duration: '25 min' }
-      },
+      overview: 'Personlig 16-veckors träningsplan för Stockholm Marathon med fokus på att fullfölja loppet',
+      duration: '16 veckor',
       currentFitnessAssessment: {
         weeklyFrequency: 4,
         avgDistance: 8.5,
         longestRun: 18,
-        avgPace: 330 // 5:30 per km in seconds
+        avgPace: 330, // 5:30 per km in seconds
+        fitnessLevel: 'Medel-avancerad'
+      },
+      phases: [
+        {
+          name: 'Grundfas',
+          weeks: '1-4',
+          focus: 'Bygga grundkondition och löpvolym',
+          weeklyDistance: '35-45 km',
+          keyWorkouts: [
+            'Långpass: Öka gradvis från 12km till 18km',
+            'Tempopass: 20-30 min i måttligt tempo',
+            'Återhämtningspass: Lugna 5-8km pass'
+          ],
+          tips: 'Fokusera på att bygga en stabil bas. Öka inte volymen mer än 10% per vecka.'
+        },
+        {
+          name: 'Utvecklingsfas', 
+          weeks: '5-8',
+          focus: 'Öka intensitet och uthållighet',
+          weeklyDistance: '45-55 km',
+          keyWorkouts: [
+            'Intervaller: 6x1000m i 10K-tempo',
+            'Tempopass: 30-40 min kontinuerligt',
+            'Långpass: Upp till 25km med progressiv hastighet'
+          ],
+          tips: 'Introducera kvalitetspass. Lär dig känna ditt racetempo.'
+        },
+        {
+          name: 'Specialfas',
+          weeks: '9-12', 
+          focus: 'Marathonspecifik träning',
+          weeklyDistance: '55-65 km',
+          keyWorkouts: [
+            'Marathontempo: 15-20km i måltempo',
+            'Långa intervaller: 4x2000m',
+            'Långpass: 28-32km med simulering av racedag'
+          ],
+          tips: 'Öva på energistrategi och racetempo. Testa all utrustning.'
+        },
+        {
+          name: 'Nedtrappning',
+          weeks: '13-16',
+          focus: 'Vila och förberedelse inför lopp',
+          weeklyDistance: '40-25 km',
+          keyWorkouts: [
+            'Korta intervaller: 6x400m för att hålla benen skarpa',
+            'Racetempo: 10-15 min för att känna tempot',
+            'Återhämtning: Korta lugna pass'
+          ],
+          tips: 'Minska volymen men behåll intensiteten. Fokusera på återhämtning.'
+        }
+      ],
+      weeklySchedule: {
+        monday: { 
+          type: 'Vila eller cross-training', 
+          duration: '30-45 min',
+          description: 'Fullständig vila, lätt yoga eller simning',
+          intensity: 'Mycket låg',
+          benefits: 'Återhämtning och flexibilitet'
+        },
+        tuesday: { 
+          type: 'Intervaller/Kvalitetspass', 
+          duration: '45-60 min',
+          description: 'Strukturerad träning med uppvärmning, intervaller och nedvarvning',
+          intensity: 'Hög',
+          benefits: 'Förbättrar VO2 max och löpekonomi'
+        },
+        wednesday: { 
+          type: 'Lätt återhämtningspass', 
+          duration: '30-40 min',
+          description: 'Lugnt tempo där du kan prata bekvämt',
+          intensity: 'Låg',
+          benefits: 'Aktiv återhämtning och aerob bas'
+        },
+        thursday: { 
+          type: 'Tempopass', 
+          duration: '40-50 min',
+          description: 'Kontinuerlig löpning i måttligt hårt tempo',
+          intensity: 'Medel-hög',
+          benefits: 'Förbättrar laktattröskel och uthållighet'
+        },
+        friday: { 
+          type: 'Vila eller styrketräning', 
+          duration: '30-45 min',
+          description: 'Vila eller lätt styrketräning fokus på core och ben',
+          intensity: 'Låg',
+          benefits: 'Förberedelse för helgens långa pass'
+        },
+        saturday: { 
+          type: 'Långpass', 
+          duration: '90-180 min',
+          description: 'Veckans längsta pass, gradvis ökning av distans',
+          intensity: 'Låg-medel',
+          benefits: 'Bygger uthållighet och mental styrka'
+        },
+        sunday: { 
+          type: 'Återhämtning eller cross-training', 
+          duration: '25-35 min',
+          description: 'Lätt jogging eller alternativ träning',
+          intensity: 'Mycket låg',
+          benefits: 'Aktiv återhämtning och variation'
+        }
+      },
+      progressionPlan: {
+        week1to4: 'Grundfas - Bygga bas och träningsvana',
+        week5to8: 'Utvecklingsfas - Öka intensitet och volym gradvis', 
+        week9to12: 'Specialfas - Marathonspecifik träning och racesimulering',
+        week13to16: 'Nedtrappning - Minska volym, bibehåll intensitet'
       }
     },
     nutrition: {
+      overview: 'Omfattande nutritionsplan anpassad för marathonträning',
       dailyCalories: 2600,
-      hydration: {
-        daily: '3.5L'
+      adjustmentNote: 'Kaloribehov justerat baserat på din genomsnittliga förbränning: 65 kcal/km',
+      macros: {
+        carbs: '55-60% (358-390g)',
+        protein: '15-20% (98-130g)',
+        fat: '25-30% (72-87g)'
       },
+      hydration: {
+        daily: '3.5-4 liter',
+        training: '500-750ml per timme träning',
+        raceDay: 'Sluta dricka 30 min före start',
+        signs: 'Kontrollera urinfärg - ska vara ljusgul'
+      },
+      mealTiming: {
+        breakfast: {
+          timing: '1-2 timmar före morgonträning',
+          options: [
+            'Havregrynsgröt med banan och honung',
+            'Toast med jordnötssmör och sylt',
+            'Smoothie med bär, banan och havredryck'
+          ]
+        },
+        lunch: {
+          timing: 'Inom 2 timmar efter träning',
+          options: [
+            'Quinoasallad med kyckling och grönsaker',
+            'Laxsallad med sötpotatis',
+            'Pastasallad med tonfisk och oliver'
+          ]
+        },
+        dinner: {
+          timing: '3-4 timmar före sömn',
+          options: [
+            'Grillad fisk med ris och ångade grönsaker',
+            'Kycklingwok med jasminris',
+            'Vegetarisk chili med quinoa'
+          ]
+        }
+      },
+      preworkout: {
+        timing: '1-3 timmar före träning',
+        options: [
+          'Banan med jordnötssmör (30-60 min före)',
+          'Havregrynsgröt med bär (2-3 timmar före)',
+          'Energibar och kaffe (45 min före)'
+        ]
+      },
+      postworkout: {
+        timing: 'Inom 30 minuter efter träning',
+        options: [
+          'Proteinshake med banan och havregryn',
+          'Chokladmjölk och smörgås',
+          'Grekisk yoghurt med granola och bär'
+        ],
+        ratio: '3:1 kolhydrater till protein'
+      },
+      supplements: [
+        'Multivitamin dagligen',
+        'D-vitamin 1000 IE (vinter)',
+        'Omega-3 2-3g per dag',
+        'Magnesium 400mg (kvällar)',
+        'Elektrolyter vid längre pass'
+      ],
       raceWeek: {
-        carbLoading: 'Öka kolhydratintaget till 70% av totala kalorier de sista 3 dagarna',
+        carbLoading: {
+          timing: '3 dagar före loppet',
+          strategy: 'Öka kolhydratintaget till 70% av totala kalorier',
+          foods: ['Pasta', 'Ris', 'Potatis', 'Bröd', 'Frukt', 'Sportdryck']
+        },
         breakfast: 'Havregrynsgröt med banan och honung 3 timmar före start',
-        during: 'Energigel var 45:e minut, vatten vid varje vätskestration'
+        during: 'Energigel var 45:e minut från km 15, vatten vid varje vätskestration',
+        avoid: ['Fiber', 'Fett', 'Nya livsmedel', 'Alkohol']
       }
     },
     equipment: [
       {
-        item: 'Löparskor (insprungna)',
-        reason: 'Samma skor som du tränat i - inga experiment på racedagen',
-        priority: 'Kritisk'
+        category: 'Löpskor',
+        items: [
+          {
+            item: 'Marathonskor (insprungna)',
+            reason: 'Samma skor som du tränat i - inga experiment på racedagen. Minst 100km insprungna.',
+            priority: 'Kritisk',
+            tips: 'Ha reservpar hemma ifall något händer'
+          },
+          {
+            item: 'Träningsskor för vardagspass',
+            reason: 'Rotera mellan olika skor för att minska skaderisk',
+            priority: 'Hög',
+            tips: 'Byt var 600-800km'
+          }
+        ]
       },
       {
-        item: 'GPS-klocka',
-        reason: 'För att hålla rätt pace och spåra prestationen',
-        priority: 'Hög'
+        category: 'Teknik & Navigation',
+        items: [
+          {
+            item: 'GPS-klocka med pulsmätning',
+            reason: 'För att hålla rätt pace och övervaka intensitet',
+            priority: 'Hög',
+            tips: 'Ladda kvällen innan, testa alla funktioner'
+          },
+          {
+            item: 'Reservbatteri/powerbank',
+            reason: 'För långa pass och racedag backup',
+            priority: 'Medel',
+            tips: 'Testa kompatibilitet i förväg'
+          }
+        ]
       },
       {
-        item: 'Energigels (6 st)',
-        reason: 'Behövs för att upprätthålla energinivåerna under loppet',
-        priority: 'Hög'
+        category: 'Nutrition & Hydration',
+        items: [
+          {
+            item: 'Energigels (8-10 st)',
+            reason: 'Behövs för att upprätthålla energinivåerna under marathon',
+            priority: 'Kritisk',
+            tips: 'Testa samma märke under träning, ta första vid km 15'
+          },
+          {
+            item: 'Elektrolyttabletter',
+            reason: 'Kompensera för saltförlust under långa pass',
+            priority: 'Hög',
+            tips: 'En tablett per 500ml vatten'
+          },
+          {
+            item: 'Löpbälte eller väst',
+            reason: 'Bära nutrition och vätskor under träning',
+            priority: 'Medel',
+            tips: 'Öva med på alla långpass'
+          }
+        ]
       },
       {
-        item: 'Löparbyxor/shorts',
-        reason: 'Bekväma och testade under långa träningspass',
-        priority: 'Kritisk'
+        category: 'Kläder',
+        items: [
+          {
+            item: 'Löparbyxor/shorts (testade)',
+            reason: 'Bekväma och testade under långa träningspass, förhindrar skav',
+            priority: 'Kritisk',
+            tips: 'Använd bodyglide/vaselin på långa pass'
+          },
+          {
+            item: 'Teknisk t-shirt/linne',
+            reason: 'Fukttransporterande material för komfort',
+            priority: 'Kritisk',
+            tips: 'Undvik bomull, välj testat material'
+          },
+          {
+            item: 'Löpstrumpor (seamless)',
+            reason: 'Förhindra blåsor och skav',
+            priority: 'Hög',
+            tips: 'Dubbelväggiga strumpor för extra skydd'
+          },
+          {
+            item: 'Löpjacka/vindtålig',
+            reason: 'För dåligt väder och uppvärmning',
+            priority: 'Medel',
+            tips: 'Lätt att knyta runt midjan'
+          }
+        ]
       },
       {
-        item: 'Teknisk t-shirt',
-        reason: 'Fukttransporterande material för komfort',
-        priority: 'Medel'
-      },
-      {
-        item: 'Solglasögon',
-        reason: 'Skydd mot sol och vind, särskilt på öppna sträckor',
-        priority: 'Medel'
-      }
-    ],
-    raceStrategy: {
-      pacing: 'Starta 10-15 sekunder per km långsammare än målpace. Håll jämnt tempo till km 30, sedan kan du öka om du känner dig stark.',
-      mentalStrategy: [
-        'Dela upp loppet i 4 delar à 10.5 km - fokusera på en del i taget',
-        'Använd publikens energi för att hålla motivationen uppe',
-        'Ha en positiv mantra redo: "Jag är stark, jag är redo, jag klarar detta"',
-        'Visualisera målgången redan från start'
-      ],
-      contingencyPlan: [
-        'Om du får kramper - sakta ner tempot och stretcha lätt',
-        'Vid magproblem - hoppa över nästa energigel och drick bara vatten',
-        'Om tempot känns för hårt efter km 20 - sänk med 15-20 sek/km'
-      ]
-    },
-    recoveryProtocol: {
-      immediate: {
-        hydration: 'Drick 500ml vätskeersättning inom 30 minuter',
-        nutrition: 'Ät något med kolhydrater och protein inom 1 timme',
-        movement: 'Promenera 10-15 minuter för att förhindra stelhet'
-      },
-      weekly: {
-        day1: 'Vila eller lätt promenad',
-        day2: 'Lätt jogging 20-30 min',
-        day3: 'Vila eller yoga',
-        day4: 'Lätt löpning 30-40 min',
-        day5: 'Vila',
-        day6: 'Längre lugn löpning 45-60 min',
-        day7: 'Vila eller lätt aktivitet'
-      },
-      sleep: {
-        target: '8-9 timmar per natt under återhämtningsveckan',
-        tips: [
-          'Gå till sängs 30 minuter tidigare än vanligt',
-          'Undvik skärmar 1 timme före sänggåendet',
-          'Håll sovrummet svalt (16-18°C)',
-          'Använd öronproppar om det är bullrigt'
+        category: 'Tillbehör',
+        items: [
+          {
+            item: 'Solglasögon',
+            reason: 'Skydd mot sol och vind, särskilt på öppna sträckor',
+            priority: 'Medel',
+            tips: 'Anti-dimma och säkert fäste'
+          },
+          {
+            item: 'Keps/pannband',
+            reason: 'Skydd mot sol och håller svett ur ögonen',
+            priority: 'Medel',
+            tips: 'Testa under varma träningspass'
+          },
+          {
+            item: 'Foam roller',
+            reason: 'Daglig återhämtning och förebygga skador',
+            priority: 'Hög',
+            tips: 'Använd 10-15 min efter varje pass'
+          }
         ]
       }
+    ],
+    lifestyle: {
+      sleep: {
+        target: '7-9 timmar per natt',
+        tips: [
+          'Gå och lägg dig samma tid varje kväll (senast 22:30)',
+          'Undvik skärmar 1 timme före sömn',
+          'Håll sovrummet svalt (16-18°C) och mörkt',
+          'Använd sovmask och öronproppar vid behov',
+          'Undvik koffein efter 14:00'
+        ],
+        raceWeek: 'Sträva efter 8-9 timmar, gå till sängs 30 min tidigare',
+        trackingTips: 'Använd sömnapp eller klocka för att följa sömnkvalitet'
+      },
+      stressManagement: {
+        techniques: [
+          'Meditation 10-15 min dagligen (Headspace/Calm)',
+          'Djupandning före träning (4-7-8 tekniken)',
+          'Naturvandring på vilodagar',
+          'Journalskrivning för att bearbeta träningsstress'
+        ],
+        raceNerves: [
+          'Visualisera loppet positivt',
+          'Fokusera på processen, inte resultatet',
+          'Prata med erfarna marathonlöpare',
+          'Ha en plan B för racedag'
+        ]
+      },
+      crossTraining: [
+        {
+          activity: 'Simning',
+          frequency: '1x/vecka',
+          benefits: 'Låg belastning, hela kroppen, bra återhämtning'
+        },
+        {
+          activity: 'Cykling',
+          frequency: '1x/vecka',
+          benefits: 'Bygger benmuskulatur utan löpbelastning'
+        },
+        {
+          activity: 'Yoga',
+          frequency: '2x/vecka',
+          benefits: 'Flexibilitet, balans och mental träning'
+        },
+        {
+          activity: 'Styrketräning',
+          frequency: '2x/vecka',
+          benefits: 'Förebygger skador, förbättrar löpekonomi'
+        }
+      ],
+      workLifeBalance: {
+        trainingTime: 'Morgon (06:00-07:30)',
+        tips: [
+          'Schemalägg träning som viktiga möten i kalendern',
+          'Förbered träningskläder kvällen innan',
+          'Ha backup-plan för dåligt väder (löpband/gym)',
+          'Kommunicera träningsschema med familj/partner',
+          'Använd lunchtid för korta återhämtningspass'
+        ],
+        travelTips: [
+          'Packa löpkläder först',
+          'Research löpspår på destinationen',
+          'Anpassa träningstider till nya tidszoner'
+        ]
+      }
+    },
+    raceStrategy: {
+      overview: 'Detaljerad strategi för Stockholm Marathon baserat på ditt mål att fullfölja',
+      pacing: {
+        strategy: 'Konservativ start - starta 10-15 sekunder per km långsammare än målpace',
+        targetPace: '5:30-5:45 min/km',
+        splits: {
+          km0to10: '5:45 min/km - Känn dig lätt och bekväm',
+          km10to21: '5:35 min/km - Hitta din rytm',
+          km21to30: '5:30 min/km - Bibehåll fokus',
+          km30to42: '5:25-5:40 min/km - Lyssna på kroppen'
+        },
+        heartRate: 'Håll 75-85% av maxpuls första halvan, sedan efter känsla'
+      },
+      mentalStrategy: [
+        {
+          phase: 'Km 0-10',
+          focus: 'Dela upp loppet i 4 delar à 10.5 km - fokusera på första delen',
+          mantra: '"Jag är stark och förberedd"'
+        },
+        {
+          phase: 'Km 10-21',
+          focus: 'Använd publikens energi för att hålla motivationen uppe',
+          mantra: '"Ett steg i taget, jag njuter av resan"'
+        },
+        {
+          phase: 'Km 21-32',
+          focus: 'Den mentala utmaningen börjar - fokusera på teknik',
+          mantra: '"Jag har tränat för detta moment"'
+        },
+        {
+          phase: 'Km 32-42',
+          focus: 'Visualisera målgången, tänk på alla som hejar',
+          mantra: '"Jag är en marathonlöpare"'
+        }
+      ],
+      nutritionStrategy: {
+        preRace: '1 energigel 15 min före start',
+        during: [
+          'Km 15: Första energigel + vatten',
+          'Km 25: Energigel + sportdryck',
+          'Km 32: Energigel + vatten',
+          'Km 38: Sista energigel om nödvändigt'
+        ],
+        hydration: 'Drick vid varje vätskestration (var 5km), små klunkar',
+        signs: 'Om magen känns dålig - hoppa över nästa gel, bara vatten'
+      },
+      contingencyPlan: [
+        {
+          problem: 'Kramper i vaderna',
+          solution: 'Sakta ner tempot 20-30 sek/km, stretcha lätt under gång'
+        },
+        {
+          problem: 'Magproblem',
+          solution: 'Hoppa över nästa energigel, drick bara vatten, gå om nödvändigt'
+        },
+        {
+          problem: 'Tempot känns för hårt efter km 20',
+          solution: 'Sänk med 15-20 sek/km, fokusera på att fullfölja'
+        },
+        {
+          problem: 'Mental kris runt km 30',
+          solution: 'Tänk på alla träningspass, visualisera målgången, småprata med andra löpare'
+        }
+      ],
+      raceDay: {
+        timeline: {
+          'T-3h': 'Vakna, drick vatten, ät testad frukost',
+          'T-2h': 'Sista toalettbesök hemma, kolla väder',
+          'T-1h': 'Ankomst till startområdet, hämta startnummer',
+          'T-30min': 'Dynamisk uppvärmning, sista toalettbesök',
+          'T-15min': 'Ta energigel, gå till startfålla',
+          'T-5min': 'Mental förberedelse, djupandning'
+        },
+        checklist: [
+          'Startnummer fäst på tröjan',
+          'Timing chip på skon',
+          'Energigels i bälte/fickor',
+          'Klocka laddad och inställd',
+          'Väderpassande kläder',
+          'Solglasögon om soligt'
+        ]
+      }
+    },
+    recoveryProtocol: {
+      overview: 'Omfattande återhämtningsplan för optimal prestanda och skadeförebyggning',
+      immediate: {
+        first30min: [
+          'Drick 500ml vätskeersättning',
+          'Ät energibar eller banan',
+          'Promenera 10-15 minuter för att förhindra stelhet',
+          'Stretcha lätt om möjligt'
+        ],
+        first2hours: [
+          'Ät fullständig måltid med kolhydrater och protein (3:1 ratio)',
+          'Fortsätt dricka vätskor',
+          'Ta en varm dusch eller bad',
+          'Höj benen 15-20 minuter'
+        ]
+      },
+      daily: {
+        stretching: '15-20 min efter varje träningspass',
+        foamRolling: '10-15 min dagligen, fokus på vader, hamstrings, IT-band',
+        hydration: 'Drick tills urinen är ljusgul',
+        nutrition: 'Ät inom 30 min efter träning',
+        sleep: 'Prioritera 8+ timmar sömn'
+      },
+      weekly: {
+        massage: 'Professionell massage eller självmassage 1x/vecka',
+        sauna: 'Bastu 15-20 min 1-2x/vecka för återhämtning',
+        activeRecovery: 'Lätt cykling, simning eller yoga på vilodagar',
+        assessment: 'Utvärdera energinivå, muskelvärk och motivation'
+      },
+      postMarathon: {
+        day1: 'Vila eller 15 min lätt promenad',
+        day2: '20-30 min lätt jogging om kroppen känns bra',
+        day3: 'Vila eller cross-training (simning/cykling)',
+        day4: '30-40 min lätt löpning',
+        day5: 'Vila',
+        day6: '45-60 min lugn löpning',
+        day7: 'Vila eller lätt aktivitet',
+        generalRule: 'En dag lätt träning per mil (6.4km) du sprang hårt'
+      },
+      warningSignals: [
+        'Konstant trötthet trots vila',
+        'Förhöjd vilopuls på morgonen (+10 slag/min)',
+        'Irritabilitet och dålig humör',
+        'Försämrad prestanda under träning',
+        'Ihållande muskelvärk (>3 dagar)',
+        'Sömnproblem',
+        'Minskad aptit'
+      ],
+      actionPlan: 'Om 3+ varningssignaler: Ta 2-3 extra vilodagar och konsultera coach/läkare'
     },
     appleHealthIntegration: {
       hasData: true,
       summary: {
         totalActivities: 47,
         avgWeeklyDistance: 32,
-        currentFitnessLevel: 'Avancerad'
+        currentFitnessLevel: 'Avancerad',
+        recentTrends: 'Positiv utveckling senaste månaden',
+        recommendedAdjustments: [
+          'Fortsätt med nuvarande frekvens',
+          'Öka långpassdistansen gradvis',
+          'Inkludera mer tempoträning'
+        ]
+      },
+      tracking: {
+        metrics: [
+          'Veckovolym (km)',
+          'Genomsnittligt tempo',
+          'Hjärtfrekvens zoner',
+          'Återhämtningstid',
+          'Sömnkvalitet',
+          'Vilopuls'
+        ],
+        goals: [
+          'Bibehåll 4+ pass per vecka',
+          'Öka veckovolym till 60km gradvis',
+          'Genomför 32km långpass innan nedtrappning'
+        ]
       }
     }
   };
@@ -3995,7 +4422,7 @@ router.get('/test-race-plan', (req, res) => {
   res.json({
     success: true,
     plan: dummyPlan,
-    message: 'Dummy race plan generated for testing',
+    message: 'Comprehensive dummy race plan generated for testing',
     timestamp: new Date()
   });
 });

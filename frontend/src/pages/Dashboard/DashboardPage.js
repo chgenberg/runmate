@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
 import { 
   Sparkles,
   Brain,
@@ -18,7 +17,6 @@ import RaceCoachOnboarding from '../../components/AICoach/RaceCoachOnboarding';
 
 const DashboardPage = () => {
   const { user } = useAuth();
-  const location = useLocation();
   const [showRaceCoachOnboarding, setShowRaceCoachOnboarding] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -6,7 +6,7 @@ import { User, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
-import AICoachOnboarding from '../AICoach/AICoachOnboarding';
+import RaceCoachOnboarding from '../AICoach/RaceCoachOnboarding';
 import api from '../../services/api';
 
 const Layout = () => {
@@ -135,7 +135,7 @@ const Layout = () => {
       <MobileNav />
 
       {/* AI Onboarding Modal */}
-      <AICoachOnboarding 
+      <RaceCoachOnboarding 
         isOpen={showAIOnboarding}
         onClose={() => {
           setShowAIOnboarding(false);

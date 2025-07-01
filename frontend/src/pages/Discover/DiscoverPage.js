@@ -26,7 +26,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
+// import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
 import RaceCoachOnboarding from '../../components/AICoach/RaceCoachOnboarding';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -1202,15 +1202,7 @@ const DiscoverPage = () => {
       {/* AI Analysis Popup */}
       <AIAnalysisPopup />
       
-      {/* AI Onboarding Modal */}
-      <AICoachOnboarding 
-        isOpen={showAIOnboarding}
-        onClose={() => {
-          setShowAIOnboarding(false);
-          // Check if analysis is complete after closing
-          checkAiProfile();
-        }}
-      />
+      {/* AI Onboarding Modal - Removed, using Race Coach instead */}
       
       {/* Race Coach Onboarding Modal */}
       <RaceCoachOnboarding 

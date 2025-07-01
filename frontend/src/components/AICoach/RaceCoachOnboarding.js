@@ -1085,26 +1085,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                               </span>
                             )}
                           </div>
-                          {race.difficulty && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <span className="text-xs text-gray-500">Svårighetsgrad:</span>
-                              <div className="flex gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <div
-                                    key={i}
-                                    className={`w-2 h-2 rounded-full ${
-                                      i < (race.difficulty === 'Expert' ? 5 : 
-                                           race.difficulty === 'Advanced' ? 4 : 
-                                           race.difficulty === 'Intermediate' ? 3 : 
-                                           race.difficulty === 'Beginner' ? 2 : 1)
-                                        ? 'bg-orange-500'
-                                        : 'bg-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          )}
+
                         </div>
                         {selectedRace?.id === race.id && (
                           <div className="flex-shrink-0 ml-3">

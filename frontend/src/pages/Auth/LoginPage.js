@@ -149,6 +149,7 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-gray-900"
+                  style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                   placeholder="din@email.se"
                 />
               </div>
@@ -167,6 +168,7 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                     className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-gray-900"
+                    style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                     placeholder="••••••••"
                   />
                   <button

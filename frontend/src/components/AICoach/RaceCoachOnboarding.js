@@ -49,10 +49,14 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
 
   // Filter races based on search
   useEffect(() => {
-    const filtered = races.filter(race => 
-      race.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      race.location.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = races.filter(race => {
+      const name = race.name || '';
+      const location = race.location || '';
+      const searchLower = searchTerm.toLowerCase();
+      
+      return name.toLowerCase().includes(searchLower) ||
+             location.toLowerCase().includes(searchLower);
+    });
     setFilteredRaces(filtered);
   }, [searchTerm, races]);
 
@@ -443,9 +447,12 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 </div>
               ) : (
                 filteredRaces.map((race) => {
-                  const isMarathon = race.distance?.includes('42') || race.distance?.includes('Marathon');
-                  const isUltra = race.distance?.includes('km') && parseInt(race.distance) > 50;
-                  const isTrail = race.terrain?.toLowerCase().includes('trail') || race.terrain?.toLowerCase().includes('berg');
+                  const distanceStr = race.distance || '';
+                  const terrainStr = race.terrain || '';
+                  
+                  const isMarathon = distanceStr.includes('42') || distanceStr.includes('Marathon');
+                  const isUltra = distanceStr.includes('km') && parseInt(distanceStr) > 50;
+                  const isTrail = terrainStr.toLowerCase().includes('trail') || terrainStr.toLowerCase().includes('berg');
                   
                   return (
                     <motion.div
@@ -506,10 +513,10 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                                   <div
                                     key={i}
                                     className={`w-2 h-2 rounded-full ${
-                                      i < (race.difficulty.includes('5') ? 5 : 
-                                           race.difficulty.includes('4') ? 4 : 
-                                           race.difficulty.includes('3') ? 3 : 
-                                           race.difficulty.includes('2') ? 2 : 1)
+                                                                        i < (race.difficulty && race.difficulty.includes('5') ? 5 : 
+                                       race.difficulty && race.difficulty.includes('4') ? 4 : 
+                                       race.difficulty && race.difficulty.includes('3') ? 3 : 
+                                       race.difficulty && race.difficulty.includes('2') ? 2 : 1)
                                         ? 'bg-orange-500'
                                         : 'bg-gray-300'
                                     }`}

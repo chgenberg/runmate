@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Calendar, Target, Globe, Lock, Trophy, Clock,
-  Sparkles, ChevronRight, Users, Zap, TrendingUp, Timer,
-  Mountain, Flame, Heart, Star, MapPin, Activity
+  Sparkles, ChevronRight, Users, Zap,
+  Mountain, Flame, Heart, Star
 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";

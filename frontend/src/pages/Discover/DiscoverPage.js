@@ -824,34 +824,7 @@ const DiscoverPage = () => {
 
         {/* Desktop Controls - Hidden on mobile */}
         <div className="hidden md:block">
-          {/* AI Banner - Only show if no AI profile */}
-          {!hasAiProfile && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6"
-            >
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white shadow-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <Brain className="w-10 h-10 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-bold text-xl">Förbered för lopp!</h3>
-                      <p className="text-base opacity-90">Få en personlig träningsplan för ditt nästa lopp</p>
-                    </div>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleStartAIAnalysis}
-                    className="bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
-                  >
-                    Förbered för lopp
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          )}
+          {/* AI Banner removed */}
 
           {/* Desktop Controls */}
           <div className="flex justify-between items-center gap-4 mb-6">
@@ -860,7 +833,7 @@ const DiscoverPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className="bg-white px-4 py-2 rounded-xl shadow-md flex items-center gap-2"
+                className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg flex items-center gap-2"
               >
                 <SlidersHorizontal className="w-5 h-5" />
                 Filter

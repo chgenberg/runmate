@@ -87,6 +87,25 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get all races from manual data (replaces file reading for Railway compatibility)
+router.get('/race-files', async (req, res) => {
+  try {
+    const { worldsTop50Races } = require('../scripts/manualRaceData');
+    
+    res.json({
+      success: true,
+      count: worldsTop50Races.length,
+      races: worldsTop50Races
+    });
+  } catch (error) {
+    console.error('Error loading race data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error loading race data'
+    });
+  }
+});
+
 // GET /api/races/:id - Hämta specifikt lopp
 router.get('/:id', async (req, res) => {
   try {
@@ -223,25 +242,6 @@ router.get('/stats/summary', async (req, res) => {
       success: false,
       message: 'Kunde inte hämta statistik',
       error: error.message
-    });
-  }
-});
-
-// Get all races from manual data (replaces file reading for Railway compatibility)
-router.get('/race-files', async (req, res) => {
-  try {
-    const { worldsTop50Races } = require('../scripts/manualRaceData');
-    
-    res.json({
-      success: true,
-      count: worldsTop50Races.length,
-      races: worldsTop50Races
-    });
-  } catch (error) {
-    console.error('Error loading race data:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error loading race data'
     });
   }
 });

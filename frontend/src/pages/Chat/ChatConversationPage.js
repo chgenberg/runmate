@@ -55,7 +55,7 @@ const ChatConversationPage = () => {
       toast.error('Kunde inte ladda chattinformation');
       navigate('/app/chat');
     }
-  }, [chatId, user, navigate]);
+  }, [chatId, navigate]);
 
   const loadMessages = useCallback(async () => {
     try {
@@ -68,7 +68,7 @@ const ChatConversationPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [chatId, user]);
+  }, [chatId]);
 
   const handleNewMessage = (message) => {
     setMessages(prev => [...prev, message]);

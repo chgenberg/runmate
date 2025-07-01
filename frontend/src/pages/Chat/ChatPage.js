@@ -38,7 +38,7 @@ const ChatPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     loadChats();

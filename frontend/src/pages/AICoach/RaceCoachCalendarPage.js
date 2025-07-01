@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, ChevronLeft, ChevronRight, Trophy, Activity, 
   Heart, Utensils, Target, MapPin, Clock, CheckCircle,
-  Download, Share, Sparkles, AlertCircle, Info, TrendingUp,
+  Download, Share, Sparkles, Info,
   X, Lightbulb
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const RaceCoachCalendarPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const plan = location.state?.plan || {};
   
   // State
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedDate, setSelectedDate] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [completedWorkouts, setCompletedWorkouts] = useState({});
   const [showDayModal, setShowDayModal] = useState(false);
@@ -165,7 +163,6 @@ const RaceCoachCalendarPage = () => {
 
   const handleDateClick = (date) => {
     if (date) {
-      setSelectedDate(date);
       const details = getDailyDetails(date);
       setSelectedDayDetails({ date, ...details });
       setShowDayModal(true);
@@ -516,9 +513,9 @@ const RaceCoachCalendarPage = () => {
                       <div className="grid grid-cols-2 gap-3">
                         {['GPS-klocka', 'Löparskor (insprungna)', 'Tävlingskläder', 'Energigels', 
                           'Solglasögon', 'Keps/pannband', 'Plåster', 'Vaselin'].map((item, idx) => (
-                          <label key={idx} className="flex items-center gap-2 text-sm">
+                          <label key={idx} className="flex items-center gap-2 text-sm text-gray-700">
                             <input type="checkbox" className="rounded text-purple-600" />
-                            <span>{item}</span>
+                            <span className="text-gray-700">{item}</span>
                           </label>
                         ))}
                       </div>

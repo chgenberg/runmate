@@ -330,7 +330,7 @@ const DiscoverPage = () => {
                   
                   {/* Profile Picture */}
                   <div className="absolute -bottom-10 left-4 w-20 h-20 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg"
-                       onClick={() => navigate(`/app/profile/${runner.id}`)}
+                       onClick={() => navigate(`/profile/${runner.id}`)}
                        title="Klicka för att se profil">
                     <img
                       src={runner.profilePicture}
@@ -451,7 +451,7 @@ const DiscoverPage = () => {
                 {/* Left side - Profile picture and basic info */}
                 <div className="flex flex-col items-center text-center">
                   <div className="w-24 md:w-32 h-24 md:h-32 rounded-full overflow-hidden mb-3 md:mb-4 border-4 border-gray-200 cursor-pointer hover:scale-105 transition-transform"
-                       onClick={() => navigate(`/app/profile/${runner.id}`)}
+                       onClick={() => navigate(`/profile/${runner.id}`)}
                        title="Klicka för att se profil">
                     <img
                       src={runner.profilePicture}
@@ -493,7 +493,7 @@ const DiscoverPage = () => {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(`/app/profile/${runner.id}`)}
+                        onClick={() => navigate(`/profile/${runner.id}`)}
                         className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
                         title="Visa profil"
                       >
@@ -1067,7 +1067,7 @@ const DiscoverPage = () => {
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          onClick={() => navigate(`/app/profile/${currentRunner.id}`)}
+                          onClick={() => navigate(`/profile/${currentRunner.id}`)}
                           className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
                           title="Visa profil"
                         >

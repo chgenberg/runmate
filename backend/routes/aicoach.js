@@ -3901,8 +3901,7 @@ const generateRaceDescriptionNew = async (raceInfo, userAnswers, appleHealthCont
           }
         ],
         max_tokens: 3000,
-        temperature: 0.7,
-        timeout: 15000 // 15 second timeout for longer responses
+        temperature: 0.7
       });
     
     return response.choices[0].message.content.trim();

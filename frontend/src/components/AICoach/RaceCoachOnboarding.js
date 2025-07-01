@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   X,
   Check,
-  Activity
+  Activity,
+  Heart
 } from 'lucide-react';
 import api from '../../services/api';
 import AILoadingScreen from './AILoadingScreen';
@@ -143,65 +144,516 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
   };
 
   const questions = [
+    // 1. Loppet du satsar på
     {
       id: 'race_picker',
       type: 'race_picker',
-      question: 'Vilket lopp vill du träna för?',
-      description: 'Välj från de 50 största loppen i världen'
+      category: 'race_info',
+      question: 'Vilket lopp tränar du inför?',
+      description: '🔍 Sök eller välj bland topp 50-loppen'
+    },
+    {
+      id: 'race_location_type',
+      type: 'single',
+      category: 'race_info',
+      question: 'Var hålls loppet?',
+      options: [
+        { value: 'city', label: '🏙️ Stad', icon: '🏙️' },
+        { value: 'trail', label: '🌳 Skog/Trail', icon: '🌳' },
+        { value: 'altitude', label: '🏔️ Höjd (>1 500 m)', icon: '🏔️' }
+      ]
     },
     {
       id: 'race_date',
       type: 'date_picker',
-      question: 'När ska du springa loppet?',
-      description: 'Välj datum så vi kan planera din träning'
+      category: 'race_info',
+      question: 'När går startskottet?',
+      description: '📅 Ange exakt datum → appen visar automatiskt X veckor kvar'
     },
+
+    // 2. Mål & motivation
     {
-      id: 'current_fitness',
+      id: 'main_goal',
       type: 'single',
-      question: 'Hur skulle du beskriva din nuvarande kondition?',
+      category: 'goals',
+      question: 'Vad är ditt huvudmål?',
       options: [
-        { value: 'beginner', label: 'Nybörjare - Kan springa 5km', icon: '🌱' },
-        { value: 'recreational', label: 'Motionär - Springer regelbundet', icon: '🏃' },
-        { value: 'experienced', label: 'Erfaren - Har sprungit flera lopp', icon: '💪' }
+        { value: 'finish', label: '🎯 Bara gå i mål', icon: '🎯' },
+        { value: 'enjoy', label: '😊 Njuta', icon: '😊' },
+        { value: 'pb', label: '⚡️ Personbästa', icon: '⚡' },
+        { value: 'qualify', label: '🚀 Kvala till större lopp', icon: '🚀' }
       ]
     },
     {
-      id: 'weekly_runs',
+      id: 'motivation',
       type: 'single',
-      question: 'Hur många gånger per vecka kan du träna?',
+      category: 'goals',
+      question: 'Vad motiverar dig mest?',
       options: [
-        { value: '3', label: '3 gånger per vecka', icon: '📅' },
-        { value: '4', label: '4 gånger per vecka', icon: '📆' },
-        { value: '5', label: '5 gånger per vecka', icon: '🗓️' },
-        { value: '6', label: '6+ gånger per vecka', icon: '🚀' }
+        { value: 'times', label: '🏅 Tider & medaljer', icon: '🏅' },
+        { value: 'community', label: '👯‍♀️ Gemenskap', icon: '👯‍♀️' },
+        { value: 'mental', label: '🧠 Mental hälsa', icon: '🧠' },
+        { value: 'experience', label: '🌍 Upplevelsen', icon: '🌍' }
+      ]
+    },
+    {
+      id: 'coaching_style',
+      type: 'single',
+      category: 'goals',
+      question: 'Hur vill du att coachen peppar dig?',
+      options: [
+        { value: 'data', label: '📈 Datadrivet', icon: '📈' },
+        { value: 'positive', label: '🤗 Positiv boost', icon: '🤗' },
+        { value: 'gamification', label: '🎮 Gamification', icon: '🎮' },
+        { value: 'mindful', label: '🧘‍♂️ Mindful ton', icon: '🧘‍♂️' }
+      ]
+    },
+
+    // 3. Din nuvarande kondition
+    {
+      id: 'current_fitness',
+      type: 'single',
+      category: 'fitness',
+      question: 'Hur skulle du beskriva din form just nu?',
+      options: [
+        { value: 'beginner', label: '🌱 Nybörjare (kan springa 5 km)', icon: '🌱' },
+        { value: 'recreational', label: '🏃 Motionär', icon: '🏃' },
+        { value: 'experienced', label: '💪 Erfaren', icon: '💪' },
+        { value: 'elite', label: '🐐 Elitnära', icon: '🐐' }
       ]
     },
     {
       id: 'longest_recent_run',
       type: 'single',
-      question: 'Vad är din längsta löprunda senaste månaden?',
+      category: 'fitness',
+      question: 'Din längsta löptur senaste månaden?',
       options: [
-        { value: '5', label: 'Under 5 km', icon: '🏁' },
-        { value: '10', label: '5-10 km', icon: '🏃‍♂️' },
-        { value: '15', label: '10-15 km', icon: '🏃‍♀️' },
-        { value: '21', label: '15-21 km', icon: '🏅' },
-        { value: '30', label: 'Över 21 km', icon: '🏆' }
+        { value: '<5', label: '🏁 <5 km', icon: '🏁' },
+        { value: '5-10', label: '5–10 km', icon: '🏃‍♂️' },
+        { value: '10-15', label: '10–15 km', icon: '🏃‍♀️' },
+        { value: '15-21', label: '15–21 km', icon: '🏅' },
+        { value: '>21', label: '🏆 >21 km', icon: '🏆' }
       ]
     },
     {
-      id: 'race_goal',
+      id: 'average_pace',
       type: 'single',
-      question: 'Vad är ditt mål med loppet?',
+      category: 'fitness',
+      question: 'Snittfart på distanspass (min/km)?',
       options: [
-        { value: 'finish', label: 'Bara ta mig i mål', icon: '🎯' },
-        { value: 'enjoy', label: 'Njuta av upplevelsen', icon: '😊' },
-        { value: 'pb', label: 'Sätta personbästa', icon: '⚡' }
+        { value: '>7:00', label: '🐢 >7:00', icon: '🐢' },
+        { value: '6:00-7:00', label: '🙂 6:00–7:00', icon: '🙂' },
+        { value: '5:00-6:00', label: '😎 5:00–6:00', icon: '😎' },
+        { value: '<5:00', label: '⚡ <5:00', icon: '⚡' }
       ]
+    },
+
+    // 4. Tillgänglig träningstid
+    {
+      id: 'weekly_runs',
+      type: 'single',
+      category: 'training_time',
+      question: 'Hur många löppass kan du lägga per vecka?',
+      options: [
+        { value: '3', label: '📅 3', icon: '📅' },
+        { value: '4', label: '📆 4', icon: '📆' },
+        { value: '5', label: '🗓️ 5', icon: '🗓️' },
+        { value: '6+', label: '🚀 6+', icon: '🚀' }
+      ]
+    },
+    {
+      id: 'long_run_duration',
+      type: 'single',
+      category: 'training_time',
+      question: 'Hur långa får långpassen bli?',
+      options: [
+        { value: '<60', label: '⌛ <60 min', icon: '⌛' },
+        { value: '60-90', label: '60–90 min', icon: '⏰' },
+        { value: '90-120', label: '90–120 min', icon: '⏱️' },
+        { value: '>120', label: '🕒 >120 min', icon: '🕒' }
+      ]
+    },
+    {
+      id: 'preferred_time',
+      type: 'multiple',
+      category: 'training_time',
+      question: 'Vilka tider på dygnet föredrar du att träna?',
+      options: [
+        { value: 'morning', label: '🌅 Morgon', icon: '🌅' },
+        { value: 'lunch', label: '🕛 Lunch', icon: '🕛' },
+        { value: 'afternoon', label: '🌆 Eftermiddag', icon: '🌆' },
+        { value: 'evening', label: '🌙 Kväll', icon: '🌙' },
+        { value: 'flexible', label: '🎲 Flexibelt', icon: '🎲' }
+      ]
+    },
+
+    // 5. Tränings- & skadehistoria
+    {
+      id: 'running_experience',
+      type: 'single',
+      category: 'history',
+      question: 'Hur länge har du löptränat regelbundet?',
+      options: [
+        { value: '<6m', label: '⏳ <6 mån', icon: '⏳' },
+        { value: '6-12m', label: '6–12 mån', icon: '📅' },
+        { value: '1-3y', label: '1–3 år', icon: '📆' },
+        { value: '3y+', label: '3+ år', icon: '🏆' }
+      ]
+    },
+    {
+      id: 'injury_count',
+      type: 'single',
+      category: 'history',
+      question: 'Antal skador senaste året?',
+      options: [
+        { value: '0', label: '🌟 0', icon: '🌟' },
+        { value: '1', label: '😅 1', icon: '😅' },
+        { value: '2-3', label: '😬 2–3', icon: '😬' },
+        { value: '4+', label: '😖 4+', icon: '😖' }
+      ]
+    },
+    {
+      id: 'current_injuries',
+      type: 'multiple',
+      category: 'history',
+      question: 'Aktuella skador eller besvär?',
+      options: [
+        { value: 'none', label: '🚫 Inga', icon: '🚫' },
+        { value: 'knee', label: '🤕 Knä', icon: '🤕' },
+        { value: 'foot', label: '🦶 Fot/ankel', icon: '🦶' },
+        { value: 'muscle', label: '🦵 Muskel', icon: '🦵' },
+        { value: 'other', label: 'Annat', icon: '🩹' }
+      ]
+    },
+
+    // 6. Hälsa & återhämtning
+    {
+      id: 'sleep_hours',
+      type: 'single',
+      category: 'health',
+      question: 'Sömn per natt i snitt?',
+      options: [
+        { value: '<6', label: '💤 <6 h', icon: '💤' },
+        { value: '6-7', label: '😌 6–7 h', icon: '😌' },
+        { value: '7-8', label: '😴 7–8 h', icon: '😴' },
+        { value: '>8', label: '😇 >8 h', icon: '😇' }
+      ]
+    },
+    {
+      id: 'stress_level',
+      type: 'single',
+      category: 'health',
+      question: 'Stressnivå i vardagen?',
+      options: [
+        { value: 'low', label: '🧘 Låg', icon: '🧘' },
+        { value: 'medium', label: '🙂 Medel', icon: '🙂' },
+        { value: 'high', label: '😰 Hög', icon: '😰' },
+        { value: 'extreme', label: '😱 Extrem', icon: '😱' }
+      ]
+    },
+    {
+      id: 'medical_clearance',
+      type: 'single',
+      category: 'health',
+      question: 'Har läkare godkänt hård träning?',
+      options: [
+        { value: 'yes', label: '✅ Ja', icon: '✅' },
+        { value: 'pending', label: '❓ Under utredning', icon: '❓' },
+        { value: 'no', label: '🚫 Nej', icon: '🚫' }
+      ]
+    },
+
+    // 7. Crossträning & styrka
+    {
+      id: 'strength_training',
+      type: 'single',
+      category: 'cross_training',
+      question: 'Styrkepass per vecka?',
+      options: [
+        { value: '0', label: '🏋️ 0', icon: '🏋️' },
+        { value: '1', label: '1', icon: '💪' },
+        { value: '2', label: '2', icon: '💪' },
+        { value: '3+', label: '3+', icon: '🦾' }
+      ]
+    },
+    {
+      id: 'flexibility_yoga',
+      type: 'single',
+      category: 'cross_training',
+      question: 'Rörlighet/yoga?',
+      options: [
+        { value: 'never', label: '🧘 Aldrig', icon: '🧘' },
+        { value: 'sometimes', label: 'Ibland', icon: '🤸' },
+        { value: '1x', label: '1×/vecka', icon: '🧘‍♀️' },
+        { value: '2x+', label: '2+×/vecka', icon: '🧘‍♂️' }
+      ]
+    },
+    {
+      id: 'other_cardio',
+      type: 'multiple',
+      category: 'cross_training',
+      question: 'Övrig uthållighetsträning?',
+      options: [
+        { value: 'cycling', label: '🚴 Cykel', icon: '🚴' },
+        { value: 'swimming', label: '🏊‍♂️ Simning', icon: '🏊‍♂️' },
+        { value: 'skiing', label: '⛷️ Längdskidor', icon: '⛷️' },
+        { value: 'none', label: '🚫 Inget', icon: '🚫' }
+      ]
+    },
+
+    // 8. Miljö & underlag
+    {
+      id: 'training_surface',
+      type: 'single',
+      category: 'environment',
+      question: 'Vanligaste underlaget i träning?',
+      options: [
+        { value: 'asphalt', label: '🏙️ Asfalt', icon: '🏙️' },
+        { value: 'gravel', label: '🌳 Grus/skog', icon: '🌳' },
+        { value: 'mountain', label: '🏔️ Berg', icon: '🏔️' },
+        { value: 'mix', label: '⚖️ Mix', icon: '⚖️' }
+      ]
+    },
+    {
+      id: 'climate',
+      type: 'single',
+      category: 'environment',
+      question: 'Klimat där du tränar mest?',
+      options: [
+        { value: '<5', label: '❄️ <5 °C', icon: '❄️' },
+        { value: '5-15', label: '🌤️ 5–15 °C', icon: '🌤️' },
+        { value: '15-25', label: '☀️ 15–25 °C', icon: '☀️' },
+        { value: '>25', label: '🔥 >25 °C', icon: '🔥' }
+      ]
+    },
+    {
+      id: 'terrain_hilliness',
+      type: 'single',
+      category: 'environment',
+      question: 'Hur kuperad är din standardrunda?',
+      options: [
+        { value: 'flat', label: '🏖️ Platt', icon: '🏖️' },
+        { value: 'rolling', label: '🚶‍♂️ Lätt backigt', icon: '🚶‍♂️' },
+        { value: 'hilly', label: '⛰️ Backigt', icon: '⛰️' }
+      ]
+    },
+
+    // 9. Utrustning
+    {
+      id: 'shoe_type',
+      type: 'single',
+      category: 'equipment',
+      question: 'Vilka skor springer du oftast i?',
+      options: [
+        { value: 'cushioned', label: '👟 Vägdämpade', icon: '👟' },
+        { value: 'racing', label: '🏃‍♀️ Lätta tävlingsskor', icon: '🏃‍♀️' },
+        { value: 'trail', label: '⛰️ Trailsko', icon: '⛰️' },
+        { value: 'unknown', label: '❓ Vet ej', icon: '❓' }
+      ]
+    },
+    {
+      id: 'shoe_budget',
+      type: 'single',
+      category: 'equipment',
+      question: 'Budget för nya skor?',
+      options: [
+        { value: '<1000', label: '💸 <1 000 kr', icon: '💸' },
+        { value: '1000-1500', label: '💶 1 000–1 500 kr', icon: '💶' },
+        { value: '1500-2500', label: '💰 1 500–2 500 kr', icon: '💰' },
+        { value: '>2500', label: '💎 >2 500 kr', icon: '💎' }
+      ]
+    },
+    {
+      id: 'tracking_device',
+      type: 'single',
+      category: 'equipment',
+      question: 'Använder du löparklocka/GPS?',
+      options: [
+        { value: 'watch_hr', label: '⌚ Klocka + pulsband', icon: '⌚' },
+        { value: 'watch', label: '⌚ Klocka (handledpuls)', icon: '⌚' },
+        { value: 'phone', label: '📱 Mobil-app', icon: '📱' },
+        { value: 'none', label: '🚫 Nej', icon: '🚫' }
+      ]
+    },
+
+    // 10. Kost & nutrition
+    {
+      id: 'diet_type',
+      type: 'single',
+      category: 'nutrition',
+      question: 'Kosthållning/restriktioner?',
+      options: [
+        { value: 'omnivore', label: '🥩 Omnivor', icon: '🥩' },
+        { value: 'vegetarian', label: '🌱 Veggie', icon: '🌱' },
+        { value: 'vegan', label: '🌿 Vegan', icon: '🌿' },
+        { value: 'pescatarian', label: '🐟 Pesc', icon: '🐟' },
+        { value: 'allergies', label: '🚫 Allergier', icon: '🚫' }
+      ]
+    },
+    {
+      id: 'sports_nutrition',
+      type: 'single',
+      category: 'nutrition',
+      question: 'Hur ofta använder du sportdryck/gels?',
+      options: [
+        { value: 'never', label: '💧 Aldrig', icon: '💧' },
+        { value: 'long_runs', label: '🥤 På långpass', icon: '🥤' },
+        { value: 'every_run', label: '⚡ Varje pass', icon: '⚡' }
+      ]
+    },
+    {
+      id: 'meals_per_day',
+      type: 'single',
+      category: 'nutrition',
+      question: 'Antal måltider per dag?',
+      options: [
+        { value: '2', label: '🍽️ 2', icon: '🍽️' },
+        { value: '3', label: '3', icon: '🍽️' },
+        { value: '4', label: '4', icon: '🍽️' },
+        { value: '>4', label: '>4', icon: '🍽️' }
+      ]
+    },
+
+    // 11. Resa & tävlingslogistik
+    {
+      id: 'travel_required',
+      type: 'single',
+      category: 'logistics',
+      question: 'Behöver du resa till loppet?',
+      options: [
+        { value: 'local', label: '🚶‍♂️ Lokal', icon: '🚶‍♂️' },
+        { value: 'domestic', label: '🚆 Inrikes', icon: '🚆' },
+        { value: 'international', label: '✈️ Internationellt', icon: '✈️' }
+      ]
+    },
+    {
+      id: 'arrival_days',
+      type: 'single',
+      category: 'logistics',
+      question: 'Hur många dagar före start anländer du?',
+      options: [
+        { value: '0', label: '📅 Samma dag', icon: '📅' },
+        { value: '1', label: '1 dag', icon: '📅' },
+        { value: '2-3', label: '2–3 dagar', icon: '📅' },
+        { value: '4+', label: '4+ dagar', icon: '📅' }
+      ]
+    },
+    {
+      id: 'heat_altitude_experience',
+      type: 'single',
+      category: 'logistics',
+      question: 'Erfarenhet av tävling i värme/höjd?',
+      options: [
+        { value: 'none', label: '🔴 Ingen', icon: '🔴' },
+        { value: 'some', label: '🟡 Lite', icon: '🟡' },
+        { value: 'experienced', label: '🟢 Ja, flera gånger', icon: '🟢' }
+      ]
+    },
+
+    // 12. Teknik & löpform
+    {
+      id: 'technique_analysis',
+      type: 'single',
+      category: 'technique',
+      question: 'Har du gjort löpteknik-analys?',
+      options: [
+        { value: 'video', label: '🎥 Video', icon: '🎥' },
+        { value: 'coach', label: '👁️ Coach live', icon: '👁️' },
+        { value: 'no', label: '❌ Nej', icon: '❌' }
+      ]
+    },
+    {
+      id: 'cadence',
+      type: 'single',
+      category: 'technique',
+      question: 'Känner du din kadens (steg/min)?',
+      options: [
+        { value: '<160', label: '👟 <160', icon: '👟' },
+        { value: '160-170', label: '160–170', icon: '👟' },
+        { value: '170-180', label: '170–180', icon: '👟' },
+        { value: '>180', label: '>180', icon: '👟' },
+        { value: 'unknown', label: '❓ Vet ej', icon: '❓' }
+      ]
+    },
+    {
+      id: 'pronation',
+      type: 'single',
+      category: 'technique',
+      question: 'Över- eller underpronation?',
+      options: [
+        { value: 'yes', label: '✅ Ja', icon: '✅' },
+        { value: 'no', label: '❌ Nej', icon: '❌' },
+        { value: 'unknown', label: '❓ Vet ej', icon: '❓' }
+      ]
+    },
+
+    // 13. Coachning-preferenser & feedback
+    {
+      id: 'delivery_method',
+      type: 'single',
+      category: 'preferences',
+      question: 'Hur vill du få träningspassen levererade?',
+      options: [
+        { value: 'push', label: '📲 Push-notiser', icon: '📲' },
+        { value: 'email', label: '📧 Mail', icon: '📧' },
+        { value: 'calendar', label: '🗓️ Kalender-sync', icon: '🗓️' }
+      ]
+    },
+    {
+      id: 'report_frequency',
+      type: 'single',
+      category: 'preferences',
+      question: 'Hur ofta vill du ha statistikrapporter?',
+      options: [
+        { value: 'per_session', label: '🕑 Varje pass', icon: '🕑' },
+        { value: 'weekly', label: '📅 Veckovis', icon: '📅' },
+        { value: 'monthly', label: '🗓️ Månadsvis', icon: '🗓️' },
+        { value: 'never', label: '🚫 Aldrig', icon: '🚫' }
+      ]
+    },
+    {
+      id: 'auto_adjust',
+      type: 'single',
+      category: 'preferences',
+      question: 'Vill du ha automatiska justeringar vid missade pass?',
+      options: [
+        { value: 'yes', label: '🤖 Ja, anpassa', icon: '🤖' },
+        { value: 'no', label: '✋ Nej, jag planerar själv', icon: '✋' }
+      ]
+    },
+
+    // Apple Health Integration Check (last question)
+    {
+      id: 'apple_health_check',
+      type: 'apple_health',
+      category: 'integration',
+      question: 'Vill du synka din träningsdata?',
+      description: 'Få personliga insikter baserat på din faktiska träningshistorik'
     }
   ];
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
+
+  const getCategoryName = (category) => {
+    const categoryNames = {
+      race_info: 'Loppet du satsar på',
+      goals: 'Mål & motivation',
+      fitness: 'Din nuvarande kondition',
+      training_time: 'Tillgänglig träningstid',
+      history: 'Tränings- & skadehistoria',
+      health: 'Hälsa & återhämtning',
+      cross_training: 'Crossträning & styrka',
+      environment: 'Miljö & underlag',
+      equipment: 'Utrustning',
+      nutrition: 'Kost & nutrition',
+      logistics: 'Resa & tävlingslogistik',
+      technique: 'Teknik & löpform',
+      preferences: 'Coachning-preferenser',
+      integration: 'Integration'
+    };
+    return categoryNames[category] || category;
+  };
 
   const handleRaceSelect = (race) => {
     setSelectedRace(race);
@@ -240,13 +692,80 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       const today = new Date();
       const weeksUntilRace = Math.floor((raceDate - today) / (1000 * 60 * 60 * 24 * 7));
       
-      // Format data correctly for backend API
+      // Format data correctly for backend API with all comprehensive questions
       const planData = {
         raceId: selectedRace?.id,
         answers: {
           ...answers,
           weeksUntilRace,
-          raceDetails: selectedRace
+          raceDetails: selectedRace,
+          // Include all category data
+          raceInfo: {
+            race: selectedRace,
+            locationType: answers.race_location_type,
+            date: answers.raceDate
+          },
+          goals: {
+            main: answers.main_goal,
+            motivation: answers.motivation,
+            coachingStyle: answers.coaching_style
+          },
+          fitness: {
+            current: answers.current_fitness,
+            longestRun: answers.longest_recent_run,
+            pace: answers.average_pace
+          },
+          trainingTime: {
+            weeklyRuns: answers.weekly_runs,
+            longRunDuration: answers.long_run_duration,
+            preferredTimes: answers.preferred_time
+          },
+          history: {
+            experience: answers.running_experience,
+            injuries: answers.injury_count,
+            currentInjuries: answers.current_injuries
+          },
+          health: {
+            sleep: answers.sleep_hours,
+            stress: answers.stress_level,
+            medical: answers.medical_clearance
+          },
+          crossTraining: {
+            strength: answers.strength_training,
+            flexibility: answers.flexibility_yoga,
+            otherCardio: answers.other_cardio
+          },
+          environment: {
+            surface: answers.training_surface,
+            climate: answers.climate,
+            terrain: answers.terrain_hilliness
+          },
+          equipment: {
+            shoes: answers.shoe_type,
+            budget: answers.shoe_budget,
+            tracking: answers.tracking_device
+          },
+          nutrition: {
+            diet: answers.diet_type,
+            sportsNutrition: answers.sports_nutrition,
+            meals: answers.meals_per_day
+          },
+          logistics: {
+            travel: answers.travel_required,
+            arrival: answers.arrival_days,
+            experience: answers.heat_altitude_experience
+          },
+          technique: {
+            analysis: answers.technique_analysis,
+            cadence: answers.cadence,
+            pronation: answers.pronation
+          },
+          preferences: {
+            delivery: answers.delivery_method,
+            reports: answers.report_frequency,
+            autoAdjust: answers.auto_adjust
+          },
+          appleHealth: answers.apple_health_check
         }
       };
 
@@ -715,6 +1234,69 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
           </div>
         );
 
+      case 'apple_health':
+        return (
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                  <Heart className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                Apple Health Integration
+              </h4>
+              <p className="text-sm text-gray-600 text-center mb-4">
+                Synka din träningshistorik för att få en mer personlig träningsplan baserad på din faktiska träningsdata
+              </p>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-500 mt-0.5" />
+                  <span>Analysera din träningsfrekvens</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-500 mt-0.5" />
+                  <span>Se dina faktiska löpdistanser</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-500 mt-0.5" />
+                  <span>Få insikter om din utveckling</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  handleAnswer('sync');
+                  // Here you would trigger Apple Health sync
+                  window.location.href = '/app/settings#apple-health';
+                }}
+                className="w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <Heart className="w-5 h-5" />
+                  <span>Synka med Apple Health</span>
+                </div>
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleAnswer('skip')}
+                className="w-full p-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-medium hover:border-gray-300 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <X className="w-5 h-5" />
+                  <span>Hoppa över</span>
+                </div>
+              </motion.button>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -732,6 +1314,8 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
           !!answers[currentQuestion.id];
       case 'multiple':
         return (answers[currentQuestion.id] || []).length > 0;
+      case 'apple_health':
+        return !!answers[currentQuestion.id];
       default:
         return !!answers[currentQuestion.id];
     }
@@ -779,7 +1363,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
             />
           </div>
           <p className="text-sm mt-2 opacity-90">
-            Steg {currentStep + 1} av {questions.length}
+            Steg {currentStep + 1} av {questions.length} - {getCategoryName(currentQuestion.category)}
           </p>
         </div>
 

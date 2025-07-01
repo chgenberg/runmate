@@ -1940,7 +1940,7 @@ const generateRaceWeeklySchedule = (raceInfo, userAnswers, appleHealthData = nul
   // Generate 16-week progressive schedule
   const schedule = [];
   const weeksToRace = 16;
-  const baseDistance = race.distance || 10;
+  const baseDistance = parseFloat(race?.distance) || parseFloat(raceInfo?.distance) || 10;
 
   for (let week = 1; week <= weeksToRace; week++) {
     const weekData = { ...weeklyTemplate };
@@ -2034,6 +2034,9 @@ router.post('/race-plan', protect, async (req, res) => {
       });
     }
 
+    // Convert new comprehensive structure to old format for compatibility
+    const adaptedAnswers = adaptComprehensiveAnswers(answers);
+
     // Get Apple Health analysis for enhanced personalization
     const appleHealthData = await getAppleHealthAnalysis(req.user._id);
 
@@ -2044,7 +2047,7 @@ router.post('/race-plan', protect, async (req, res) => {
         `\n\nBaserat på användarens Apple Health-data:\n- Genomsnittlig träningsfrekvens: ${appleHealthData.weeklyFrequency} pass/vecka\n- Genomsnittsdistans: ${appleHealthData.avgDistance}km\n- Genomsnittligt tempo: ${Math.floor(appleHealthData.avgPace / 60)}:${Math.round(appleHealthData.avgPace % 60).toString().padStart(2, '0')} min/km\n- Längsta pass: ${appleHealthData.longestRun}km\n- Genomsnittspuls: ${appleHealthData.avgHeartRate || 'Ej tillgänglig'}\n- Senaste aktivitet: ${appleHealthData.lastActivity ? new Date(appleHealthData.lastActivity).toLocaleDateString('sv-SE') : 'Okänd'}` : 
         '';
 
-      raceDescription = await generateRaceDescriptionNew(raceInfo, answers, appleHealthContext);
+      raceDescription = await generateRaceDescriptionNew(raceInfo, adaptedAnswers, appleHealthContext);
     } catch (error) {
       console.error('Error generating race description:', error);
       raceDescription = `${raceInfo.name} är ett fantastiskt lopp som kommer utmana dig på bästa sätt. Baserat på dina svar kommer vi att skapa en personlig träningsplan som förbereder dig optimalt för detta lopp.`;
@@ -2054,42 +2057,42 @@ router.post('/race-plan', protect, async (req, res) => {
     let trainingPlan, nutritionPlan, lifestylePlan, recoveryPlan, progressTracking, weeklySchedule;
     
     try {
-      trainingPlan = generateTrainingPlanNew(raceInfo, answers, appleHealthData);
+      trainingPlan = generateTrainingPlanNew(raceInfo, adaptedAnswers, appleHealthData);
     } catch (error) {
       console.error('Error generating training plan:', error);
       trainingPlan = { overview: 'Grundläggande träningsplan', phases: [] };
     }
     
     try {
-      nutritionPlan = generateNutritionPlan(raceInfo, answers, appleHealthData);
+      nutritionPlan = generateNutritionPlan(raceInfo, adaptedAnswers, appleHealthData);
     } catch (error) {
       console.error('Error generating nutrition plan:', error);
       nutritionPlan = { overview: 'Grundläggande nutritionsplan', dailyCalories: 2000 };
     }
     
     try {
-      lifestylePlan = generateLifestylePlan(raceInfo, answers, appleHealthData);
+      lifestylePlan = generateLifestylePlan(raceInfo, adaptedAnswers, appleHealthData);
     } catch (error) {
       console.error('Error generating lifestyle plan:', error);
       lifestylePlan = { overview: 'Grundläggande livsstilsplan' };
     }
     
     try {
-      recoveryPlan = generateRecoveryPlan(raceInfo, answers, appleHealthData);
+      recoveryPlan = generateRecoveryPlan(raceInfo, adaptedAnswers, appleHealthData);
     } catch (error) {
       console.error('Error generating recovery plan:', error);
       recoveryPlan = { overview: 'Grundläggande återhämtningsplan' };
     }
     
     try {
-      progressTracking = generateProgressTracking(raceInfo, answers, appleHealthData);
+      progressTracking = generateProgressTracking(raceInfo, adaptedAnswers, appleHealthData);
     } catch (error) {
       console.error('Error generating progress tracking:', error);
       progressTracking = { overview: 'Grundläggande progressuppföljning' };
     }
     
     try {
-      weeklySchedule = generateRaceWeeklySchedule(raceInfo, answers, appleHealthData);
+      weeklySchedule = generateRaceWeeklySchedule(raceInfo, adaptedAnswers, appleHealthData);
     } catch (error) {
       console.error('Error generating weekly schedule:', error);
       weeklySchedule = [];
@@ -2154,6 +2157,63 @@ router.post('/race-plan', protect, async (req, res) => {
     });
   }
 });
+
+// Adapter function to convert comprehensive answers to old format
+function adaptComprehensiveAnswers(comprehensiveAnswers) {
+  return {
+    // Race info
+    race: comprehensiveAnswers.raceDetails || comprehensiveAnswers.raceInfo?.race,
+    
+    // Goals
+    goal: comprehensiveAnswers.goals?.main || comprehensiveAnswers.main_goal || 'fullfölja',
+    
+    // Fitness level
+    level: comprehensiveAnswers.fitness?.current || comprehensiveAnswers.current_fitness || 'medel',
+    
+    // Time goal (optional)
+    timeGoal: comprehensiveAnswers.goals?.timeGoal || null,
+    
+    // Preferences
+    preferences: {
+      preferredTime: comprehensiveAnswers.trainingTime?.preferredTimes || 
+                   comprehensiveAnswers.preferred_time || 'morgon',
+      preferredEnvironment: comprehensiveAnswers.environment?.surface || 
+                           comprehensiveAnswers.training_surface || 'utomhus',
+      equipment: comprehensiveAnswers.equipment?.shoes || 
+                comprehensiveAnswers.shoe_type || ['löpskor']
+    },
+    
+    // Health info
+    health: {
+      injuries: comprehensiveAnswers.history?.injuries || 
+               comprehensiveAnswers.injury_count || 'inga',
+      sleepHours: comprehensiveAnswers.health?.sleep || 
+                 comprehensiveAnswers.sleep_hours || '7-8',
+      stressLevel: comprehensiveAnswers.health?.stress || 
+                  comprehensiveAnswers.stress_level || 'medel'
+    },
+    
+    // Training specifics
+    weeklyRuns: comprehensiveAnswers.trainingTime?.weeklyRuns || 
+               comprehensiveAnswers.weekly_runs || '3-4',
+    longestRun: comprehensiveAnswers.fitness?.longestRun || 
+               comprehensiveAnswers.longest_recent_run || '10km',
+    avgPace: comprehensiveAnswers.fitness?.pace || 
+            comprehensiveAnswers.average_pace || '5:30',
+    
+    // Additional data for enhanced plans
+    weeksUntilRace: comprehensiveAnswers.weeksUntilRace || 16,
+    experience: comprehensiveAnswers.history?.experience || 
+               comprehensiveAnswers.running_experience || 'medel',
+    motivation: comprehensiveAnswers.goals?.motivation || 
+               comprehensiveAnswers.motivation || 'hälsa',
+    dietType: comprehensiveAnswers.nutrition?.diet || 
+             comprehensiveAnswers.diet_type || 'blandkost',
+    
+    // Keep original comprehensive data for reference
+    _comprehensive: comprehensiveAnswers
+  };
+}
 
 // Helper functions for race plan generation
 function generateRaceTrainingPhases(weeks, data) {
@@ -3547,11 +3607,23 @@ function generatePersonalizedTips(userData) {
 
 // Apple Health-enhanced helper functions
 const generateTrainingPlanNew = (raceInfo, userAnswers, appleHealthData = null) => {
-  const { race, goal, level, timeGoal, preferences, health } = userAnswers;
+  const { race, goal, level, timeGoal, preferences, health, weeklyRuns } = userAnswers;
   
   // Adjust plan based on Apple Health data
-  let adjustedLevel = level;
-  let weeklyWorkouts = level === 'nybörjare' ? 3 : level === 'medel' ? 4 : 5;
+  let adjustedLevel = level || 'medel';
+  let weeklyWorkouts = adjustedLevel === 'nybörjare' ? 3 : adjustedLevel === 'medel' ? 4 : 5;
+  
+  // Use weeklyRuns from answers if available
+  if (weeklyRuns) {
+    const runsMapping = {
+      '2-3': 3,
+      '3-4': 4,
+      '4-5': 5,
+      '5-6': 5,
+      '6+': 6
+    };
+    weeklyWorkouts = runsMapping[weeklyRuns] || 4;
+  }
   
   if (appleHealthData && appleHealthData.hasData) {
     // Adjust based on current training frequency
@@ -3560,7 +3632,7 @@ const generateTrainingPlanNew = (raceInfo, userAnswers, appleHealthData = null) 
       weeklyWorkouts = 3;
     } else if (appleHealthData.weeklyFrequency >= 4) {
       adjustedLevel = 'avancerad';
-      weeklyWorkouts = Math.min(5, Math.round(appleHealthData.weeklyFrequency));
+      weeklyWorkouts = Math.min(6, Math.round(appleHealthData.weeklyFrequency));
     }
   }
   
@@ -3623,11 +3695,23 @@ const generateTrainingPlanNew = (raceInfo, userAnswers, appleHealthData = null) 
 };
 
 const generateNutritionPlan = (raceInfo, userAnswers, appleHealthData = null) => {
-  const { race, goal, level, preferences, health } = userAnswers;
+  const { race, goal, level, preferences, health, weeklyRuns, dietType } = userAnswers;
   
   // Base calorie calculation
   let baseCalories = 2000;
   let adjustmentNote = '';
+  
+  // Adjust calories based on training frequency
+  if (weeklyRuns) {
+    const calorieMultiplier = {
+      '2-3': 1.2,
+      '3-4': 1.3,
+      '4-5': 1.4,
+      '5-6': 1.5,
+      '6+': 1.6
+    };
+    baseCalories = Math.round(2000 * (calorieMultiplier[weeklyRuns] || 1.3));
+  }
   
   if (appleHealthData && appleHealthData.hasData) {
     // Adjust calories based on training volume
@@ -3674,9 +3758,19 @@ const generateNutritionPlan = (raceInfo, userAnswers, appleHealthData = null) =>
 };
 
 const generateLifestylePlan = (raceInfo, userAnswers, appleHealthData = null) => {
-  const { race, goal, level, preferences, health } = userAnswers;
+  const { race, goal, level, preferences, health, weeklyRuns } = userAnswers;
   
   let recoveryAdjustment = '';
+  
+  // Adjust based on training frequency from answers
+  if (weeklyRuns) {
+    if (weeklyRuns === '5-6' || weeklyRuns === '6+') {
+      recoveryAdjustment = 'Med din höga träningsfrekvens behöver du extra fokus på återhämtning';
+    } else if (weeklyRuns === '2-3') {
+      recoveryAdjustment = 'Börja gradvis med återhämtningsrutiner när träningsvolymen ökar';
+    }
+  }
+  
   if (appleHealthData && appleHealthData.hasData) {
     if (appleHealthData.weeklyFrequency > 4) {
       recoveryAdjustment = 'Med din höga träningsfrekvens behöver du extra fokus på återhämtning';
@@ -3719,9 +3813,19 @@ const generateLifestylePlan = (raceInfo, userAnswers, appleHealthData = null) =>
 };
 
 const generateRecoveryPlan = (raceInfo, userAnswers, appleHealthData = null) => {
-  const { race, goal, level, preferences, health } = userAnswers;
+  const { race, goal, level, preferences, health, weeklyRuns } = userAnswers;
   
   let intensityAdjustment = 'normal';
+  
+  // Adjust based on training frequency from answers
+  if (weeklyRuns) {
+    if (weeklyRuns === '6+') {
+      intensityAdjustment = 'hög';
+    } else if (weeklyRuns === '2-3') {
+      intensityAdjustment = 'lätt';
+    }
+  }
+  
   if (appleHealthData && appleHealthData.hasData) {
     if (appleHealthData.weeklyFrequency > 5) {
       intensityAdjustment = 'hög';
@@ -3773,7 +3877,7 @@ const generateRecoveryPlan = (raceInfo, userAnswers, appleHealthData = null) => 
 };
 
 const generateProgressTracking = (raceInfo, userAnswers, appleHealthData = null) => {
-  const { race, goal, level, timeGoal, preferences, health } = userAnswers;
+  const { race, goal, level, timeGoal, preferences, health, longestRun, avgPace } = userAnswers;
   
   let currentBaseline = {};
   if (appleHealthData && appleHealthData.hasData) {

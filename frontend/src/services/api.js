@@ -7,7 +7,7 @@ const isLocalDevelopment = process.env.NODE_ENV === 'development' ||
 
 const API_BASE_URL = isLocalDevelopment
   ? 'http://localhost:8000/api'
-  : 'https://staging-runmate-backend-production.up.railway.app/api';
+  : 'https://runmate-production.up.railway.app/api';
 
 // Create axios instance with timeout
 const apiClient = axios.create({
@@ -74,7 +74,7 @@ export const getFullImageUrl = (imageSrc) => {
   // If it's a relative URL starting with /uploads, convert to full backend URL
   if (imageSrc.startsWith('/uploads/')) {
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://staging-runmate-backend-production.up.railway.app'
+      ? 'https://runmate-production.up.railway.app'
       : 'http://localhost:8000';
     return `${backendUrl}${imageSrc}`;
   }

@@ -596,7 +596,7 @@ router.get('/leaderboard', auth, async (req, res) => {
       displayName: `${user.firstName || 'Anonym'} ${user.lastName || ''}`.trim(),
       points: user.points || 0,
       level: user.level || 1,
-      city: user.location?.city || 'Okänd stad',
+              city: user.location?.city || user.city || 'Stockholm',
       profilePhoto: user.profilePhoto || '/avatar2.png',
       isCurrentUser: user._id.toString() === currentUserId
     }));

@@ -163,19 +163,24 @@ const ChatConversationPage = () => {
     if (chatInfo.type === 'challenge') {
       return chatInfo.name;
     } else {
-      // More robust comparison - check all possible ID combinations
-      const userId = user?._id || user?.id;
+      // More robust comparison - check all possible ID combinations and convert to strings
+      const userId = String(user?._id || user?.id || '');
       const otherParticipant = chatInfo.participants.find(p => {
-        const participantId = p._id || p.id;
-        return participantId !== userId && participantId !== undefined;
+        const participantId = String(p._id || p.id || '');
+        return participantId !== userId && participantId !== '' && participantId !== 'undefined';
       });
       
       if (!otherParticipant) {
-        console.error('Could not find other participant. User:', user, 'Participants:', chatInfo.participants);
+        console.error('Could not find other participant. User ID:', userId, 'Participants:', chatInfo.participants);
         return 'Okänd användare';
       }
       
-      return `${otherParticipant?.firstName || ''} ${otherParticipant?.lastName || ''}`.trim() || 'Anonym';
+      // Handle case where firstName or lastName might be undefined
+      const firstName = otherParticipant?.firstName || '';
+      const lastName = otherParticipant?.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      
+      return fullName || otherParticipant?.name || 'Anonym';
     }
   };
 
@@ -185,12 +190,15 @@ const ChatConversationPage = () => {
     if (chatInfo.type === 'challenge') {
       return `${chatInfo.participants.length} deltagare`;
     } else {
-      // More robust comparison - check all possible ID combinations
-      const userId = user?._id || user?.id;
+      // More robust comparison - check all possible ID combinations and convert to strings
+      const userId = String(user?._id || user?.id || '');
       const otherParticipant = chatInfo.participants.find(p => {
-        const participantId = p._id || p.id;
-        return participantId !== userId && participantId !== undefined;
+        const participantId = String(p._id || p.id || '');
+        return participantId !== userId && participantId !== '' && participantId !== 'undefined';
       });
+      
+      if (!otherParticipant) return '';
+      
       return otherParticipant?.isOnline ? 'Aktiv nu' : 'Senast aktiv för en stund sedan';
     }
   };
@@ -205,12 +213,13 @@ const ChatConversationPage = () => {
         </div>
       );
     } else {
-      // More robust comparison - check all possible ID combinations
-      const userId = user?._id || user?.id;
+      // More robust comparison - check all possible ID combinations and convert to strings
+      const userId = String(user?._id || user?.id || '');
       const otherParticipant = chatInfo.participants.find(p => {
-        const participantId = p._id || p.id;
-        return participantId !== userId && participantId !== undefined;
+        const participantId = String(p._id || p.id || '');
+        return participantId !== userId && participantId !== '' && participantId !== 'undefined';
       });
+      
       return (
         <ProfileAvatar 
           user={otherParticipant} 

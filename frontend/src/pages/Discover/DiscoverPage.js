@@ -116,7 +116,7 @@ const DiscoverPage = () => {
         name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Anonym löpare',
         age: user.dateOfBirth ? new Date().getFullYear() - new Date(user.dateOfBirth).getFullYear() : 
              user.birthDate ? new Date().getFullYear() - new Date(user.birthDate).getFullYear() : null,
-        location: user.location?.city || 'Okänd stad',
+        location: user.location?.city || user.city || 'Stockholm',
         distance: user.distance || Math.floor(Math.random() * 50) + 1,
         bio: user.bio || 'Passionerad löpare som älskar att utforska nya rutter och träffa likasinnade!',
         level: user.activityLevel || 'Medel',
@@ -426,7 +426,7 @@ const DiscoverPage = () => {
 
                   {/* Goals if available */}
                   {runner.goals && runner.goals.length > 0 && (
-                    <div className="mb-4">
+                    <div className="mb-20">
                       <h4 className="text-sm font-semibold text-gray-700 mb-2">Mål</h4>
                       <div className="space-y-1">
                         {runner.goals.slice(0, 2).map((goal, idx) => (
@@ -544,7 +544,7 @@ const DiscoverPage = () => {
                       </div>
                       <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="font-bold text-sm">{runner.rating.toFixed(1)}</span>
+                        <span className="font-bold text-sm text-gray-900">{runner.rating.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>

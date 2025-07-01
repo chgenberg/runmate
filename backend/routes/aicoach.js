@@ -1936,7 +1936,7 @@ function generateRaceNutritionPlan(data, race) {
     raceDay: {
       breakfast: 'Havregrynsgröt med banan och honung, 3h före start',
       preRace: 'Energibar och sportdryck 1h före',
-      during: race.distance.includes('Marathon') ? 'Energigel var 45 min' : 'Vatten vid vätskestationer',
+      during: (race.distance && race.distance.includes('Marathon')) ? 'Energigel var 45 min' : 'Vatten vid vätskestationer',
       postRace: 'Proteinshake och banan direkt efter målgång'
     },
     hydration: {
@@ -2002,7 +2002,7 @@ function generateTaperingPlan(weeks, race) {
 function generateRaceStrategy(race, data) {
   return {
     pacing: data.race_goal === 'finish' ? 'Starta lugnt, håll jämn fart' : 'Negativ split - snabbare andra halvan',
-    nutrition: race.distance.includes('Marathon') ? 'Ta energi var 45 min från start' : 'Drick vid alla vätskestationer',
+    nutrition: (race.distance && race.distance.includes('Marathon')) ? 'Ta energi var 45 min från start' : 'Drick vid alla vätskestationer',
     mentalStrategy: [
       'Dela upp loppet i mindre segment',
       'Ha mantran redo för svåra stunder',
@@ -2019,7 +2019,7 @@ function generateRaceStrategy(race, data) {
 function generateEquipmentRecommendations(race, currentEquipment) {
   const recommendations = [];
   
-  if (!currentEquipment.includes('watch')) {
+  if (!currentEquipment || !currentEquipment.includes('watch')) {
     recommendations.push({
       item: 'GPS-klocka',
       priority: 'Hög',
@@ -2027,7 +2027,7 @@ function generateEquipmentRecommendations(race, currentEquipment) {
     });
   }
   
-  if (race.terrain === 'Terräng' && !currentEquipment.includes('trails')) {
+  if (race.terrain === 'Terräng' && (!currentEquipment || !currentEquipment.includes('trails'))) {
     recommendations.push({
       item: 'Terrängskor',
       priority: 'Kritisk',

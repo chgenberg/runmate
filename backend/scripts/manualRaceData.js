@@ -508,11 +508,12 @@ const getRacesForAICoach = () => {
     id: race.id,
     name: race.name,
     location: race.location,
-    distance: race.distance,
+    distance: race.distance + ' km', // Convert number to string with unit
     type: race.type,
     difficulty: race.difficulty,
     description: race.description.substring(0, 150) + '...',
     keyFeatures: race.keyFeatures.slice(0, 3), // Bara första 3 features
+    terrain: race.terrain,
     imageUrl: race.imageUrl
   }));
 };

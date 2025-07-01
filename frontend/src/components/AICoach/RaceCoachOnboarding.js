@@ -482,8 +482,8 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 </div>
               ) : (
                 filteredRaces.map((race) => {
-                  const distanceStr = race.distance || '';
-                  const terrainStr = race.terrain || '';
+                  const distanceStr = String(race.distance || '');
+                  const terrainStr = String(race.terrain || '');
                   
                   const isMarathon = distanceStr.includes('42') || distanceStr.includes('Marathon');
                   const isUltra = distanceStr.includes('km') && parseInt(distanceStr) > 50;
@@ -548,10 +548,10 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                                   <div
                                     key={i}
                                     className={`w-2 h-2 rounded-full ${
-                                                                        i < (race.difficulty && race.difficulty.includes('5') ? 5 : 
-                                       race.difficulty && race.difficulty.includes('4') ? 4 : 
-                                       race.difficulty && race.difficulty.includes('3') ? 3 : 
-                                       race.difficulty && race.difficulty.includes('2') ? 2 : 1)
+                                      i < (race.difficulty && String(race.difficulty).includes('5') ? 5 : 
+                                       race.difficulty && String(race.difficulty).includes('4') ? 4 : 
+                                       race.difficulty && String(race.difficulty).includes('3') ? 3 : 
+                                       race.difficulty && String(race.difficulty).includes('2') ? 2 : 1)
                                         ? 'bg-orange-500'
                                         : 'bg-gray-300'
                                     }`}

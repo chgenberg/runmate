@@ -298,7 +298,10 @@ const CommunityRoomPage = () => {
                   : 'bg-white text-gray-900 border border-gray-100'
               }`}
             >
-              <p className="break-words text-[15px] leading-relaxed">{message.content}</p>
+              <div 
+                className="break-words text-[15px] leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: message.content }}
+              />
               
               {/* Floating action button */}
               <AnimatePresence>

@@ -399,7 +399,10 @@ const ChatConversationPage = () => {
                           : 'bg-white border border-gray-200 text-gray-900 rounded-bl-md shadow-sm'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      <div 
+                        className="text-sm whitespace-pre-wrap break-words"
+                        dangerouslySetInnerHTML={{ __html: message.content }}
+                      />
                       
                       <div className={`flex items-center justify-between mt-1 text-xs ${
                         isOwnMessage ? 'text-orange-100' : 'text-gray-500'

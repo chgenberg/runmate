@@ -306,19 +306,27 @@ router.post('/chat', protect, async (req, res) => {
               role: "system",
               content: `Du är ARIA - en professionell AI-löpcoach. Du svarar på svenska och ger konkreta, praktiska råd baserat på vetenskap och beprövad erfarenhet. Håll svaren personliga och uppmuntrande.
 
+              VIKTIGA FORMATERINGSREGLER:
+              - Använd HTML-formatering: <strong>text</strong> för fetstil (INTE ** eller markdown)
+              - Dela upp text i paragrafer med <p>-taggar
+              - Avsluta alltid meningar komplett - klipp ALDRIG av mitt i en mening
+              - Strukturera svaret logiskt med tydliga stycken
+              - Använd <br/> för radbrytningar vid behov
+              - Max 2-3 emojis per svar, använd naturligt
+
               Användarens profil:
               - Namn: ${user.firstName}
               - Träningsnivå: ${user.activityLevel || 'okänd'}
               - AI Coach profil: ${user.aiCoachProfile ? JSON.stringify(user.aiCoachProfile) : 'Inte konfigurerad'}
               
-              Fokusera på praktiska råd för löpning, återhämtning, nutrition och skadeförebyggning. Använd emojis sparsamt och naturligt.`
+              Fokusera på praktiska råd för löpning, återhämtning, nutrition och skadeförebyggning. Ge alltid kompletta, välstrukturerade svar.`
             },
             {
               role: "user",
               content: message
             }
           ],
-          max_tokens: 300,
+          max_tokens: 3000,
           temperature: 0.7,
         });
 
@@ -670,6 +678,14 @@ router.post('/advice', protect, async (req, res) => {
               role: "system",
               content: `Du är en världsklass löpcoach och träningsexpert med över 20 års erfarenhet. Du svarar på svenska och ger djupa, vetenskapligt baserade råd som är personligt anpassade för varje användare.
 
+              VIKTIGA FORMATERINGSREGLER:
+              - Använd HTML-formatering: <strong>text</strong> för fetstil (INTE ** eller markdown)
+              - Dela upp text i paragrafer med <p>-taggar
+              - Avsluta alltid meningar komplett - klipp ALDRIG av mitt i en mening
+              - Strukturera svaret logiskt med tydliga stycken
+              - Använd <br/> för radbrytningar vid behov
+              - Max 2-3 emojis per svar, använd naturligt
+
               ANVÄNDARENS PROFIL:
               - Namn: ${user.firstName}
               - Träningsnivå: ${user.activityLevel || 'okänd'}
@@ -691,14 +707,14 @@ router.post('/advice', protect, async (req, res) => {
               - Mental träning och motivation
               - Tävlingsförberedelse
               
-              Håll svaren informativa men läsbara (150-300 ord). Använd personlig ton och inkludera användarens namn.`
+              Ge detaljerade, välstrukturerade svar (300-800 ord). Använd personlig ton och inkludera användarens namn.`
             },
             {
               role: "user",
               content: question
             }
           ],
-          max_tokens: 400,
+          max_tokens: 3000,
           temperature: 0.7,
         });
 

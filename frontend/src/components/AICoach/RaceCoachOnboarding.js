@@ -1,5 +1,5 @@
-// AI Race Coach Modal - Modern Interactive Design v2.0
-// Updated with enhanced animations and improved UX
+// AI Race Coach Modal - Modern Interactive Design v2.1
+// Updated with enhanced animations and improved UX - Force redeploy
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1406,12 +1406,12 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.8, opacity: 0, y: 50 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-white/20"
+        className="relative bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-purple-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Decorative gradient orbs */}
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500 rounded-full blur-3xl opacity-20" />
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-500 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500 rounded-full blur-3xl opacity-10" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-500 rounded-full blur-3xl opacity-10" />
         
         {/* Header */}
         <div className="relative overflow-hidden">
@@ -1451,14 +1451,14 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                   {getCategoryName(currentQuestion.category)}
                 </span>
               </div>
-              <div className="relative w-full bg-white/20 backdrop-blur-sm rounded-full h-3 overflow-hidden">
+              <div className="relative w-full bg-white/30 rounded-full h-3 overflow-hidden">
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-white via-yellow-200 to-white rounded-full h-3"
+                  className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-white to-yellow-300 rounded-full h-3 shadow-sm"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 />
-                <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse" />
+                <div className="absolute inset-0 bg-white/10 rounded-full animate-pulse" />
               </div>
               <div className="flex items-center justify-between">
                 {[...Array(Math.min(5, questions.length))].map((_, i) => {

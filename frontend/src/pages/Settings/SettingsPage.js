@@ -18,8 +18,6 @@ import {
   Heart,
   Zap,
   Brain,
-  Sparkles,
-  Settings,
   Camera,
   Mail,
   Key,

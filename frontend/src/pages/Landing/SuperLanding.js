@@ -53,13 +53,28 @@ const SuperLanding = () => {
       setEvents(eventsRes.data.events || []);
       setLeaderboard(leaderboardRes.data.data?.leaderboard || leaderboardRes.data.users || []);
       
-      // Mock user stats for demo
-      setUserStats({
-        totalKm: 156,
-        nationalRank: 42,
-        rating: 4.8,
-        totalRatings: 38
-      });
+      // Try to get real user stats if available
+      try {
+        const userStatsRes = await api.get('/users/stats/summary');
+        if (userStatsRes.data.success && userStatsRes.data.data) {
+          const stats = userStatsRes.data.data.stats;
+          setUserStats({
+            totalKm: Math.round(stats.thisMonth?.distance || stats.totalDistance || 0),
+            nationalRank: userStatsRes.data.data.rankings?.national || '-',
+            rating: 4.8, // Still mock as we don't have rating system yet
+            totalRatings: 38
+          });
+        }
+      } catch (error) {
+        console.log('Using demo stats for landing page');
+        // Use demo stats for non-authenticated users
+        setUserStats({
+          totalKm: 156,
+          nationalRank: 42,
+          rating: 4.8,
+          totalRatings: 38
+        });
+      }
     } catch (error) {
       console.error('Error fetching landing data:', error);
       // Show empty arrays instead of mock data

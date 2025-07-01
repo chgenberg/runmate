@@ -460,7 +460,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 placeholder="Sök lopp, plats eller distans..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-700 placeholder-gray-400"
               />
             </div>
             
@@ -595,7 +595,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 value={selectedDate}
                 onChange={(e) => handleDateSelect(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-700"
               />
               {selectedDate && (
                 <p className="mt-2 text-sm text-gray-600">
@@ -617,13 +617,17 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 onClick={() => handleAnswer(option.value)}
                 className={`w-full p-4 rounded-xl text-left transition-all ${
                   answers[currentQuestion.id] === option.value
-                    ? 'bg-purple-100 border-2 border-purple-500'
-                    : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
+                    ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-500 shadow-md'
+                    : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{option.icon}</span>
-                  <span className="font-medium">{option.label}</span>
+                  <span className={`font-medium ${
+                    answers[currentQuestion.id] === option.value
+                      ? 'text-purple-900'
+                      : 'text-gray-700'
+                  }`}>{option.label}</span>
                 </div>
               </motion.button>
             ))}
@@ -649,16 +653,22 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                   }}
                   className={`w-full p-4 rounded-xl text-left transition-all ${
                     selected
-                      ? 'bg-purple-100 border-2 border-purple-500'
-                      : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-500 shadow-md'
+                      : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{option.icon}</span>
-                      <span className="font-medium">{option.label}</span>
+                      <span className={`font-medium ${
+                        selected ? 'text-purple-900' : 'text-gray-700'
+                      }`}>{option.label}</span>
                     </div>
-                    {selected && <Check className="w-5 h-5 text-purple-600" />}
+                    {selected && (
+                      <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    )}
                   </div>
                 </motion.button>
               );
@@ -674,7 +684,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
               placeholder={currentQuestion.placeholder}
               value={answers[currentQuestion.id] || ''}
               onChange={(e) => handleAnswer(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-700 placeholder-gray-400"
             />
           </div>
         );
@@ -719,6 +729,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white">
@@ -747,7 +758,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
+        <div className="p-6 overflow-y-auto max-h-[60vh] bg-gray-50">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -756,11 +767,11 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
                 {currentQuestion.question}
               </h3>
               {currentQuestion.description && (
-                <p className="text-gray-600 mb-6">{currentQuestion.description}</p>
+                <p className="text-gray-600 mb-6 text-lg">{currentQuestion.description}</p>
               )}
               
               {renderQuestion()}

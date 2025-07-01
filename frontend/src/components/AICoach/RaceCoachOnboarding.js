@@ -386,65 +386,150 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       case 'race_picker':
         return (
           <div className="space-y-4">
+            {/* Popular Categories */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+              <button
+                onClick={() => setSearchTerm('Marathon')}
+                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+              >
+                🏃‍♂️ Marathon
+              </button>
+              <button
+                onClick={() => setSearchTerm('Ultra')}
+                className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-200 transition-colors"
+              >
+                🏔️ Ultra
+              </button>
+              <button
+                onClick={() => setSearchTerm('Sverige')}
+                className="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors"
+              >
+                🇸🇪 Sverige
+              </button>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                🌍 Alla lopp
+              </button>
+            </div>
+            
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Sök lopp..."
+                placeholder="Sök lopp, plats eller distans..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
             
-            <div className="max-h-96 overflow-y-auto space-y-2">
+            <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
               {loadingRaces ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
                   <p className="text-gray-500 mt-2">Laddar lopp...</p>
                 </div>
-              ) : (
-                filteredRaces.map((race) => (
-                  <motion.div
-                    key={race.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleRaceSelect(race)}
-                    className={`p-4 rounded-xl cursor-pointer transition-all ${
-                      selectedRace?.id === race.id
-                        ? 'bg-purple-100 border-2 border-purple-500'
-                        : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
-                    }`}
+              ) : filteredRaces.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Inga lopp hittades</p>
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="text-purple-600 hover:text-purple-700 text-sm mt-2"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold text-purple-600">#{race.ranking}</span>
-                          <h3 className="font-semibold text-gray-900">{race.name}</h3>
-                        </div>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {race.location}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Activity className="w-4 h-4" />
-                            {race.distance}
-                          </span>
-                          {race.terrain && (
-                            <span className="flex items-center gap-1">
-                              <Mountain className="w-4 h-4" />
-                              {race.terrain}
+                    Rensa sökning
+                  </button>
+                </div>
+              ) : (
+                filteredRaces.map((race) => {
+                  const isMarathon = race.distance?.includes('42') || race.distance?.includes('Marathon');
+                  const isUltra = race.distance?.includes('km') && parseInt(race.distance) > 50;
+                  const isTrail = race.terrain?.toLowerCase().includes('trail') || race.terrain?.toLowerCase().includes('berg');
+                  
+                  return (
+                    <motion.div
+                      key={race.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleRaceSelect(race)}
+                      className={`p-4 rounded-xl cursor-pointer transition-all ${
+                        selectedRace?.id === race.id
+                          ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-500 shadow-lg'
+                          : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                              #{race.ranking}
                             </span>
+                            <h3 className="font-bold text-gray-900 text-lg">{race.name}</h3>
+                            {isMarathon && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                Marathon
+                              </span>
+                            )}
+                            {isUltra && (
+                              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                                Ultra
+                              </span>
+                            )}
+                            {isTrail && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                                Trail
+                              </span>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                            <span className="flex items-center gap-1 text-sm text-gray-600">
+                              <MapPin className="w-4 h-4 text-gray-400" />
+                              <span className="truncate">{race.location}</span>
+                            </span>
+                            <span className="flex items-center gap-1 text-sm text-gray-600">
+                              <Activity className="w-4 h-4 text-gray-400" />
+                              <span className="font-medium">{race.distance}</span>
+                            </span>
+                            {race.terrain && (
+                              <span className="flex items-center gap-1 text-sm text-gray-600">
+                                <Mountain className="w-4 h-4 text-gray-400" />
+                                <span className="truncate">{race.terrain}</span>
+                              </span>
+                            )}
+                          </div>
+                          {race.difficulty && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-xs text-gray-500">Svårighetsgrad:</span>
+                              <div className="flex gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className={`w-2 h-2 rounded-full ${
+                                      i < (race.difficulty.includes('5') ? 5 : 
+                                           race.difficulty.includes('4') ? 4 : 
+                                           race.difficulty.includes('3') ? 3 : 
+                                           race.difficulty.includes('2') ? 2 : 1)
+                                        ? 'bg-orange-500'
+                                        : 'bg-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
                           )}
                         </div>
+                        {selectedRace?.id === race.id && (
+                          <div className="flex-shrink-0 ml-3">
+                            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                              <Check className="w-5 h-5 text-white" />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {selectedRace?.id === race.id && (
-                        <Check className="w-6 h-6 text-purple-600" />
-                      )}
-                    </div>
-                  </motion.div>
-                ))
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </div>

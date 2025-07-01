@@ -2062,13 +2062,52 @@ router.post('/race-plan', protect, async (req, res) => {
       raceDescription = `${raceInfo.name} är ett fantastiskt lopp som kommer utmana dig på bästa sätt. Baserat på dina svar kommer vi att skapa en personlig träningsplan som förbereder dig optimalt för detta lopp.`;
     }
 
-    // Generate comprehensive training plan with Apple Health integration
-    const trainingPlan = generateTrainingPlanNew(raceInfo, answers, appleHealthData);
-    const nutritionPlan = generateNutritionPlan(raceInfo, answers, appleHealthData);
-    const lifestylePlan = generateLifestylePlan(raceInfo, answers, appleHealthData);
-    const recoveryPlan = generateRecoveryPlan(raceInfo, answers, appleHealthData);
-    const progressTracking = generateProgressTracking(raceInfo, answers, appleHealthData);
-    const weeklySchedule = generateRaceWeeklySchedule(raceInfo, answers, appleHealthData);
+    // Generate comprehensive training plan with Apple Health integration (with error handling)
+    let trainingPlan, nutritionPlan, lifestylePlan, recoveryPlan, progressTracking, weeklySchedule;
+    
+    try {
+      trainingPlan = generateTrainingPlanNew(raceInfo, answers, appleHealthData);
+    } catch (error) {
+      console.error('Error generating training plan:', error);
+      trainingPlan = { overview: 'Grundläggande träningsplan', phases: [] };
+    }
+    
+    try {
+      nutritionPlan = generateNutritionPlan(raceInfo, answers, appleHealthData);
+    } catch (error) {
+      console.error('Error generating nutrition plan:', error);
+      nutritionPlan = { overview: 'Grundläggande nutritionsplan', dailyCalories: 2000 };
+    }
+    
+    try {
+      lifestylePlan = generateLifestylePlan(raceInfo, answers, appleHealthData);
+    } catch (error) {
+      console.error('Error generating lifestyle plan:', error);
+      lifestylePlan = { overview: 'Grundläggande livsstilsplan' };
+    }
+    
+    try {
+      recoveryPlan = generateRecoveryPlan(raceInfo, answers, appleHealthData);
+    } catch (error) {
+      console.error('Error generating recovery plan:', error);
+      recoveryPlan = { overview: 'Grundläggande återhämtningsplan' };
+    }
+    
+    try {
+      progressTracking = generateProgressTracking(raceInfo, answers, appleHealthData);
+    } catch (error) {
+      console.error('Error generating progress tracking:', error);
+      progressTracking = { overview: 'Grundläggande progressuppföljning' };
+    }
+    
+    try {
+      weeklySchedule = generateRaceWeeklySchedule(raceInfo, answers, appleHealthData);
+    } catch (error) {
+      console.error('Error generating weekly schedule:', error);
+      weeklySchedule = [];
+    }
+
+
 
     // Enhanced plan with Apple Health insights
     const enhancedPlan = {
@@ -3814,49 +3853,62 @@ const generateProgressTracking = (raceInfo, userAnswers, appleHealthData = null)
 // Enhanced race description with Apple Health context
 const generateRaceDescriptionNew = async (raceInfo, userAnswers, appleHealthContext = '') => {
   try {
+    // Always provide fallback first to prevent any errors
+    const fallbackDescription = `${raceInfo.name} är ett fantastiskt lopp i ${raceInfo.location} som kommer utmana dig på bästa sätt. Med ${raceInfo.distance} av löpning genom ${raceInfo.terrain || 'varierad'} terräng blir detta en minnesvärd upplevelse.${appleHealthContext ? ' Med din nuvarande träningshistoria från Apple Health är du på god väg att nå ditt mål.' : ''}`;
+    
+    // Only try OpenAI if it's available and properly configured
     if (!raceInfo || !raceInfo.name || !openai) {
-      return `${raceInfo.name} är ett fantastiskt lopp i ${raceInfo.location} som kommer utmana dig på bästa sätt. Med ${raceInfo.distance} av löpning genom ${raceInfo.terrain || 'varierad'} terräng blir detta en minnesvärd upplevelse.`;
+      return fallbackDescription;
     }
     
-    const prompt = `Skriv en inspirerande och personlig beskrivning av ${raceInfo.name} loppet i ${raceInfo.location}. 
+    const prompt = `Skriv en omfattande, inspirerande och personlig beskrivning av ${raceInfo.name} loppet i ${raceInfo.location}. 
     
     Loppdetaljer:
     - Distans: ${raceInfo.distance}
     - Terräng: ${raceInfo.terrain || 'Varierad'}
     - Svårighetsgrad: ${raceInfo.difficulty || 'Medel'}
     
-    Användarens mål: ${userAnswers.goal}
-    Användarens nivå: ${userAnswers.level}
+    Användarens mål: ${userAnswers.goal || 'fullfölja'}
+    Användarens nivå: ${userAnswers.level || 'medel'}
     ${appleHealthContext}
     
-    Skapa en beskrivning som:
-    1. Beskriver loppets unika karaktär och utmaningar
-    2. Relaterar till användarens mål och nuvarande nivå
-    3. Inkluderar motiverande aspekter
-    4. Nämner specifika förberedelser som krävs
+    Skapa en detaljerad beskrivning som inkluderar:
+    1. Loppets historia och prestige
+    2. Banprofil och specifika utmaningar
+    3. Väderförhållanden och bästa tid på året
+    4. Publikstöd och atmosfär
+    5. Unika aspekter som gör loppet speciellt
+    6. Specifika förberedelser som krävs för detta lopp
+    7. Personliga råd baserat på användarens mål och nivå
+    8. Motiverande aspekter och vad som gör loppet minnesvärt
+    9. Praktisk information om logistik och faciliteter
+    10. Tips för första gången deltagare
     
-    Max 4-5 meningar. Skriv på svenska och var personlig och inspirerande.`;
+    Använd HTML-formatering med <p>, <strong>, <em> taggar för struktur.
+    Skriv minst 8-12 stycken med detaljerad information.
+    Var personlig, inspirerande och ge konkreta, praktiska råd på svenska.`;
     
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "Du är en erfaren löpcoach som beskriver lopp på ett personligt och inspirerande sätt."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      max_tokens: 200,
-      temperature: 0.7
-    });
+          const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Use more reliable model
+        messages: [
+          {
+            role: "system",
+            content: "Du är en erfaren löpcoach som beskriver lopp på ett personligt och inspirerande sätt."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 3000,
+        temperature: 0.7,
+        timeout: 15000 // 15 second timeout for longer responses
+      });
     
     return response.choices[0].message.content.trim();
   } catch (error) {
     console.error('Error generating enhanced race description:', error);
-    // Fallback with Apple Health context if available
+    // Always return fallback to prevent 500 errors
     const healthInsight = appleHealthContext ? 
       ` Med din nuvarande träningshistoria från Apple Health är du på god väg att nå ditt mål.` : '';
     

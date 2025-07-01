@@ -441,6 +441,62 @@ const DiscoverPage = () => {
                   )}
                 </div>
 
+                {/* Action Buttons for Mobile Stack Mode */}
+                {isMobile && viewMode === 'stack' && (
+                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSwipe('left', runner.id)}
+                      className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                      title="Inte intresserad"
+                    >
+                      <X className="w-6 h-6" />
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => navigate(`/profile/${runner.id}`)}
+                      className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                      title="Visa profil"
+                    >
+                      <User className="w-6 h-6" />
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleStartChat(runner.id)}
+                      className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-purple-500 text-purple-500 hover:bg-purple-50 transition-colors"
+                      title="Skicka meddelande"
+                    >
+                      <MessageCircle className="w-6 h-6" />
+                    </motion.button>
+                    
+                    {isAiMatch ? (
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleAiMatchMessage(runner.id)}
+                        className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-xl flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
+                        title="AI Supermatch"
+                      >
+                        <Sparkles className="w-6 h-6" />
+                      </motion.button>
+                    ) : (
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleSwipe('right', runner.id)}
+                        className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                        title="Gilla"
+                      >
+                        <Heart className="w-6 h-6" />
+                      </motion.button>
+                    )}
+                  </div>
+                )}
 
               </div>
             )}

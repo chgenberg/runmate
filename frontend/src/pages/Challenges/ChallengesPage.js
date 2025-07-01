@@ -296,7 +296,7 @@ const ChallengesPage = () => {
           >
             <h1 className="text-3xl md:text-5xl font-black mb-2 md:mb-4">
               <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                Utmaningar
+                UTMANINGAR
               </span>
             </h1>
             <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto">

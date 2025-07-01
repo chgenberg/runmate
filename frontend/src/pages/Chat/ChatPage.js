@@ -279,7 +279,7 @@ const ChatPage = () => {
                   className="text-2xl md:text-4xl font-bold flex items-center gap-2"
                 >
                   <MessageCircle className="w-6 h-6 md:w-8 md:h-8" />
-                  Mina Chattar
+                  MINA CHATTAR
                 </motion.h1>
                 <motion.p 
                   initial={{ opacity: 0, x: -20 }}

@@ -1,42 +1,44 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   MessageCircle,
-  Users,
-  Trophy,
   Search,
-  Plus,
-  MoreVertical,
-  Check,
-  CheckCheck,
-  Sparkles,
   Filter,
-  Star,
-  Zap,
+  Plus,
   Heart,
-  MapPin,
-  Clock,
-  Activity,
-  Smile,
-  Calendar
+  Trophy,
+  Target,
+  TrendingUp,
+  Users2,
+  Star,
+  Settings,
+  Zap,
+  CheckCheck,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSocket } from '../../contexts/SocketContext';
 import api from '../../services/api';
-import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import NewChatModal from '../../components/Chat/NewChatModal';
+import ProfileAvatar from '../../components/common/ProfileAvatar';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 
 const ChatPage = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
-  
+  const { socket, isConnected } = useSocket();
+  const navigate = useNavigate();
   const [chats, setChats] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const [filterType, setFilterType] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
-  const [showQuickActions] = useState(false);
+  const [chatStats, setChatStats] = useState({
+    totalChats: 0,
+    activeChats: 0,
+    totalMessages: 0,
+    newMatches: 0
+  });
 
   const loadChats = useCallback(async () => {
     try {
@@ -136,7 +138,7 @@ const ChatPage = () => {
         }
       ]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [user]);
 
@@ -145,8 +147,8 @@ const ChatPage = () => {
   }, [loadChats]);
 
   const filteredChats = chats.filter(chat => {
-    if (activeTab === 'matches' && chat.type !== 'match') return false;
-    if (activeTab === 'challenges' && chat.type !== 'challenge') return false;
+    if (filterType === 'matches' && chat.type !== 'match') return false;
+    if (filterType === 'challenges' && chat.type !== 'challenge') return false;
     
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -261,9 +263,9 @@ const ChatPage = () => {
     return { matches, challenges, unread };
   };
 
-  const stats = getTabStats();
+  const tabStats = getTabStats();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 flex items-center justify-center pb-20 lg:pb-0">
         <LoadingSpinner size="xl" text="Laddar dina chattar..." />
@@ -307,7 +309,7 @@ const ChatPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowFilters(!showFilters)}
+                  onClick={() => setFilterType('all')}
                   className="p-2.5 md:p-3 bg-white/20 backdrop-blur-sm rounded-lg md:rounded-xl hover:bg-white/30 transition-all"
                 >
                   <Filter className="w-5 h-5" />
@@ -337,15 +339,15 @@ const ChatPage = () => {
                 <div className="text-white/80 text-xs md:text-sm">Totalt</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold">{stats.matches}</div>
+                <div className="text-xl md:text-2xl font-bold">{tabStats.matches}</div>
                 <div className="text-white/80 text-xs md:text-sm">Matches</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold">{stats.challenges}</div>
+                <div className="text-xl md:text-2xl font-bold">{tabStats.challenges}</div>
                 <div className="text-white/80 text-xs md:text-sm">Grupper</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-yellow-300">{stats.unread}</div>
+                <div className="text-xl md:text-2xl font-bold text-yellow-300">{tabStats.unread}</div>
                 <div className="text-white/80 text-xs md:text-sm">Olästa</div>
               </div>
             </motion.div>
@@ -376,8 +378,8 @@ const ChatPage = () => {
             >
               {[
                 { id: 'all', label: 'Alla', icon: MessageCircle, count: chats.length },
-                { id: 'matches', label: 'Matches', icon: Heart, count: stats.matches },
-                { id: 'challenges', label: 'Grupper', icon: Trophy, count: stats.challenges }
+                { id: 'matches', label: 'Matches', icon: Heart, count: tabStats.matches },
+                { id: 'challenges', label: 'Grupper', icon: Trophy, count: tabStats.challenges }
               ].map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -385,9 +387,9 @@ const ChatPage = () => {
                     key={tab.id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => setFilterType(tab.id)}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 md:px-4 md:py-3 rounded-lg font-medium transition-all ${
-                      activeTab === tab.id
+                      filterType === tab.id
                         ? 'bg-white text-orange-600 shadow-lg'
                         : 'text-white/80 hover:text-white hover:bg-white/10'
                     }`}
@@ -395,7 +397,7 @@ const ChatPage = () => {
                     <Icon className="w-4 h-4" />
                     <span className="text-sm md:text-base">{tab.label}</span>
                     <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                      activeTab === tab.id 
+                      filterType === tab.id 
                         ? 'bg-orange-100 text-orange-600' 
                         : 'bg-white/20 text-white/80'
                     }`}>

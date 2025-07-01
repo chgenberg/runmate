@@ -53,7 +53,29 @@ const DiscoverPage = () => {
 
   const constraintsRef = useRef(null);
 
-  // Motion values for swipe animations (not used in current implementation)
+  // Swipe animations
+  const swipeVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+      rotate: direction > 0 ? 15 : -15,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+    },
+    exit: (direction) => ({
+      zIndex: 0,
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+      rotate: direction < 0 ? 15 : -15,
+    }),
+  };
 
   const fetchAiMatches = useCallback(async () => {
     try {
@@ -263,8 +285,6 @@ const DiscoverPage = () => {
     const cardX = useMotionValue(0);
     const cardRotate = useTransform(cardX, [-200, 200], [-30, 30]);
     const cardOpacity = useTransform(cardX, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
-    const cardLikeOpacity = useTransform(cardX, [0, 100], [0, 1]);
-    const cardSkipOpacity = useTransform(cardX, [-100, 0], [1, 0]);
 
     const isMobile = window.innerWidth < 768;
 

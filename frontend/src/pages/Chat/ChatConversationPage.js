@@ -42,12 +42,6 @@ const ChatConversationPage = () => {
     try {
       const response = await api.get(`/chat/conversations/${chatId}`);
       console.log('Chat info loaded:', response.data.conversation);
-      console.log('Current user:', user);
-      console.log('User ID:', user?._id || user?.id);
-      console.log('Participants:', response.data.conversation.participants);
-      response.data.conversation.participants.forEach((p, i) => {
-        console.log(`Participant ${i}:`, p._id || p.id, p.firstName, p.lastName);
-      });
       setChatInfo(response.data.conversation);
     } catch (error) {
       console.error('Error loading chat info:', error);

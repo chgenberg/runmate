@@ -192,7 +192,7 @@ const AICoachPage = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const response = await api.post('/aicoach/comprehensive-plan', formData);
+      const response = await api.post('/aicoach/generate-structured-plan', formData);
       
       if (response.data.success) {
         setCoachingPlan(response.data.plan);

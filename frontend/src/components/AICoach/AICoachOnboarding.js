@@ -336,7 +336,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
         }
       };
 
-      const response = await api.post('/aicoach/comprehensive-plan', apiData);
+                  const response = await api.post('/aicoach/generate-structured-plan', apiData);
 
       if (response.data.success) {
         // Navigate to results page with plan data
@@ -884,7 +884,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
                             
                             try {
                               // Generate comprehensive plan with demo data
-                              const response = await api.post('/aicoach/comprehensive-plan', {
+                              const response = await api.post('/aicoach/generate-structured-plan', {
                                 // Basic profile
                                 age: 35,
                                 gender: 'male',

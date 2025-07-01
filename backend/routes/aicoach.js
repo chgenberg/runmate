@@ -284,70 +284,35 @@ router.post('/generate-plan', protect, async (req, res) => {
   }
 });
 
-// Chat endpoint for AI conversations
-router.post('/chat', protect, async (req, res) => {
+// Generate structured training plan based on user answers (NO CHAT)
+router.post('/generate-structured-plan', protect, async (req, res) => {
   try {
-    const { message, context } = req.body;
-    
+    const formData = req.body;
     const user = await User.findById(req.user._id);
+    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    let response;
-    
-    // Use OpenAI if available, otherwise fallback to simple responses
-    if (openai) {
-      try {
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `Du är ARIA - en professionell AI-löpcoach. Du svarar på svenska och ger konkreta, praktiska råd baserat på vetenskap och beprövad erfarenhet. Håll svaren personliga och uppmuntrande.
+    // Save AI coach profile from answers
+    user.aiCoachProfile = {
+      ...formData,
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+    await user.save();
 
-              VIKTIGA FORMATERINGSREGLER:
-              - Använd HTML-formatering: <strong>text</strong> för fetstil (INTE ** eller markdown)
-              - Dela upp text i paragrafer med <p>-taggar
-              - Avsluta alltid meningar komplett - klipp ALDRIG av mitt i en mening
-              - Strukturera svaret logiskt med tydliga stycken
-              - Använd <br/> för radbrytningar vid behov
-              - Max 2-3 emojis per svar, använd naturligt
-
-              Användarens profil:
-              - Namn: ${user.firstName}
-              - Träningsnivå: ${user.activityLevel || 'okänd'}
-              - AI Coach profil: ${user.aiCoachProfile ? JSON.stringify(user.aiCoachProfile) : 'Inte konfigurerad'}
-              
-              Fokusera på praktiska råd för löpning, återhämtning, nutrition och skadeförebyggning. Ge alltid kompletta, välstrukturerade svar.`
-            },
-            {
-              role: "user",
-              content: message
-            }
-          ],
-          max_tokens: 3000,
-          temperature: 0.7,
-        });
-
-        response = completion.choices[0].message.content;
-      } catch (openaiError) {
-        console.error('OpenAI API error:', openaiError);
-        // Fallback to simple response if OpenAI fails
-        response = generateAIAdvice(message, context, user);
-      }
-    } else {
-      // Use fallback responses when OpenAI is not available
-      response = generateAIAdvice(message, context, user);
-    }
+    // Generate structured plan based on answers
+    const structuredPlan = generateStructuredPlanFromAnswers(formData, user);
 
     res.json({ 
-      message: response,
-      timestamp: new Date(),
-      enhanced: !!openai
+      success: true,
+      plan: structuredPlan,
+      message: `Personlig plan skapad för ${user.firstName}`,
+      timestamp: new Date()
     });
   } catch (error) {
-    console.error('Error in AI chat:', error);
+    console.error('Error generating structured plan:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -1154,6 +1119,82 @@ function extractProgressTracking(aiResponse) {
     return sections[1].trim();
   }
   return 'Detaljerad uppföljningsplan finns i den fullständiga planen.';
+}
+
+function generateStructuredPlanFromAnswers(formData, user) {
+  const {
+    primaryGoal,
+    currentLevel,
+    weeklyHours,
+    dietStyle,
+    sleepQuality,
+    stressLevel,
+    preferredTime,
+    preferredEnvironment,
+    healthConcerns,
+    equipment
+  } = formData;
+
+  // Calculate training intensity based on level
+  const intensityMap = {
+    'beginner': { easy: 85, moderate: 10, hard: 5 },
+    'casual': { easy: 80, moderate: 15, hard: 5 },
+    'regular': { easy: 75, moderate: 20, hard: 5 },
+    'experienced': { easy: 70, moderate: 25, hard: 5 },
+    'competitive': { easy: 65, moderate: 25, hard: 10 }
+  };
+
+  const intensity = intensityMap[currentLevel] || intensityMap['regular'];
+  const hoursPerWeek = parseInt(weeklyHours) || 4;
+
+  // Generate training schedule
+  const trainingSchedule = generateTrainingScheduleFromAnswers(
+    primaryGoal, 
+    currentLevel, 
+    hoursPerWeek, 
+    preferredTime, 
+    preferredEnvironment,
+    equipment
+  );
+
+  // Generate nutrition plan
+  const nutritionPlan = generateNutritionPlanFromAnswers(
+    primaryGoal, 
+    dietStyle, 
+    currentLevel
+  );
+
+  // Generate lifestyle recommendations
+  const lifestylePlan = generateLifestylePlanFromAnswers(
+    sleepQuality, 
+    stressLevel, 
+    healthConcerns
+  );
+
+  // Generate recovery plan
+  const recoveryPlan = generateRecoveryPlanFromAnswers(
+    currentLevel, 
+    hoursPerWeek, 
+    healthConcerns
+  );
+
+  return {
+    summary: {
+      name: `${user.firstName}s Personliga Träningsplan`,
+      goal: getGoalDescription(primaryGoal),
+      level: getLevelDescription(currentLevel),
+      commitment: `${hoursPerWeek} timmar/vecka`,
+      startDate: new Date().toLocaleDateString('sv-SE'),
+      duration: '12 veckor'
+    },
+    training: trainingSchedule,
+    nutrition: nutritionPlan,
+    lifestyle: lifestylePlan,
+    recovery: recoveryPlan,
+    progressTracking: generateProgressTrackingFromAnswers(primaryGoal),
+    createdAt: new Date(),
+    source: 'structured_answers'
+  };
 }
 
 function generateStructuredPlan(formData, user) {
@@ -2077,6 +2118,343 @@ function generateMentalPreparation(weeks, goal) {
       'Förbered allt kvällen innan'
     ]
   };
+}
+
+// Helper functions for generating structured plans from answers
+function generateTrainingScheduleFromAnswers(primaryGoal, currentLevel, hoursPerWeek, preferredTime, preferredEnvironment, equipment) {
+  const sessionsPerWeek = Math.min(Math.max(Math.floor(hoursPerWeek / 1.5), 3), 6);
+  
+  const goalTrainingMap = {
+    'first_5k': {
+      focus: 'Bygga grundkondition och uthållighet',
+      weeklyDistance: '15-25 km',
+      keyWorkouts: ['Intervaller 2x/vecka', 'Långpass 1x/vecka', 'Lugna löprundor']
+    },
+    'improve_time': {
+      focus: 'Hastighet och tröskeltempo',
+      weeklyDistance: '25-35 km', 
+      keyWorkouts: ['Tempopass 2x/vecka', 'Intervaller 1x/vecka', 'Långpass 1x/vecka']
+    },
+    'marathon': {
+      focus: 'Uthållighet och volym',
+      weeklyDistance: '40-60 km',
+      keyWorkouts: ['Långpass 1x/vecka', 'Tempopass 1x/vecka', 'Lugna löprundor 4x/vecka']
+    },
+    'health': {
+      focus: 'Allmän hälsa och välmående',
+      weeklyDistance: '15-30 km',
+      keyWorkouts: ['Lugna löprundor 3x/vecka', 'Intervaller 1x/vecka']
+    },
+    'weight_loss': {
+      focus: 'Fettförbränning och kondition',
+      weeklyDistance: '20-35 km',
+      keyWorkouts: ['Långa lugna pass 2x/vecka', 'Intervaller 2x/vecka']
+    }
+  };
+
+  const trainingPlan = goalTrainingMap[primaryGoal] || goalTrainingMap['health'];
+  
+  // Generate weekly schedule based on preferences
+  const schedule = [];
+  const timeMap = {
+    'morning': '06:00-08:00',
+    'lunch': '11:00-13:00', 
+    'evening': '17:00-19:00',
+    'flexible': 'Flexibel tid'
+  };
+
+  const days = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag'];
+  const workoutTypes = ['Lugn löpning', 'Intervaller', 'Tempopass', 'Långpass', 'Vila', 'Styrketräning'];
+  
+  for (let i = 0; i < 7; i++) {
+    let workout;
+    if (i < sessionsPerWeek) {
+      const type = workoutTypes[i % workoutTypes.length];
+      workout = {
+        day: days[i],
+        type: type,
+        duration: type === 'Vila' ? '-' : `${Math.floor(hoursPerWeek / sessionsPerWeek * 60)} min`,
+        time: timeMap[preferredTime] || 'Flexibel tid',
+        location: preferredEnvironment === 'outdoor' ? 'Utomhus' : preferredEnvironment === 'indoor' ? 'Inomhus' : 'Valfritt',
+        description: getWorkoutDescription(type, currentLevel)
+      };
+    } else {
+      workout = {
+        day: days[i],
+        type: 'Vila',
+        duration: '-',
+        time: '-',
+        location: '-',
+        description: 'Fullständig vila eller lätt stretching'
+      };
+    }
+    schedule.push(workout);
+  }
+
+  return {
+    summary: trainingPlan,
+    weeklySchedule: schedule,
+    progressionPlan: generateProgressionPlan(currentLevel, primaryGoal)
+  };
+}
+
+function generateNutritionPlanFromAnswers(primaryGoal, dietStyle, currentLevel) {
+  const goalNutritionMap = {
+    'weight_loss': {
+      calories: 1800,
+      macros: { carbs: '40%', protein: '30%', fat: '30%' },
+      focus: 'Kaloriunderskott för viktminskning'
+    },
+    'marathon': {
+      calories: 2800,
+      macros: { carbs: '60%', protein: '20%', fat: '20%' },
+      focus: 'Hög kolhydratintag för uthållighet'
+    },
+    'improve_time': {
+      calories: 2400,
+      macros: { carbs: '50%', protein: '25%', fat: '25%' },
+      focus: 'Balanserad kost för prestationsförbättring'
+    },
+    'health': {
+      calories: 2200,
+      macros: { carbs: '45%', protein: '25%', fat: '30%' },
+      focus: 'Hälsosam och balanserad kost'
+    }
+  };
+
+  const basePlan = goalNutritionMap[primaryGoal] || goalNutritionMap['health'];
+  
+  const dietAdjustments = {
+    'vegetarian': {
+      proteinSources: ['Bönor', 'Linser', 'Quinoa', 'Nötter', 'Ägg', 'Mejeriprodukt'],
+      supplements: ['B12-vitamin', 'Järn', 'Omega-3']
+    },
+    'vegan': {
+      proteinSources: ['Bönor', 'Linser', 'Quinoa', 'Nötter', 'Frön', 'Tofu'],
+      supplements: ['B12-vitamin', 'Järn', 'Omega-3', 'D-vitamin']
+    },
+    'keto': {
+      macros: { carbs: '5%', protein: '25%', fat: '70%' },
+      focus: 'Ketogen kost för fettförbränning'
+    },
+    'paleo': {
+      foods: ['Kött', 'Fisk', 'Ägg', 'Grönsaker', 'Nötter', 'Bär'],
+      avoid: ['Spannmål', 'Mejeriprodukter', 'Bönor']
+    }
+  };
+
+  return {
+    dailyCalories: basePlan.calories,
+    macroDistribution: basePlan.macros,
+    focus: basePlan.focus,
+    mealPlan: generateMealPlan(dietStyle),
+    hydration: '2.5-3 liter vatten per dag',
+    preWorkout: 'Banan och havregrynsgröt 1-2h före träning',
+    postWorkout: 'Protein och kolhydrater inom 30 min efter träning',
+    supplements: dietAdjustments[dietStyle]?.supplements || ['Multivitamin', 'D-vitamin'],
+    specialConsiderations: dietAdjustments[dietStyle] || null
+  };
+}
+
+function generateLifestylePlanFromAnswers(sleepQuality, stressLevel, healthConcerns) {
+  const sleepRecommendations = {
+    'poor': {
+      hours: '8-9 timmar',
+      tips: [
+        'Gå till sängs samma tid varje kväll',
+        'Undvik skärmar 2 timmar före sömn',
+        'Mörkt och svalt sovrum (16-18°C)',
+        'Melatonin-tillskott efter konsultation med läkare'
+      ]
+    },
+    'average': {
+      hours: '7-8 timmar',
+      tips: [
+        'Regelbundna sovtider',
+        'Undvik koffein efter 14:00',
+        'Avslappning före sänggående'
+      ]
+    },
+    'good': {
+      hours: '7-8 timmar',
+      tips: [
+        'Fortsätt med nuvarande rutiner',
+        'Övervaka sömnkvalitet med app eller klocka'
+      ]
+    }
+  };
+
+  const stressManagement = {
+    'high': [
+      'Meditation 10-15 min dagligen',
+      'Andningsövningar före träning',
+      'Yoga eller tai chi 2x/vecka',
+      'Överväg professionell hjälp'
+    ],
+    'medium': [
+      'Meditation 5-10 min dagligen',
+      'Regelbundna promenader',
+      'Begränsa nyheter och sociala medier'
+    ],
+    'low': [
+      'Fortsätt med nuvarande stresshantering',
+      'Bibehåll work-life balance'
+    ]
+  };
+
+  return {
+    sleep: sleepRecommendations[sleepQuality] || sleepRecommendations['average'],
+    stressManagement: stressManagement[stressLevel] || stressManagement['medium'],
+    healthConsiderations: generateHealthRecommendations(healthConcerns),
+    dailyRoutine: [
+      'Morgon: Stretching 5-10 min',
+      'Lunch: Kort promenad 10-15 min',
+      'Kväll: Avslappning och reflektion'
+    ]
+  };
+}
+
+function generateRecoveryPlanFromAnswers(currentLevel, hoursPerWeek, healthConcerns) {
+  const recoveryIntensity = {
+    'beginner': 'Hög fokus på återhämtning',
+    'casual': 'Medel återhämtning', 
+    'regular': 'Balanserad återhämtning',
+    'experienced': 'Aktiv återhämtning',
+    'competitive': 'Strukturerad återhämtning'
+  };
+
+  return {
+    philosophy: recoveryIntensity[currentLevel] || 'Balanserad återhämtning',
+    weeklyPlan: {
+      restDays: Math.max(1, 7 - Math.floor(hoursPerWeek / 1.5)),
+      activeRecovery: 'Lätt yoga eller promenad 2x/vecka',
+      stretching: 'Daglig stretching 10-15 min',
+      massage: 'Foam rolling eller massage 1x/vecka'
+    },
+    sleepPriority: 'Minst 7-8 timmar sömn per natt',
+    nutritionTiming: 'Protein och kolhydrater inom 30 min efter träning',
+    hydration: 'Extra vätskeintag på träningsdagar',
+    warningSignals: [
+      'Ökad vilopuls på morgonen',
+      'Minskad motivation',
+      'Försämrad sömnkvalitet',
+      'Ihållande muskelvärk'
+    ]
+  };
+}
+
+function generateProgressTrackingFromAnswers(primaryGoal) {
+  const trackingMap = {
+    'first_5k': {
+      metrics: ['Löpavstånd', 'Löptid', 'Genomsnittspuls', 'Upplevd ansträngning'],
+      milestones: ['1 km utan paus', '2 km utan paus', '5 km på under 35 min'],
+      frequency: 'Veckovis uppföljning'
+    },
+    'improve_time': {
+      metrics: ['Tempo per km', 'Intervallprestanda', 'Återhämtningstid', 'VO2 max'],
+      milestones: ['5% förbättring av 5K-tid', '10% förbättring av 10K-tid'],
+      frequency: 'Bi-veckovis tester'
+    },
+    'marathon': {
+      metrics: ['Veckovolym', 'Långpassdistans', 'Genomsnittspuls', 'Näringsintag'],
+      milestones: ['20 km långpass', '30 km långpass', 'Fullständig marathon'],
+      frequency: 'Månadsvis utvärdering'
+    },
+    'weight_loss': {
+      metrics: ['Vikt', 'Kroppsfett%', 'Midjeomfång', 'Energinivå'],
+      milestones: ['2 kg viktminskning', '5 kg viktminskning', 'Målvikt uppnådd'],
+      frequency: 'Veckovis vägning'
+    }
+  };
+
+  return trackingMap[primaryGoal] || trackingMap['health'];
+}
+
+function getWorkoutDescription(type, level) {
+  const descriptions = {
+    'Lugn löpning': `Behagligt tempo där du kan prata. ${level === 'beginner' ? 'Fokus på att bygga uthållighet.' : 'Aktiv återhämtning.'}`,
+    'Intervaller': `Korta intensiva perioder följt av vila. ${level === 'beginner' ? '30 sek hårt, 90 sek vila.' : '1-2 min hårt, 1 min vila.'}`,
+    'Tempopass': `Måttligt hårt tempo under längre tid. ${level === 'beginner' ? '10-15 min.' : '20-30 min.'}`,
+    'Långpass': `Långsam och steady löpning. ${level === 'beginner' ? '30-45 min.' : '60-90 min.'}`,
+    'Styrketräning': 'Fokus på ben, core och stabilitet för löpare.',
+    'Vila': 'Fullständig vila eller lätt stretching/yoga.'
+  };
+  
+  return descriptions[type] || 'Anpassad träning enligt plan.';
+}
+
+function generateProgressionPlan(currentLevel, primaryGoal) {
+  return {
+    week1to4: 'Grundfas - Bygga bas och vana',
+    week5to8: 'Utvecklingsfas - Öka intensitet och volym', 
+    week9to12: 'Prestationsfas - Maximera resultat',
+    progressionRate: currentLevel === 'beginner' ? '5-10% ökning per vecka' : '10-15% ökning per vecka'
+  };
+}
+
+function generateMealPlan(dietStyle) {
+  const baseMeals = {
+    breakfast: 'Havregrynsgröt med bär och nötter',
+    lunch: 'Quinoasallad med grönsaker och protein',
+    dinner: 'Grillad fisk/kyckling med ris och grönsaker',
+    snacks: ['Frukt och nötter', 'Grekisk yoghurt', 'Smoothie']
+  };
+
+  if (dietStyle === 'vegan') {
+    return {
+      breakfast: 'Havregrynsgröt med växtmjölk, bär och mandlar',
+      lunch: 'Bönbowl med quinoa och grönsaker',
+      dinner: 'Tofu-wok med ris och grönsaker',
+      snacks: ['Frukt och nötter', 'Hummus med grönsaker', 'Vegansk smoothie']
+    };
+  }
+
+  return baseMeals;
+}
+
+function generateHealthRecommendations(healthConcerns) {
+  if (!healthConcerns || healthConcerns.length === 0) {
+    return ['Regelbundna hälsokontroller', 'Lyssna på kroppen under träning'];
+  }
+
+  const recommendations = [];
+  
+  if (healthConcerns.includes('joints')) {
+    recommendations.push('Låg-impact träning', 'Extra uppvärmning', 'Styrketräning för stabilitet');
+  }
+  
+  if (healthConcerns.includes('heart')) {
+    recommendations.push('Pulskontroll under träning', 'Gradvis progression', 'Regelbunden läkarkontakt');
+  }
+  
+  if (healthConcerns.includes('diabetes')) {
+    recommendations.push('Blodsockerkontroll', 'Måltidsplanering', 'Konsultera diabetessjuksköterska');
+  }
+
+  return recommendations.length > 0 ? recommendations : ['Konsultera läkare före träningsstart'];
+}
+
+function getGoalDescription(goal) {
+  const goals = {
+    'first_5k': 'Springa första 5K',
+    'improve_time': 'Förbättra löptider',
+    'marathon': 'Träna för marathon',
+    'health': 'Förbättra allmän hälsa',
+    'weight_loss': 'Gå ner i vikt',
+    'social': 'Hitta löparvänner'
+  };
+  return goals[goal] || 'Allmän träning';
+}
+
+function getLevelDescription(level) {
+  const levels = {
+    'beginner': 'Nybörjare',
+    'casual': 'Tillfällig löpare', 
+    'regular': 'Regelbunden löpare',
+    'experienced': 'Erfaren löpare',
+    'competitive': 'Tävlingsløpare'
+  };
+  return levels[level] || 'Medelnivå';
 }
 
 module.exports = router;

@@ -28,6 +28,7 @@ import LogActivityPage from './pages/Activity/LogActivityPage';
 import ChatPage from './pages/Chat/ChatPage';
 import ChatConversationPage from './pages/Chat/ChatConversationPage';
 import MatchesPage from './pages/Matches/MatchesPage';
+import CreateChallengePage from './pages/Challenges/CreateChallengePage';
 
 // Landing Page
 import SuperLanding from './pages/Landing/SuperLanding';
@@ -94,6 +95,7 @@ function App() {
               <Route path="discover" element={<DiscoverPage />} />
               <Route path="challenges" element={<ChallengesPage />} />
               <Route path="challenges/:id" element={<ChallengeDetailPage />} />
+              <Route path="challenges/create" element={<CreateChallengePage />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="chat/:chatId" element={<ChatConversationPage />} />
               <Route path="statistics" element={<StatisticsPage />} />

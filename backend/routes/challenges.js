@@ -370,7 +370,31 @@ router.post('/', protect, [
     
     res.status(201).json(populatedChallenge);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Challenge creation error:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => ({
+        field: err.path,
+        message: err.message
+      }));
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: validationErrors 
+      });
+    }
+    
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        message: 'Duplicate entry - challenge with this data already exists' 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to create challenge',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 });
 

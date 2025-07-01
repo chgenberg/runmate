@@ -1888,6 +1888,9 @@ router.post('/race-plan', protect, async (req, res) => {
     };
     await user.save();
 
+    // Generate race description using AI
+    const raceDescription = await generateRaceDescription(selectedRace);
+    
     // Generate race-specific training plan
     const racePlan = {
       success: true,
@@ -1895,6 +1898,7 @@ router.post('/race-plan', protect, async (req, res) => {
         race: selectedRace,
         raceDate,
         weeksUntilRace,
+        raceDescription,
         trainingPhases: generateRaceTrainingPhases(weeksUntilRace, req.body),
         training: {
           weeklySchedule: generateRaceWeeklySchedule(req.body),
@@ -2125,6 +2129,47 @@ function generateMentalPreparation(weeks, goal) {
       'Förbered allt kvällen innan'
     ]
   };
+}
+
+async function generateRaceDescription(race) {
+  try {
+    if (!race || !race.name) return null;
+    
+    const prompt = `Skriv en kort och inspirerande beskrivning av ${race.name} loppet i ${race.location}. 
+    Inkludera:
+    - Vad som gör loppet speciellt
+    - Banans karaktär och utmaningar
+    - Atmosfären och upplevelsen
+    Max 3-4 meningar. Skriv på svenska och var entusiastisk men faktabaserad.`;
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "Du är en kunnig löpcoach som beskriver lopp på ett inspirerande sätt."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 150,
+      temperature: 0.7
+    });
+    
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error generating race description:', error);
+    // Fallback descriptions for common races
+    const fallbackDescriptions = {
+      'Berlin Marathon': 'Berlin Marathon är känt för sin platta och snabba bana där många världsrekord har satts. Loppet går genom stadens historiska landmärken med fantastiskt publikstöd hela vägen.',
+      'Stockholm Marathon': 'Stockholm Marathon bjuder på en vacker bana genom Sveriges huvudstad med passager över broar och längs vattnet. Publikstödet är enastående och målgången på Stockholms Stadion är oförglömlig.',
+      'New York Marathon': 'New York Marathon tar dig genom alla fem stadsdelar med över 2 miljoner åskådare längs banan. Den unika energin och mångfalden gör detta till ett av världens mest eftertraktade lopp.'
+    };
+    
+    return fallbackDescriptions[race.name] || `${race.name} är ett fantastiskt lopp i ${race.location} som erbjuder en unik löpupplevelse med ${race.distance} av utmaning och glädje.`;
+  }
 }
 
 function generateRaceWeeklySchedule(data) {

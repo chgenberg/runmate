@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+
+// Import CSS safely
+try {
+  require('leaflet/dist/leaflet.css');
+} catch (e) {
+  console.warn('Leaflet CSS could not be loaded:', e);
+}
 
 // Fix for default icon issue with webpack
 delete L.Icon.Default.prototype._getIconUrl;
@@ -13,10 +19,24 @@ L.Icon.Default.mergeOptions({
 });
 
 const EventMap = ({ position, locationName }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   if (!position || position.length !== 2) {
     return (
       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
         <p className="text-gray-500">Kartposition saknas.</p>
+      </div>
+    );
+  }
+
+  if (!isClient) {
+    return (
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Laddar karta...</p>
       </div>
     );
   }

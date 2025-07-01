@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -31,7 +31,20 @@ const LocationPicker = ({ onLocationSelect }) => {
 };
 
 const LocationPickerMap = ({ onLocationSelect, initialPosition }) => {
+  const [isClient, setIsClient] = useState(false);
   const center = useMemo(() => initialPosition || [59.3293, 18.0686], [initialPosition]); // Default to Stockholm
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="h-64 md:h-80 w-full rounded-2xl overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Laddar karta...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-64 md:h-80 w-full rounded-2xl overflow-hidden border-2 border-gray-200">

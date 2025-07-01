@@ -25,7 +25,10 @@ import {
   Key,
   HelpCircle,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Trophy,
+  Calendar,
+  TrendingUp
 } from 'lucide-react';
 import AppleHealthSync from '../../components/Settings/AppleHealthSync';
 import api from '../../services/api';
@@ -191,36 +194,37 @@ const SettingsPage = () => {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                        Optimera med AI!
+                        Förbered för lopp
                       </h2>
                       <p className="text-gray-600">
-                        Låt vår AI analysera din träningsdata och ge personliga rekommendationer
+                        Få en personlig träningsplan för ditt nästa lopp med vår AI-coach
                       </p>
                     </div>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                    onClick={() => navigate('/app/dashboard')}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
                   >
-                    <Sparkles className="w-5 h-5" />
-                    Få rekommendationer
+                    <Trophy className="w-5 h-5" />
+                    Skapa träningsplan
                   </motion.button>
                 </div>
                 
                 {/* Features */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
-                    <Zap className="w-5 h-5 text-orange-600" />
-                    <span className="text-sm font-medium text-gray-800">Optimerade notifieringar</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
-                    <Heart className="w-5 h-5 text-red-600" />
-                    <span className="text-sm font-medium text-gray-800">Hälsoinsikter</span>
+                  <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
+                    <Calendar className="w-5 h-5 text-purple-600" />
+                    <span className="text-sm font-medium text-gray-800">Träningskalender</span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
-                    <Settings className="w-5 h-5 text-pink-600" />
-                    <span className="text-sm font-medium text-gray-800">Smarta inställningar</span>
+                    <TrendingUp className="w-5 h-5 text-pink-600" />
+                    <span className="text-sm font-medium text-gray-800">Progressplan</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl">
+                    <Zap className="w-5 h-5 text-indigo-600" />
+                    <span className="text-sm font-medium text-gray-800">AI-coaching</span>
                   </div>
                 </div>
               </div>

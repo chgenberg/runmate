@@ -86,9 +86,9 @@ const DashboardPage = () => {
           <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black text-gray-900 mb-3 lg:mb-4 uppercase">
             VÄLKOMMEN TILL RUNMATE! 👋
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto mb-6 lg:mb-8 uppercase">
-            {user?.name ? `HEJ ${user.name.toUpperCase()}! ` : 'HEJ! '}
-            FÖRBERED DIG FÖR DITT NÄSTA LOPP MED VÅR AI-COACH.
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto mb-6 lg:mb-8">
+            {user?.name ? `Hej ${user.name}! ` : 'Hej! '}
+            Förbered dig för ditt nästa lopp med vår AI-coach.
           </p>
 
           {/* Race Preparation Button - Main CTA */}
@@ -129,8 +129,8 @@ const DashboardPage = () => {
                   </span>
                 </div>
                 
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 lg:mb-4 uppercase">
-                  FÖRBERED DIG FÖR DITT NÄSTA LOPP
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 lg:mb-4">
+                  Förbered dig för ditt nästa lopp
                 </h2>
                 <p className="text-base lg:text-lg text-gray-600 mb-6 lg:mb-8">
                   Välj från de 50 största loppen i världen och få en personlig träningsplan 

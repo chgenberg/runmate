@@ -1337,8 +1337,8 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   handleAnswer('sync');
-                  // Here you would trigger Apple Health sync
-                  window.location.href = '/app/settings#apple-health';
+                  // Open Apple Health sync in a new tab to keep modal open
+                  window.open('/app/settings#apple-health', '_blank');
                 }}
                 className="w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
               >

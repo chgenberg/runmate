@@ -56,9 +56,10 @@ router.get('/', async (req, res) => {
       if (search) {
         const searchLower = search.toLowerCase();
         filteredRaces = filteredRaces.filter(race => 
-          race.name.toLowerCase().includes(searchLower) ||
-          race.location.toLowerCase().includes(searchLower) ||
-          race.description.toLowerCase().includes(searchLower)
+          (race.name && race.name.toLowerCase().includes(searchLower)) ||
+          (race.location && race.location.toLowerCase().includes(searchLower)) ||
+          (race.description && race.description.toLowerCase().includes(searchLower)) ||
+          (race.searchTags && race.searchTags.some(tag => tag.toLowerCase().includes(searchLower)))
         );
       }
       

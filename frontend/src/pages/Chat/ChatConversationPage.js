@@ -45,7 +45,8 @@ const ChatConversationPage = () => {
     } catch (error) {
       console.error('Error loading chat info:', error);
       
-      // Enhanced fallback demo data based on chatId
+      // For real chats (MongoDB ObjectIds), try to create a minimal chat structure
+      // Only use demo data for actual demo chat IDs (simple numbers or ai- prefixed)
       if (chatId === '1') {
         setChatInfo({
           _id: '1',
@@ -119,18 +120,14 @@ const ChatConversationPage = () => {
           ]
         });
       } else {
-        // Default fallback for unknown chat IDs
-        setChatInfo({
-          _id: chatId,
-          type: 'match',
-          participants: [
-            { _id: user?._id, firstName: user?.firstName },
-            { _id: 'unknown', firstName: 'Okänd', lastName: 'Användare', profileImage: '/avatar2.png', isOnline: false }
-          ]
-        });
+        // For real chats that failed to load, show error and redirect back
+        console.error('Failed to load chat information for chatId:', chatId);
+        toast.error('Kunde inte ladda chattinformation');
+        navigate('/app/chat');
+        return;
       }
     }
-  }, [chatId, user]);
+  }, [chatId, user, navigate]);
 
   const loadMessages = useCallback(async () => {
     try {
@@ -139,7 +136,7 @@ const ChatConversationPage = () => {
     } catch (error) {
       console.error('Error loading messages:', error);
       
-      // Enhanced fallback demo messages based on chatId
+      // Only provide demo messages for actual demo chat IDs
       if (chatId === '1') {
         setMessages([
           {
@@ -248,16 +245,8 @@ const ChatConversationPage = () => {
           }
         ]);
       } else {
-        // Default fallback messages
-        setMessages([
-          {
-            _id: '1',
-            content: 'Hej! Kul att vi matchade!',
-            sender: { _id: 'unknown', firstName: 'Okänd', lastName: 'Användare' },
-            createdAt: new Date(Date.now() - 1000 * 60 * 30),
-            readBy: [user?._id]
-          }
-        ]);
+        // For real chats that failed to load messages, start with empty message list
+        setMessages([]);
       }
     } finally {
       setLoading(false);

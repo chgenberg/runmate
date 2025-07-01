@@ -58,11 +58,11 @@ const DiscoverPage = () => {
   const fetchAiMatches = useCallback(async () => {
     try {
       const response = await api.get('/users/ai-matches');
-      setAiMatches(response.data.matches || getDemoAiMatches());
+      setAiMatches(response.data.matches || []);
     } catch (error) {
       console.error('Error fetching AI matches:', error);
       // Use demo AI matches
-      setAiMatches(getDemoAiMatches());
+      setAiMatches([]);
     }
   }, []);
 
@@ -137,8 +137,9 @@ const DiscoverPage = () => {
       setRunners(mappedUsers.filter(u => u.id !== authUser?._id));
     } catch (error) {
       console.error('Error fetching runners:', error);
-      // Demo data
-      setRunners(getDemoRunners().filter(u => u.id !== authUser?._id));
+      // No fallback to demo data - show empty state instead
+      setRunners([]);
+      toast.error('Kunde inte ladda löpare. Kontrollera din internetanslutning.');
     } finally {
       setLoading(false);
     }
@@ -1183,169 +1184,7 @@ const DiscoverPage = () => {
   );
 };
 
-// Demo data functions
-const getDemoRunners = () => [
-  {
-    id: 1,
-    name: 'Emma Johansson',
-    age: 28,
-    location: 'Stockholm',
-    distance: 12,
-    bio: 'Marathonlöpare som älskar långdistans. Tränar för Berlin Marathon 2024. Alltid på jakt efter nya löparvänner!',
-    level: 'Avancerad',
-    pace: '4:45',
-    weeklyDistance: 65,
-    interests: ['Marathon', 'Trail', 'Intervaller', 'Yoga'],
-    profilePicture: '/avatar2.png',
-    rating: 4.8,
-    totalRuns: 342,
-    achievements: ['Marathon Finisher', 'Sub 3:30', '100km Club'],
-    longestRun: 42,
-    favoriteTime: 'Morgon',
-    goals: ['Sub 3:15 marathon', 'Ultra trail']
-  },
-  {
-    id: 2,
-    name: 'Marcus Andersson',
-    age: 32,
-    location: 'Göteborg',
-    distance: 8,
-    bio: 'Nybörjare som siktar på första 10km-loppet. Söker motiverande träningssällskap!',
-    level: 'Nybörjare',
-    pace: '6:30',
-    weeklyDistance: 20,
-    interests: ['5K', '10K', 'Morgonlöpning'],
-    profilePicture: '/avatar2.png',
-    rating: 4.5,
-    totalRuns: 45,
-    achievements: ['First 5K', 'Morning Runner'],
-    longestRun: 8,
-    favoriteTime: 'Kväll',
-    goals: ['Första 10K', 'Bygga rutin']
-  },
-  {
-    id: 3,
-    name: 'Sofia Lindberg',
-    age: 25,
-    location: 'Uppsala',
-    distance: 15,
-    bio: 'Traillöpare och äventyrare. Älskar att utforska nya stigar i naturen.',
-    level: 'Medel',
-    pace: '5:15',
-    weeklyDistance: 40,
-    interests: ['Trail', 'Ultramarathon', 'Bergslopp'],
-    profilePicture: '/avatar2.png',
-    rating: 4.9,
-    totalRuns: 189,
-    achievements: ['Trail Master', 'Mountain Goat', 'Ultra Runner'],
-    longestRun: 50,
-    favoriteTime: 'Morgon',
-    goals: ['100K ultra', 'Kebnekaise runt']
-  }
-];
 
-const getDemoAiMatches = () => [
-  {
-    id: 'ai-1',
-    name: 'Lisa Bergström',
-    age: 26,
-    location: 'Stockholm',
-    distance: 5,
-    bio: 'Perfekt match! Vi har samma tempo och tränar båda för halvmarathon. Älskar morgonlöpning runt Djurgården.',
-    level: 'Medel',
-    pace: '5:00',
-    weeklyDistance: 45,
-    interests: ['Halvmarathon', 'Intervaller', 'Styrka', 'Yoga'],
-    profilePicture: '/avatar2.png',
-    rating: 4.7,
-    totalRuns: 156,
-    achievements: ['Halvmarathon < 1:45', 'Streak 100 dagar'],
-    longestRun: 21,
-    favoriteTime: 'Morgon',
-    goals: ['Sub 1:40 halvmarathon', 'Första marathon'],
-    matchReason: '96% kompatibilitet'
-  },
-  {
-    id: 'ai-2',
-    name: 'Johan Eriksson',
-    age: 30,
-    location: 'Solna',
-    distance: 3,
-    bio: 'Tränar på samma tider som dig! Fokuserar på intervaller och 10K. Medlem i Hässelby SK.',
-    level: 'Medel',
-    pace: '4:55',
-    weeklyDistance: 50,
-    interests: ['Banlöpning', '10K', 'Intervaller', 'Träningsläger'],
-    profilePicture: '/avatar2.png',
-    rating: 4.6,
-    totalRuns: 234,
-    achievements: ['10K < 40min', 'Klubbmästare 5000m'],
-    longestRun: 18,
-    favoriteTime: 'Kväll',
-    goals: ['10K < 38min', 'Förbättra VO2max'],
-    matchReason: '94% kompatibilitet'
-  },
-  {
-    id: 'ai-3',
-    name: 'Anna Nilsson',
-    age: 29,
-    location: 'Täby',
-    distance: 7,
-    bio: 'Samma löpstil och mål! Tränar för Stockholm Marathon. Gillar långa lugna pass på helgerna.',
-    level: 'Medel',
-    pace: '5:05',
-    weeklyDistance: 48,
-    interests: ['Marathon', 'Långpass', 'Trail', 'Mindfulness'],
-    profilePicture: '/avatar2.png',
-    rating: 4.8,
-    totalRuns: 267,
-    achievements: ['3 Marathons', 'Boston Qualifier'],
-    longestRun: 35,
-    favoriteTime: 'Morgon',
-    goals: ['Boston Marathon', 'Sub 3:30'],
-    matchReason: '93% kompatibilitet'
-  },
-  {
-    id: 'ai-4',
-    name: 'Erik Gustafsson',
-    age: 27,
-    location: 'Nacka',
-    distance: 6,
-    bio: 'Liknande träningsfilosofi! Balanserar löpning med styrka. Tränar ofta vid Nacka reservatet.',
-    level: 'Avancerad',
-    pace: '4:30',
-    weeklyDistance: 60,
-    interests: ['Trail', 'OCR', 'Styrka', 'Bergslopp'],
-    profilePicture: '/avatar2.png',
-    rating: 4.9,
-    totalRuns: 412,
-    achievements: ['Tough Viking', 'Trail Champion'],
-    longestRun: 45,
-    favoriteTime: 'Eftermiddag',
-    goals: ['Ultra trail', 'Kebnekaise runt'],
-    matchReason: '91% kompatibilitet'
-  },
-  {
-    id: 'ai-5',
-    name: 'Maria Andersson',
-    age: 31,
-    location: 'Sundbyberg',
-    distance: 4,
-    bio: 'Perfekt träningspartner! Samma ambitionsnivå och gillar varierad träning. Springer ofta Ursvik runt.',
-    level: 'Medel',
-    pace: '5:10',
-    weeklyDistance: 42,
-    interests: ['Halvmarathon', 'Fartlek', 'Gruppträning', 'Yoga'],
-    profilePicture: '/avatar2.png',
-    rating: 4.7,
-    totalRuns: 198,
-    achievements: ['Midnattsloppet', '10 races 2023'],
-    longestRun: 25,
-    favoriteTime: 'Morgon',
-    goals: ['Ny PB halvmarathon', 'Träna skadefritt'],
-    matchReason: '90% kompatibilitet'
-  }
-];
 
 export default DiscoverPage;
 

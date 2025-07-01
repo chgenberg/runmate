@@ -190,21 +190,24 @@ router.get('/', protect, async (req, res) => {
     const enrichedChallenges = challenges.map(challenge => {
       const challengeObj = challenge.toObject({ virtuals: true });
       
+      // Ensure participants is always an array
+      challengeObj.participants = challengeObj.participants || [];
+      
       // Calculate additional fields
       challengeObj.daysRemaining = Math.max(0, Math.ceil((new Date(challenge.endDate) - new Date()) / (1000 * 60 * 60 * 24)));
-      challengeObj.participantCount = challenge.participants.filter(p => p.isActive !== false).length;
-      challengeObj.isJoined = challenge.participants.some(p => p.user._id.toString() === req.user._id.toString() && p.isActive !== false);
+      challengeObj.participantCount = challengeObj.participants.filter(p => p.isActive !== false).length;
+      challengeObj.isJoined = challengeObj.participants.some(p => p.user && p.user._id && p.user._id.toString() === req.user._id.toString() && p.isActive !== false);
       
       // Calculate progress percentage for individual or collective goals
-      if (challenge.goal.isCollective) {
+      if (challenge.goal && challenge.goal.isCollective) {
         const metric = challenge.goal.unit.replace('km', 'distance').replace('meters', 'elevation').replace('hours', 'time');
-        const totalProgress = challenge.totalProgress[metric] || 0;
+        const totalProgress = challenge.totalProgress && challenge.totalProgress[metric] || 0;
         challengeObj.progressPercentage = Math.min((totalProgress / challenge.goal.target) * 100, 100);
       } else if (challengeObj.isJoined) {
-        const participant = challenge.participants.find(p => p.user._id.toString() === req.user._id.toString());
-        if (participant) {
+        const participant = challengeObj.participants.find(p => p.user && p.user._id && p.user._id.toString() === req.user._id.toString());
+        if (participant && challenge.goal) {
           const metric = challenge.goal.unit.replace('km', 'distance').replace('meters', 'elevation').replace('hours', 'time');
-          const userProgress = participant.progress[metric] || 0;
+          const userProgress = participant.progress && participant.progress[metric] || 0;
           challengeObj.progressPercentage = Math.min((userProgress / challenge.goal.target) * 100, 100);
         } else {
           challengeObj.progressPercentage = 0;
@@ -236,9 +239,12 @@ router.get('/trending', protect, async (req, res) => {
     const enrichedChallenges = challenges.map(challenge => {
       const challengeObj = challenge.toObject({ virtuals: true });
       
+      // Ensure participants is always an array
+      challengeObj.participants = challengeObj.participants || [];
+      
       // Calculate additional fields safely
       challengeObj.daysRemaining = Math.max(0, Math.ceil((new Date(challenge.endDate) - new Date()) / (1000 * 60 * 60 * 24)));
-      challengeObj.participantCount = (challenge.participants || []).length;
+      challengeObj.participantCount = challengeObj.participants.length;
       challengeObj.isJoined = false; // Simplified for now
       challengeObj.progressPercentage = 0; // Simplified for now
       
@@ -267,16 +273,19 @@ router.get('/my-challenges', protect, async (req, res) => {
     const enrichedChallenges = challenges.map(challenge => {
       const challengeObj = challenge.toObject({ virtuals: true });
       
+      // Ensure participants is always an array
+      challengeObj.participants = challengeObj.participants || [];
+      
       // Calculate additional fields
       challengeObj.daysRemaining = Math.max(0, Math.ceil((new Date(challenge.endDate) - new Date()) / (1000 * 60 * 60 * 24)));
-      challengeObj.participantCount = challenge.participants.filter(p => p.isActive !== false).length;
+      challengeObj.participantCount = challengeObj.participants.filter(p => p.isActive !== false).length;
       challengeObj.isJoined = true; // Always true for my challenges
       
       // Calculate user's progress percentage
-      const participant = challenge.participants.find(p => p.user._id.toString() === req.user._id.toString());
-      if (participant) {
+      const participant = challengeObj.participants.find(p => p.user && p.user._id && p.user._id.toString() === req.user._id.toString());
+      if (participant && challenge.goal) {
         const metric = challenge.goal.unit.replace('km', 'distance').replace('meters', 'elevation').replace('hours', 'time');
-        const userProgress = participant.progress[metric] || 0;
+        const userProgress = participant.progress && participant.progress[metric] || 0;
         challengeObj.progressPercentage = Math.min((userProgress / challenge.goal.target) * 100, 100);
         challengeObj.myProgress = {
           value: userProgress,

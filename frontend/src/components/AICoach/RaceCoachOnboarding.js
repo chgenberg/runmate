@@ -297,10 +297,14 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       const today = new Date();
       const weeksUntilRace = Math.floor((raceDate - today) / (1000 * 60 * 60 * 24 * 7));
       
+      // Format data correctly for backend API
       const planData = {
-        ...answers,
-        weeksUntilRace,
-        raceDetails: selectedRace
+        raceId: selectedRace?.id,
+        answers: {
+          ...answers,
+          weeksUntilRace,
+          raceDetails: selectedRace
+        }
       };
 
       const response = await api.post('/aicoach/race-plan', planData);

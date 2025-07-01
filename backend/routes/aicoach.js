@@ -1896,6 +1896,13 @@ router.post('/race-plan', protect, async (req, res) => {
         raceDate,
         weeksUntilRace,
         trainingPhases: generateRaceTrainingPhases(weeksUntilRace, req.body),
+        training: {
+          weeklySchedule: generateRaceWeeklySchedule(req.body),
+          duration: `${weeksUntilRace} veckor`,
+          phases: generateRaceTrainingPhases(weeksUntilRace, req.body)
+        },
+        nutrition: generateRaceNutritionPlan(req.body, selectedRace),
+        recovery: generateRaceRecoveryProtocol(req.body),
         calendarEvents: {}, // Will be generated on frontend
         nutritionPlan: generateRaceNutritionPlan(req.body, selectedRace),
         recoveryProtocol: generateRaceRecoveryProtocol(req.body),
@@ -2118,6 +2125,73 @@ function generateMentalPreparation(weeks, goal) {
       'Förbered allt kvällen innan'
     ]
   };
+}
+
+function generateRaceWeeklySchedule(data) {
+  const weeklyRuns = parseInt(data.weekly_runs?.split('-')[0] || '3');
+  const fitness = data.current_fitness || 'recreational';
+  const preference = data.training_preference || 'mixed';
+  
+  const schedule = [
+    {
+      day: 'Måndag',
+      type: 'Lugn löpning',
+      duration: fitness === 'beginner' ? '30 min' : fitness === 'experienced' ? '45 min' : '40 min',
+      time: '07:00',
+      location: 'Utomhus',
+      description: 'Lätt löpning för att starta veckan. Fokus på att känna kroppen.'
+    },
+    {
+      day: 'Tisdag',
+      type: weeklyRuns >= 4 ? 'Intervaller' : 'Vila',
+      duration: weeklyRuns >= 4 ? '45 min' : '-',
+      time: weeklyRuns >= 4 ? '18:00' : '-',
+      location: weeklyRuns >= 4 ? 'Löpbana eller park' : '-',
+      description: weeklyRuns >= 4 ? 'Intervallträning för att bygga hastighet och VO2 max.' : 'Vila eller lätt stretching.'
+    },
+    {
+      day: 'Onsdag',
+      type: 'Lugn löpning',
+      duration: fitness === 'beginner' ? '25 min' : '35 min',
+      time: '07:00',
+      location: 'Utomhus',
+      description: 'Återhämtningslöpning efter intervaller. Låg intensitet.'
+    },
+    {
+      day: 'Torsdag',
+      type: weeklyRuns >= 5 ? 'Tempopass' : 'Vila',
+      duration: weeklyRuns >= 5 ? '40 min' : '-',
+      time: weeklyRuns >= 5 ? '18:00' : '-',
+      location: weeklyRuns >= 5 ? 'Utomhus' : '-',
+      description: weeklyRuns >= 5 ? 'Måttligt hårt tempo för att bygga tröskelfart.' : 'Vila eller styrketräning.'
+    },
+    {
+      day: 'Fredag',
+      type: 'Vila',
+      duration: '-',
+      time: '-',
+      location: '-',
+      description: 'Fullständig vila inför helgens längre pass.'
+    },
+    {
+      day: 'Lördag',
+      type: 'Långpass',
+      duration: fitness === 'beginner' ? '60 min' : fitness === 'experienced' ? '90 min' : '75 min',
+      time: '08:00',
+      location: 'Natursköna rutter',
+      description: 'Veckans längsta pass. Bygger uthållighet för loppet.'
+    },
+    {
+      day: 'Söndag',
+      type: weeklyRuns >= 6 ? 'Lugn löpning' : 'Vila',
+      duration: weeklyRuns >= 6 ? '30 min' : '-',
+      time: weeklyRuns >= 6 ? '09:00' : '-',
+      location: weeklyRuns >= 6 ? 'Utomhus' : '-',
+      description: weeklyRuns >= 6 ? 'Lätt återhämtningslöpning.' : 'Vila och förberedelse för nästa vecka.'
+    }
+  ];
+  
+  return schedule;
 }
 
 // Helper functions for generating structured plans from answers

@@ -215,19 +215,24 @@ const RaceCoachCalendarPage = () => {
   const convertStructuredPlanToCalendar = (structuredPlan) => {
     // Extract race info from structured plan
     const race = {
-      name: structuredPlan.raceGoal?.name || structuredPlan.goal?.race || 'Ditt Valda Lopp',
-      location: structuredPlan.raceGoal?.location || structuredPlan.goal?.location || 'Din Plats',
-      distance: structuredPlan.raceGoal?.distance || structuredPlan.goal?.distance || '42.195 km'
+      name: structuredPlan.race?.name || structuredPlan.raceGoal?.name || 'Ditt Valda Lopp',
+      location: structuredPlan.race?.location || structuredPlan.raceGoal?.location || 'Din Plats',
+      distance: structuredPlan.race?.distance || structuredPlan.raceGoal?.distance || '42.195 km'
     };
     
-    // Extract race date from plan or calculate based on training duration
+    // Extract race date from plan
     let raceDate;
-    if (structuredPlan.raceGoal?.date) {
+    if (structuredPlan.raceDate) {
+      raceDate = new Date(structuredPlan.raceDate);
+    } else if (structuredPlan.raceGoal?.date) {
       raceDate = new Date(structuredPlan.raceGoal.date);
     } else if (structuredPlan.training?.duration) {
       raceDate = new Date();
       const weeks = parseInt(structuredPlan.training.duration.match(/(\d+)/)?.[1] || '12');
       raceDate.setDate(raceDate.getDate() + (weeks * 7));
+    } else if (structuredPlan.weeksUntilRace) {
+      raceDate = new Date();
+      raceDate.setDate(raceDate.getDate() + (structuredPlan.weeksUntilRace * 7));
     } else {
       raceDate = new Date();
       raceDate.setDate(raceDate.getDate() + (12 * 7)); // Default 12 weeks
@@ -237,7 +242,7 @@ const RaceCoachCalendarPage = () => {
       ...structuredPlan,
       race,
       raceDate: raceDate.toISOString(),
-      trainingPhases: structuredPlan.training?.phases || [
+      trainingPhases: structuredPlan.trainingPhases || structuredPlan.training?.phases || [
         { name: 'Grundfas', weeks: 12 },
         { name: 'Uppbyggnadsfas', weeks: 8 },
         { name: 'Toppfas', weeks: 4 },

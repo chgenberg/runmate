@@ -295,29 +295,29 @@ const DiscoverPage = () => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
       >
-        <div className={`${isAiMatch ? 'bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 border-2 border-orange-300 shadow-2xl' : 'bg-white shadow-lg'} ${isMobile && viewMode === 'stack' ? 'h-full rounded-none' : 'rounded-2xl'} overflow-hidden ${viewMode === 'stack' && isMobile ? 'cursor-grab active:cursor-grabbing' : ''} ${viewMode === 'scroll' ? 'hover:shadow-xl transition-shadow' : ''}`}>
+        <div className={`${isAiMatch ? 'bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 border-2 border-orange-300 shadow-2xl' : 'bg-white shadow-lg'} ${isMobile && viewMode === 'stack' ? 'h-full flex flex-col' : 'rounded-2xl'} overflow-hidden ${viewMode === 'stack' && isMobile ? 'cursor-grab active:cursor-grabbing' : ''} ${viewMode === 'scroll' ? 'hover:shadow-xl transition-shadow' : ''}`}>
           {/* AI Match Special Header */}
           {isAiMatch && (
-            <div className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-3 py-1.5 text-center">
+            <div className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-3 py-2 text-center">
               <div className="flex items-center justify-center gap-2">
-                <Sparkles className="w-3 h-3" />
-                <span className="font-bold text-xs">AI SUPERMATCH - {runner.matchReason}</span>
-                <Sparkles className="w-3 h-3" />
+                <Sparkles className="w-4 h-4" />
+                <span className="font-bold text-sm">AI SUPERMATCH - {runner.matchReason}</span>
+                <Sparkles className="w-4 h-4" />
               </div>
             </div>
           )}
 
-          <div className={`${viewMode === 'scroll' ? 'flex flex-col md:flex-row' : ''}`}>
-            {/* Left side - Profile picture and basic info */}
-            <div className={`${viewMode === 'scroll' ? 'md:w-1/3 p-4 md:p-6' : 'relative'}`}>
-              {viewMode === 'stack' ? (
-                // Stack view header
-                <div className={`relative ${isMobile ? 'h-20' : 'h-32'} bg-gradient-to-br from-blue-500 to-purple-600`}>
+          <div className={`${viewMode === 'scroll' ? 'flex flex-col md:flex-row' : 'flex-1 flex flex-col'}`}>
+            {/* Stack view for mobile */}
+            {viewMode === 'stack' && (
+              <div className="flex-1 flex flex-col">
+                {/* Header with profile image */}
+                <div className="relative h-24 bg-gradient-to-br from-blue-500 to-purple-600">
                   <div className="absolute inset-0 bg-black/20" />
                   
-                  {/* Profile Picture - Smaller on mobile */}
-                  <div className={`absolute ${isMobile ? '-bottom-8 left-3 w-16 h-16' : '-bottom-12 left-6 w-24 h-24'} rounded-full border-4 border-white overflow-hidden bg-white cursor-pointer hover:scale-105 transition-transform`}
-                       onClick={() => window.open(`/profile/${runner.id}`, '_blank')}
+                  {/* Profile Picture */}
+                  <div className="absolute -bottom-10 left-4 w-20 h-20 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg"
+                       onClick={() => navigate(`/app/profile/${runner.id}`)}
                        title="Klicka för att se profil">
                     <img
                       src={runner.profilePicture}
@@ -330,21 +330,151 @@ const DiscoverPage = () => {
                   </div>
 
                   {/* Level Badge */}
-                  <div className={`absolute ${isMobile ? 'top-2 right-2 px-2 py-0.5 text-[10px]' : 'top-4 right-4 px-3 py-1 text-xs'} rounded-full text-white font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
+                  <div className={`absolute top-3 right-3 px-3 py-1 text-xs rounded-full text-white font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
                     {runner.level}
                   </div>
 
                   {/* Rating */}
-                  <div className={`absolute ${isMobile ? 'bottom-2 right-2' : 'bottom-4 right-4'} flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full`}>
-                    <Star className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} text-yellow-500 fill-current`} />
-                    <span className={`font-bold ${isMobile ? 'text-[11px]' : 'text-xs'}`}>{runner.rating.toFixed(1)}</span>
+                  <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                    <span className="font-bold text-xs">{runner.rating.toFixed(1)}</span>
                   </div>
                 </div>
-              ) : (
-                // List view profile section
+
+                {/* Content */}
+                <div className="flex-1 px-4 pt-12 pb-4 overflow-y-auto">
+                  {/* Name and Location */}
+                  <div className="mb-3">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {runner.name}{runner.age && `, ${runner.age}`}
+                    </h3>
+                    <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3" />
+                      {runner.location} • {runner.distance} km bort
+                    </p>
+                  </div>
+
+                  {/* Bio */}
+                  <p className="text-sm text-gray-700 mb-4">{runner.bio}</p>
+
+                  {/* Stats Grid - Optimized for mobile */}
+                  <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-4 mb-4`}>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-1">
+                          <Zap className="w-4 h-4 text-orange-500" />
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">{runner.pace}</p>
+                        <p className="text-xs text-gray-500">min/km</p>
+                      </div>
+                      <div className="text-center border-x border-gray-200">
+                        <div className="flex items-center justify-center mb-1">
+                          <Activity className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
+                        <p className="text-xs text-gray-500">km/vecka</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-1">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">{runner.longestRun}</p>
+                        <p className="text-xs text-gray-500">längsta (km)</p>
+                      </div>
+                    </div>
+
+                    {/* Additional info */}
+                    <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm text-gray-700">
+                          <span className="font-bold">{runner.totalRuns}</span> löprundor
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-purple-500" />
+                        <span className="text-sm text-gray-700">
+                          <span className="font-bold">{runner.favoriteTime}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interests/Goals */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {runner.interests.slice(0, 4).map((interest, idx) => (
+                      <span
+                        key={idx}
+                        className={`px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-xs font-medium`}
+                      >
+                        {interest}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Goals if available */}
+                  {runner.goals && runner.goals.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Mål</h4>
+                      <div className="space-y-1">
+                        {runner.goals.slice(0, 2).map((goal, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                            <Target className="w-3 h-3 text-green-500" />
+                            <span>{goal}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons - Fixed at bottom for mobile */}
+                <div className="p-4 bg-gray-50 border-t border-gray-200">
+                  <div className="flex gap-3 justify-center">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSwipe('left', runner.id)}
+                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500"
+                    >
+                      <X className="w-8 h-8" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => navigate(`/app/profile/${runner.id}`)}
+                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-400 text-gray-600"
+                    >
+                      <User className="w-8 h-8" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleStartChat(runner.id)}
+                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500"
+                    >
+                      <MessageCircle className="w-8 h-8" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSwipe('right', runner.id)}
+                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500"
+                    >
+                      <Heart className="w-8 h-8" />
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* List view - existing code for desktop */}
+            {viewMode === 'scroll' && (
+              <div className="flex-1 flex flex-col">
+                {/* Left side - Profile picture and basic info */}
                 <div className="flex flex-col items-center text-center">
                   <div className="w-24 md:w-32 h-24 md:h-32 rounded-full overflow-hidden mb-3 md:mb-4 border-4 border-gray-200 cursor-pointer hover:scale-105 transition-transform"
-                       onClick={() => window.open(`/profile/${runner.id}`, '_blank')}
+                       onClick={() => navigate(`/app/profile/${runner.id}`)}
                        title="Klicka för att se profil">
                     <img
                       src={runner.profilePicture}
@@ -386,7 +516,7 @@ const DiscoverPage = () => {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => window.open(`/profile/${runner.id}`, '_blank')}
+                        onClick={() => navigate(`/app/profile/${runner.id}`)}
                         className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
                         title="Visa profil"
                       >
@@ -422,158 +552,135 @@ const DiscoverPage = () => {
                     </div>
                   )}
                 </div>
-              )}
-            </div>
 
-            {/* Right side - Content */}
-            <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-4 md:p-6' : isMobile ? 'pt-10 px-3 pb-3' : 'pt-16 px-6 pb-6'}`}>
-              {viewMode === 'stack' && (
-                <>
-                  {/* Name and Location for stack view */}
-                  <div className={`${isMobile ? 'mb-2' : 'mb-4'}`}>
-                    <h3 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold text-gray-900`}>
-                      {runner.name}{runner.age && `, ${runner.age}`}
-                    </h3>
-                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 flex items-center gap-1 mt-0.5`}>
-                      <MapPin className="w-3 h-3" />
-                      {runner.location} • {runner.distance} km bort
-                    </p>
-                  </div>
-                </>
-              )}
-
-              {/* Bio */}
-              <p className={`${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'} text-gray-700 line-clamp-2`}>{runner.bio}</p>
-
-              {/* Stats Grid - Main Focus */}
-              <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-3 md:p-4 mb-3 md:mb-4`}>
-                <div className="grid grid-cols-3 gap-2 md:gap-4">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-1">
-                      <Zap className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <p className="text-base md:text-lg font-bold text-gray-900">{runner.pace}</p>
-                    <p className="text-[11px] md:text-xs text-gray-500">min/km</p>
-                  </div>
-                  <div className="text-center border-x border-gray-200">
-                    <div className="flex items-center justify-center mb-1">
-                      <Activity className="w-4 h-4 text-blue-500" />
-                    </div>
-                    <p className="text-base md:text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
-                    <p className="text-[11px] md:text-xs text-gray-500">km/vecka</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-1">
-                      <TrendingUp className="w-4 h-4 text-green-500" />
-                    </div>
-                    <p className="text-base md:text-lg font-bold text-gray-900">{runner.longestRun}</p>
-                    <p className="text-[11px] md:text-xs text-gray-500">längsta (km)</p>
-                  </div>
-                </div>
-
-                {/* Additional Stats - Hidden on mobile in stack view */}
-                <div className={`grid grid-cols-2 gap-2 md:gap-4 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200 ${viewMode === 'stack' && isMobile ? 'hidden' : ''}`}>
-                  <div className="flex items-center gap-1 md:gap-2">
-                    <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
-                    <span className="text-[11px] md:text-sm text-gray-700">
-                      <span className="font-bold">{runner.totalRuns}</span> löprundor
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 md:gap-2">
-                    <Calendar className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
-                    <span className="text-[11px] md:text-sm text-gray-700">
-                      Föredrar <span className="font-bold">{runner.favoriteTime}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Interests/Goals */}
-              <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
-                {runner.interests.slice(0, 4).map((interest, idx) => (
-                  <span
-                    key={idx}
-                    className={`px-2 md:px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] md:text-xs font-medium`}
-                  >
-                    {interest}
-                  </span>
-                ))}
-              </div>
-
-              {/* Action Buttons for mobile or stack view */}
-              {(isMobile || viewMode === 'stack') && (
-                <div className="flex gap-2 md:gap-4 mt-4 justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleSwipe('left', runner.id)}
-                    className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
-                  >
-                    <X className="w-5 h-5 md:w-8 md:h-8" />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => window.open(`/profile/${runner.id}`, '_blank')}
-                    className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
-                    title="Visa profil"
-                  >
-                    <User className="w-5 h-5 md:w-8 md:h-8" />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleStartChat(runner.id)}
-                    className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
-                  >
-                    <MessageCircle className="w-5 h-5 md:w-8 md:h-8" />
-                  </motion.button>
-                  {isAiMatch ? (
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleAiMatchMessage(runner.id)}
-                      className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
-                    >
-                      <Sparkles className="w-5 h-5 md:w-8 md:h-8" />
-                    </motion.button>
-                  ) : (
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleSwipe('right', runner.id)}
-                      className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
-                    >
-                      <Heart className="w-5 h-5 md:w-8 md:h-8" />
-                    </motion.button>
+                {/* Right side - Content */}
+                <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-4 md:p-6' : isMobile ? 'pt-10 px-3 pb-3' : 'pt-16 px-6 pb-6'}`}>
+                  {viewMode === 'stack' && (
+                    <>
+                      {/* Name and Location for stack view */}
+                      <div className={`${isMobile ? 'mb-2' : 'mb-4'}`}>
+                        <h3 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold text-gray-900`}>
+                          {runner.name}{runner.age && `, ${runner.age}`}
+                        </h3>
+                        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 flex items-center gap-1 mt-0.5`}>
+                          <MapPin className="w-3 h-3" />
+                          {runner.location} • {runner.distance} km bort
+                        </p>
+                      </div>
+                    </>
                   )}
+
+                  {/* Bio */}
+                  <p className={`${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'} text-gray-700 line-clamp-2`}>{runner.bio}</p>
+
+                  {/* Stats Grid - Main Focus */}
+                  <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-3 md:p-4 mb-3 md:mb-4`}>
+                    <div className="grid grid-cols-3 gap-2 md:gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-1">
+                          <Zap className="w-4 h-4 text-orange-500" />
+                        </div>
+                        <p className="text-base md:text-lg font-bold text-gray-900">{runner.pace}</p>
+                        <p className="text-[11px] md:text-xs text-gray-500">min/km</p>
+                      </div>
+                      <div className="text-center border-x border-gray-200">
+                        <div className="flex items-center justify-center mb-1">
+                          <Activity className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <p className="text-base md:text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
+                        <p className="text-[11px] md:text-xs text-gray-500">km/vecka</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-1">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                        </div>
+                        <p className="text-base md:text-lg font-bold text-gray-900">{runner.longestRun}</p>
+                        <p className="text-[11px] md:text-xs text-gray-500">längsta (km)</p>
+                      </div>
+                    </div>
+
+                    {/* Additional Stats - Hidden on mobile in stack view */}
+                    <div className={`grid grid-cols-2 gap-2 md:gap-4 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200 ${viewMode === 'stack' && isMobile ? 'hidden' : ''}`}>
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
+                        <span className="text-[11px] md:text-sm text-gray-700">
+                          <span className="font-bold">{runner.totalRuns}</span> löprundor
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <Calendar className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
+                        <span className="text-[11px] md:text-sm text-gray-700">
+                          Föredrar <span className="font-bold">{runner.favoriteTime}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interests/Goals */}
+                  <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
+                    {runner.interests.slice(0, 4).map((interest, idx) => (
+                      <span
+                        key={idx}
+                        className={`px-2 md:px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] md:text-xs font-medium`}
+                      >
+                        {interest}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons for mobile or stack view */}
+                  {(isMobile || viewMode === 'stack') && (
+                    <div className="flex gap-2 md:gap-4 mt-4 justify-center">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleSwipe('left', runner.id)}
+                        className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <X className="w-5 h-5 md:w-8 md:h-8" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => navigate(`/app/profile/${runner.id}`)}
+                        className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
+                        title="Visa profil"
+                      >
+                        <User className="w-5 h-5 md:w-8 md:h-8" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleStartChat(runner.id)}
+                        className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                      >
+                        <MessageCircle className="w-5 h-5 md:w-8 md:h-8" />
+                      </motion.button>
+                      {isAiMatch ? (
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleAiMatchMessage(runner.id)}
+                          className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
+                        >
+                          <Sparkles className="w-5 h-5 md:w-8 md:h-8" />
+                        </motion.button>
+                      ) : (
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleSwipe('right', runner.id)}
+                          className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                        >
+                          <Heart className="w-5 h-5 md:w-8 md:h-8" />
+                        </motion.button>
+                      )}
+                    </div>
+                  )}
+
+
                 </div>
-              )}
-
-
-            </div>
-
-            {/* Swipe Indicators for Stack Mode */}
-            {viewMode === 'stack' && (
-              <>
-                <motion.div
-                  className="absolute top-1/2 left-4 transform -translate-y-1/2"
-                  style={{ opacity: cardSkipOpacity }}
-                >
-                  <div className="bg-red-500 text-white p-3 rounded-full">
-                    <X className="w-6 h-6" />
-                  </div>
-                </motion.div>
-                
-                <motion.div
-                  className="absolute top-1/2 right-4 transform -translate-y-1/2"
-                  style={{ opacity: cardLikeOpacity }}
-                >
-                  <div className="bg-green-500 text-white p-3 rounded-full">
-                    <Heart className="w-6 h-6" />
-                  </div>
-                </motion.div>
-              </>
+              </div>
             )}
           </div>
         </div>

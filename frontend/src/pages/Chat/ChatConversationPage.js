@@ -267,25 +267,36 @@ const ChatConversationPage = () => {
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </motion.button>
           
-          <div className="relative">
-            {getChatAvatar()}
-            {chatInfo?.type === 'match' && (
-              <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                chatInfo.participants.find(p => p._id !== user?._id)?.isOnline 
-                  ? 'bg-green-500' 
-                  : 'bg-gray-400'
-              }`} />
-            )}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base md:text-lg font-semibold text-gray-900 truncate">
-              {getChatTitle()}
-            </h1>
-            <div className="flex items-center space-x-2 text-xs md:text-sm text-gray-500">
-              {chatInfo?.type === 'match' && <MapPin className="h-3 w-3" />}
-              {chatInfo?.type === 'challenge' && <Users className="h-3 w-3" />}
-              <span>{getChatSubtitle()}</span>
+          {/* Clickable profile wrapper */}
+          <div
+            className="flex items-center space-x-2 md:space-x-3 cursor-pointer group"
+            onClick={() => {
+              const other = chatInfo?.participants?.find(p => p._id !== user?._id);
+              if (other?._id) {
+                navigate(`/profile/${other._id}`);
+              }
+            }}
+          >
+            <div className="relative">
+              {getChatAvatar()}
+              {chatInfo?.type === 'match' && (
+                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                  chatInfo.participants.find(p => p._id !== user?._id)?.isOnline 
+                    ? 'bg-green-500' 
+                    : 'bg-gray-400'
+                }`} />
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base md:text-lg font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
+                {getChatTitle()}
+              </h1>
+              <div className="flex items-center space-x-2 text-xs md:text-sm text-gray-500">
+                {chatInfo?.type === 'match' && <MapPin className="h-3 w-3" />}
+                {chatInfo?.type === 'challenge' && <Users className="h-3 w-3" />}
+                <span>{getChatSubtitle()}</span>
+              </div>
             </div>
           </div>
         </div>

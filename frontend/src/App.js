@@ -40,6 +40,11 @@ import PublicProfilePage from './pages/Profile/PublicProfilePage';
 import PrivacyPage from './pages/Legal/PrivacyPage';
 import FAQPage from './pages/Legal/FAQPage';
 
+// Run Events Pages
+import EventsPage from './pages/Events/EventsPage';
+import CreateRunEventPage from './pages/RunEvents/CreateRunEventPage';
+import RunEventDetailPage from './pages/RunEvents/RunEventDetailPage';
+
 // Force cache refresh
 console.log('App Version:', new Date().toISOString());
 
@@ -116,6 +121,11 @@ function App() {
               
               {/* Matches Page */}
               <Route path="matches" element={<MatchesPage />} />
+              
+              {/* Run events */}
+              <Route path="events" element={<EventsPage />} />
+              <Route path="events/create" element={<CreateRunEventPage />} />
+              <Route path="runevents/:id" element={<RunEventDetailPage />} />
             </Route>
             
             {/* Catch all route */}

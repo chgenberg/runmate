@@ -168,6 +168,7 @@ const RegisterPage = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                         placeholder="Anna"
                       />
                     </div>
@@ -180,6 +181,7 @@ const RegisterPage = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                         placeholder="Svensson"
                       />
                     </div>
@@ -194,6 +196,7 @@ const RegisterPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                       placeholder="anna@exempel.se"
                     />
                   </div>
@@ -208,6 +211,7 @@ const RegisterPage = () => {
                         value={formData.password}
                         onChange={handleChange}
                         className="w-full px-3 pr-10 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                         placeholder="Minst 8 tecken"
                       />
                       <button
@@ -230,6 +234,7 @@ const RegisterPage = () => {
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         className="w-full px-3 pr-10 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                         placeholder="Upprepa lösenordet"
                       />
                       <button
@@ -257,6 +262,7 @@ const RegisterPage = () => {
                       onChange={handleChange}
                       max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                       className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                     />
                     {formData.dateOfBirth && (
                       <p className="text-xs text-gray-500 flex items-center mt-1">
@@ -300,6 +306,7 @@ const RegisterPage = () => {
                       value={formData.location}
                       onChange={handleChange}
                       className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                       placeholder="Stockholm, Sverige"
                     />
                   </div>
@@ -312,6 +319,7 @@ const RegisterPage = () => {
                       value={formData.bio}
                       onChange={handleChange}
                       className="w-full px-3 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                      style={{ color: '#111827', backgroundColor: '#ffffff', fontSize: '16px' }}
                       placeholder="Vad motiverar dig? Vilka mål har du?"
                     />
                   </div>

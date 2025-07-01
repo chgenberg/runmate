@@ -51,7 +51,8 @@ const ChatPage = () => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       if (chat.type === 'match') {
-        const otherParticipant = chat.participants.find(p => p._id !== user?._id);
+        const currentUserId = String(user?._id || user?.id || '');
+        const otherParticipant = chat.participants.find(p => String(p._id || p.id || '') !== currentUserId);
         return otherParticipant?.firstName?.toLowerCase().includes(query) ||
                otherParticipant?.lastName?.toLowerCase().includes(query);
       } else {
@@ -82,8 +83,9 @@ const ChatPage = () => {
     if (chat.type === 'challenge') {
       return chat.name;
     } else {
-      const otherParticipant = chat.participants.find(p => p._id !== user?._id);
-      return `${otherParticipant?.firstName} ${otherParticipant?.lastName}`;
+      const currentUserId = String(user?._id || user?.id || '');
+      const otherParticipant = chat.participants.find(p => String(p._id || p.id || '') !== currentUserId);
+      return `${otherParticipant?.firstName || 'Okänd'} ${otherParticipant?.lastName || 'Användare'}`;
     }
   };
 
@@ -91,8 +93,9 @@ const ChatPage = () => {
     if (chat.type === 'challenge') {
       return `${chat.participants.length} deltagare • ${chat.isActive ? 'Aktiv' : 'Avslutad'}`;
     } else {
-      const otherParticipant = chat.participants.find(p => p._id !== user?._id);
-      return `${otherParticipant?.location} • ${chat.matchScore}% match`;
+      const currentUserId = String(user?._id || user?.id || '');
+      const otherParticipant = chat.participants.find(p => String(p._id || p.id || '') !== currentUserId);
+      return `${otherParticipant?.location || 'Okänd stad'} • ${chat.matchScore || 0}% match`;
     }
   };
 
@@ -111,7 +114,8 @@ const ChatPage = () => {
         </div>
       );
     } else {
-      const otherParticipant = chat.participants.find(p => p._id !== user?._id);
+      const currentUserId = String(user?._id || user?.id || '');
+      const otherParticipant = chat.participants.find(p => String(p._id || p.id || '') !== currentUserId);
       return (
         <div className="relative">
           <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg">

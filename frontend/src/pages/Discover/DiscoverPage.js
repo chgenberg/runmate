@@ -500,12 +500,12 @@ const DiscoverPage = () => {
               </div>
             )}
 
-            {/* List view - existing code for desktop */}
+            {/* List view - Completely redesigned */}
             {viewMode === 'scroll' && (
-              <div className="flex-1 flex flex-col">
-                {/* Left side - Profile picture and basic info */}
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-24 md:w-32 h-24 md:h-32 rounded-full overflow-hidden mb-3 md:mb-4 border-4 border-gray-200 cursor-pointer hover:scale-105 transition-transform"
+              <div className="flex flex-col md:flex-row gap-4 p-4">
+                {/* Left side - Profile picture */}
+                <div className="flex-shrink-0">
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:scale-105 transition-transform"
                        onClick={() => navigate(`/profile/${runner.id}`)}
                        title="Klicka för att se profil">
                     <img
@@ -517,104 +517,122 @@ const DiscoverPage = () => {
                       }}
                     />
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900">
-                    {runner.name}{runner.age && `, ${runner.age}`}
-                  </h3>
-                  <p className="text-xs md:text-sm text-gray-600 flex items-center gap-1 mt-1">
-                    <MapPin className="w-3 h-3" />
-                    {runner.location} • {runner.distance} km bort
-                  </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
-                      {runner.level}
-                    </div>
-                    <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
-                      <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                      <span className="font-bold text-xs">{runner.rating.toFixed(1)}</span>
-                    </div>
-                  </div>
-                  
-
                 </div>
 
-                {/* Right side - Content */}
-                <div className={`${viewMode === 'scroll' ? 'md:w-2/3 p-4 md:p-6' : isMobile ? 'pt-10 px-3 pb-3' : 'pt-16 px-6 pb-6'}`}>
-                  {viewMode === 'stack' && (
-                    <>
-                      {/* Name and Location for stack view */}
-                      <div className={`${isMobile ? 'mb-2' : 'mb-4'}`}>
-                        <h3 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold text-gray-900`}>
-                          {runner.name}{runner.age && `, ${runner.age}`}
-                        </h3>
-                        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 flex items-center gap-1 mt-0.5`}>
-                          <MapPin className="w-3 h-3" />
-                          {runner.location} • {runner.distance} km bort
-                        </p>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Bio */}
-                  <p className={`${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'} text-gray-700 line-clamp-2`}>{runner.bio}</p>
-
-                  {/* Stats Grid - Main Focus */}
-                  <div className={`${isAiMatch ? 'bg-gradient-to-br from-orange-100 to-yellow-100' : 'bg-gradient-to-br from-gray-50 to-gray-100'} rounded-xl p-3 md:p-4 mb-3 md:mb-4`}>
-                    <div className="grid grid-cols-3 gap-2 md:gap-4">
-                      <div className="text-center">
-                        <div className="flex items-center justify-center mb-1">
-                          <Zap className="w-4 h-4 text-orange-500" />
-                        </div>
-                        <p className="text-base md:text-lg font-bold text-gray-900">{runner.pace}</p>
-                        <p className="text-[11px] md:text-xs text-gray-500">min/km</p>
-                      </div>
-                      <div className="text-center border-x border-gray-200">
-                        <div className="flex items-center justify-center mb-1">
-                          <Activity className="w-4 h-4 text-blue-500" />
-                        </div>
-                        <p className="text-base md:text-lg font-bold text-gray-900">{runner.weeklyDistance}</p>
-                        <p className="text-[11px] md:text-xs text-gray-500">km/vecka</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center justify-center mb-1">
-                          <TrendingUp className="w-4 h-4 text-green-500" />
-                        </div>
-                        <p className="text-base md:text-lg font-bold text-gray-900">{runner.longestRun}</p>
-                        <p className="text-[11px] md:text-xs text-gray-500">längsta (km)</p>
-                      </div>
+                {/* Middle section - Main info */}
+                <div className="flex-1 min-w-0">
+                  {/* Header with name and badges */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        {runner.name}{runner.age && `, ${runner.age}`}
+                        {isAiMatch && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-400 to-yellow-400 text-white text-xs font-bold rounded-full">
+                            <Sparkles className="w-3 h-3" />
+                            AI MATCH
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                        <MapPin className="w-4 h-4" />
+                        {runner.location} • {runner.distance} km bort
+                      </p>
                     </div>
-
-                    {/* Additional Stats - Hidden on mobile in stack view */}
-                    <div className={`grid grid-cols-2 gap-2 md:gap-4 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-gray-200 ${viewMode === 'stack' && isMobile ? 'hidden' : ''}`}>
-                      <div className="flex items-center gap-1 md:gap-2">
-                        <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-500" />
-                        <span className="text-[11px] md:text-sm text-gray-700">
-                          <span className="font-bold">{runner.totalRuns}</span> löprundor
-                        </span>
+                    <div className="flex items-center gap-2">
+                      <div className={`px-3 py-1 rounded-full text-white text-xs font-bold ${levelColors[runner.level] || 'bg-gray-500'}`}>
+                        {runner.level}
                       </div>
-                      <div className="flex items-center gap-1 md:gap-2">
-                        <Calendar className="w-3 h-3 md:w-4 md:h-4 text-purple-500" />
-                        <span className="text-[11px] md:text-sm text-gray-700">
-                          Föredrar <span className="font-bold">{runner.favoriteTime}</span>
-                        </span>
+                      <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
+                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                        <span className="font-bold text-sm">{runner.rating.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Interests/Goals */}
-                  <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
-                    {runner.interests.slice(0, 4).map((interest, idx) => (
+                  {/* Bio */}
+                  <p className="text-gray-700 mb-3 line-clamp-2">{runner.bio}</p>
+
+                  {/* Stats in a compact horizontal layout */}
+                  <div className="flex flex-wrap gap-4 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm">
+                        <span className="font-bold text-gray-900">{runner.pace}</span>
+                        <span className="text-gray-500"> min/km</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm">
+                        <span className="font-bold text-gray-900">{runner.weeklyDistance}</span>
+                        <span className="text-gray-500"> km/vecka</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-green-500" />
+                      <span className="text-sm">
+                        <span className="font-bold text-gray-900">{runner.longestRun}</span>
+                        <span className="text-gray-500"> km längsta</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-yellow-500" />
+                      <span className="text-sm">
+                        <span className="font-bold text-gray-900">{runner.totalRuns}</span>
+                        <span className="text-gray-500"> rundor</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Interests */}
+                  <div className="flex flex-wrap gap-2">
+                    {runner.interests.slice(0, 5).map((interest, idx) => (
                       <span
                         key={idx}
-                        className={`px-2 md:px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] md:text-xs font-medium`}
+                        className={`px-3 py-1 ${isAiMatch ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} rounded-full text-xs font-medium`}
                       >
                         {interest}
                       </span>
                     ))}
                   </div>
+                </div>
 
-
-
-
+                {/* Right side - Action buttons */}
+                <div className="flex md:flex-col gap-2 mt-4 md:mt-0">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate(`/profile/${runner.id}`)}
+                    className="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="hidden md:inline">Visa profil</span>
+                    <span className="md:hidden">Profil</span>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => isAiMatch ? handleAiMatchMessage(runner.id) : handleStartChat(runner.id)}
+                    className="flex-1 md:flex-none px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span className="hidden md:inline">Skicka meddelande</span>
+                    <span className="md:hidden">Chatta</span>
+                  </motion.button>
+                  
+                  {!isAiMatch && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleSwipe('right', runner.id)}
+                      className="flex-1 md:flex-none px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Heart className="w-4 h-4" />
+                      <span className="hidden md:inline">Gilla</span>
+                      <span className="md:hidden">Gilla</span>
+                    </motion.button>
+                  )}
                 </div>
               </div>
             )}

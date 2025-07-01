@@ -184,23 +184,23 @@ const CreateChallengePage = () => {
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-orange-200 to-red-200 rounded-full blur-3xl opacity-30" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-red-200 to-pink-200 rounded-full blur-3xl opacity-30" />
         
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 md:pt-8 md:pb-16">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/app/challenges')}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Tillbaka</span>
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="font-medium text-sm md:text-base">Tillbaka</span>
             </motion.button>
             
             {/* Progress bar */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Steg {currentStep} av 3</span>
-              <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <span className="text-xs md:text-sm text-gray-600">Steg {currentStep} av 3</span>
+              <div className="w-24 md:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-gradient-to-r from-orange-500 to-red-500"
                   initial={{ width: 0 }}
@@ -216,15 +216,15 @@ const CreateChallengePage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-3xl shadow-2xl mb-6">
-              <Trophy className="w-10 h-10 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl md:rounded-3xl shadow-2xl mb-4 md:mb-6">
+              <Trophy className="w-8 h-8 md:w-10 md:h-10 text-white" />
             </div>
-            <h1 className="text-5xl font-black mb-4">
+            <h1 className="text-3xl md:text-5xl font-black mb-3 md:mb-4">
               <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                 Skapa utmaning
               </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
               {currentStep === 1 && 'Välj vilken typ av utmaning du vill skapa'}
               {currentStep === 2 && 'Ge din utmaning ett namn och beskriv den'}
               {currentStep === 3 && 'Ställ in datum och synlighet'}
@@ -242,9 +242,9 @@ const CreateChallengePage = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
+              className="space-y-4 md:space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 {challengeTypes.map((type, index) => {
                   const Icon = type.icon;
                   const isSelected = formData.type === type.id;
@@ -257,7 +257,7 @@ const CreateChallengePage = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleTypeChange(type.id)}
-                      className={`relative overflow-hidden p-6 rounded-3xl border-2 transition-all ${
+                      className={`relative overflow-hidden p-4 md:p-6 rounded-2xl md:rounded-3xl border-2 transition-all ${
                         isSelected 
                           ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50 shadow-lg' 
                           : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md'
@@ -267,18 +267,18 @@ const CreateChallengePage = () => {
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="absolute top-3 right-3 w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center"
+                          className="absolute top-2 right-2 md:top-3 md:right-3 w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center"
                         >
-                          <Star className="w-4 h-4 text-white" />
+                          <Star className="w-3 h-3 md:w-4 md:h-4 text-white" />
                         </motion.div>
                       )}
                       
-                      <div className="text-4xl mb-4">{type.emoji}</div>
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${type.gradient} flex items-center justify-center mb-4 mx-auto shadow-lg`}>
-                        <Icon className="w-7 h-7 text-white" />
+                      <div className="text-2xl md:text-4xl mb-2 md:mb-4">{type.emoji}</div>
+                      <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br ${type.gradient} flex items-center justify-center mb-3 md:mb-4 mx-auto shadow-lg`}>
+                        <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                       </div>
-                      <h3 className="font-bold text-lg text-gray-900 mb-2">{type.label}</h3>
-                      <p className="text-sm text-gray-600">{type.description}</p>
+                      <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1 md:mb-2">{type.label}</h3>
+                      <p className="text-xs md:text-sm text-gray-600">{type.description}</p>
                     </motion.button>
                   );
                 })}
@@ -288,16 +288,16 @@ const CreateChallengePage = () => {
                 <p className="text-red-500 text-sm text-center">{errors.type}</p>
               )}
 
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-2">
                 <motion.button
                   type="button"
                   onClick={nextStep}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 md:px-8 py-3 md:py-4 rounded-xl text-sm md:text-base shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
                 >
                   Nästa steg
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                 </motion.button>
               </div>
             </motion.div>
@@ -310,15 +310,15 @@ const CreateChallengePage = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
+              className="space-y-4 md:space-y-6"
             >
               {/* Challenge Info */}
-              <div className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Information om utmaningen</h2>
+              <div className="bg-white rounded-2xl md:rounded-3xl shadow-lg p-6 md:p-8 border border-gray-100">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Information om utmaningen</h2>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2">
                       Namn på utmaningen *
                     </label>
                     <input
@@ -327,18 +327,18 @@ const CreateChallengePage = () => {
                       value={formData.title}
                       onChange={handleInputChange}
                       placeholder="Ex: Vårens stora löputmaning"
-                      className={`w-full px-4 py-3 rounded-xl border ${
+                      className={`w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border ${
                         errors.title ? 'border-red-300' : 'border-gray-200'
                       } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
                       required
                     />
                     {errors.title && (
-                      <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                      <p className="text-red-500 text-xs md:text-sm mt-1">{errors.title}</p>
                     )}
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2">
                       Beskrivning *
                     </label>
                     <textarea
@@ -347,43 +347,43 @@ const CreateChallengePage = () => {
                       onChange={handleInputChange}
                       placeholder="Beskriv vad utmaningen går ut på och vad som motiverar deltagarna..."
                       rows="4"
-                      className={`w-full px-4 py-3 rounded-xl border ${
+                      className={`w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border ${
                         errors.description ? 'border-red-300' : 'border-gray-200'
                       } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none`}
                       required
                     />
                     {errors.description && (
-                      <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                      <p className="text-red-500 text-xs md:text-sm mt-1">{errors.description}</p>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Goal Settings */}
-              <div className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Mål för utmaningen</h2>
+              <div className="bg-white rounded-2xl md:rounded-3xl shadow-lg p-6 md:p-8 border border-gray-100">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Mål för utmaningen</h2>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   {/* Goal Type Toggle */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                       Typ av mål
                     </label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
                       <motion.button
                         type="button"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, isCollective: false }}))}
-                        className={`p-4 rounded-xl border-2 transition-all ${
+                        className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                           !formData.goal.isCollective 
                             ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50' 
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                       >
-                        <Users className="w-6 h-6 mb-2 mx-auto text-gray-700" />
-                        <div className="font-medium">Individuellt</div>
-                        <div className="text-xs text-gray-500 mt-1">Var och en har sitt eget mål</div>
+                        <Users className="w-5 h-5 md:w-6 md:h-6 mb-1.5 md:mb-2 mx-auto text-gray-700" />
+                        <div className="font-medium text-sm md:text-base">Individuellt</div>
+                        <div className="text-xs text-gray-500 mt-0.5 md:mt-1">Var och en har sitt eget mål</div>
                       </motion.button>
                       
                       <motion.button
@@ -391,27 +391,27 @@ const CreateChallengePage = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, isCollective: true }}))}
-                        className={`p-4 rounded-xl border-2 transition-all ${
+                        className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                           formData.goal.isCollective 
                             ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50' 
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                       >
-                        <Heart className="w-6 h-6 mb-2 mx-auto text-gray-700" />
-                        <div className="font-medium">Gemensamt</div>
-                        <div className="text-xs text-gray-500 mt-1">Alla bidrar till samma mål</div>
+                        <Heart className="w-5 h-5 md:w-6 md:h-6 mb-1.5 md:mb-2 mx-auto text-gray-700" />
+                        <div className="font-medium text-sm md:text-base">Gemensamt</div>
+                        <div className="text-xs text-gray-500 mt-0.5 md:mt-1">Alla bidrar till samma mål</div>
                       </motion.button>
                     </div>
                   </div>
 
                   {/* Goal Value */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 md:mb-3">
                       Målvärde ({formData.goal.unit})
                     </label>
                     
                     {/* Preset buttons */}
-                    <div className="grid grid-cols-5 gap-2 mb-4">
+                    <div className="grid grid-cols-5 gap-1.5 md:gap-2 mb-3 md:mb-4">
                       {presetGoals[formData.type].map((value) => (
                         <motion.button
                           key={value}
@@ -419,7 +419,7 @@ const CreateChallengePage = () => {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => setFormData(p => ({ ...p, goal: { ...p.goal, target: value }}))}
-                          className={`py-2 rounded-lg font-medium transition-all ${
+                          className={`py-1.5 md:py-2 px-2 md:px-3 rounded-lg font-medium text-xs md:text-sm transition-all ${
                             formData.goal.target === value
                               ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -440,30 +440,30 @@ const CreateChallengePage = () => {
                           goal: { ...prev.goal, target: Number(e.target.value) }
                         }))}
                         min="1"
-                        className={`w-full px-4 py-3 pr-20 rounded-xl border ${
+                        className={`w-full px-3 md:px-4 py-2.5 md:py-3 pr-16 md:pr-20 text-sm md:text-base rounded-xl border ${
                           errors.target ? 'border-red-300' : 'border-gray-200'
                         } focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
                       />
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-100 px-3 py-1 rounded-lg">
-                        <span className="text-sm font-semibold text-gray-700">{formData.goal.unit}</span>
+                      <div className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-lg">
+                        <span className="text-xs md:text-sm font-semibold text-gray-700">{formData.goal.unit}</span>
                       </div>
                     </div>
                     {errors.target && (
-                      <p className="text-red-500 text-sm mt-1">{errors.target}</p>
+                      <p className="text-red-500 text-xs md:text-sm mt-1">{errors.target}</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3 md:gap-4">
                 <motion.button
                   type="button"
                   onClick={prevStep}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-white text-gray-700 font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 border border-gray-200"
+                  className="flex-1 bg-white text-gray-700 font-bold px-6 md:px-8 py-3 md:py-4 rounded-xl text-sm md:text-base shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 border border-gray-200"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
                   Tillbaka
                 </motion.button>
                 
@@ -472,10 +472,10 @@ const CreateChallengePage = () => {
                   onClick={nextStep}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-6 md:px-8 py-3 md:py-4 rounded-xl text-sm md:text-base shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
                 >
                   Nästa steg
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                 </motion.button>
               </div>
             </motion.div>

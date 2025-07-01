@@ -104,16 +104,16 @@ const RegisterPage = () => {
         <div className="lg:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-50">
           <div className="flex items-center justify-between p-4">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-                <Heart className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <Heart className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold gradient-text">RunMate</span>
+              <span className="text-lg font-bold gradient-text">RunMate</span>
             </Link>
           </div>
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-20 xl:px-24 mt-16 lg:mt-0">
+        <div className="flex-1 flex flex-col justify-center px-4 py-6 sm:px-6 lg:px-20 xl:px-24 mt-14 lg:mt-0">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             {/* Desktop Logo */}
             <div className="hidden lg:flex items-center space-x-3 mb-8 animate-slide-up">
@@ -127,8 +127,8 @@ const RegisterPage = () => {
             </div>
 
             {/* Progress */}
-            <div className="mb-8 animate-slide-up animation-delay-200">
-              <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+            <div className="mb-6 animate-slide-up animation-delay-200">
+              <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                 <span className="font-medium">Steg {step} av 3</span>
                 <span className="font-medium">{Math.round((step / 3) * 100)}%</span>
               </div>
@@ -142,64 +142,64 @@ const RegisterPage = () => {
 
             {/* Step content */}
             <div className="animate-slide-up animation-delay-300">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 {step === 1 && 'Skapa ditt konto'}
                 {step === 2 && 'Berätta om dig'}
                 {step === 3 && 'Din träningsprofil'}
               </h2>
-              <p className="text-gray-600 mb-8">
+              <p className="text-sm sm:text-base text-gray-600 mb-6">
                 {step === 1 && 'Kom igång på bara några minuter'}
                 {step === 2 && 'Hjälp oss matcha dig med rätt personer'}
                 {step === 3 && 'Anpassa din träningsupplevelse'}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 animate-slide-up animation-delay-400">
+            <form onSubmit={handleSubmit} className="space-y-4 animate-slide-up animation-delay-400">
               {/* Step 1: Basic Info */}
               {step === 1 && (
-                <div className="space-y-5">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Förnamn</label>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">Förnamn</label>
                       <input
                         type="text"
                         name="firstName"
                         required
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Anna"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Efternamn</label>
+                    <div className="space-y-1">
+                      <label className="text-xs sm:text-sm font-medium text-gray-700">Efternamn</label>
                       <input
                         type="text"
                         name="lastName"
                         required
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Svensson"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">E-postadress</label>
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">E-postadress</label>
                     <input
                       type="email"
                       name="email"
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       placeholder="anna@exempel.se"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Lösenord</label>
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Lösenord</label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -207,7 +207,7 @@ const RegisterPage = () => {
                         required
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full px-3 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Minst 8 tecken"
                       />
                       <button
@@ -215,13 +215,13 @@ const RegisterPage = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Bekräfta lösenord</label>
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Bekräfta lösenord</label>
                     <div className="relative">
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
@@ -229,7 +229,7 @@ const RegisterPage = () => {
                         required
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className="w-full px-3 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        className="w-full px-3 pr-10 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Upprepa lösenordet"
                       />
                       <button
@@ -237,7 +237,7 @@ const RegisterPage = () => {
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                       >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -246,9 +246,9 @@ const RegisterPage = () => {
 
               {/* Step 2: Personal Info */}
               {step === 2 && (
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Födelsedatum</label>
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Födelsedatum</label>
                     <input
                       type="date"
                       name="dateOfBirth"
@@ -256,19 +256,19 @@ const RegisterPage = () => {
                       value={formData.dateOfBirth}
                       onChange={handleChange}
                       max={new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                      className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     />
                     {formData.dateOfBirth && (
-                      <p className="text-sm text-gray-500 flex items-center mt-1">
-                        <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                      <p className="text-xs text-gray-500 flex items-center mt-1">
+                        <Star className="w-3 h-3 mr-1 text-yellow-500" />
                         Du är {calculateAge(formData.dateOfBirth)} år
                       </p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Kön</label>
-                    <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Kön</label>
+                    <div className="grid grid-cols-3 gap-2">
                       {[
                         { value: 'male', label: 'Man', emoji: '👨' },
                         { value: 'female', label: 'Kvinna', emoji: '👩' },
@@ -278,40 +278,40 @@ const RegisterPage = () => {
                           key={option.value}
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, gender: option.value }))}
-                          className={`p-3 rounded-xl border-2 transition-all transform hover:scale-105 ${
+                          className={`p-2.5 rounded-xl border-2 transition-all transform hover:scale-105 ${
                             formData.gender === option.value
                               ? 'border-primary-500 bg-primary-50 shadow-md'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
-                          <div className="text-2xl mb-1">{option.emoji}</div>
-                          <div className="text-sm font-medium">{option.label}</div>
+                          <div className="text-xl mb-0.5">{option.emoji}</div>
+                          <div className="text-xs font-medium">{option.label}</div>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Var tränar du?</label>
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Var tränar du?</label>
                     <input
                       type="text"
                       name="location"
                       required
                       value={formData.location}
                       onChange={handleChange}
-                      className="w-full px-3 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       placeholder="Stockholm, Sverige"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Berätta om dig (valfritt)</label>
+                  <div className="space-y-1">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Berätta om dig (valfritt)</label>
                     <textarea
                       name="bio"
                       rows="3"
                       value={formData.bio}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                      className="w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
                       placeholder="Vad motiverar dig? Vilka mål har du?"
                     />
                   </div>
@@ -320,10 +320,10 @@ const RegisterPage = () => {
 
               {/* Step 3: Training Preferences */}
               {step === 3 && (
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700">Din träningsnivå</label>
-                    <div className="space-y-3">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">Din träningsnivå</label>
+                    <div className="space-y-2">
                       {[
                         { 
                           id: 'beginner', 
@@ -354,21 +354,21 @@ const RegisterPage = () => {
                           key={level.id}
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, activityLevel: level.id }))}
-                          className={`w-full p-4 rounded-xl border-2 text-left transition-all transform hover:scale-[1.02] ${
+                          className={`w-full p-3 rounded-xl border-2 text-left transition-all transform hover:scale-[1.02] ${
                             formData.activityLevel === level.id
                               ? 'border-primary-500 bg-gradient-to-r from-primary-50 to-secondary-50 shadow-md'
                               : 'border-gray-200 hover:border-gray-300 bg-white'
                           }`}
                         >
-                          <div className="flex items-start space-x-3">
-                            <span className="text-2xl">{level.icon}</span>
+                          <div className="flex items-start space-x-2">
+                            <span className="text-lg">{level.icon}</span>
                             <div className="flex-1">
-                              <div className="font-semibold text-gray-900">{level.label}</div>
-                              <div className="text-sm text-gray-600 mt-0.5">{level.desc}</div>
+                              <div className="font-semibold text-sm text-gray-900">{level.label}</div>
+                              <div className="text-xs text-gray-600 mt-0.5">{level.desc}</div>
                             </div>
                             {formData.activityLevel === level.id && (
-                              <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                               </div>
@@ -380,12 +380,12 @@ const RegisterPage = () => {
                   </div>
 
                   {/* Strava Connect Preview */}
-                  <div className="p-4 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl border border-primary-200">
-                    <div className="flex items-center space-x-3">
-                      <Activity className="w-8 h-8 text-primary-600" />
+                  <div className="p-3 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl border border-primary-200">
+                    <div className="flex items-center space-x-2">
+                      <Activity className="w-6 h-6 text-primary-600" />
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900">Koppla Strava efter registrering</p>
-                        <p className="text-sm text-gray-600">Synka dina aktiviteter automatiskt</p>
+                        <p className="font-medium text-sm text-gray-900">Koppla Strava efter registrering</p>
+                        <p className="text-xs text-gray-600">Synka dina aktiviteter automatiskt</p>
                       </div>
                     </div>
                   </div>
@@ -393,14 +393,14 @@ const RegisterPage = () => {
               )}
 
               {/* Navigation */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-2 pt-2">
                 {step > 1 && (
                   <button
                     type="button"
                     onClick={handlePrevious}
-                    className="flex-1 btn btn-glass group"
+                    className="flex-1 btn btn-glass group text-sm"
                   >
-                    <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 mr-1.5 transform group-hover:-translate-x-1 transition-transform" />
                     Tillbaka
                   </button>
                 )}
@@ -409,26 +409,26 @@ const RegisterPage = () => {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="flex-1 btn btn-primary group"
+                    className="flex-1 btn btn-primary group text-sm"
                   >
                     Nästa
-                    <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover:translate-x-1 transition-transform" />
                   </button>
                 ) : (
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-1 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                         <span>Skapar konto...</span>
                       </div>
                     ) : (
                       <>
                         Kom igång
-                        <Zap className="w-5 h-5 ml-2" />
+                        <Zap className="w-4 h-4 ml-1.5" />
                       </>
                     )}
                   </button>

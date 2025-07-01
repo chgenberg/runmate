@@ -1812,4 +1812,50 @@ a {
 /* Safe area padding for iOS devices */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Better touch targets */
+  button, a, input, textarea, select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smaller padding on mobile */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Fix modal heights on mobile */
+  .modal-content {
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  
+  /* Better form inputs on mobile */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Responsive text sizes */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.125rem; }
+  
+  /* Better spacing for mobile */
+  .space-y-6 > * + * { margin-top: 1rem; }
+  .space-y-8 > * + * { margin-top: 1.5rem; }
+  
+  /* Fix bottom navigation overlap */
+  .pb-20 {
+    padding-bottom: 5rem !important;
+  }
 } 

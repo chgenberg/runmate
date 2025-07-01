@@ -10,7 +10,8 @@ import {
   X,
   Check,
   Activity,
-  Heart
+  Heart,
+  Sparkles
 } from 'lucide-react';
 import api from '../../services/api';
 import AILoadingScreen from './AILoadingScreen';
@@ -1134,71 +1135,153 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
 
       case 'single':
         return (
-          <div className="space-y-3">
-            {currentQuestion.options.map((option) => (
-              <motion.button
-                key={option.value}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleAnswer(option.value)}
-                className={`w-full p-4 rounded-xl text-left transition-all ${
-                  answers[currentQuestion.id] === option.value
-                    ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-500 shadow-md'
-                    : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-sm'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{option.icon}</span>
-                  <span className={`font-medium ${
-                    answers[currentQuestion.id] === option.value
-                      ? 'text-purple-900'
-                      : 'text-gray-700'
-                  }`}>{option.label}</span>
-                </div>
-              </motion.button>
-            ))}
+          <div className="grid gap-3">
+            {currentQuestion.options.map((option, index) => {
+              const isSelected = answers[currentQuestion.id] === option.value;
+              return (
+                <motion.button
+                  key={option.value}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.02, x: 5 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAnswer(option.value)}
+                  className={`relative group w-full p-4 rounded-2xl text-left transition-all overflow-hidden ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 border-2 border-purple-500 shadow-lg'
+                      : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-md hover:bg-gradient-to-r hover:from-gray-50 hover:to-purple-50/30'
+                  }`}
+                >
+                  {/* Background decoration */}
+                  <div className={`absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 transition-opacity ${
+                    isSelected ? 'opacity-5' : 'group-hover:opacity-3'
+                  }`} />
+                  
+                  <div className="relative flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <motion.div
+                        animate={{ rotate: isSelected ? [0, 10, -10, 0] : 0 }}
+                        transition={{ duration: 0.5 }}
+                        className={`text-3xl flex-shrink-0 ${isSelected ? 'filter drop-shadow-md' : ''}`}
+                      >
+                        {option.icon}
+                      </motion.div>
+                      <span className={`font-medium text-lg ${
+                        isSelected
+                          ? 'text-purple-900'
+                          : 'text-gray-700 group-hover:text-purple-700'
+                      }`}>
+                        {option.label}
+                      </span>
+                    </div>
+                    
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                        className="flex-shrink-0"
+                      >
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-md">
+                          <Check className="w-5 h-5 text-white" />
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                  
+                  {/* Hover effect line */}
+                  <motion.div
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600"
+                    initial={{ width: 0 }}
+                    animate={{ width: isSelected ? '100%' : '0%' }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.button>
+              );
+            })}
           </div>
         );
 
       case 'multiple':
         return (
           <div className="space-y-3">
-            {currentQuestion.options.map((option) => {
-              const selected = (answers[currentQuestion.id] || []).includes(option.value);
-              return (
-                <motion.button
-                  key={option.value}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    const current = answers[currentQuestion.id] || [];
-                    const updated = selected
-                      ? current.filter(v => v !== option.value)
-                      : [...current, option.value];
-                    handleAnswer(updated);
-                  }}
-                  className={`w-full p-4 rounded-xl text-left transition-all ${
-                    selected
-                      ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-500 shadow-md'
-                      : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{option.icon}</span>
-                      <span className={`font-medium ${
-                        selected ? 'text-purple-900' : 'text-gray-700'
-                      }`}>{option.label}</span>
+            <p className="text-sm text-gray-500 mb-2">Välj alla som gäller</p>
+            <div className="grid gap-3">
+              {currentQuestion.options.map((option, index) => {
+                const selected = (answers[currentQuestion.id] || []).includes(option.value);
+                return (
+                  <motion.button
+                    key={option.value}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      const current = answers[currentQuestion.id] || [];
+                      const updated = selected
+                        ? current.filter(v => v !== option.value)
+                        : [...current, option.value];
+                      handleAnswer(updated);
+                    }}
+                    className={`relative group w-full p-4 rounded-2xl text-left transition-all overflow-hidden ${
+                      selected
+                        ? 'bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 border-2 border-purple-500 shadow-lg'
+                        : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-md hover:bg-gradient-to-r hover:from-gray-50 hover:to-purple-50/30'
+                    }`}
+                  >
+                    {/* Checkbox indicator */}
+                    <div className="absolute top-4 right-4">
+                      <motion.div
+                        animate={selected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                        className={`w-6 h-6 rounded-md border-2 transition-all ${
+                          selected
+                            ? 'bg-gradient-to-br from-purple-600 to-pink-600 border-purple-600'
+                            : 'bg-white border-gray-300 group-hover:border-purple-400'
+                        }`}
+                      >
+                        {selected && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                            className="w-full h-full flex items-center justify-center"
+                          >
+                            <Check className="w-4 h-4 text-white" />
+                          </motion.div>
+                        )}
+                      </motion.div>
                     </div>
-                    {selected && (
-                      <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                  </div>
-                </motion.button>
-              );
-            })}
+                    
+                    <div className="flex items-center gap-4 pr-12">
+                      <motion.div
+                        animate={{ rotate: selected ? [0, 10, -10, 0] : 0 }}
+                        transition={{ duration: 0.5 }}
+                        className={`text-3xl flex-shrink-0 ${selected ? 'filter drop-shadow-md' : ''}`}
+                      >
+                        {option.icon}
+                      </motion.div>
+                      <span className={`font-medium text-lg ${
+                        selected
+                          ? 'text-purple-900'
+                          : 'text-gray-700 group-hover:text-purple-700'
+                      }`}>
+                        {option.label}
+                      </span>
+                    </div>
+                    
+                    {/* Hover effect line */}
+                    <motion.div
+                      className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600"
+                      initial={{ width: 0 }}
+                      animate={{ width: selected ? '100%' : '0%' }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
         );
 
@@ -1313,94 +1396,199 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-gradient-to-br from-black/60 via-purple-900/20 to-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+        initial={{ scale: 0.8, opacity: 0, y: 50 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: 50 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="relative bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-white/20"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Decorative gradient orbs */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-500 rounded-full blur-3xl opacity-20" />
+        
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">AI Race Coach</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 animate-gradient-x" />
+          <div className="relative bg-gradient-to-b from-transparent to-black/10 p-6 text-white">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center"
+                >
+                  <Sparkles className="w-6 h-6 text-white" />
+                </motion.div>
+                <div>
+                  <h2 className="text-2xl font-bold">AI Race Coach</h2>
+                  <p className="text-sm opacity-90">Din personliga träningsassistent</p>
+                </div>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                className="p-2 hover:bg-white/20 rounded-xl transition-all backdrop-blur-sm"
+              >
+                <X className="w-6 h-6" />
+              </motion.button>
+            </div>
+            
+            {/* Enhanced Progress */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">
+                  Steg {currentStep + 1} av {questions.length}
+                </span>
+                <span className="text-white/80">
+                  {getCategoryName(currentQuestion.category)}
+                </span>
+              </div>
+              <div className="relative w-full bg-white/20 backdrop-blur-sm rounded-full h-3 overflow-hidden">
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white via-yellow-200 to-white rounded-full h-3"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+                <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse" />
+              </div>
+              <div className="flex items-center justify-between">
+                {[...Array(Math.min(5, questions.length))].map((_, i) => {
+                  const stepIndex = Math.floor((i / 4) * (questions.length - 1));
+                  const isCompleted = currentStep > stepIndex;
+                  const isCurrent = currentStep === stepIndex;
+                  
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: i * 0.1 }}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        isCompleted ? 'bg-white' : isCurrent ? 'bg-white/60 animate-pulse' : 'bg-white/30'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-white/20 rounded-full h-2">
-            <motion.div
-              className="bg-white rounded-full h-2"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-          <p className="text-sm mt-2 opacity-90">
-            Steg {currentStep + 1} av {questions.length} - {getCategoryName(currentQuestion.category)}
-          </p>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh] bg-gray-50">
+        {/* Content with better styling */}
+        <div className="relative p-6 md:p-8 overflow-y-auto max-h-[55vh] custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <motion.h3 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-900 via-pink-900 to-orange-900 bg-clip-text text-transparent mb-3"
+              >
                 {currentQuestion.question}
-              </h3>
+              </motion.h3>
               {currentQuestion.description && (
-                <p className="text-gray-600 mb-6 text-lg">{currentQuestion.description}</p>
+                <motion.p 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-gray-600 mb-6 text-lg leading-relaxed"
+                >
+                  {currentQuestion.description}
+                </motion.p>
               )}
               
-              {renderQuestion()}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {renderQuestion()}
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-6 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <button
+        {/* Enhanced Footer */}
+        <div className="relative border-t border-gray-100 p-6 bg-gradient-to-t from-gray-50 to-transparent">
+          <div className="flex items-center justify-between gap-4">
+            <motion.button
+              whileHover={{ scale: 1.05, x: -5 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleBack}
               disabled={currentStep === 0}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all ${
                 currentStep === 0
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-700 hover:bg-gray-200'
+                  ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                  : 'text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md border border-gray-200'
               }`}
             >
               <ChevronLeft className="w-5 h-5" />
-              Tillbaka
-            </button>
+              <span className="hidden sm:inline">Tillbaka</span>
+            </motion.button>
             
-            <button
-              onClick={handleNext}
-              disabled={!isStepComplete()}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                isStepComplete()
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg transform hover:scale-105'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {currentStep === questions.length - 1 ? 'Skapa träningsplan' : 'Nästa'}
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {currentStep > 0 && currentStep < questions.length - 1 && (
+                <span className="text-sm text-gray-500 hidden sm:inline">
+                  {Math.round(((currentStep + 1) / questions.length) * 100)}% klart
+                </span>
+              )}
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                disabled={!isStepComplete()}
+                className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all overflow-hidden ${
+                  isStepComplete()
+                    ? 'text-white shadow-lg'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isStepComplete() && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 animate-gradient-x" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  </>
+                )}
+                <span className="relative">
+                  {currentStep === questions.length - 1 ? 'Skapa träningsplan' : 'Nästa'}
+                </span>
+                <ChevronRight className="w-5 h-5 relative" />
+              </motion.button>
+            </div>
           </div>
+          
+          {/* Motivational text */}
+          {currentStep > 0 && (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-center text-sm text-gray-500 mt-4"
+            >
+              {currentStep < 5 && "🎯 Bra start! Fortsätt så..."}
+              {currentStep >= 5 && currentStep < 10 && "💪 Halvvägs där! Du klarar det..."}
+              {currentStep >= 10 && currentStep < questions.length - 1 && "🔥 Snart klar! Bara några frågor till..."}
+              {currentStep === questions.length - 1 && "🎉 Sista frågan! Din plan är nästan redo..."}
+            </motion.p>
+          )}
         </div>
       </motion.div>
+      
+      
     </motion.div>
   );
 };

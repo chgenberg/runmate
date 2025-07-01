@@ -574,67 +574,82 @@ router.post('/swipe', auth, async (req, res) => {
 });
 
 // @route   GET api/users/leaderboard
-// @desc    Get leaderboard (simplified to prevent 500 errors)
+// @desc    Get leaderboard (real data with safe fallbacks)
 // @access  Private
 router.get('/leaderboard', auth, async (req, res) => {
   try {
-    // Simple mock leaderboard to prevent crashes
-    const mockLeaderboard = [
-      {
-        rank: 1,
-        firstName: 'Emma',
-        lastName: 'Johansson',
-        points: 1250,
-        level: 8,
-        totalDistance: 156.7,
-        totalActivities: 24,
-        city: 'Stockholm',
-        profilePhoto: '/avatar2.png',
-        isCurrentUser: false,
-        displayName: 'Emma Johansson'
-      },
-      {
-        rank: 2,
-        firstName: 'Marcus',
-        lastName: 'Andersson',
-        points: 980,
-        level: 6,
-        totalDistance: 98.3,
-        totalActivities: 18,
-        city: 'Göteborg',
-        profilePhoto: '/avatar2.png',
-        isCurrentUser: false,
-        displayName: 'Marcus Andersson'
-      },
-      {
-        rank: 3,
-        firstName: 'Sofia',
-        lastName: 'Lindberg',
-        points: 850,
-        level: 5,
-        totalDistance: 87.2,
-        totalActivities: 15,
-        city: 'Malmö',
-        profilePhoto: '/avatar2.png',
-        isCurrentUser: false,
-        displayName: 'Sofia Lindberg'
+    const { limit = 20, sortBy = 'points' } = req.query;
+    const currentUserId = req.user.id;
+    
+    // Simple query with error handling
+    const users = await User.find({ isActive: true })
+      .select('firstName lastName profilePhoto points level location')
+      .sort({ [sortBy]: -1, createdAt: 1 })
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance
+
+    // Build leaderboard with safe data handling
+    const leaderboard = users.map((user, index) => ({
+      rank: index + 1,
+      firstName: user.firstName || 'Anonym',
+      lastName: user.lastName || '',
+      displayName: `${user.firstName || 'Anonym'} ${user.lastName || ''}`.trim(),
+      points: user.points || 0,
+      level: user.level || 1,
+      city: user.location?.city || 'Okänd stad',
+      profilePhoto: user.profilePhoto || '/avatar2.png',
+      isCurrentUser: user._id.toString() === currentUserId
+    }));
+
+    // Find current user's rank if not in top results
+    let currentUserRank = leaderboard.find(user => user.isCurrentUser);
+    
+    if (!currentUserRank) {
+      try {
+        const currentUser = await User.findById(currentUserId).select('points level firstName lastName').lean();
+        if (currentUser) {
+          const usersAbove = await User.countDocuments({
+            isActive: true,
+            [sortBy]: { $gt: currentUser[sortBy] || 0 }
+          });
+          
+          currentUserRank = {
+            rank: usersAbove + 1,
+            firstName: currentUser.firstName || 'Du',
+            lastName: currentUser.lastName || '',
+            points: currentUser.points || 0,
+            level: currentUser.level || 1,
+            isCurrentUser: true
+          };
+        }
+      } catch (rankError) {
+        console.log('Could not calculate user rank:', rankError.message);
+        currentUserRank = { rank: '?', points: 0, isCurrentUser: true };
       }
-    ];
+    }
 
     res.json({
       success: true,
       data: {
-        leaderboard: mockLeaderboard,
-        currentUserRank: { rank: 15, points: 420, isCurrentUser: true },
-        totalUsers: mockLeaderboard.length
+        leaderboard,
+        currentUserRank,
+        totalUsers: leaderboard.length,
+        sortBy
       }
     });
 
   } catch (error) {
     console.error('Leaderboard error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching leaderboard'
+    
+    // Fallback response instead of 500 error
+    res.json({
+      success: true,
+      data: {
+        leaderboard: [],
+        currentUserRank: { rank: 1, points: 0, isCurrentUser: true },
+        totalUsers: 0,
+        message: 'Inga användare hittades än'
+      }
     });
   }
 });

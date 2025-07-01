@@ -14,7 +14,12 @@ import {
   Calendar,
   Clock,
   Sparkles,
-  Lightbulb
+  Lightbulb,
+  Target,
+  TrendingUp,
+  CheckCircle,
+  AlertCircle,
+  Info
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -26,6 +31,7 @@ const RaceCoachCalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [completedWorkouts, setCompletedWorkouts] = useState({});
   const [showRaceInfo, setShowRaceInfo] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
   
   useEffect(() => {
     const navigationPlan = location.state?.plan;
@@ -212,6 +218,10 @@ const RaceCoachCalendarPage = () => {
   const handleDateClick = (date) => {
     if (date) {
       setSelectedDate(date);
+      // Scroll to daily details smoothly
+      setTimeout(() => {
+        document.getElementById('daily-details')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 
@@ -271,6 +281,188 @@ const RaceCoachCalendarPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Selected Day Details - Now at the top */}
+        {dailyDetails && (
+          <motion.div
+            id="daily-details"
+            key={selectedDateKey}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                {selectedDate.toLocaleDateString('sv-SE', { 
+                  weekday: 'long', 
+                  day: 'numeric',
+                  month: 'long'
+                })}
+              </h3>
+              {dailyDetails.workout.type !== 'Vila' && (
+                <button
+                  onClick={() => handleWorkoutComplete(selectedDateKey)}
+                  className={`px-6 py-3 rounded-lg transition-colors flex items-center gap-2 font-medium ${
+                    completedWorkouts[selectedDateKey]
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  {completedWorkouts[selectedDateKey] ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Genomförd
+                    </>
+                  ) : (
+                    'Markera som klar'
+                  )}
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Workout Section */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-5xl">{dailyDetails.workout.icon}</span>
+                    <div>
+                      <h4 className="text-2xl font-bold text-gray-900">{dailyDetails.workout.type}</h4>
+                      {dailyDetails.workout.duration && (
+                        <p className="text-lg text-gray-600 mt-1">{dailyDetails.workout.duration}</p>
+                      )}
+                    </div>
+                  </div>
+                  {dailyDetails.workout.description && (
+                    <p className="text-gray-700 text-lg leading-relaxed">{dailyDetails.workout.description}</p>
+                  )}
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    {dailyDetails.workout.time && (
+                      <div className="bg-white/50 rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-purple-600">
+                          <Clock className="w-5 h-5" />
+                          <span className="font-medium">Rekommenderad tid</span>
+                        </div>
+                        <p className="text-gray-900 mt-1 font-semibold">{dailyDetails.workout.time}</p>
+                      </div>
+                    )}
+                    {dailyDetails.workout.location && (
+                      <div className="bg-white/50 rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-purple-600">
+                          <MapPin className="w-5 h-5" />
+                          <span className="font-medium">Plats</span>
+                        </div>
+                        <p className="text-gray-900 mt-1 font-semibold">{dailyDetails.workout.location}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tips Section */}
+                <div className="bg-blue-50 rounded-xl p-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Lightbulb className="w-6 h-6 text-blue-600" />
+                    Dagens tips
+                  </h4>
+                  <ul className="space-y-3">
+                    {dailyDetails.tips.map((tip, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-gray-700">
+                        <span className="text-blue-500 mt-1 text-xl">•</span>
+                        <span className="text-lg">{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Nutrition & Recovery Section */}
+              <div className="space-y-4">
+                <div className="bg-green-50 rounded-xl p-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Utensils className="w-6 h-6 text-green-600" />
+                    Kost & Nutrition
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="bg-white/50 rounded-lg p-4 text-center">
+                      <p className="text-sm text-gray-600">Dagligt kaloriintag</p>
+                      <p className="text-3xl font-bold text-gray-900 mt-1">{dailyDetails.nutrition.calories} kcal</p>
+                    </div>
+                    <p className="text-gray-700 font-medium">{dailyDetails.nutrition.focus}</p>
+                    <div className="space-y-3 mt-4">
+                      {Object.entries(dailyDetails.nutrition.meals).map(([meal, food]) => (
+                        <div key={meal} className="bg-white/30 rounded-lg p-3">
+                          <p className="text-sm text-gray-600 capitalize">{meal}:</p>
+                          <p className="text-gray-900 font-medium">{food}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-red-50 rounded-xl p-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Heart className="w-6 h-6 text-red-600" />
+                    Återhämtning
+                  </h4>
+                  <ul className="space-y-3">
+                    {dailyDetails.recovery.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-gray-700">
+                        <span className="text-red-500 mt-1 text-xl">•</span>
+                        <span className="text-lg">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Comprehensive Race Information Tabs */}
+        {plan.comprehensiveRaceInfo && (
+          <div className="bg-white rounded-2xl shadow-sm mb-8">
+            {/* Tab Navigation */}
+            <div className="border-b border-gray-200 px-6">
+              <div className="flex gap-8 overflow-x-auto">
+                {[
+                  { id: 'overview', label: 'Översikt', icon: Info },
+                  { id: 'training', label: 'Träning', icon: Activity },
+                  { id: 'nutrition', label: 'Nutrition', icon: Utensils },
+                  { id: 'equipment', label: 'Utrustning', icon: Target },
+                  { id: 'strategy', label: 'Strategi', icon: TrendingUp },
+                  { id: 'recovery', label: 'Återhämtning', icon: Heart }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-4 px-2 border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-purple-600 text-purple-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="prose prose-lg max-w-none"
+                  dangerouslySetInnerHTML={{ __html: plan.comprehensiveRaceInfo }}
+                />
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Calendar Area */}
           <div className="lg:col-span-2 space-y-6">
@@ -326,7 +518,7 @@ const RaceCoachCalendarPage = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleDateClick(date)}
-                      className={`aspect-square p-2 rounded-xl border-2 transition-all ${
+                      className={`aspect-square p-2 rounded-xl border-2 transition-all relative ${
                         isRaceDay
                           ? 'border-yellow-500 bg-yellow-50'
                           : isSelected
@@ -357,134 +549,29 @@ const RaceCoachCalendarPage = () => {
               </div>
             </div>
 
-            {/* Selected Day Details */}
-            {dailyDetails && (
-              <motion.div
-                key={selectedDateKey}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-sm p-6"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    {selectedDate.toLocaleDateString('sv-SE', { 
-                      weekday: 'long', 
-                      day: 'numeric',
-                      month: 'long'
-                    })}
-                  </h3>
-                  {dailyDetails.workout.type !== 'Vila' && (
-                    <button
-                      onClick={() => handleWorkoutComplete(selectedDateKey)}
-                      className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                        completedWorkouts[selectedDateKey]
-                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {completedWorkouts[selectedDateKey] ? '✓ Genomförd' : 'Markera som klar'}
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Workout Section */}
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="text-4xl">{dailyDetails.workout.icon}</span>
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900">{dailyDetails.workout.type}</h4>
-                          {dailyDetails.workout.duration && (
-                            <p className="text-gray-600">{dailyDetails.workout.duration}</p>
-                          )}
-                        </div>
+            {/* Week by Week Plan */}
+            {plan.weekByWeekPlan && (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Vecka för vecka plan</h3>
+                <div className="space-y-4">
+                  {plan.weekByWeekPlan.slice(0, 4).map((week) => (
+                    <div key={week.week} className="border-l-4 border-purple-500 pl-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-gray-900">Vecka {week.week} - {week.phase}</h4>
+                        <span className="text-sm text-gray-500">{week.totalDistance}</span>
                       </div>
-                      {dailyDetails.workout.description && (
-                        <p className="text-gray-700">{dailyDetails.workout.description}</p>
-                      )}
-                      {dailyDetails.workout.time && (
-                        <div className="mt-4 flex items-center gap-2 text-sm text-purple-600">
-                          <Clock className="w-4 h-4" />
-                          <span>Rekommenderad tid: {dailyDetails.workout.time}</span>
-                        </div>
-                      )}
-                      {dailyDetails.workout.location && (
-                        <div className="mt-2 flex items-center gap-2 text-sm text-purple-600">
-                          <MapPin className="w-4 h-4" />
-                          <span>{dailyDetails.workout.location}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Tips Section */}
-                    <div className="bg-blue-50 rounded-xl p-6">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <Lightbulb className="w-5 h-5 text-blue-600" />
-                        Dagens tips
-                      </h4>
-                      <ul className="space-y-2">
-                        {dailyDetails.tips.map((tip, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-gray-700">
-                            <span className="text-blue-500 mt-1">•</span>
-                            <span>{tip}</span>
-                          </li>
+                      <p className="text-gray-600 mt-1">{week.focus}</p>
+                      <div className="flex gap-2 mt-2">
+                        {week.keyWorkouts.map((workout, idx) => (
+                          <span key={idx} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                            {workout}
+                          </span>
                         ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Nutrition & Recovery Section */}
-                  <div className="space-y-4">
-                    <div className="bg-green-50 rounded-xl p-6">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <Utensils className="w-5 h-5 text-green-600" />
-                        Kost & Nutrition
-                      </h4>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-gray-600">Dagligt kaloriintag</p>
-                          <p className="text-2xl font-bold text-gray-900">{dailyDetails.nutrition.calories} kcal</p>
-                        </div>
-                        <p className="text-gray-700">{dailyDetails.nutrition.focus}</p>
-                        <div className="space-y-2 mt-4">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Frukost:</span>
-                            <span className="text-gray-900">{dailyDetails.nutrition.meals.breakfast}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Lunch:</span>
-                            <span className="text-gray-900">{dailyDetails.nutrition.meals.lunch}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Middag:</span>
-                            <span className="text-gray-900">{dailyDetails.nutrition.meals.dinner}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Mellanmål:</span>
-                            <span className="text-gray-900">{dailyDetails.nutrition.meals.snacks}</span>
-                          </div>
-                        </div>
                       </div>
                     </div>
-
-                    <div className="bg-red-50 rounded-xl p-6">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <Heart className="w-5 h-5 text-red-600" />
-                        Återhämtning
-                      </h4>
-                      <ul className="space-y-2">
-                        {dailyDetails.recovery.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-gray-700">
-                            <span className="text-red-500 mt-1">•</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
 
@@ -547,6 +634,34 @@ const RaceCoachCalendarPage = () => {
               )}
             </AnimatePresence>
 
+            {/* Performance Metrics */}
+            {plan.performanceMetrics && (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Prestationsmål</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Nuvarande tempo</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {Math.floor(plan.performanceMetrics.current.estimatedPace / 60)}:
+                      {(plan.performanceMetrics.current.estimatedPace % 60).toString().padStart(2, '0')}/km
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Måltempo</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {Math.floor(plan.performanceMetrics.target.racePace / 60)}:
+                      {(plan.performanceMetrics.target.racePace % 60).toString().padStart(2, '0')}/km
+                    </p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-3">
+                    <p className="text-sm text-purple-900">
+                      {plan.performanceMetrics.progression.timeToGoal}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Countdown */}
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Nedräkning</h3>
@@ -579,21 +694,30 @@ const RaceCoachCalendarPage = () => {
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Veckans översikt</h3>
-              <div className="space-y-3">
-                {plan.training?.weeklySchedule?.slice(0, 7).map((workout, idx) => (
-                  <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{getWorkoutIcon(workout.type)}</span>
-                      <span className="text-sm text-gray-700">{workout.day}</span>
-                    </div>
-                    <span className="text-sm text-gray-500">{workout.type}</span>
+            {/* Injury Prevention */}
+            {plan.injuryPrevention && (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-orange-600" />
+                  Skadeförebyggande
+                </h3>
+                <div className="space-y-3">
+                  <div className="bg-orange-50 rounded-lg p-3">
+                    <p className="text-sm font-medium text-orange-900">
+                      Risk: {plan.injuryPrevention.riskAssessment}
+                    </p>
                   </div>
-                ))}
+                  <ul className="space-y-2">
+                    {plan.injuryPrevention.preventionStrategies.slice(0, 3).map((strategy, idx) => (
+                      <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-orange-500 mt-1">•</span>
+                        <span>{strategy}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Motivational Quote */}
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">

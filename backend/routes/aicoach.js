@@ -1891,6 +1891,9 @@ router.post('/race-plan', protect, async (req, res) => {
     // Generate race description using AI
     const raceDescription = await generateRaceDescription(selectedRace);
     
+    // Generate comprehensive race information
+    const comprehensiveRaceInfo = await generateComprehensiveRaceInfo(selectedRace, req.body);
+    
     // Generate race-specific training plan
     const racePlan = {
       success: true,
@@ -1899,11 +1902,13 @@ router.post('/race-plan', protect, async (req, res) => {
         raceDate,
         weeksUntilRace,
         raceDescription,
+        comprehensiveRaceInfo, // New comprehensive info
         trainingPhases: generateRaceTrainingPhases(weeksUntilRace, req.body),
         training: {
           weeklySchedule: generateRaceWeeklySchedule(req.body),
           duration: `${weeksUntilRace} veckor`,
-          phases: generateRaceTrainingPhases(weeksUntilRace, req.body)
+          phases: generateRaceTrainingPhases(weeksUntilRace, req.body),
+          detailedWorkouts: generateDetailedWorkouts(weeksUntilRace, req.body)
         },
         nutrition: generateRaceNutritionPlan(req.body, selectedRace),
         recovery: generateRaceRecoveryProtocol(req.body),
@@ -1913,7 +1918,13 @@ router.post('/race-plan', protect, async (req, res) => {
         tapering: generateTaperingPlan(weeksUntilRace, selectedRace),
         raceStrategy: generateRaceStrategy(selectedRace, req.body),
         equipment: generateEquipmentRecommendations(selectedRace, equipment),
-        mentalPreparation: generateMentalPreparation(weeksUntilRace, race_goal)
+        mentalPreparation: generateMentalPreparation(weeksUntilRace, race_goal),
+        // Additional detailed sections
+        weekByWeekPlan: generateWeekByWeekPlan(weeksUntilRace, req.body),
+        performanceMetrics: generatePerformanceMetrics(req.body),
+        injuryPrevention: generateInjuryPreventionPlan(req.body),
+        weatherPreparation: generateWeatherPrep(selectedRace),
+        raceWeekSchedule: generateRaceWeekSchedule(selectedRace, req.body)
       }
     };
 
@@ -2170,6 +2181,139 @@ async function generateRaceDescription(race) {
     
     return fallbackDescriptions[race.name] || `${race.name} är ett fantastiskt lopp i ${race.location} som erbjuder en unik löpupplevelse med ${race.distance} av utmaning och glädje.`;
   }
+}
+
+async function generateComprehensiveRaceInfo(race, userData) {
+  try {
+    if (!race || !race.name || !openai) return generateFallbackRaceInfo(race, userData);
+    
+    const prompt = `Generera en omfattande guide för ${race.name} i ${race.location} (${race.distance}). 
+    
+    Användarens profil:
+    - Träningsnivå: ${userData.current_fitness}
+    - Målsättning: ${userData.race_goal}
+    - Veckans löprundor: ${userData.weekly_runs}
+    - Längsta distans: ${userData.longest_recent_run}
+    
+    Skapa en detaljerad guide med följande sektioner:
+    
+    1. LOPPÖVERSIKT
+    - Detaljerad beskrivning av loppet (historia, prestige, unika aspekter)
+    - Banprofil och utmaningar
+    - Väder och klimat under loppperioden
+    - Publikstöd och atmosfär
+    
+    2. TRÄNINGSPLAN ÖVERSIKT
+    - Specifika träningsråd för detta lopp
+    - Viktigaste träningspassen att fokusera på
+    - Terrängspecifik träning om relevant
+    - Höjdträning om relevant
+    
+    3. NUTRITIONSSTRATEGI
+    - Veckan före loppet
+    - Carb-loading protokoll
+    - Racedagens frukost (timing och innehåll)
+    - Energistrategi under loppet
+    - Återhämtning efter loppet
+    
+    4. UTRUSTNINGSGUIDE
+    - Skor (specifika rekommendationer för banan)
+    - Kläder för väderförhållanden
+    - Tillbehör (bälte, klocka, etc)
+    - Vad som ska packas i väskan
+    
+    5. MENTAL FÖRBEREDELSE
+    - Visualiseringsövningar
+    - Mantran och positiva affirmationer
+    - Strategier för svåra delar av banan
+    - Nervositet och prestation
+    
+    6. RACEDAGSSTRATEGI
+    - Detaljerad tidsplanering från uppvaknande
+    - Uppvärmningsrutin
+    - Pacing-strategi för varje del
+    - Vätskestationer och energiintag
+    
+    7. PRAKTISK INFORMATION
+    - Transport till start
+    - Väskförvaring
+    - Toaletter och faciliteter
+    - Efterloppet logistik
+    
+    8. VANLIGA MISSTAG
+    - Top 5 misstag att undvika
+    - Nybörjarfällor
+    - Väderfällor
+    
+    9. ÅTERHÄMTNINGSPLAN
+    - Första 24 timmarna
+    - Första veckan
+    - Återgång till träning
+    
+    10. PERSONLIGA TIPS
+    - Baserat på användarens profil
+    - Specifika råd för deras mål
+    - Anpassningar för deras nivå
+    
+    Skriv på svenska, var detaljerad och ge konkreta, praktiska råd. Använd HTML-formatering med <h3>, <p>, <ul>, <li>, <strong> etc.`;
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "Du är en erfaren löpcoach och loppexpert med djup kunskap om internationella lopp. Du ger detaljerade, praktiska råd anpassade för varje löpare."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 3000,
+      temperature: 0.7
+    });
+    
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error generating comprehensive race info:', error);
+    return generateFallbackRaceInfo(race, userData);
+  }
+}
+
+function generateFallbackRaceInfo(race, userData) {
+  return `
+    <h3>🏃‍♂️ ${race.name} - Din Kompletta Guide</h3>
+    
+    <h4>Loppöversikt</h4>
+    <p>${race.name} i ${race.location} är ett ${race.distance}-lopp som lockar löpare från hela världen. Detta lopp erbjuder en unik kombination av utmaning och upplevelse.</p>
+    
+    <h4>Träningsplan</h4>
+    <p>Med ${userData.weeksUntilRace} veckor kvar har du gott om tid att förbereda dig. Fokusera på:</p>
+    <ul>
+      <li>Gradvis ökning av distans</li>
+      <li>Tempopass i racefart</li>
+      <li>Långpass för uthållighet</li>
+    </ul>
+    
+    <h4>Nutritionsstrategi</h4>
+    <p>En genomtänkt nutritionsplan är avgörande för framgång:</p>
+    <ul>
+      <li><strong>Veckan före:</strong> Öka kolhydratintaget gradvis</li>
+      <li><strong>Racedagen:</strong> Frukost 3h före start</li>
+      <li><strong>Under loppet:</strong> Energi var 45:e minut</li>
+    </ul>
+    
+    <h4>Mental Förberedelse</h4>
+    <p>Visualisera din framgång och förbered dig mentalt på utmaningen. Dela upp loppet i mindre segment för att göra det mer hanterbart.</p>
+    
+    <h4>Racedagsstrategi</h4>
+    <ul>
+      <li>Vakna 3-4 timmar före start</li>
+      <li>Ät frukost direkt</li>
+      <li>Ankom till startområdet 1 timme före</li>
+      <li>Värm upp 20 minuter före start</li>
+    </ul>
+  `;
 }
 
 function generateRaceWeeklySchedule(data) {
@@ -2574,6 +2718,247 @@ function getLevelDescription(level) {
     'competitive': 'Tävlingsløpare'
   };
   return levels[level] || 'Medelnivå';
+}
+
+// New helper functions for comprehensive race planning
+function generateDetailedWorkouts(weeks, data) {
+  const workouts = [];
+  const fitness = data.current_fitness || 'recreational';
+  
+  // Generate specific workouts for key weeks
+  const keyWeeks = [
+    Math.floor(weeks * 0.25), // Early build
+    Math.floor(weeks * 0.5),  // Mid-training
+    Math.floor(weeks * 0.75), // Peak
+    weeks - 2                  // Taper
+  ];
+  
+  keyWeeks.forEach(week => {
+    workouts.push({
+      week,
+      keyWorkout: {
+        type: week < weeks/2 ? 'Långpass' : 'Racesimulering',
+        distance: calculateWorkoutDistance(week, weeks, fitness),
+        pace: 'Racefart minus 10-15 sek/km',
+        tips: 'Öva på vätskeintag och energi'
+      }
+    });
+  });
+  
+  return workouts;
+}
+
+function generateWeekByWeekPlan(weeks, data) {
+  const plan = [];
+  
+  for (let week = 1; week <= weeks; week++) {
+    const phase = week <= weeks * 0.3 ? 'Bas' : 
+                  week <= weeks * 0.6 ? 'Uppbyggnad' :
+                  week <= weeks * 0.85 ? 'Topp' : 'Nedtrappning';
+    
+    plan.push({
+      week,
+      phase,
+      focus: getWeeklyFocus(week, data),
+      keyWorkouts: getWeeklyKeyWorkouts(week, weeks, data),
+      totalDistance: calculateWeeklyTotal(week, weeks, data),
+      intensity: getWeeklyIntensity(week, weeks)
+    });
+  }
+  
+  return plan;
+}
+
+function generatePerformanceMetrics(data) {
+  const currentPace = estimateCurrentPace(data.longest_recent_run, data.current_fitness);
+  const targetPace = calculateTargetPace(data.target_time, data.selectedRace);
+  
+  return {
+    current: {
+      estimatedPace: currentPace,
+      vo2max: estimateVO2Max(data.current_fitness),
+      weeklyMileage: data.weekly_runs
+    },
+    target: {
+      racePace: targetPace,
+      requiredVO2Max: calculateRequiredVO2Max(targetPace),
+      peakWeeklyMileage: calculatePeakMileage(data)
+    },
+    progression: {
+      paceImprovement: `${Math.round((currentPace - targetPace) / currentPace * 100)}%`,
+      timeToGoal: 'Realistiskt med rätt träning'
+    }
+  };
+}
+
+function generateInjuryPreventionPlan(data) {
+  const riskFactors = [];
+  
+  if (data.weekly_runs === '6+') {
+    riskFactors.push('Hög träningsvolym');
+  }
+  
+  if (data.injury_history && data.injury_history !== 'none') {
+    riskFactors.push('Tidigare skador');
+  }
+  
+  return {
+    riskAssessment: riskFactors.length > 0 ? 'Medel-Hög' : 'Låg',
+    preventionStrategies: [
+      'Dynamisk uppvärmning före varje pass',
+      'Styrketräning 2x/vecka fokus på core och ben',
+      'Foam rolling dagligen',
+      'Gradvis ökning av volym (max 10% per vecka)'
+    ],
+    warningSignals: [
+      'Ihållande smärta som inte försvinner med vila',
+      'Ökad morgonstelhet',
+      'Försämrad löpteknik'
+    ],
+    recoveryProtocol: {
+      daily: 'Stretching 10-15 min',
+      weekly: 'Massage eller yoga',
+      nutrition: 'Protein inom 30 min efter träning'
+    }
+  };
+}
+
+function generateWeatherPrep(race) {
+  // Weather preparation based on race location and typical conditions
+  const typicalConditions = {
+    'Stockholm Marathon': { temp: '15-20°C', conditions: 'Växlande, risk för regn' },
+    'Berlin Marathon': { temp: '12-18°C', conditions: 'Stabilt, ofta mulet' },
+    'New York Marathon': { temp: '8-15°C', conditions: 'Kyligt, blåsigt' }
+  };
+  
+  const conditions = typicalConditions[race.name] || { temp: '10-20°C', conditions: 'Varierande' };
+  
+  return {
+    expectedConditions: conditions,
+    clothingRecommendations: [
+      'Lager-på-lager för start',
+      'Tekniskt material som andas',
+      'Keps eller pannband'
+    ],
+    preparation: [
+      'Träna i liknande väder',
+      'Testa kläder på långpass',
+      'Ha backup-kläder'
+    ]
+  };
+}
+
+function generateRaceWeekSchedule(race, data) {
+  return {
+    sevenDaysBefore: {
+      training: 'Sista kvalitetspasset - 30 min tempopass',
+      nutrition: 'Börja öka kolhydratintag',
+      mental: 'Visualisera loppet'
+    },
+    threeDaysBefore: {
+      training: 'Lätt löpning 20-30 min',
+      nutrition: 'Carb-loading på allvar',
+      logistics: 'Packa väskan, kolla utrustning'
+    },
+    dayBefore: {
+      training: 'Vila eller 15 min shakeout',
+      nutrition: 'Tidig middag, undvik nya rätter',
+      preparation: 'Lägg fram alla kläder, sätt klockan'
+    },
+    raceDay: {
+      wakeUp: '3-4h före start',
+      breakfast: '3h före start - testad frukost',
+      arrival: '1h före start',
+      warmup: '20 min före start'
+    }
+  };
+}
+
+// Helper calculation functions
+function calculateWorkoutDistance(week, totalWeeks, fitness) {
+  const base = fitness === 'beginner' ? 5 : 
+               fitness === 'recreational' ? 10 : 
+               fitness === 'experienced' ? 15 : 20;
+  
+  const progression = week / totalWeeks;
+  return Math.round(base * (1 + progression * 0.5));
+}
+
+function getWeeklyKeyWorkouts(week, totalWeeks, data) {
+  const phase = week / totalWeeks;
+  
+  if (phase < 0.3) {
+    return ['Långpass', 'Lätta löprundor', 'Styrketräning'];
+  } else if (phase < 0.6) {
+    return ['Tempopass', 'Intervaller', 'Progressivt långpass'];
+  } else if (phase < 0.85) {
+    return ['Racefartpass', 'Långpass med fartväxlingar', 'Snabbdistans'];
+  } else {
+    return ['Kort racefart', 'Lätta löprundor', 'Vila'];
+  }
+}
+
+function calculateWeeklyTotal(week, totalWeeks, data) {
+  const base = parseInt(data.weekly_runs?.split('-')[0] || '3') * 10;
+  const peak = base * 1.5;
+  const current = base + (peak - base) * (week / totalWeeks) * 
+                  (week < totalWeeks - 3 ? 1 : 0.6); // Taper last 3 weeks
+  
+  return `${Math.round(current)}-${Math.round(current * 1.1)} km`;
+}
+
+function getWeeklyIntensity(week, totalWeeks) {
+  const phase = week / totalWeeks;
+  
+  if (phase < 0.3) return 'Låg-Medel';
+  if (phase < 0.6) return 'Medel';
+  if (phase < 0.85) return 'Medel-Hög';
+  return 'Låg'; // Taper
+}
+
+function estimateCurrentPace(longestRun, fitness) {
+  const paceMap = {
+    'beginner': 420, // 7:00/km
+    'recreational': 360, // 6:00/km
+    'experienced': 300, // 5:00/km
+    'competitive': 240 // 4:00/km
+  };
+  
+  return paceMap[fitness] || 360;
+}
+
+function calculateTargetPace(targetTime, race) {
+  if (!targetTime || !race.distance) return 360;
+  
+  // Parse target time (format: "3:30" or similar)
+  const [hours, minutes] = targetTime.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes;
+  
+  // Extract distance in km
+  const distanceKm = parseInt(race.distance) || 42.195;
+  
+  return Math.round((totalMinutes * 60) / distanceKm);
+}
+
+function estimateVO2Max(fitness) {
+  const vo2Map = {
+    'beginner': 35,
+    'recreational': 45,
+    'experienced': 55,
+    'competitive': 65
+  };
+  
+  return vo2Map[fitness] || 45;
+}
+
+function calculateRequiredVO2Max(targetPace) {
+  // Simplified calculation
+  return Math.round(70 - (targetPace / 10));
+}
+
+function calculatePeakMileage(data) {
+  const base = parseInt(data.weekly_runs?.split('-')[0] || '3') * 10;
+  return Math.round(base * 1.5);
 }
 
 module.exports = router;

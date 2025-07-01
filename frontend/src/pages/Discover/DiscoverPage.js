@@ -223,7 +223,14 @@ const DiscoverPage = () => {
 
   const handleStartChat = async (userId) => {
     try {
-      // Create or find direct chat with this user
+      // Check if this is a demo user (simple number ID)
+      if (typeof userId === 'number' || (typeof userId === 'string' && /^\d+$/.test(userId))) {
+        // Navigate directly to demo chat for demo users
+        navigate(`/app/chat/${userId}`);
+        return;
+      }
+      
+      // Create or find direct chat with real user
       const response = await api.post(`/chat/direct/${userId}`);
       const chatId = response.data.chat._id;
       
@@ -237,7 +244,14 @@ const DiscoverPage = () => {
 
   const handleAiMatchMessage = async (userId) => {
     try {
-      // Create or find direct chat with this user
+      // Check if this is a demo user (simple number ID or AI demo ID)
+      if (typeof userId === 'number' || (typeof userId === 'string' && (/^\d+$/.test(userId) || userId.startsWith('ai-')))) {
+        // Navigate directly to demo chat for demo users
+        navigate(`/app/chat/${userId}`);
+        return;
+      }
+      
+      // Create or find direct chat with real user
       const response = await api.post(`/chat/direct/${userId}`);
       const chatId = response.data.chat._id;
       

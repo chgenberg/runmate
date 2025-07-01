@@ -44,26 +44,88 @@ const ChatConversationPage = () => {
       setChatInfo(response.data.conversation);
     } catch (error) {
       console.error('Error loading chat info:', error);
-      // Fallback demo data
+      
+      // Enhanced fallback demo data based on chatId
       if (chatId === '1') {
         setChatInfo({
           _id: '1',
           type: 'match',
           participants: [
             { _id: user?._id, firstName: user?.firstName },
-            { _id: '2', firstName: 'Emma', lastName: 'Johansson', profileImage: '/avatar2.png', isOnline: true }
+            { _id: '1', firstName: 'Emma', lastName: 'Johansson', profileImage: '/avatar2.png', isOnline: true }
           ]
         });
       } else if (chatId === '2') {
         setChatInfo({
           _id: '2',
-          type: 'challenge',
-          name: 'Stockholm Marathon 2025',
+          type: 'match',
           participants: [
             { _id: user?._id, firstName: user?.firstName },
-            { _id: '3', firstName: 'Marcus', lastName: 'Andersson' },
-            { _id: '4', firstName: 'Sofia', lastName: 'Lindberg' },
-            { _id: '5', firstName: 'Johan', lastName: 'Nilsson' }
+            { _id: '2', firstName: 'Marcus', lastName: 'Andersson', profileImage: '/avatar2.png', isOnline: false }
+          ]
+        });
+      } else if (chatId === '3') {
+        setChatInfo({
+          _id: '3',
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: '3', firstName: 'Sofia', lastName: 'Lindberg', profileImage: '/avatar2.png', isOnline: true }
+          ]
+        });
+      } else if (chatId === 'ai-1') {
+        setChatInfo({
+          _id: 'ai-1',
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: 'ai-1', firstName: 'Lisa', lastName: 'Bergström', profileImage: '/avatar2.png', isOnline: true }
+          ]
+        });
+      } else if (chatId === 'ai-2') {
+        setChatInfo({
+          _id: 'ai-2',
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: 'ai-2', firstName: 'Johan', lastName: 'Eriksson', profileImage: '/avatar2.png', isOnline: false }
+          ]
+        });
+      } else if (chatId === 'ai-3') {
+        setChatInfo({
+          _id: 'ai-3',
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: 'ai-3', firstName: 'Anna', lastName: 'Nilsson', profileImage: '/avatar2.png', isOnline: true }
+          ]
+        });
+      } else if (chatId === 'ai-4') {
+        setChatInfo({
+          _id: 'ai-4',
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: 'ai-4', firstName: 'Erik', lastName: 'Gustafsson', profileImage: '/avatar2.png', isOnline: false }
+          ]
+        });
+      } else if (chatId === 'ai-5') {
+        setChatInfo({
+          _id: 'ai-5',
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: 'ai-5', firstName: 'Maria', lastName: 'Andersson', profileImage: '/avatar2.png', isOnline: true }
+          ]
+        });
+      } else {
+        // Default fallback for unknown chat IDs
+        setChatInfo({
+          _id: chatId,
+          type: 'match',
+          participants: [
+            { _id: user?._id, firstName: user?.firstName },
+            { _id: 'unknown', firstName: 'Okänd', lastName: 'Användare', profileImage: '/avatar2.png', isOnline: false }
           ]
         });
       }
@@ -76,30 +138,127 @@ const ChatConversationPage = () => {
       setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading messages:', error);
-      // Fallback demo messages
-      setMessages([
-        {
-          _id: '1',
-          content: 'Hej! Ska vi springa tillsammans imorgon?',
-          sender: { _id: '2', firstName: 'Emma', lastName: 'Johansson' },
-          createdAt: new Date(Date.now() - 1000 * 60 * 30),
-          readBy: [user?._id]
-        },
-        {
-          _id: '2',
-          content: 'Ja, det låter bra! Vilken tid passar dig?',
-          sender: { _id: user?._id, firstName: user?.firstName },
-          createdAt: new Date(Date.now() - 1000 * 60 * 25),
-          readBy: ['2']
-        },
-        {
-          _id: '3',
-          content: 'Hur är det med 07:00 vid Långholmen? Vi kan springa runt ön 🏃‍♀️',
-          sender: { _id: '2', firstName: 'Emma', lastName: 'Johansson' },
-          createdAt: new Date(Date.now() - 1000 * 60 * 20),
-          readBy: []
-        }
-      ]);
+      
+      // Enhanced fallback demo messages based on chatId
+      if (chatId === '1') {
+        setMessages([
+          {
+            _id: '1',
+            content: 'Hej! Såg att du också tränar för marathon. Ska vi springa tillsammans imorgon?',
+            sender: { _id: '1', firstName: 'Emma', lastName: 'Johansson' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 30),
+            readBy: [user?._id]
+          },
+          {
+            _id: '2',
+            content: 'Ja, det låter bra! Vilken tid och var passar dig?',
+            sender: { _id: user?._id, firstName: user?.firstName },
+            createdAt: new Date(Date.now() - 1000 * 60 * 25),
+            readBy: ['1']
+          },
+          {
+            _id: '3',
+            content: 'Hur är det med 07:00 vid Långholmen? Vi kan springa runt ön, ca 10km 🏃‍♀️',
+            sender: { _id: '1', firstName: 'Emma', lastName: 'Johansson' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 20),
+            readBy: []
+          }
+        ]);
+      } else if (chatId === '2') {
+        setMessages([
+          {
+            _id: '1',
+            content: 'Hej! Jag är ny på löpning och såg att du verkar vara erfaren. Har du några tips för nybörjare?',
+            sender: { _id: '2', firstName: 'Marcus', lastName: 'Andersson' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 45),
+            readBy: [user?._id]
+          },
+          {
+            _id: '2',
+            content: 'Hej Marcus! Kul att du har börjat springa! Det viktigaste är att börja långsamt och bygga upp gradvis.',
+            sender: { _id: user?._id, firstName: user?.firstName },
+            createdAt: new Date(Date.now() - 1000 * 60 * 40),
+            readBy: ['2']
+          },
+          {
+            _id: '3',
+            content: 'Tack så mycket! Skulle du kunna hjälpa mig med ett träningsprogram? 😊',
+            sender: { _id: '2', firstName: 'Marcus', lastName: 'Andersson' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 35),
+            readBy: []
+          }
+        ]);
+      } else if (chatId === '3') {
+        setMessages([
+          {
+            _id: '1',
+            content: 'Hej! Såg att du gillar trail. Känner du till några bra stigar runt Uppsala?',
+            sender: { _id: '3', firstName: 'Sofia', lastName: 'Lindberg' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 60),
+            readBy: [user?._id]
+          },
+          {
+            _id: '2',
+            content: 'Hej Sofia! Ja, jag känner några bra ställen. Har du sprungit i Hågadalen-Nåsten?',
+            sender: { _id: user?._id, firstName: user?.firstName },
+            createdAt: new Date(Date.now() - 1000 * 60 * 55),
+            readBy: ['3']
+          },
+          {
+            _id: '3',
+            content: 'Nej, men det låter spännande! Kan vi springa där tillsammans någon gång? 🌲',
+            sender: { _id: '3', firstName: 'Sofia', lastName: 'Lindberg' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 50),
+            readBy: []
+          }
+        ]);
+      } else if (chatId.startsWith('ai-')) {
+        // AI match messages
+        const aiUsers = {
+          'ai-1': { name: 'Lisa', lastName: 'Bergström' },
+          'ai-2': { name: 'Johan', lastName: 'Eriksson' },
+          'ai-3': { name: 'Anna', lastName: 'Nilsson' },
+          'ai-4': { name: 'Erik', lastName: 'Gustafsson' },
+          'ai-5': { name: 'Maria', lastName: 'Andersson' }
+        };
+        
+        const aiUser = aiUsers[chatId] || { name: 'AI', lastName: 'Match' };
+        
+        setMessages([
+          {
+            _id: '1',
+            content: `Hej! Vi fick en AI-supermatch! 🤖✨ Vill du träna tillsammans?`,
+            sender: { _id: chatId, firstName: aiUser.name, lastName: aiUser.lastName },
+            createdAt: new Date(Date.now() - 1000 * 60 * 15),
+            readBy: [user?._id]
+          },
+          {
+            _id: '2',
+            content: 'Hej! Ja, det låter kul! AI:n verkar ha hittat en bra match 😊',
+            sender: { _id: user?._id, firstName: user?.firstName },
+            createdAt: new Date(Date.now() - 1000 * 60 * 10),
+            readBy: [chatId]
+          },
+          {
+            _id: '3',
+            content: 'Perfekt! Ska vi börja med ett lugnt pass och se hur det känns?',
+            sender: { _id: chatId, firstName: aiUser.name, lastName: aiUser.lastName },
+            createdAt: new Date(Date.now() - 1000 * 60 * 5),
+            readBy: []
+          }
+        ]);
+      } else {
+        // Default fallback messages
+        setMessages([
+          {
+            _id: '1',
+            content: 'Hej! Kul att vi matchade!',
+            sender: { _id: 'unknown', firstName: 'Okänd', lastName: 'Användare' },
+            createdAt: new Date(Date.now() - 1000 * 60 * 30),
+            readBy: [user?._id]
+          }
+        ]);
+      }
     } finally {
       setLoading(false);
     }

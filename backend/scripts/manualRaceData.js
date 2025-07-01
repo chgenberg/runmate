@@ -23,141 +23,100 @@ const hardcodedRaces = [
 // Function to read and parse all race files
 const loadRacesFromFiles = () => {
   try {
-    const racesDir = path.join(__dirname, '../../complete_race_data');
-    console.log('Looking for race files in:', racesDir);
+    const racesFile = path.join(__dirname, '../../complete_race_data/all_races.txt');
     
-    const files = fs.readdirSync(racesDir);
-    console.log('Found files:', files.length);
+    if (!fs.existsSync(racesFile)) {
+      console.error('all_races.txt file not found at:', racesFile);
+      return hardcodedRaces;
+    }
     
+    const content = fs.readFileSync(racesFile, 'utf8');
     const races = [];
     
-    // Filter and sort race files (exclude index file)
-    const raceFiles = files
-      .filter(file => file.endsWith('.txt') && file !== '00_KOMPLETT_INDEX.txt')
-      .sort((a, b) => {
-        const numA = parseInt(a.split('_')[0]);
-        const numB = parseInt(b.split('_')[0]);
-        return numA - numB;
-      });
+    // Split content by race sections (## followed by number)
+    const raceBlocks = content.split(/## \d+\./);
     
-    console.log('Race files to process:', raceFiles.length);
-    
-    // Parse each race file
-    raceFiles.forEach((file, index) => {
-      const filePath = path.join(racesDir, file);
-      const content = fs.readFileSync(filePath, 'utf8');
-      const lines = content.split('\n').filter(line => line.trim());
+    // Skip the first empty element and process each race block
+    for (let i = 1; i < raceBlocks.length; i++) {
+      const block = raceBlocks[i].trim();
+      if (!block) continue;
       
-      // Parse race data from file
-      const raceData = {};
-      let currentSection = '';
-      
-      lines.forEach(line => {
-        // Parse different fields
-        if (line.startsWith('Namn: ')) {
-          raceData.name = line.replace('Namn: ', '').trim();
-        } else if (line.startsWith('Plats: ')) {
-          raceData.location = line.replace('Plats: ', '').trim();
-        } else if (line.startsWith('Distans: ')) {
-          const distanceStr = line.replace('Distans: ', '').trim();
-          raceData.distanceStr = distanceStr;
-          // Extract numeric distance
-          const match = distanceStr.match(/(\d+(?:\.\d+)?)/);
-          raceData.distance = match ? parseFloat(match[1]) : 42.195;
-        } else if (line.startsWith('Typ: ')) {
-          raceData.type = line.replace('Typ: ', '').trim().toLowerCase();
-        } else if (line.startsWith('Svårighetsgrad: ')) {
-          raceData.difficulty = line.replace('Svårighetsgrad: ', '').trim();
-        } else if (line.startsWith('Terräng: ')) {
-          raceData.terrain = line.replace('Terräng: ', '').trim();
-        } else if (line.startsWith('Höjdmeter: ')) {
-          raceData.elevation = line.replace('Höjdmeter: ', '').trim();
-        } else if (line.startsWith('Väder: ')) {
-          raceData.weather = line.replace('Väder: ', '').trim();
-        } else if (line.startsWith('Popularitet: ')) {
-          raceData.popularity = line.replace('Popularitet: ', '').trim();
-        } else if (line.startsWith('Krav: ')) {
-          raceData.requirements = line.replace('Krav: ', '').trim();
-        } else if (line.startsWith('Unik')) {
-          raceData.uniqueFeature = line.replace(/^Unikt?\s+[^-]+-lopp:\s*/, '').trim();
-        } else if (line.startsWith('Beskrivning:')) {
-          currentSection = 'description';
-        } else if (line.startsWith('Nyckelfunktioner:')) {
-          currentSection = 'features';
-          raceData.keyFeatures = [];
-        } else if (line.startsWith('Träningsfokus:')) {
-          currentSection = 'training';
-          raceData.trainingFocus = [];
-        } else if (currentSection === 'description' && !line.startsWith('Nyckelfunktioner:')) {
-          raceData.description = (raceData.description || '') + ' ' + line.trim();
-        } else if (currentSection === 'features' && line.startsWith('- ')) {
-          raceData.keyFeatures.push(line.replace('- ', '').trim());
-        } else if (currentSection === 'training' && line.startsWith('- ')) {
-          raceData.trainingFocus.push(line.replace('- ', '').trim());
+      try {
+        // Extract race name (first line)
+        const lines = block.split('\n');
+        const name = lines[0].trim();
+        
+        // Extract other fields
+        const platsMatch = block.match(/\*\*Plats:\*\* (.+)/);
+        const distansMatch = block.match(/\*\*Distans:\*\* (.+)/);
+        const typMatch = block.match(/\*\*Typ:\*\* (.+)/);
+        const svårighetsMatch = block.match(/\*\*Svårighetsgrad:\*\* (.+)/);
+        const terrängMatch = block.match(/\*\*Terräng:\*\* (.+)/);
+        const beskrivningMatch = block.match(/\*\*Beskrivning:\*\* (.+)/);
+        const söktaggarMatch = block.match(/\*\*Söktaggar:\*\* (.+)/);
+        
+        if (!name || !platsMatch || !distansMatch) {
+          console.warn(`Incomplete race data for race ${i}, skipping`);
+          continue;
         }
-      });
-      
-      // Clean up description
-      if (raceData.description) {
-        raceData.description = raceData.description.trim();
-      }
-      
-      // Create ID from name
-      raceData.id = raceData.name
-        .toLowerCase()
-        .replace(/[åä]/g, 'a')
-        .replace(/ö/g, 'o')
-        .replace(/[^a-z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-      
-      // Add ranking
-      raceData.ranking = index + 1;
-      
-      // Normalize type
-      if (raceData.type) {
-        if (raceData.type.includes('trail') || raceData.type.includes('terräng')) {
-          raceData.type = 'trail';
-        } else if (raceData.type.includes('ultra')) {
-          raceData.type = 'ultra';
-        } else if (raceData.type.includes('halvmarathon') || raceData.type.includes('half')) {
-          raceData.type = 'half-marathon';
-        } else if (raceData.type.includes('marathon')) {
-          raceData.type = 'marathon';
-        } else if (raceData.type.includes('10k') || raceData.distance === 10) {
-          raceData.type = '10k';
-        } else if (raceData.type.includes('5k') || raceData.distance === 5) {
-          raceData.type = '5k';
+        
+        // Parse distance
+        const distanceStr = distansMatch[1];
+        let distance = 42.195; // default
+        let distanceNumber = parseFloat(distanceStr.replace(/[^\d.]/g, ''));
+        if (!isNaN(distanceNumber)) {
+          distance = distanceNumber;
         }
-      }
-      
-      // Add search tags for Swedish races
-      raceData.searchTags = [];
-      if (raceData.location && raceData.location.toLowerCase().includes('sverige')) {
-        raceData.searchTags.push('Sverige', 'Sweden', 'Svenska lopp');
-      }
-      if (raceData.location && raceData.location.toLowerCase().includes('stockholm')) {
-        raceData.searchTags.push('Stockholm');
-      }
-      if (raceData.location && raceData.location.toLowerCase().includes('göteborg')) {
-        raceData.searchTags.push('Göteborg', 'Goteborg');
-      }
-      
-      // Add elevation object
-      if (raceData.elevation) {
-        raceData.elevationObj = {
-          total: raceData.elevation,
-          profile: raceData.elevation.includes('+') ? 'hilly' : 'flat'
+        
+        // Determine difficulty level
+        const svårighetsgrad = svårighetsMatch ? svårighetsMatch[1] : 'Medel';
+        let difficulty = 'Intermediate';
+        switch(svårighetsgrad.toLowerCase()) {
+          case 'nybörjare':
+            difficulty = 'Beginner';
+            break;
+          case 'medel':
+            difficulty = 'Intermediate';
+            break;
+          case 'avancerad':
+            difficulty = 'Advanced';
+            break;
+          case 'extrem':
+            difficulty = 'Expert';
+            break;
+        }
+        
+        // Create searchTags array
+        const searchTags = söktaggarMatch ? 
+          söktaggarMatch[1].split(',').map(tag => tag.trim()) : [];
+        
+        const race = {
+          id: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          name: name,
+          location: platsMatch[1],
+          distance: distance,
+          distanceStr: distanceStr,
+          type: typMatch ? typMatch[1].toLowerCase() : 'marathon',
+          difficulty: difficulty,
+          description: beskrivningMatch ? beskrivningMatch[1] : '',
+          terrain: terrängMatch ? terrängMatch[1] : '',
+          searchTags: searchTags,
+          imageUrl: `/images/races/${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.jpg`
         };
+        
+        races.push(race);
+        
+      } catch (error) {
+        console.error(`Error parsing race ${i}:`, error);
+        continue;
       }
-      
-      races.push(raceData);
-    });
+    }
     
-    console.log('Successfully parsed races:', races.length);
+    console.log(`Successfully parsed races: ${races.length}`);
     return races;
+    
   } catch (error) {
-    console.error('Error loading races from files:', error);
+    console.error('Error loading races from all_races.txt:', error);
     // Return the original hardcoded data as fallback
     return hardcodedRaces;
   }

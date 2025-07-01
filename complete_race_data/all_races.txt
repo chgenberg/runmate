@@ -1,0 +1,451 @@
+# VÄRLDENS 50 STÖRSTA LOPP - KOMPLETT DATABAS
+
+## 1. Boston Marathon
+**Plats:** Boston, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Asfalt, kuperat
+**Beskrivning:** Världens äldsta årliga marathon med strikta kvalificeringstider. Känd för sin utmanande Heartbreak Hill och fantastiska publikstöd.
+**Söktaggar:** Boston, USA, Amerika, marathon, kvalificering, april, tradition, Heartbreak Hill
+
+## 2. New York City Marathon
+**Plats:** New York, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, varierat
+**Beskrivning:** Världens största marathon med över 50,000 deltagare. Går genom alla fem boroughs i New York City.
+**Söktaggar:** New York, NYC, USA, Amerika, marathon, november, stor, stad
+
+## 3. London Marathon
+**Plats:** London, England
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, flackt
+**Beskrivning:** Ett av World Marathon Majors med fantastisk atmosfär och välgörenhetsinriktning.
+**Söktaggar:** London, England, Storbritannien, UK, marathon, april, välgörenhet
+
+## 4. Berlin Marathon
+**Plats:** Berlin, Tyskland
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Nybörjare
+**Terräng:** Asfalt, flackt
+**Beskrivning:** Känd som världens snabbaste marathon med platt bana och fantastisk organisation.
+**Söktaggar:** Berlin, Tyskland, marathon, september, snabb, rekord, platt
+
+## 5. Chicago Marathon
+**Plats:** Chicago, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, flackt
+**Beskrivning:** Del av World Marathon Majors med utmärkt organisation och publikstöd.
+**Söktaggar:** Chicago, USA, Amerika, marathon, oktober, publikstöd
+
+## 6. Tokyo Marathon
+**Plats:** Tokyo, Japan
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, lätt kuperat
+**Beskrivning:** Asiens största marathon med unik japansk kultur och organisation.
+**Söktaggar:** Tokyo, Japan, Asien, marathon, mars, kultur, organisation
+
+## 7. Stockholm Marathon
+**Plats:** Stockholm, Sverige
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, lätt kuperat
+**Beskrivning:** Vackert marathon genom Sveriges huvudstad med passage genom Gamla Stan.
+**Söktaggar:** Sverige, Stockholm, marathon, juni, huvudstad, stad, Gamla Stan
+
+## 8. Göteborgsvarvet
+**Plats:** Göteborg, Sverige
+**Distans:** 21.1 km
+**Typ:** Halvmarathon
+**Svårighetsgrad:** Nybörjare
+**Terräng:** Asfalt, flackt
+**Beskrivning:** Världens största halvmarathon med över 60,000 deltagare.
+**Söktaggar:** Sverige, Göteborg, halvmarathon, maj, stor, publikstöd
+
+## 9. Lidingöloppet
+**Plats:** Lidingö, Sverige
+**Distans:** 30 km
+**Typ:** Terränglöpning
+**Svårighetsgrad:** Medel
+**Terräng:** Trail, skog
+**Beskrivning:** Världens största terränglöpning genom Lidingös skogar.
+**Söktaggar:** Sverige, Lidingö, terräng, september, skog, trail, störst
+
+## 10. Vasaloppet
+**Plats:** Dalarna, Sverige
+**Distans:** 90 km
+**Typ:** Skidlöpning
+**Svårighetsgrad:** Avancerad
+**Terräng:** Längdskidor
+**Beskrivning:** Världens äldsta och största längdskidtävling från Sälen till Mora.
+**Söktaggar:** Sverige, Dalarna, skidor, mars, tradition, Vasaloppet, längdskidor
+
+## 11. Comrades Marathon
+**Plats:** Durban-Pietermaritzburg, Sydafrika
+**Distans:** 89 km
+**Typ:** Ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Asfalt, mycket kuperat
+**Beskrivning:** Världens äldsta och största ultramarathon med växlande riktning varje år.
+**Söktaggar:** Sydafrika, ultramarathon, juni, tradition, extrem, Comrades
+
+## 12. Western States 100
+**Plats:** Kalifornien, USA
+**Distans:** 161 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Trail, berg
+**Beskrivning:** Prestigefyllt 100-mile trail race genom Sierra Nevada bergen.
+**Söktaggar:** Kalifornien, USA, trail, ultramarathon, berg, 100 miles, juni
+
+## 13. Ultra-Trail du Mont-Blanc (UTMB)
+**Plats:** Chamonix, Frankrike
+**Distans:** 171 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, trail
+**Beskrivning:** Världens mest prestigefyllda trail ultramarathon runt Mont Blanc.
+**Söktaggar:** Frankrike, Mont Blanc, trail, ultramarathon, berg, augusti, UTMB
+
+## 14. Badwater 135
+**Plats:** Death Valley, USA
+**Distans:** 217 km
+**Typ:** Ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Asfalt, öken
+**Beskrivning:** Världens tuffaste race från Death Valley till Mount Whitney.
+**Söktaggar:** USA, Death Valley, ultramarathon, öken, extrem, juli, värme
+
+## 15. Two Oceans Marathon
+**Plats:** Kapstaden, Sydafrika
+**Distans:** 56 km
+**Typ:** Ultramarathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Asfalt, kuperat
+**Beskrivning:** Vackert race runt Kaphalvön med fantastisk utsikt.
+**Söktaggar:** Sydafrika, Kapstaden, ultramarathon, påsk, utsikt, hav
+
+## 16. Big Sur International Marathon
+**Plats:** Kalifornien, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Asfalt, kuperat
+**Beskrivning:** Spektakulär kustmarathon längs Highway 1 med havsutsikt.
+**Söktaggar:** Kalifornien, USA, kust, marathon, april, utsikt, hav
+
+## 17. Leadville Trail 100
+**Plats:** Colorado, USA
+**Distans:** 161 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Trail, höghöjd
+**Beskrivning:** Tufft höghöjdsrace på över 3000 meters höjd i Rocky Mountains.
+**Söktaggar:** Colorado, USA, trail, ultramarathon, höghöjd, augusti, berg
+
+## 18. Spartathlon
+**Plats:** Aten-Sparta, Grekland
+**Distans:** 246 km
+**Typ:** Ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Asfalt, kuperat
+**Beskrivning:** Historiskt race som följer Pheidippides rutt från antikens Grekland.
+**Söktaggar:** Grekland, ultramarathon, september, historia, antiken, Sparta
+
+## 19. Marine Corps Marathon
+**Plats:** Washington DC, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, lätt kuperat
+**Beskrivning:** "The People's Marathon" med militärt tema och patriotisk atmosfär.
+**Söktaggar:** Washington DC, USA, marathon, oktober, militär, patriotisk
+
+## 20. Hardrock 100
+**Plats:** Colorado, USA
+**Distans:** 161 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, trail, höghöjd
+**Beskrivning:** Extremt svårt bergrace i San Juan Mountains med lotteri för start.
+**Söktaggar:** Colorado, USA, trail, ultramarathon, berg, extrem, juli
+
+## 21. Midnight Sun Marathon
+**Plats:** Tromsø, Norge
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, kuperat
+**Beskrivning:** Unikt marathon under midnattssolen i norra Norge.
+**Söktaggar:** Norge, marathon, juni, midnattssol, Tromsø, norden
+
+## 22. Kauai Marathon
+**Plats:** Kauai, Hawaii, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Asfalt, kuperat
+**Beskrivning:** Tropiskt marathon på Hawaiis vackraste ö.
+**Söktaggar:** Hawaii, USA, tropiskt, september, ö, paradis
+
+## 23. Avenue of the Giants Marathon
+**Plats:** Kalifornien, USA
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, lätt kuperat
+**Beskrivning:** Marathon bland världens högsta träd i Redwood National Forest.
+**Söktaggar:** Kalifornien, USA, redwood, träd, skog, maj, natur
+
+## 24. Antarctic Ice Marathon
+**Plats:** Antarktis
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Is, snö
+**Beskrivning:** Världens sydligaste marathon på Antarktis kontinenten.
+**Söktaggar:** Antarktis, extrem, kyla, is, snö, december, unik
+
+## 25. Great Wall Marathon
+**Plats:** Kina
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Kinesiska muren, trappor
+**Beskrivning:** Extremt utmanande marathon på och runt Kinesiska muren.
+**Söktaggar:** Kina, Kinesiska muren, maj, trappor, extrem, kultur
+
+## 26. JFK 50 Mile
+**Plats:** Maryland, USA
+**Distans:** 80 km
+**Typ:** Ultramarathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Varierat
+**Beskrivning:** Amerikas äldsta 50-mile race med varierad terräng.
+**Söktaggar:** Maryland, USA, ultramarathon, november, tradition, 50 miles
+
+## 27. Barkley Marathons
+**Plats:** Tennessee, USA
+**Distans:** 161 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, skog, extrem
+**Beskrivning:** Världens svåraste race med hemlig ansökan och extrem svårighetsgrad.
+**Söktaggar:** Tennessee, USA, extrem, hemlig, mars, omöjlig, Barkley
+
+## 28. Pikes Peak Marathon
+**Plats:** Colorado, USA
+**Distans:** 42.195 km
+**Typ:** Bergmarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, trail
+**Beskrivning:** "America's Ultimate Challenge" upp och ner för Pikes Peak.
+**Söktaggar:** Colorado, USA, berg, augusti, extrem, höghöjd
+
+## 29. Sahara Marathon
+**Plats:** Västsahara
+**Distans:** 42.195 km
+**Typ:** Ökenmarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Sand, öken
+**Beskrivning:** Marathon genom Saharaöknen för att stödja sahrawiska flyktingar.
+**Söktaggar:** Sahara, öken, februari, sand, välgörenhet, Afrika
+
+## 30. Big Five Marathon
+**Plats:** Sydafrika
+**Distans:** 42.195 km
+**Typ:** Safari marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Savann, grus
+**Beskrivning:** Marathon genom afrikansk savann med möjlighet att se Big Five.
+**Söktaggar:** Sydafrika, safari, djur, juni, savann, Afrika
+
+## 31. Kilimanjaro Marathon
+**Plats:** Tanzania
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Grus, savann
+**Beskrivning:** Marathon i skuggan av Afrikas högsta berg.
+**Söktaggar:** Tanzania, Afrika, Kilimanjaro, februari, berg, savann
+
+## 32. Medoc Marathon
+**Plats:** Bordeaux, Frankrike
+**Distans:** 42.195 km
+**Typ:** Vinmarathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, vingårdar
+**Beskrivning:** Marathon genom vingårdar med vinprovning längs banan.
+**Söktaggar:** Frankrike, Bordeaux, vin, september, vingårdar, provning
+
+## 33. Tor des Géants
+**Plats:** Italien
+**Distans:** 330 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, Alperna
+**Beskrivning:** Ett av världens längsta trail races genom italienska Alperna.
+**Söktaggar:** Italien, Alperna, ultramarathon, september, extrem, berg
+
+## 34. Laugavegur Ultra Marathon
+**Plats:** Island
+**Distans:** 55 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Vulkanisk, berg
+**Beskrivning:** Spektakulärt race genom Islands unika vulkaniska landskap.
+**Söktaggar:** Island, vulkanisk, juli, berg, natur, spektakulärt
+
+## 35. Patagonian International Marathon
+**Plats:** Chile
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Trail, berg
+**Beskrivning:** Marathon genom Patagoniens vilda natur med glaciärer och berg.
+**Söktaggar:** Chile, Patagonia, september, glaciärer, berg, natur
+
+## 36. Inca Trail Marathon
+**Plats:** Peru
+**Distans:** 42.195 km
+**Typ:** Kulturmarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, sten
+**Beskrivning:** Marathon till Machu Picchu längs den historiska Inkaleden.
+**Söktaggar:** Peru, Machu Picchu, juni, historia, Inca, höghöjd
+
+## 37. Everest Marathon
+**Plats:** Nepal
+**Distans:** 42.195 km
+**Typ:** Höghöjdsmarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, höghöjd
+**Beskrivning:** Världens högst belägna marathon vid Everest basläger.
+**Söktaggar:** Nepal, Everest, maj, höghöjd, extrem, Himalaya
+
+## 38. Jungfrau Marathon
+**Plats:** Schweiz
+**Distans:** 42.195 km
+**Typ:** Bergmarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, Alperna
+**Beskrivning:** Spektakulärt bergmarathon i schweiziska Alperna.
+**Söktaggar:** Schweiz, Alperna, september, berg, spektakulärt
+
+## 39. Zermatt Marathon
+**Plats:** Schweiz
+**Distans:** 42.195 km
+**Typ:** Bergmarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, Alperna
+**Beskrivning:** Utmanande bergmarathon med Matterhorn som bakgrund.
+**Söktaggar:** Schweiz, Zermatt, juli, Matterhorn, berg, Alperna
+
+## 40. Transylvania 100K
+**Plats:** Rumänien
+**Distans:** 100 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Berg, skog
+**Beskrivning:** Mystiskt ultramarathon genom Transsylvaniens skogar och berg.
+**Söktaggar:** Rumänien, Transylvania, oktober, skog, berg, mystisk
+
+## 41. Dodo Trail
+**Plats:** Mauritius
+**Distans:** 50 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Tropisk, berg
+**Beskrivning:** Tropiskt trail race på den vackra ön Mauritius.
+**Söktaggar:** Mauritius, tropiskt, augusti, ö, paradis, trail
+
+## 42. Tarawera Ultramarathon
+**Plats:** Nya Zeeland
+**Distans:** 102 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Extrem
+**Terräng:** Vulkanisk, skog
+**Beskrivning:** Ultramarathon genom Nya Zeelands vulkaniska landskap.
+**Söktaggar:** Nya Zeeland, vulkanisk, februari, skog, landskap
+
+## 43. Kepler Challenge
+**Plats:** Nya Zeeland
+**Distans:** 60 km
+**Typ:** Trail ultramarathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Berg, skog
+**Beskrivning:** Vackert trail race genom Fiordland National Park.
+**Söktaggar:** Nya Zeeland, Fiordland, december, nationalpark, berg
+
+## 44. Gold Coast Marathon
+**Plats:** Australien
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, kust
+**Beskrivning:** Snabbt kustmarathon längs Australiens Gold Coast.
+**Söktaggar:** Australien, Gold Coast, juli, kust, strand, snabb
+
+## 45. Melbourne Marathon
+**Plats:** Australien
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, stad
+**Beskrivning:** Stadsmarathon genom Australiens kulturella huvudstad.
+**Söktaggar:** Australien, Melbourne, oktober, stad, kultur
+
+## 46. Sydney Marathon
+**Plats:** Australien
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, kust
+**Beskrivning:** Ikoniskt marathon med Sydney Harbour Bridge och Opera House.
+**Söktaggar:** Australien, Sydney, september, hamn, ikonisk, Opera House
+
+## 47. Great Ocean Road Marathon
+**Plats:** Australien
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Avancerad
+**Terräng:** Asfalt, kust, kuperat
+**Beskrivning:** Spektakulärt kustmarathon längs Great Ocean Road.
+**Söktaggar:** Australien, kust, maj, Great Ocean Road, spektakulärt
+
+## 48. Kagoshima Marathon
+**Plats:** Japan
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, lätt kuperat
+**Beskrivning:** Japanskt marathon med vulkanen Sakurajima som bakgrund.
+**Söktaggar:** Japan, Kagoshima, mars, vulkan, Sakurajima
+
+## 49. Fukuoka Marathon
+**Plats:** Japan
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, flackt
+**Beskrivning:** Prestigefyllt japanskt marathon känt för snabba tider.
+**Söktaggar:** Japan, Fukuoka, december, snabb, prestige
+
+## 50. Osaka Marathon
+**Plats:** Japan
+**Distans:** 42.195 km
+**Typ:** Marathon
+**Svårighetsgrad:** Medel
+**Terräng:** Asfalt, flackt
+**Beskrivning:** Populärt stadsmarathon genom Japans kökshuvudstad.
+**Söktaggar:** Japan, Osaka, december, stad, mat, kultur 

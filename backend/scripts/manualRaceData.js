@@ -17,7 +17,8 @@ const hardcodedRaces = [
     description: 'Världens äldsta årliga marathon med strikta kvalificeringstider.',
     terrain: 'Road, hilly',
     searchTags: ['Boston', 'USA', 'Amerika', 'marathon', 'kvalificering', 'april'],
-    imageUrl: '/images/races/boston-marathon.jpg'
+    imageUrl: '/images/races/boston-marathon.jpg',
+    ranking: 1
   },
   {
     id: 'new-york-city-marathon',
@@ -30,7 +31,8 @@ const hardcodedRaces = [
     description: 'Världens största marathon med över 50,000 deltagare.',
     terrain: 'Road, varied',
     searchTags: ['New York', 'NYC', 'USA', 'Amerika', 'marathon', 'november'],
-    imageUrl: '/images/races/nyc-marathon.jpg'
+    imageUrl: '/images/races/nyc-marathon.jpg',
+    ranking: 2
   },
   {
     id: 'london-marathon',
@@ -43,7 +45,8 @@ const hardcodedRaces = [
     description: 'Ett av World Marathon Majors med fantastisk atmosfär.',
     terrain: 'Road, flat',
     searchTags: ['London', 'England', 'Storbritannien', 'UK', 'marathon', 'april'],
-    imageUrl: '/images/races/london-marathon.jpg'
+    imageUrl: '/images/races/london-marathon.jpg',
+    ranking: 3
   },
   {
     id: 'berlin-marathon',
@@ -56,7 +59,8 @@ const hardcodedRaces = [
     description: 'Känd som världens snabbaste marathon med platt bana.',
     terrain: 'Road, flat',
     searchTags: ['Berlin', 'Tyskland', 'marathon', 'september', 'snabb', 'rekord'],
-    imageUrl: '/images/races/berlin-marathon.jpg'
+    imageUrl: '/images/races/berlin-marathon.jpg',
+    ranking: 4
   },
   {
     id: 'chicago-marathon',
@@ -69,7 +73,8 @@ const hardcodedRaces = [
     description: 'Del av World Marathon Majors med utmärkt organisation.',
     terrain: 'Road, flat',
     searchTags: ['Chicago', 'USA', 'Amerika', 'marathon', 'oktober'],
-    imageUrl: '/images/races/chicago-marathon.jpg'
+    imageUrl: '/images/races/chicago-marathon.jpg',
+    ranking: 5
   },
   {
     id: 'tokyo-marathon',
@@ -82,7 +87,8 @@ const hardcodedRaces = [
     description: 'Asiens största marathon med unik japansk kultur.',
     terrain: 'Road, slightly hilly',
     searchTags: ['Tokyo', 'Japan', 'Asien', 'marathon', 'mars'],
-    imageUrl: '/images/races/tokyo-marathon.jpg'
+    imageUrl: '/images/races/tokyo-marathon.jpg',
+    ranking: 6
   },
   {
     id: 'stockholm-marathon',
@@ -95,7 +101,8 @@ const hardcodedRaces = [
     description: 'Vackert marathon genom Sveriges huvudstad.',
     terrain: 'Road, slightly hilly',
     searchTags: ['Sverige', 'Stockholm', 'marathon', 'juni', 'huvudstad'],
-    imageUrl: '/images/races/stockholm-marathon.jpg'
+    imageUrl: '/images/races/stockholm-marathon.jpg',
+    ranking: 7
   },
   {
     id: 'goteborgsvarvet',
@@ -108,7 +115,8 @@ const hardcodedRaces = [
     description: 'Världens största halvmarathon med över 60,000 deltagare.',
     terrain: 'Road, flat',
     searchTags: ['Sverige', 'Göteborg', 'halvmarathon', 'maj', 'stor'],
-    imageUrl: '/images/races/goteborgsvarvet.jpg'
+    imageUrl: '/images/races/goteborgsvarvet.jpg',
+    ranking: 8
   },
   {
     id: 'lidingoloppet',
@@ -121,7 +129,8 @@ const hardcodedRaces = [
     description: 'Världens största terränglöpning genom Lidingös skogar.',
     terrain: 'Trail, forest',
     searchTags: ['Sverige', 'Lidingö', 'terräng', 'september', 'skog'],
-    imageUrl: '/images/races/lidingoloppet.jpg'
+    imageUrl: '/images/races/lidingoloppet.jpg',
+    ranking: 9
   },
   {
     id: 'vasaloppet',
@@ -134,7 +143,8 @@ const hardcodedRaces = [
     description: 'Världens äldsta och största längdskidtävling.',
     terrain: 'Cross-country ski',
     searchTags: ['Sverige', 'Dalarna', 'skidor', 'mars', 'tradition'],
-    imageUrl: '/images/races/vasaloppet.jpg'
+    imageUrl: '/images/races/vasaloppet.jpg',
+    ranking: 10
   },
   {
     id: 'comrades-marathon',
@@ -147,7 +157,8 @@ const hardcodedRaces = [
     description: 'Världens äldsta och största ultramarathon.',
     terrain: 'Road, very hilly',
     searchTags: ['Sydafrika', 'ultramarathon', 'juni', 'tradition'],
-    imageUrl: '/images/races/comrades.jpg'
+    imageUrl: '/images/races/comrades.jpg',
+    ranking: 11
   },
   {
     id: 'western-states-100',
@@ -160,7 +171,8 @@ const hardcodedRaces = [
     description: 'Prestigefyllt 100-mile trail race genom Sierra Nevada.',
     terrain: 'Trail, mountains',
     searchTags: ['Kalifornien', 'USA', 'trail', 'ultramarathon', 'berg'],
-    imageUrl: '/images/races/western-states.jpg'
+    imageUrl: '/images/races/western-states.jpg',
+    ranking: 12
   },
   {
     id: 'utmb',
@@ -173,7 +185,8 @@ const hardcodedRaces = [
     description: 'Världens mest prestigefyllda trail ultramarathon.',
     terrain: 'Mountain trail',
     searchTags: ['Frankrike', 'Mont Blanc', 'trail', 'ultramarathon', 'berg'],
-    imageUrl: '/images/races/utmb.jpg'
+    imageUrl: '/images/races/utmb.jpg',
+    ranking: 13
   },
   {
     id: 'badwater-135',
@@ -186,7 +199,8 @@ const hardcodedRaces = [
     description: 'Världens tuffaste race från Death Valley till Mount Whitney.',
     terrain: 'Road, desert',
     searchTags: ['USA', 'Death Valley', 'ultramarathon', 'öken', 'extrem'],
-    imageUrl: '/images/races/badwater.jpg'
+    imageUrl: '/images/races/badwater.jpg',
+    ranking: 14
   },
   {
     id: 'two-oceans-marathon',
@@ -199,7 +213,8 @@ const hardcodedRaces = [
     description: 'Vackert race runt Kaphalvön med fantastisk utsikt.',
     terrain: 'Road, hilly',
     searchTags: ['Sydafrika', 'Kapstaden', 'ultramarathon', 'påsk', 'utsikt'],
-    imageUrl: '/images/races/two-oceans.jpg'
+    imageUrl: '/images/races/two-oceans.jpg',
+    ranking: 15
   }
 ];
 
@@ -288,7 +303,8 @@ const loadRacesFromFiles = () => {
           description: beskrivningMatch ? beskrivningMatch[1] : '',
           terrain: terrängMatch ? terrängMatch[1] : '',
           searchTags: searchTags,
-          imageUrl: `/images/races/${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.jpg`
+          imageUrl: `/images/races/${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.jpg`,
+          ranking: i // Add ranking based on position in file
         };
         
         races.push(race);
@@ -383,7 +399,7 @@ const getRacesForAICoach = () => {
     elevation: race.elevation,
     weather: race.weather,
     searchTags: race.searchTags || [],
-    ranking: race.ranking,
+    ranking: race.ranking || 0, // Include ranking
     imageUrl: race.imageUrl || '/images/races/default.jpg'
   }));
 };

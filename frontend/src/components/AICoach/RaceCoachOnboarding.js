@@ -37,7 +37,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
     const loadRaces = async () => {
       try {
         console.log('Loading races from API...');
-        const response = await api.get('/races/race-files');
+        const response = await api.get('/races');
         console.log('API response:', response.data);
         
         if (response.data.success && response.data.races) {
@@ -95,11 +95,58 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
     setFilteredRaces(filtered);
   }, [searchTerm, races]);
 
+  // Count races by type
+  const countRacesByType = (type) => {
+    return races.filter(race => {
+      const raceType = race.type?.toLowerCase() || '';
+      const distance = race.distance?.toLowerCase() || '';
+      const terrain = race.terrain?.toLowerCase() || '';
+      
+      switch(type) {
+        case 'marathon':
+          return raceType.includes('marathon') && !raceType.includes('ultra') && !raceType.includes('halv');
+        case 'halvmarathon':
+          return raceType.includes('halvmarathon') || distance.includes('21');
+        case 'ultra':
+          return raceType.includes('ultra') || (distance.includes('km') && parseInt(distance) > 50);
+        case 'trail':
+          return raceType.includes('trail') || terrain.includes('trail') || terrain.includes('berg');
+        default:
+          return true;
+      }
+    }).length;
+  };
+
+  // Count races by location
+  const countRacesByLocation = (location) => {
+    return races.filter(race => {
+      const raceLocation = race.location?.toLowerCase() || '';
+      const tags = race.searchTags?.map(t => t.toLowerCase()) || [];
+      
+      switch(location) {
+        case 'sverige':
+          return raceLocation.includes('sverige') || tags.includes('sverige');
+        case 'usa':
+          return raceLocation.includes('usa') || tags.includes('usa') || tags.includes('amerika');
+        case 'europa':
+          return ['england', 'frankrike', 'tyskland', 'schweiz', 'italien', 'spanien', 'norge'].some(country => 
+            raceLocation.includes(country) || tags.includes(country)
+          );
+        case 'asien':
+          return ['japan', 'kina', 'nepal', 'indien'].some(country => 
+            raceLocation.includes(country) || tags.includes(country)
+          );
+        default:
+          return true;
+      }
+    }).length;
+  };
+
   const questions = [
     {
-      id: 'race_selection',
+      id: 'race_picker',
       type: 'race_picker',
-      question: 'Vilket lopp vill du förbereda dig för?',
+      question: 'Vilket lopp vill du träna för?',
       description: 'Välj från de 50 största loppen i världen'
     },
     {
@@ -113,10 +160,9 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       type: 'single',
       question: 'Hur skulle du beskriva din nuvarande kondition?',
       options: [
-        { value: 'beginner', label: 'Nybörjare - Kan knappt springa 5km', icon: '🌱' },
+        { value: 'beginner', label: 'Nybörjare - Kan springa 5km', icon: '🌱' },
         { value: 'recreational', label: 'Motionär - Springer regelbundet', icon: '🏃' },
-        { value: 'experienced', label: 'Erfaren - Har sprungit flera lopp', icon: '💪' },
-        { value: 'competitive', label: 'Tävlingslöpare - Tränar seriöst', icon: '🏆' }
+        { value: 'experienced', label: 'Erfaren - Har sprungit flera lopp', icon: '💪' }
       ]
     },
     {
@@ -124,11 +170,10 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       type: 'single',
       question: 'Hur många gånger per vecka kan du träna?',
       options: [
-        { value: '2-3', label: '2-3 gånger', icon: '📅' },
-        { value: '3-4', label: '3-4 gånger', icon: '📆' },
-        { value: '4-5', label: '4-5 gånger', icon: '🗓️' },
-        { value: '5-6', label: '5-6 gånger', icon: '📊' },
-        { value: '6+', label: '6+ gånger', icon: '🚀' }
+        { value: '3', label: '3 gånger per vecka', icon: '📅' },
+        { value: '4', label: '4 gånger per vecka', icon: '📆' },
+        { value: '5', label: '5 gånger per vecka', icon: '🗓️' },
+        { value: '6', label: '6+ gånger per vecka', icon: '🚀' }
       ]
     },
     {
@@ -136,12 +181,11 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       type: 'single',
       question: 'Vad är din längsta löprunda senaste månaden?',
       options: [
-        { value: '0-5', label: '0-5 km', icon: '🏁' },
-        { value: '5-10', label: '5-10 km', icon: '🏃‍♂️' },
-        { value: '10-15', label: '10-15 km', icon: '🏃‍♀️' },
-        { value: '15-21', label: '15-21 km', icon: '🏅' },
-        { value: '21-30', label: '21-30 km', icon: '🥇' },
-        { value: '30+', label: '30+ km', icon: '🏆' }
+        { value: '5', label: 'Under 5 km', icon: '🏁' },
+        { value: '10', label: '5-10 km', icon: '🏃‍♂️' },
+        { value: '15', label: '10-15 km', icon: '🏃‍♀️' },
+        { value: '21', label: '15-21 km', icon: '🏅' },
+        { value: '30', label: 'Över 21 km', icon: '🏆' }
       ]
     },
     {
@@ -151,109 +195,8 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       options: [
         { value: 'finish', label: 'Bara ta mig i mål', icon: '🎯' },
         { value: 'enjoy', label: 'Njuta av upplevelsen', icon: '😊' },
-        { value: 'pb', label: 'Sätta personbästa', icon: '⚡' },
-        { value: 'podium', label: 'Topplacering', icon: '🥇' }
+        { value: 'pb', label: 'Sätta personbästa', icon: '⚡' }
       ]
-    },
-    {
-      id: 'target_time',
-      type: 'text',
-      question: 'Har du en måltid för loppet?',
-      placeholder: 'T.ex. 3:30:00 eller "Ingen specifik tid"',
-      validation: (value) => value && value.trim().length > 0
-    },
-    {
-      id: 'cross_training',
-      type: 'multiple',
-      question: 'Vilken annan träning gör du?',
-      options: [
-        { value: 'gym', label: 'Gym/Styrketräning', icon: '🏋️' },
-        { value: 'cycling', label: 'Cykling', icon: '🚴' },
-        { value: 'swimming', label: 'Simning', icon: '🏊' },
-        { value: 'yoga', label: 'Yoga/Stretching', icon: '🧘' },
-        { value: 'none', label: 'Ingen annan träning', icon: '❌' }
-      ]
-    },
-    {
-      id: 'injury_history',
-      type: 'text',
-      question: 'Har du några skador eller fysiska begränsningar?',
-      placeholder: 'Beskriv eventuella skador eller skriv "Inga skador"',
-      validation: (value) => value && value.trim().length > 0
-    },
-    {
-      id: 'nutrition_habits',
-      type: 'single',
-      question: 'Hur skulle du beskriva dina kostvanor?',
-      options: [
-        { value: 'excellent', label: 'Utmärkta - Mycket medveten', icon: '🥗' },
-        { value: 'good', label: 'Bra - Försöker äta hälsosamt', icon: '🍎' },
-        { value: 'average', label: 'OK - Kan förbättras', icon: '🍽️' },
-        { value: 'poor', label: 'Dåliga - Behöver hjälp', icon: '🍔' }
-      ]
-    },
-    {
-      id: 'sleep_hours',
-      type: 'single',
-      question: 'Hur många timmar sover du per natt?',
-      options: [
-        { value: '5-6', label: '5-6 timmar', icon: '😴' },
-        { value: '6-7', label: '6-7 timmar', icon: '😊' },
-        { value: '7-8', label: '7-8 timmar', icon: '😃' },
-        { value: '8+', label: '8+ timmar', icon: '🤩' }
-      ]
-    },
-    {
-      id: 'recovery_priority',
-      type: 'single',
-      question: 'Hur prioriterar du återhämtning?',
-      options: [
-        { value: 'high', label: 'Högt - Stretching, foam rolling, etc', icon: '💯' },
-        { value: 'medium', label: 'Medel - Gör det ibland', icon: '👍' },
-        { value: 'low', label: 'Lågt - Sällan eller aldrig', icon: '🤷' }
-      ]
-    },
-    {
-      id: 'race_experience',
-      type: 'single',
-      question: 'Har du sprungit liknande lopp tidigare?',
-      options: [
-        { value: 'never', label: 'Aldrig', icon: '🆕' },
-        { value: '1-2', label: '1-2 lopp', icon: '✌️' },
-        { value: '3-5', label: '3-5 lopp', icon: '🖐️' },
-        { value: '5+', label: '5+ lopp', icon: '💪' }
-      ]
-    },
-    {
-      id: 'training_preference',
-      type: 'multiple',
-      question: 'Vilken typ av träning föredrar du?',
-      options: [
-        { value: 'intervals', label: 'Intervaller', icon: '⚡' },
-        { value: 'tempo', label: 'Tempopass', icon: '🏃' },
-        { value: 'long', label: 'Långpass', icon: '⏱️' },
-        { value: 'easy', label: 'Lugna pass', icon: '🚶' },
-        { value: 'hills', label: 'Backlöpning', icon: '⛰️' }
-      ]
-    },
-    {
-      id: 'equipment',
-      type: 'multiple',
-      question: 'Vilken träningsutrustning har du tillgång till?',
-      options: [
-        { value: 'watch', label: 'GPS-klocka', icon: '⌚' },
-        { value: 'hr', label: 'Pulsmätare', icon: '❤️' },
-        { value: 'treadmill', label: 'Löpband', icon: '🏃‍♂️' },
-        { value: 'track', label: 'Löparbana', icon: '🏟️' },
-        { value: 'trails', label: 'Terrängstigar', icon: '🌲' }
-      ]
-    },
-    {
-      id: 'biggest_challenge',
-      type: 'text',
-      question: 'Vad ser du som din största utmaning inför loppet?',
-      placeholder: 'T.ex. "Distansen", "Höjdmeter", "Tidsbrist"...',
-      validation: (value) => value && value.trim().length > 0
     }
   ];
 
@@ -429,32 +372,111 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
       case 'race_picker':
         return (
           <div className="space-y-4">
-            {/* Popular Categories */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-              <button
-                onClick={() => setSearchTerm('Marathon')}
-                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
-              >
-                🏃‍♂️ Marathon
-              </button>
-              <button
-                onClick={() => setSearchTerm('Ultra')}
-                className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-200 transition-colors"
-              >
-                🏔️ Ultra
-              </button>
-              <button
-                onClick={() => setSearchTerm('Sverige')}
-                className="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors"
-              >
-                🇸🇪 Sverige
-              </button>
-              <button
-                onClick={() => setSearchTerm('')}
-                className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-              >
-                🌍 Alla lopp
-              </button>
+            {/* Filter buttons */}
+            <div className="space-y-3">
+              {/* Type filters */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Filtrera efter typ:</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm === '' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    🌍 Alla lopp ({races.length})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('Marathon')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'marathon' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    }`}
+                  >
+                    🏃‍♂️ Marathon ({countRacesByType('marathon')})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('Halvmarathon')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'halvmarathon' 
+                        ? 'bg-green-600 text-white' 
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    }`}
+                  >
+                    🏃 Halvmarathon ({countRacesByType('halvmarathon')})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('Ultra')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'ultra' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                    }`}
+                  >
+                    🏔️ Ultramarathon ({countRacesByType('ultra')})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('Trail')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'trail' 
+                        ? 'bg-orange-600 text-white' 
+                        : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                    }`}
+                  >
+                    🌲 Trail ({countRacesByType('trail')})
+                  </button>
+                </div>
+              </div>
+
+              {/* Location filters */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Populära platser:</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSearchTerm('Sverige')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'sverige' 
+                        ? 'bg-yellow-600 text-white' 
+                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                    }`}
+                  >
+                    🇸🇪 Sverige ({countRacesByLocation('sverige')})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('USA')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'usa' 
+                        ? 'bg-red-600 text-white' 
+                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                    }`}
+                  >
+                    🇺🇸 USA ({countRacesByLocation('usa')})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('Europa')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'europa' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    }`}
+                  >
+                    🇪🇺 Europa ({countRacesByLocation('europa')})
+                  </button>
+                  <button
+                    onClick={() => setSearchTerm('Asien')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      searchTerm.toLowerCase() === 'asien' 
+                        ? 'bg-pink-600 text-white' 
+                        : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                    }`}
+                  >
+                    🌏 Asien ({countRacesByLocation('asien')})
+                  </button>
+                </div>
+              </div>
             </div>
             
             <div className="relative">
@@ -552,10 +574,10 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                                   <div
                                     key={i}
                                     className={`w-2 h-2 rounded-full ${
-                                      i < (race.difficulty && String(race.difficulty).includes('5') ? 5 : 
-                                       race.difficulty && String(race.difficulty).includes('4') ? 4 : 
-                                       race.difficulty && String(race.difficulty).includes('3') ? 3 : 
-                                       race.difficulty && String(race.difficulty).includes('2') ? 2 : 1)
+                                      i < (race.difficulty === 'Expert' ? 5 : 
+                                           race.difficulty === 'Advanced' ? 4 : 
+                                           race.difficulty === 'Intermediate' ? 3 : 
+                                           race.difficulty === 'Beginner' ? 2 : 1)
                                         ? 'bg-orange-500'
                                         : 'bg-gray-300'
                                     }`}

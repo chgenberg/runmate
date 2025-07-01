@@ -481,31 +481,33 @@ const DiscoverPage = () => {
                   
                   {/* Action buttons for desktop list view */}
                   {!isMobile && viewMode === 'scroll' && (
-                    <div className="flex gap-2 mt-4 justify-center">
+                    <div className="flex gap-3 mt-4 justify-center">
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleSwipe('left', runner.id)}
                         className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                        title="Inte intresserad"
                       >
-                        <X className="w-5 h-5 md:w-8 md:h-8" />
+                        <X className="w-5 h-5" />
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => navigate(`/profile/${runner.id}`)}
-                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
                         title="Visa profil"
                       >
-                        <User className="w-5 h-5 md:w-8 md:h-8" />
+                        <User className="w-5 h-5" />
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleStartChat(runner.id)}
-                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                        className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-purple-500 text-purple-500 hover:bg-purple-50 transition-colors"
+                        title="Skicka meddelande"
                       >
-                        <MessageCircle className="w-5 h-5 md:w-8 md:h-8" />
+                        <MessageCircle className="w-5 h-5" />
                       </motion.button>
                       {isAiMatch ? (
                         <motion.button
@@ -513,17 +515,19 @@ const DiscoverPage = () => {
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleAiMatchMessage(runner.id)}
                           className="w-12 h-12 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
+                          title="AI Supermatch"
                         >
-                          <Sparkles className="w-5 h-5 md:w-8 md:h-8" />
+                          <Sparkles className="w-5 h-5" />
                         </motion.button>
                       ) : (
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleSwipe('right', runner.id)}
-                          className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                          className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                          title="Gilla"
                         >
-                          <Heart className="w-5 h-5 md:w-8 md:h-8" />
+                          <Heart className="w-5 h-5" />
                         </motion.button>
                       )}
                     </div>
@@ -1054,43 +1058,45 @@ const DiscoverPage = () => {
 
                     {/* Action Buttons for Stack Mode Desktop */}
                     {hasMoreRunners && window.innerWidth >= 768 && (
-                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-3 z-50">
+                      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleSwipe('left', currentRunner.id)}
-                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                          className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
+                          title="Inte intresserad"
                         >
-                          <X className="w-8 h-8" />
+                          <X className="w-6 h-6" />
                         </motion.button>
                         
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => navigate(`/profile/${currentRunner.id}`)}
-                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
+                          className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
                           title="Visa profil"
                         >
-                          <User className="w-8 h-8" />
+                          <User className="w-6 h-6" />
                         </motion.button>
                         
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleStartChat(currentRunner.id)}
-                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                          className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-purple-500 text-purple-500 hover:bg-purple-50 transition-colors"
                           title="Skicka meddelande"
                         >
-                          <MessageCircle className="w-8 h-8" />
+                          <MessageCircle className="w-6 h-6" />
                         </motion.button>
                         
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleSwipe('right', currentRunner.id)}
-                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                          className="w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
+                          title="Gilla"
                         >
-                          <Heart className="w-8 h-8" />
+                          <Heart className="w-6 h-6" />
                         </motion.button>
                       </div>
                     )}

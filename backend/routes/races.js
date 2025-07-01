@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     const races = await Race.find(query)
       .sort({ popularity: -1, name: 1 })
       .limit(parseInt(limit))
-      .select('id name location distance type difficulty description keyFeatures imageUrl terrain elevation weather requirements');
+      .select('id name location distance type difficulty description keyFeatures imageUrl terrain elevation weather requirements ranking');
     
     // Om inga lopp finns i databasen, använd manual data
     if (races.length === 0) {

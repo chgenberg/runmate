@@ -1972,56 +1972,44 @@ const generateRaceWeeklySchedule = (raceInfo, userAnswers, appleHealthData = nul
 
 // Get race information from race ID
 const getRaceInfo = (raceId) => {
-  const races = {
-    'boston_marathon': {
-      name: 'Boston Marathon',
-      distance: '42.2km',
-      location: 'Boston, USA',
-      terrain: 'Flat',
-      difficulty: 'Hög',
-      elevation: '120m'
-    },
-    'stockholm_marathon': {
-      name: 'Stockholm Marathon',
-      distance: '42.2km', 
-      location: 'Stockholm, Sverige',
-      terrain: 'Flat',
-      difficulty: 'Medel',
-      elevation: '80m'
-    },
-    'new_york_marathon': {
-      name: 'New York Marathon',
-      distance: '42.2km',
-      location: 'New York, USA', 
-      terrain: 'Hilly',
-      difficulty: 'Hög',
-      elevation: '200m'
-    },
-    'london_marathon': {
-      name: 'London Marathon',
-      distance: '42.2km',
-      location: 'London, UK',
-      terrain: 'Flat',
-      difficulty: 'Medel',
-      elevation: '60m'
-    },
-    'berlin_marathon': {
-      name: 'Berlin Marathon',
-      distance: '42.2km',
-      location: 'Berlin, Tyskland',
-      terrain: 'Flat',
-      difficulty: 'Låg',
-      elevation: '40m'
-    }
-  };
+  // Import the races from manualRaceData
+  const { worldsTop50Races } = require('../scripts/manualRaceData');
   
-  return races[raceId] || {
+  // Find the race by ID
+  const race = worldsTop50Races.find(r => 
+    r.id === raceId || 
+    r.id === raceId.replace(/_/g, '-') || 
+    r.id === raceId.replace(/-/g, '_')
+  );
+  
+  if (race) {
+    return {
+      id: race.id,
+      name: race.name,
+      distance: race.distanceStr || `${race.distance} km`,
+      location: race.location,
+      terrain: race.terrain || 'Varierad',
+      difficulty: race.difficulty === 'Beginner' ? 'Låg' : 
+                  race.difficulty === 'Intermediate' ? 'Medel' :
+                  race.difficulty === 'Advanced' ? 'Hög' :
+                  race.difficulty === 'Expert' ? 'Extrem' : 'Medel',
+      elevation: race.elevation || 'Okänd',
+      description: race.description,
+      searchTags: race.searchTags || []
+    };
+  }
+  
+  // Fallback if race not found
+  return {
+    id: raceId,
     name: 'Okänt lopp',
     distance: '42.2km',
     location: 'Okänd plats',
     terrain: 'Varierad',
     difficulty: 'Medel',
-    elevation: '100m'
+    elevation: '100m',
+    description: 'Information om detta lopp kunde inte hittas.',
+    searchTags: []
   };
 };
 

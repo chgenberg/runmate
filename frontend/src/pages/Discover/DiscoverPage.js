@@ -426,43 +426,7 @@ const DiscoverPage = () => {
                   )}
                 </div>
 
-                {/* Action Buttons - Fixed at bottom for mobile */}
-                <div className="p-4 bg-gray-50 border-t border-gray-200">
-                  <div className="flex gap-3 justify-center">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleSwipe('left', runner.id)}
-                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500"
-                    >
-                      <X className="w-8 h-8" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => navigate(`/app/profile/${runner.id}`)}
-                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-400 text-gray-600"
-                    >
-                      <User className="w-8 h-8" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleStartChat(runner.id)}
-                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500"
-                    >
-                      <MessageCircle className="w-8 h-8" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleSwipe('right', runner.id)}
-                      className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500"
-                    >
-                      <Heart className="w-8 h-8" />
-                    </motion.button>
-                  </div>
-                </div>
+
               </div>
             )}
 
@@ -626,55 +590,7 @@ const DiscoverPage = () => {
                     ))}
                   </div>
 
-                  {/* Action Buttons for mobile or stack view */}
-                  {(isMobile || viewMode === 'stack') && (
-                    <div className="flex gap-2 md:gap-4 mt-4 justify-center">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleSwipe('left', runner.id)}
-                        className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        <X className="w-5 h-5 md:w-8 md:h-8" />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate(`/app/profile/${runner.id}`)}
-                        className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
-                        title="Visa profil"
-                      >
-                        <User className="w-5 h-5 md:w-8 md:h-8" />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleStartChat(runner.id)}
-                        className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
-                      >
-                        <MessageCircle className="w-5 h-5 md:w-8 md:h-8" />
-                      </motion.button>
-                      {isAiMatch ? (
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleAiMatchMessage(runner.id)}
-                          className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full shadow-lg flex items-center justify-center text-white hover:from-orange-600 hover:to-yellow-600 transition-all"
-                        >
-                          <Sparkles className="w-5 h-5 md:w-8 md:h-8" />
-                        </motion.button>
-                      ) : (
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleSwipe('right', runner.id)}
-                          className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-50 transition-colors"
-                        >
-                          <Heart className="w-5 h-5 md:w-8 md:h-8" />
-                        </motion.button>
-                      )}
-                    </div>
-                  )}
+
 
 
                 </div>
@@ -1123,7 +1039,7 @@ const DiscoverPage = () => {
 
                     {/* Action Buttons for Stack Mode Desktop */}
                     {hasMoreRunners && window.innerWidth >= 768 && (
-                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-3 z-50">
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -1131,6 +1047,26 @@ const DiscoverPage = () => {
                           className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors"
                         >
                           <X className="w-8 h-8" />
+                        </motion.button>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => navigate(`/app/profile/${currentRunner.id}`)}
+                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-500 text-gray-500 hover:bg-gray-50 transition-colors"
+                          title="Visa profil"
+                        >
+                          <User className="w-8 h-8" />
+                        </motion.button>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleStartChat(currentRunner.id)}
+                          className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-blue-500 text-blue-500 hover:bg-blue-50 transition-colors"
+                          title="Skicka meddelande"
+                        >
+                          <MessageCircle className="w-8 h-8" />
                         </motion.button>
                         
                         <motion.button

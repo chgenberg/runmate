@@ -238,6 +238,28 @@ router.post('/generate-plan', protect, async (req, res) => {
       user: req.user._id 
     }).sort({ date: -1 }).limit(10);
 
+    // Simple wrapper for backward compatibility
+    const generateTrainingPlan = (profile, recentActivities) => {
+      // Convert old format to new format
+      const userAnswers = {
+        currentLevel: profile.currentLevel || 'beginner',
+        primaryGoal: profile.goals?.[0] || 'health',
+        hoursPerWeek: profile.timeCommitment || 3,
+        preferredTime: profile.preferredTime || 'morning',
+        preferredEnvironment: profile.preferredEnvironment || 'outdoor',
+        equipment: profile.equipment || ['running_shoes']
+      };
+      
+      const raceInfo = {
+        name: 'General Training',
+        distance: '5K',
+        location: 'Local'
+      };
+      
+      // Call the new function
+      return generateTrainingPlanNew(raceInfo, userAnswers, null);
+    };
+
     // Generate base training plan
     const trainingPlan = generateTrainingPlan(profile, recentActivities);
 
@@ -740,61 +762,7 @@ router.post('/adapt-plan', protect, async (req, res) => {
   }
 });
 
-// Smart training plan generation
-function generateTrainingPlan(profile, recentActivities) {
-  const { 
-    targetDistance, 
-    targetTime, 
-    deadline, 
-    currentLevel, 
-    weeklyVolume, 
-    restDays, 
-    priorities 
-  } = profile;
-
-  const weeksToGoal = Math.ceil((new Date(deadline) - new Date()) / (7 * 24 * 60 * 60 * 1000));
-  const baseWeeklyVolume = Math.min(weeklyVolume || 30, 50); // Cap at 50km/week
-  
-  // Calculate current fitness level from recent activities
-  const avgDistance = recentActivities.length > 0 
-    ? recentActivities.reduce((sum, act) => sum + (act.distance || 0), 0) / recentActivities.length 
-    : 5;
-  
-  const avgPace = recentActivities.length > 0
-    ? recentActivities.reduce((sum, act) => sum + (act.averagePace || 360), 0) / recentActivities.length
-    : 360; // 6:00 min/km default
-
-  // Generate 12-week progressive plan
-  const weeks = [];
-  for (let week = 1; week <= Math.min(weeksToGoal, 12); week++) {
-    const weeklyDistance = calculateWeeklyDistance(baseWeeklyVolume, week, weeksToGoal);
-    const workouts = generateWeeklyWorkouts(weeklyDistance, avgPace, priorities, restDays);
-    
-    weeks.push({
-      week,
-      weeklyDistance,
-      workouts,
-      focus: getWeeklyFocus(week, priorities),
-      recoveryEmphasis: week % 4 === 0 ? 'high' : 'normal'
-    });
-  }
-
-  return {
-    totalWeeks: weeks.length,
-    targetGoal: `${targetDistance} på ${formatTime(targetTime)}`,
-    currentFitness: {
-      avgDistance: Math.round(avgDistance * 10) / 10,
-      avgPace: formatPace(avgPace)
-    },
-    weeks,
-    keyPrinciples: [
-      '80/20 regel - 80% lätt, 20% hårt',
-      'Progressiv överbelastning',
-      'Individuell återhämtning',
-      'Skadeförebyggande styrketräning'
-    ]
-  };
-}
+// Removed old generateTrainingPlan function - using Apple Health enhanced version instead
 
 function calculateWeeklyDistance(baseVolume, week, totalWeeks) {
   const buildPhase = Math.floor(totalWeeks * 0.7);
@@ -1838,100 +1806,325 @@ function extractMotivationalSupport(aiResponse) {
   ];
 }
 
+// Get Apple Health data for enhanced analysis
+const getAppleHealthAnalysis = async (userId) => {
+  try {
+    const appleHealthActivities = await Activity.find({
+      userId: userId,
+      source: 'apple_health'
+    }).sort({ startTime: -1 }).limit(50); // Last 50 Apple Health activities
+
+    if (appleHealthActivities.length === 0) {
+      return null;
+    }
+
+    // Calculate comprehensive Apple Health stats
+    const totalActivities = appleHealthActivities.length;
+    const totalDistance = appleHealthActivities.reduce((sum, act) => sum + (act.distance || 0), 0);
+    const totalDuration = appleHealthActivities.reduce((sum, act) => sum + (act.duration || 0), 0);
+    const avgDistance = totalDistance / totalActivities;
+    const avgDuration = totalDuration / totalActivities / 60; // in minutes
+    const avgPace = appleHealthActivities.reduce((sum, act) => sum + (act.averagePace || 0), 0) / totalActivities;
+
+    // Heart rate analysis
+    const heartRateActivities = appleHealthActivities.filter(act => act.averageHeartRate);
+    const avgHeartRate = heartRateActivities.length > 0 ? 
+      heartRateActivities.reduce((sum, act) => sum + act.averageHeartRate, 0) / heartRateActivities.length : null;
+    const maxHeartRate = Math.max(...appleHealthActivities.map(act => act.maxHeartRate || 0));
+
+    // Training frequency analysis
+    const recentActivities = appleHealthActivities.filter(act => 
+      new Date(act.startTime) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
+    );
+    const weeklyFrequency = (recentActivities.length / 4.3).toFixed(1); // Approximate weeks in a month
+
+    // Performance trends
+    const last10Activities = appleHealthActivities.slice(0, 10);
+    const previous10Activities = appleHealthActivities.slice(10, 20);
+    
+    let paceImprovement = null;
+    if (last10Activities.length >= 5 && previous10Activities.length >= 5) {
+      const recentAvgPace = last10Activities.reduce((sum, act) => sum + (act.averagePace || 0), 0) / last10Activities.length;
+      const previousAvgPace = previous10Activities.reduce((sum, act) => sum + (act.averagePace || 0), 0) / previous10Activities.length;
+      paceImprovement = previousAvgPace > 0 ? ((previousAvgPace - recentAvgPace) / previousAvgPace * 100).toFixed(1) : null;
+    }
+
+    // Distance categories
+    const shortRuns = appleHealthActivities.filter(act => act.distance < 5).length;
+    const mediumRuns = appleHealthActivities.filter(act => act.distance >= 5 && act.distance < 10).length;
+    const longRuns = appleHealthActivities.filter(act => act.distance >= 10).length;
+
+    // Activity type distribution
+    const activityTypes = {};
+    appleHealthActivities.forEach(act => {
+      const type = act.activityType || 'easy';
+      activityTypes[type] = (activityTypes[type] || 0) + 1;
+    });
+
+    return {
+      hasData: true,
+      totalActivities,
+      totalDistance: Math.round(totalDistance * 10) / 10,
+      avgDistance: Math.round(avgDistance * 10) / 10,
+      avgDuration: Math.round(avgDuration),
+      avgPace: Math.round(avgPace),
+      avgHeartRate: avgHeartRate ? Math.round(avgHeartRate) : null,
+      maxHeartRate: maxHeartRate > 0 ? maxHeartRate : null,
+      weeklyFrequency: parseFloat(weeklyFrequency),
+      paceImprovement,
+      distanceDistribution: {
+        short: shortRuns,
+        medium: mediumRuns,
+        long: longRuns
+      },
+      activityTypes,
+      lastActivity: appleHealthActivities[0]?.startTime,
+      longestRun: Math.max(...appleHealthActivities.map(act => act.distance || 0)),
+      fastestPace: Math.min(...appleHealthActivities.map(act => act.averagePace || Infinity).filter(p => p < Infinity)),
+      totalCalories: appleHealthActivities.reduce((sum, act) => sum + (act.calories || 0), 0),
+      avgCaloriesPerKm: totalDistance > 0 ? Math.round(appleHealthActivities.reduce((sum, act) => sum + (act.calories || 0), 0) / totalDistance) : null
+    };
+
+  } catch (error) {
+    console.error('Error analyzing Apple Health data:', error);
+    return null;
+  }
+};
+
+// Generate comprehensive race plan with Apple Health integration
+const generateRaceWeeklySchedule = (raceInfo, userAnswers, appleHealthData = null) => {
+  const { race, goal, level, timeGoal, preferences, health } = userAnswers;
+  
+  // Base schedule template
+  const weeklyTemplate = {
+    monday: { type: 'rest', activity: 'Vildag eller lätt cross-training' },
+    tuesday: { type: 'interval', activity: 'Intervallträning' },
+    wednesday: { type: 'easy', activity: 'Lugnt löppass' },
+    thursday: { type: 'tempo', activity: 'Tempoträning' },
+    friday: { type: 'rest', activity: 'Vila' },
+    saturday: { type: 'long', activity: 'Långpass' },
+    sunday: { type: 'recovery', activity: 'Återhämtningspass' }
+  };
+
+  // Adjust based on Apple Health data if available
+  if (appleHealthData && appleHealthData.hasData) {
+    // Adjust training volume based on current fitness
+    if (appleHealthData.weeklyFrequency < 2) {
+      // Low frequency - reduce intensity
+      weeklyTemplate.tuesday.activity = 'Lätt fartlek';
+      weeklyTemplate.thursday.activity = 'Steady state-löpning';
+    } else if (appleHealthData.weeklyFrequency > 5) {
+      // High frequency - can handle more intensity
+      weeklyTemplate.monday.activity = 'Lätt återhämtningspass';
+      weeklyTemplate.friday.activity = 'Kort intervallpass';
+    }
+
+    // Adjust pace targets based on current performance
+    if (appleHealthData.avgPace > 0) {
+      const currentPaceMinKm = Math.floor(appleHealthData.avgPace / 60);
+      const currentPaceSecKm = Math.round(appleHealthData.avgPace % 60);
+      
+      // Add specific pace recommendations
+      weeklyTemplate.tuesday.paceTarget = `${currentPaceMinKm}:${currentPaceSecKm.toString().padStart(2, '0')} - 30s snabbare`;
+      weeklyTemplate.wednesday.paceTarget = `${currentPaceMinKm}:${(currentPaceSecKm + 30).toString().padStart(2, '0')} - 1min långsammare`;
+      weeklyTemplate.thursday.paceTarget = `${currentPaceMinKm}:${(currentPaceSecKm - 15).toString().padStart(2, '0')} - 15s snabbare`;
+    }
+
+    // Adjust long run distance based on current longest runs
+    if (appleHealthData.longestRun > 0) {
+      const targetLongRun = Math.min(appleHealthData.longestRun * 1.2, race.distance * 0.8);
+      weeklyTemplate.saturday.distance = `${Math.round(targetLongRun)}km`;
+    }
+  }
+
+  // Generate 16-week progressive schedule
+  const schedule = [];
+  const weeksToRace = 16;
+  const baseDistance = race.distance || 10;
+
+  for (let week = 1; week <= weeksToRace; week++) {
+    const weekData = { ...weeklyTemplate };
+    const progressFactor = week / weeksToRace;
+    
+    // Progressive volume increase
+    if (week <= 12) {
+      // Build phase
+      const weeklyDistance = Math.round(baseDistance * (0.3 + progressFactor * 0.5));
+      weekData.weeklyTarget = `${weeklyDistance}km total`;
+    } else {
+      // Taper phase
+      const taperFactor = (16 - week) / 4;
+      const weeklyDistance = Math.round(baseDistance * 0.6 * taperFactor);
+      weekData.weeklyTarget = `${weeklyDistance}km total (nedtrappning)`;
+    }
+
+    schedule.push({
+      week,
+      ...weekData,
+      focus: week <= 4 ? 'Grundkondition' : 
+             week <= 8 ? 'Uthållighet' :
+             week <= 12 ? 'Hastighet' : 'Nedtrappning'
+    });
+  }
+
+  return schedule;
+};
+
+// Get race information from race ID
+const getRaceInfo = (raceId) => {
+  const races = {
+    'boston_marathon': {
+      name: 'Boston Marathon',
+      distance: '42.2km',
+      location: 'Boston, USA',
+      terrain: 'Flat',
+      difficulty: 'Hög',
+      elevation: '120m'
+    },
+    'stockholm_marathon': {
+      name: 'Stockholm Marathon',
+      distance: '42.2km', 
+      location: 'Stockholm, Sverige',
+      terrain: 'Flat',
+      difficulty: 'Medel',
+      elevation: '80m'
+    },
+    'new_york_marathon': {
+      name: 'New York Marathon',
+      distance: '42.2km',
+      location: 'New York, USA', 
+      terrain: 'Hilly',
+      difficulty: 'Hög',
+      elevation: '200m'
+    },
+    'london_marathon': {
+      name: 'London Marathon',
+      distance: '42.2km',
+      location: 'London, UK',
+      terrain: 'Flat',
+      difficulty: 'Medel',
+      elevation: '60m'
+    },
+    'berlin_marathon': {
+      name: 'Berlin Marathon',
+      distance: '42.2km',
+      location: 'Berlin, Tyskland',
+      terrain: 'Flat',
+      difficulty: 'Låg',
+      elevation: '40m'
+    }
+  };
+  
+  return races[raceId] || {
+    name: 'Okänt lopp',
+    distance: '42.2km',
+    location: 'Okänd plats',
+    terrain: 'Varierad',
+    difficulty: 'Medel',
+    elevation: '100m'
+  };
+};
+
 // Race-specific training plan endpoint
 router.post('/race-plan', protect, async (req, res) => {
   try {
-    const {
-      selectedRace,
-      raceDate,
-      weeksUntilRace,
-      current_fitness,
-      weekly_runs,
-      longest_recent_run,
-      race_goal,
-      target_time,
-      cross_training,
-      injury_history,
-      nutrition_habits,
-      sleep_hours,
-      recovery_priority,
-      race_experience,
-      training_preference,
-      equipment,
-      biggest_challenge
-    } = req.body;
-
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const { raceId, answers } = req.body;
+    
+    if (!raceId || !answers) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Race ID och svar krävs' 
+      });
     }
 
-    // Save race coach profile
-    user.raceCoachProfile = {
-      selectedRace,
-      raceDate,
-      currentFitness: current_fitness,
-      weeklyRuns: weekly_runs,
-      longestRecentRun: longest_recent_run,
-      raceGoal: race_goal,
-      targetTime: target_time,
-      crossTraining: cross_training,
-      injuryHistory: injury_history,
-      nutritionHabits: nutrition_habits,
-      sleepHours: sleep_hours,
-      recoveryPriority: recovery_priority,
-      raceExperience: race_experience,
-      trainingPreference: training_preference,
-      equipment,
-      biggestChallenge: biggest_challenge,
-      createdAt: new Date()
-    };
-    await user.save();
+    // Get race information
+    const raceInfo = getRaceInfo(raceId);
+    if (!raceInfo) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Lopp hittades inte' 
+      });
+    }
 
-    // Generate race description using AI
-    const raceDescription = await generateRaceDescription(selectedRace);
-    
-    // Generate comprehensive race information
-    const comprehensiveRaceInfo = await generateComprehensiveRaceInfo(selectedRace, req.body);
-    
-    // Generate race-specific training plan
-    const racePlan = {
+    // Get Apple Health analysis for enhanced personalization
+    const appleHealthData = await getAppleHealthAnalysis(req.user._id);
+
+    // Generate race description with Apple Health context
+    let raceDescription;
+    try {
+      const appleHealthContext = appleHealthData && appleHealthData.hasData ? 
+        `\n\nBaserat på användarens Apple Health-data:\n- Genomsnittlig träningsfrekvens: ${appleHealthData.weeklyFrequency} pass/vecka\n- Genomsnittsdistans: ${appleHealthData.avgDistance}km\n- Genomsnittligt tempo: ${Math.floor(appleHealthData.avgPace / 60)}:${Math.round(appleHealthData.avgPace % 60).toString().padStart(2, '0')} min/km\n- Längsta pass: ${appleHealthData.longestRun}km\n- Genomsnittspuls: ${appleHealthData.avgHeartRate || 'Ej tillgänglig'}\n- Senaste aktivitet: ${appleHealthData.lastActivity ? new Date(appleHealthData.lastActivity).toLocaleDateString('sv-SE') : 'Okänd'}` : 
+        '';
+
+      raceDescription = await generateRaceDescriptionNew(raceInfo, answers, appleHealthContext);
+    } catch (error) {
+      console.error('Error generating race description:', error);
+      raceDescription = `${raceInfo.name} är ett fantastiskt lopp som kommer utmana dig på bästa sätt. Baserat på dina svar kommer vi att skapa en personlig träningsplan som förbereder dig optimalt för detta lopp.`;
+    }
+
+    // Generate comprehensive training plan with Apple Health integration
+    const trainingPlan = generateTrainingPlanNew(raceInfo, answers, appleHealthData);
+    const nutritionPlan = generateNutritionPlan(raceInfo, answers, appleHealthData);
+    const lifestylePlan = generateLifestylePlan(raceInfo, answers, appleHealthData);
+    const recoveryPlan = generateRecoveryPlan(raceInfo, answers, appleHealthData);
+    const progressTracking = generateProgressTracking(raceInfo, answers, appleHealthData);
+    const weeklySchedule = generateRaceWeeklySchedule(raceInfo, answers, appleHealthData);
+
+    // Enhanced plan with Apple Health insights
+    const enhancedPlan = {
+      race: {
+        id: raceId,
+        name: raceInfo.name,
+        distance: raceInfo.distance,
+        date: raceInfo.date,
+        location: raceInfo.location,
+        difficulty: raceInfo.difficulty,
+        description: raceDescription
+      },
+      raceDescription,
+      training: {
+        ...trainingPlan,
+        weeklySchedule
+      },
+      nutrition: nutritionPlan,
+      lifestyle: lifestylePlan,
+      recovery: recoveryPlan,
+      progress: progressTracking,
+      
+      // Apple Health integration summary
+      appleHealthIntegration: appleHealthData ? {
+        hasData: appleHealthData.hasData,
+        summary: appleHealthData.hasData ? {
+          totalActivities: appleHealthData.totalActivities,
+          avgWeeklyDistance: Math.round(appleHealthData.avgDistance * appleHealthData.weeklyFrequency * 10) / 10,
+          currentFitnessLevel: appleHealthData.weeklyFrequency >= 4 ? 'Hög' : 
+                             appleHealthData.weeklyFrequency >= 2 ? 'Medel' : 'Grundnivå',
+          recommendedAdjustments: [
+            appleHealthData.weeklyFrequency < 2 ? 'Öka träningsfrekvensen gradvis' : null,
+            appleHealthData.longestRun < raceInfo.distance * 0.6 ? 'Fokusera på längre pass' : null,
+            appleHealthData.paceImprovement && parseFloat(appleHealthData.paceImprovement) < 0 ? 'Inkludera mer tempoträning' : null
+          ].filter(Boolean)
+        } : null
+      } : null,
+
+      userAnswers: answers,
+      generatedAt: new Date(),
+      planDuration: '16 veckor',
+      lastUpdated: new Date()
+    };
+
+    res.json({
       success: true,
-      plan: {
-        race: selectedRace,
-        raceDate,
-        weeksUntilRace,
-        raceDescription,
-        comprehensiveRaceInfo, // New comprehensive info
-        trainingPhases: generateRaceTrainingPhases(weeksUntilRace, req.body),
-        training: {
-          weeklySchedule: generateRaceWeeklySchedule(req.body),
-          duration: `${weeksUntilRace} veckor`,
-          phases: generateRaceTrainingPhases(weeksUntilRace, req.body),
-          detailedWorkouts: generateDetailedWorkouts(weeksUntilRace, req.body)
-        },
-        nutrition: generateRaceNutritionPlan(req.body, selectedRace),
-        recovery: generateRaceRecoveryProtocol(req.body),
-        calendarEvents: {}, // Will be generated on frontend
-        nutritionPlan: generateRaceNutritionPlan(req.body, selectedRace),
-        recoveryProtocol: generateRaceRecoveryProtocol(req.body),
-        tapering: generateTaperingPlan(weeksUntilRace, selectedRace),
-        raceStrategy: generateRaceStrategy(selectedRace, req.body),
-        equipment: generateEquipmentRecommendations(selectedRace, equipment),
-        mentalPreparation: generateMentalPreparation(weeksUntilRace, race_goal),
-        // Additional detailed sections
-        weekByWeekPlan: generateWeekByWeekPlan(weeksUntilRace, req.body),
-        performanceMetrics: generatePerformanceMetrics(req.body),
-        injuryPrevention: generateInjuryPreventionPlan(req.body),
-        weatherPreparation: generateWeatherPrep(selectedRace),
-        raceWeekSchedule: generateRaceWeekSchedule(selectedRace, req.body)
-      }
-    };
+      plan: enhancedPlan
+    });
 
-    res.json(racePlan);
   } catch (error) {
-    console.error('Error creating race plan:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Error generating race plan:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Kunde inte generera träningsplan',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -2142,46 +2335,7 @@ function generateMentalPreparation(weeks, goal) {
   };
 }
 
-async function generateRaceDescription(race) {
-  try {
-    if (!race || !race.name) return null;
-    
-    const prompt = `Skriv en kort och inspirerande beskrivning av ${race.name} loppet i ${race.location}. 
-    Inkludera:
-    - Vad som gör loppet speciellt
-    - Banans karaktär och utmaningar
-    - Atmosfären och upplevelsen
-    Max 3-4 meningar. Skriv på svenska och var entusiastisk men faktabaserad.`;
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "Du är en kunnig löpcoach som beskriver lopp på ett inspirerande sätt."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      max_tokens: 150,
-      temperature: 0.7
-    });
-    
-    return response.choices[0].message.content.trim();
-  } catch (error) {
-    console.error('Error generating race description:', error);
-    // Fallback descriptions for common races
-    const fallbackDescriptions = {
-      'Berlin Marathon': 'Berlin Marathon är känt för sin platta och snabba bana där många världsrekord har satts. Loppet går genom stadens historiska landmärken med fantastiskt publikstöd hela vägen.',
-      'Stockholm Marathon': 'Stockholm Marathon bjuder på en vacker bana genom Sveriges huvudstad med passager över broar och längs vattnet. Publikstödet är enastående och målgången på Stockholms Stadion är oförglömlig.',
-      'New York Marathon': 'New York Marathon tar dig genom alla fem stadsdelar med över 2 miljoner åskådare längs banan. Den unika energin och mångfalden gör detta till ett av världens mest eftertraktade lopp.'
-    };
-    
-    return fallbackDescriptions[race.name] || `${race.name} är ett fantastiskt lopp i ${race.location} som erbjuder en unik löpupplevelse med ${race.distance} av utmaning och glädje.`;
-  }
-}
+
 
 async function generateComprehensiveRaceInfo(race, userData) {
   try {
@@ -2532,72 +2686,7 @@ function generateFallbackRaceInfo(race, userData) {
   `;
 }
 
-function generateRaceWeeklySchedule(data) {
-  const weeklyRuns = parseInt(data.weekly_runs?.split('-')[0] || '3');
-  const fitness = data.current_fitness || 'recreational';
-  const preference = data.training_preference || 'mixed';
-  
-  const schedule = [
-    {
-      day: 'Måndag',
-      type: 'Lugn löpning',
-      duration: fitness === 'beginner' ? '30 min' : fitness === 'experienced' ? '45 min' : '40 min',
-      time: '07:00',
-      location: 'Utomhus',
-      description: 'Lätt löpning för att starta veckan. Fokus på att känna kroppen.'
-    },
-    {
-      day: 'Tisdag',
-      type: weeklyRuns >= 4 ? 'Intervaller' : 'Vila',
-      duration: weeklyRuns >= 4 ? '45 min' : '-',
-      time: weeklyRuns >= 4 ? '18:00' : '-',
-      location: weeklyRuns >= 4 ? 'Löpbana eller park' : '-',
-      description: weeklyRuns >= 4 ? 'Intervallträning för att bygga hastighet och VO2 max.' : 'Vila eller lätt stretching.'
-    },
-    {
-      day: 'Onsdag',
-      type: 'Lugn löpning',
-      duration: fitness === 'beginner' ? '25 min' : '35 min',
-      time: '07:00',
-      location: 'Utomhus',
-      description: 'Återhämtningslöpning efter intervaller. Låg intensitet.'
-    },
-    {
-      day: 'Torsdag',
-      type: weeklyRuns >= 5 ? 'Tempopass' : 'Vila',
-      duration: weeklyRuns >= 5 ? '40 min' : '-',
-      time: weeklyRuns >= 5 ? '18:00' : '-',
-      location: weeklyRuns >= 5 ? 'Utomhus' : '-',
-      description: weeklyRuns >= 5 ? 'Måttligt hårt tempo för att bygga tröskelfart.' : 'Vila eller styrketräning.'
-    },
-    {
-      day: 'Fredag',
-      type: 'Vila',
-      duration: '-',
-      time: '-',
-      location: '-',
-      description: 'Fullständig vila inför helgens längre pass.'
-    },
-    {
-      day: 'Lördag',
-      type: 'Långpass',
-      duration: fitness === 'beginner' ? '60 min' : fitness === 'experienced' ? '90 min' : '75 min',
-      time: '08:00',
-      location: 'Natursköna rutter',
-      description: 'Veckans längsta pass. Bygger uthållighet för loppet.'
-    },
-    {
-      day: 'Söndag',
-      type: weeklyRuns >= 6 ? 'Lugn löpning' : 'Vila',
-      duration: weeklyRuns >= 6 ? '30 min' : '-',
-      time: weeklyRuns >= 6 ? '09:00' : '-',
-      location: weeklyRuns >= 6 ? 'Utomhus' : '-',
-      description: weeklyRuns >= 6 ? 'Lätt återhämtningslöpning.' : 'Vila och förberedelse för nästa vecka.'
-    }
-  ];
-  
-  return schedule;
-}
+// Removed duplicate generateRaceWeeklySchedule function - using the Apple Health enhanced version instead
 
 // Helper functions for generating structured plans from answers
 function generateTrainingScheduleFromAnswers(primaryGoal, currentLevel, hoursPerWeek, preferredTime, preferredEnvironment, equipment) {
@@ -3428,5 +3517,351 @@ function generatePersonalizedTips(userData) {
   
   return tips.join('');
 }
+
+// Apple Health-enhanced helper functions
+const generateTrainingPlanNew = (raceInfo, userAnswers, appleHealthData = null) => {
+  const { race, goal, level, timeGoal, preferences, health } = userAnswers;
+  
+  // Adjust plan based on Apple Health data
+  let adjustedLevel = level;
+  let weeklyWorkouts = level === 'nybörjare' ? 3 : level === 'medel' ? 4 : 5;
+  
+  if (appleHealthData && appleHealthData.hasData) {
+    // Adjust based on current training frequency
+    if (appleHealthData.weeklyFrequency < 2) {
+      adjustedLevel = 'nybörjare';
+      weeklyWorkouts = 3;
+    } else if (appleHealthData.weeklyFrequency >= 4) {
+      adjustedLevel = 'avancerad';
+      weeklyWorkouts = Math.min(5, Math.round(appleHealthData.weeklyFrequency));
+    }
+  }
+  
+  const baseOverview = `Träningsplan för ${race.name} med fokus på ${goal}`;
+  const appleHealthInsight = appleHealthData && appleHealthData.hasData ? 
+    ` Baserat på din Apple Health-data (${appleHealthData.totalActivities} aktiviteter, ${appleHealthData.avgDistance}km genomsnitt) har planen anpassats för din nuvarande fitnessnivå.` : '';
+  
+  return {
+    overview: baseOverview + appleHealthInsight,
+    duration: '16 veckor',
+    currentFitnessAssessment: appleHealthData && appleHealthData.hasData ? {
+      weeklyFrequency: appleHealthData.weeklyFrequency,
+      avgDistance: appleHealthData.avgDistance,
+      longestRun: appleHealthData.longestRun,
+      avgPace: appleHealthData.avgPace,
+      fitnessLevel: adjustedLevel
+    } : null,
+    phases: [
+      {
+        name: 'Grundfas',
+        weeks: '1-4',
+        focus: 'Bygga grundkondition och löpvolym',
+        keyWorkouts: ['Långa lugna pass', 'Grundtempo', 'Återhämtningspass'],
+        adjustment: appleHealthData && appleHealthData.weeklyFrequency < 2 ? 
+          'Extra fokus på att bygga träningsvana gradvis' : null
+      },
+      {
+        name: 'Utvecklingsfas', 
+        weeks: '5-8',
+        focus: 'Öka intensitet och hastighet',
+        keyWorkouts: ['Intervaller', 'Tempopass', 'Progressiva pass'],
+        adjustment: appleHealthData && appleHealthData.avgPace > 0 ? 
+          `Tempoträning runt ${Math.floor(appleHealthData.avgPace / 60)}:${Math.round(appleHealthData.avgPace % 60).toString().padStart(2, '0')} min/km` : null
+      },
+      {
+        name: 'Specialfas',
+        weeks: '9-12', 
+        focus: 'Loppspecifik träning',
+        keyWorkouts: ['Loppstempo', 'Långa intervaller', 'Simulering'],
+        adjustment: appleHealthData && appleHealthData.longestRun > 0 ? 
+          `Långpass upp till ${Math.round(appleHealthData.longestRun * 1.3)}km` : null
+      },
+      {
+        name: 'Nedtrappning',
+        weeks: '13-16',
+        focus: 'Vila och förberedelse inför lopp',
+        keyWorkouts: ['Korta intervaller', 'Loppstempo', 'Vila']
+      }
+    ],
+    weeklyStructure: {
+      workouts: weeklyWorkouts,
+      longRun: 'Lördagar',
+      intervals: 'Tisdagar',
+      tempo: 'Torsdagar',
+      recovery: 'Söndagar',
+      adjustment: appleHealthData && appleHealthData.hasData ? 
+        `Anpassad från ${appleHealthData.weeklyFrequency} nuvarande pass/vecka` : null
+    }
+  };
+};
+
+const generateNutritionPlan = (raceInfo, userAnswers, appleHealthData = null) => {
+  const { race, goal, level, preferences, health } = userAnswers;
+  
+  // Base calorie calculation
+  let baseCalories = 2000;
+  let adjustmentNote = '';
+  
+  if (appleHealthData && appleHealthData.hasData) {
+    // Adjust calories based on training volume
+    const weeklyCalories = appleHealthData.totalCalories / (appleHealthData.totalActivities / appleHealthData.weeklyFrequency);
+    baseCalories = Math.round(2000 + (weeklyCalories * 0.3));
+    adjustmentNote = `Kaloribehov justerat baserat på din genomsnittliga förbränning: ${appleHealthData.avgCaloriesPerKm || 'N/A'} kcal/km`;
+  }
+  
+  return {
+    dailyCalories: baseCalories,
+    adjustmentNote,
+    macros: {
+      carbs: '55-60%',
+      protein: '15-20%',
+      fat: '25-30%'
+    },
+    hydration: {
+      daily: '2.5-3 liter',
+      training: '500-750ml per timme träning',
+      raceDay: 'Sluta dricka 30 min före start'
+    },
+    preworkout: {
+      timing: '2-3 timmar före träning',
+      options: [
+        'Havregrynsgröt med banan',
+        'Toast med jordnötssmör',
+        'Smoothie med bär och yoghurt'
+      ]
+    },
+    postworkout: {
+      timing: 'Inom 30 minuter efter träning',
+      options: [
+        'Proteinshake med banan',
+        'Grekisk yoghurt med granola',
+        'Chokladmjölk och smörgås'
+      ]
+    },
+    raceWeek: {
+      carbLoading: 'Öka kolhydrater till 70% av kalorier 3 dagar före',
+      breakfast: 'Havregrynsgröt 3 timmar före start',
+      during: race.distance > 15 ? 'Energigel var 45 min' : 'Vatten vid stationer'
+    }
+  };
+};
+
+const generateLifestylePlan = (raceInfo, userAnswers, appleHealthData = null) => {
+  const { race, goal, level, preferences, health } = userAnswers;
+  
+  let recoveryAdjustment = '';
+  if (appleHealthData && appleHealthData.hasData) {
+    if (appleHealthData.weeklyFrequency > 4) {
+      recoveryAdjustment = 'Med din höga träningsfrekvens behöver du extra fokus på återhämtning';
+    } else if (appleHealthData.weeklyFrequency < 2) {
+      recoveryAdjustment = 'Börja gradvis med återhämtningsrutiner när träningsvolymen ökar';
+    }
+  }
+  
+  return {
+    sleep: {
+      target: '7-9 timmar per natt',
+      tips: [
+        'Gå och lägg dig samma tid varje kväll',
+        'Undvik skärmar 1 timme före sömn',
+        'Håll sovrummet svalt (16-18°C)'
+      ],
+      adjustment: recoveryAdjustment
+    },
+    stressManagement: {
+      techniques: [
+        'Meditation 10 min dagligen',
+        'Djupandning före träning',
+        'Naturvandring på vilodagar'
+      ]
+    },
+    crossTraining: [
+      'Simning eller cykling 1-2 ggr/vecka',
+      'Yoga eller stretching dagligen',
+      'Styrketräning 2 ggr/vecka'
+    ],
+    workLifeBalance: {
+      trainingTime: preferences.preferredTime || 'Morgon',
+      tips: [
+        'Schemalägg träning som viktiga möten',
+        'Förbered träningskläder kvällen innan',
+        'Ha backup-plan för dåligt väder'
+      ]
+    }
+  };
+};
+
+const generateRecoveryPlan = (raceInfo, userAnswers, appleHealthData = null) => {
+  const { race, goal, level, preferences, health } = userAnswers;
+  
+  let intensityAdjustment = 'normal';
+  if (appleHealthData && appleHealthData.hasData) {
+    if (appleHealthData.weeklyFrequency > 5) {
+      intensityAdjustment = 'hög';
+    } else if (appleHealthData.weeklyFrequency < 2) {
+      intensityAdjustment = 'lätt';
+    }
+  }
+  
+  const recoveryProtocols = {
+    'lätt': {
+      stretching: '10 min efter träning',
+      foamRolling: '2 ggr/vecka',
+      massage: 'Varannan vecka',
+      restDays: '2-3 per vecka'
+    },
+    'normal': {
+      stretching: '15 min efter träning',
+      foamRolling: '3-4 ggr/vecka',
+      massage: 'Varje vecka',
+      restDays: '1-2 per vecka'
+    },
+    'hög': {
+      stretching: '20 min efter träning',
+      foamRolling: 'Dagligen',
+      massage: '2 ggr/vecka',
+      restDays: '1 per vecka + aktiv återhämtning'
+    }
+  };
+  
+  return {
+    intensity: intensityAdjustment,
+    ...recoveryProtocols[intensityAdjustment],
+    signs: {
+      overtraining: [
+        'Konstant trötthet',
+        'Förhöjd vilopuls',
+        'Irritabilitet',
+        'Försämrad prestanda'
+      ],
+      action: 'Ta 2-3 extra vilodagar och minska intensiteten'
+    },
+    activeRecovery: [
+      'Lätt promenad',
+      'Yoga eller stretching',
+      'Simning i lugnt tempo',
+      'Cykling på låg intensitet'
+    ]
+  };
+};
+
+const generateProgressTracking = (raceInfo, userAnswers, appleHealthData = null) => {
+  const { race, goal, level, timeGoal, preferences, health } = userAnswers;
+  
+  let currentBaseline = {};
+  if (appleHealthData && appleHealthData.hasData) {
+    currentBaseline = {
+      avgPace: `${Math.floor(appleHealthData.avgPace / 60)}:${Math.round(appleHealthData.avgPace % 60).toString().padStart(2, '0')} min/km`,
+      longestRun: `${appleHealthData.longestRun}km`,
+      weeklyDistance: `${Math.round(appleHealthData.avgDistance * appleHealthData.weeklyFrequency)}km`,
+      avgHeartRate: appleHealthData.avgHeartRate ? `${appleHealthData.avgHeartRate} bpm` : 'Ej tillgänglig'
+    };
+  }
+  
+  return {
+    currentBaseline,
+    weeklyMetrics: [
+      'Total distans',
+      'Genomsnittligt tempo',
+      'Längsta pass',
+      'Träningspass genomförda',
+      'Vilopuls (morgon)',
+      'Subjektiv återhämtning (1-10)'
+    ],
+    monthlyTests: [
+      {
+        test: '5K tidtagning',
+        frequency: 'Var 4:e vecka',
+        purpose: 'Mäta hastighetsförbättring'
+      },
+      {
+        test: 'Långpass utvärdering',
+        frequency: 'Var 2:a vecka',
+        purpose: 'Bedöma uthållighetsframsteg'
+      }
+    ],
+    milestones: [
+      {
+        week: 4,
+        goal: 'Genomföra första 60-minuters långpass',
+        metric: 'Distans och komfort'
+      },
+      {
+        week: 8,
+        goal: 'Förbättra 5K-tid med 30 sekunder',
+        metric: 'Tid och ansträngning'
+      },
+      {
+        week: 12,
+        goal: 'Genomföra 80% av loppdistansen',
+        metric: 'Uthållighet och återhämtning'
+      },
+      {
+        week: 16,
+        goal: 'Vara redo för lopp',
+        metric: 'Övergripande kondition'
+      }
+    ],
+    warningSignals: [
+      'Konsekvent långsammare tider',
+      'Svårigheter att genomföra planerade pass',
+      'Ökad trötthet eller irritabilitet',
+      'Återkommande små skador'
+    ]
+  };
+};
+
+// Enhanced race description with Apple Health context
+const generateRaceDescriptionNew = async (raceInfo, userAnswers, appleHealthContext = '') => {
+  try {
+    if (!raceInfo || !raceInfo.name || !openai) {
+      return `${raceInfo.name} är ett fantastiskt lopp i ${raceInfo.location} som kommer utmana dig på bästa sätt. Med ${raceInfo.distance} av löpning genom ${raceInfo.terrain || 'varierad'} terräng blir detta en minnesvärd upplevelse.`;
+    }
+    
+    const prompt = `Skriv en inspirerande och personlig beskrivning av ${raceInfo.name} loppet i ${raceInfo.location}. 
+    
+    Loppdetaljer:
+    - Distans: ${raceInfo.distance}
+    - Terräng: ${raceInfo.terrain || 'Varierad'}
+    - Svårighetsgrad: ${raceInfo.difficulty || 'Medel'}
+    
+    Användarens mål: ${userAnswers.goal}
+    Användarens nivå: ${userAnswers.level}
+    ${appleHealthContext}
+    
+    Skapa en beskrivning som:
+    1. Beskriver loppets unika karaktär och utmaningar
+    2. Relaterar till användarens mål och nuvarande nivå
+    3. Inkluderar motiverande aspekter
+    4. Nämner specifika förberedelser som krävs
+    
+    Max 4-5 meningar. Skriv på svenska och var personlig och inspirerande.`;
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "Du är en erfaren löpcoach som beskriver lopp på ett personligt och inspirerande sätt."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 200,
+      temperature: 0.7
+    });
+    
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error generating enhanced race description:', error);
+    // Fallback with Apple Health context if available
+    const healthInsight = appleHealthContext ? 
+      ` Med din nuvarande träningshistoria från Apple Health är du på god väg att nå ditt mål.` : '';
+    
+    return `${raceInfo.name} är ett fantastiskt lopp i ${raceInfo.location} som kommer utmana dig på bästa sätt. Med ${raceInfo.distance} av löpning genom ${raceInfo.terrain || 'varierad'} terräng blir detta en minnesvärd upplevelse.${healthInsight}`;
+  }
+};
 
 module.exports = router;

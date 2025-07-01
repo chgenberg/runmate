@@ -175,7 +175,18 @@ router.get('/conversations/:chatId', auth, async (req, res) => {
         message: 'Access denied'
       });
     }
-    
+
+    console.log('Chat participants debug:');
+    console.log('Current user ID:', req.user._id);
+    chat.participants.forEach((p, i) => {
+      console.log(`Participant ${i}:`, {
+        _id: p._id,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        email: p.email
+      });
+    });
+
     res.json({
       success: true,
       conversation: {

@@ -117,7 +117,7 @@ chatSchema.statics.findOrCreateDirectChat = async function(userId1, userId2) {
   let chat = await this.findOne({
     chatType: 'direct',
     participants: { $all: [userId1, userId2], $size: 2 }
-  }).populate('participants', 'firstName lastName email profile');
+  }).populate('participants', 'firstName lastName email profilePhoto');
 
   if (!chat) {
     // Create new direct chat
@@ -127,7 +127,7 @@ chatSchema.statics.findOrCreateDirectChat = async function(userId1, userId2) {
       createdBy: userId1
     });
     
-    await chat.populate('participants', 'firstName lastName email profile');
+    await chat.populate('participants', 'firstName lastName email profilePhoto');
   }
 
   return chat;
@@ -146,7 +146,7 @@ chatSchema.statics.createGroupChat = async function(creatorId, participantIds, n
     admins: [creatorId]
   });
 
-  await chat.populate('participants', 'firstName lastName email profile');
+  await chat.populate('participants', 'firstName lastName email profilePhoto');
   return chat;
 };
 
@@ -158,7 +158,7 @@ chatSchema.statics.getUserChats = async function(userId, page = 1, limit = 20) {
     participants: userId,
     isActive: true
   })
-  .populate('participants', 'firstName lastName email profile')
+  .populate('participants', 'firstName lastName email profilePhoto')
   .populate('lastMessage.sender', 'firstName lastName')
   .sort({ lastActivity: -1 })
   .skip(skip)

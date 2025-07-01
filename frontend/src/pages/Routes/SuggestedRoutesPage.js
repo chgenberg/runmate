@@ -200,8 +200,9 @@ const SuggestedRoutesPage = () => {
   const loadAiCoachData = async () => {
     try {
       const response = await api.get('/users/profile');
-      if (response.data.user.aiCoachData) {
-        setAiCoachData(response.data.user.aiCoachData);
+      const coachData = response?.data?.user?.aiCoachData;
+      if (coachData) {
+        setAiCoachData(coachData);
       }
     } catch (error) {
       console.error('Error loading AI coach data:', error);

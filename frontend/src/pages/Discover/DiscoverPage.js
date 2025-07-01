@@ -28,9 +28,11 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import AICoachOnboarding from '../../components/AICoach/AICoachOnboarding';
 import RaceCoachOnboarding from '../../components/AICoach/RaceCoachOnboarding';
+import { useAuth } from '../../contexts/AuthContext';
 
 const DiscoverPage = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [runners, setRunners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -132,15 +134,15 @@ const DiscoverPage = () => {
         goals: user.goals || ['Förbättra hälsa', 'Träffa nya vänner']
       }));
       
-      setRunners(mappedUsers);
+      setRunners(mappedUsers.filter(u => u.id !== authUser?._id));
     } catch (error) {
       console.error('Error fetching runners:', error);
       // Demo data
-      setRunners(getDemoRunners());
+      setRunners(getDemoRunners().filter(u => u.id !== authUser?._id));
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, authUser._id]);
 
   // Check if user has AI profile
   useEffect(() => {
@@ -1016,7 +1018,7 @@ const DiscoverPage = () => {
 
                     {/* Action Buttons for Stack Mode Desktop */}
                     {hasMoreRunners && window.innerWidth >= 768 && (
-                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4">
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}

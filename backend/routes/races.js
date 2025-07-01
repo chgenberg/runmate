@@ -92,16 +92,30 @@ router.get('/race-files', async (req, res) => {
   try {
     const { worldsTop50Races } = require('../scripts/manualRaceData');
     
+    if (!worldsTop50Races || worldsTop50Races.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: 'No race data available'
+      });
+    }
+    
+    // Add ranking to each race
+    const racesWithRanking = worldsTop50Races.map((race, index) => ({
+      ...race,
+      ranking: index + 1
+    }));
+    
     res.json({
       success: true,
-      count: worldsTop50Races.length,
-      races: worldsTop50Races
+      count: racesWithRanking.length,
+      races: racesWithRanking
     });
   } catch (error) {
     console.error('Error loading race data:', error);
     res.status(500).json({
       success: false,
-      message: 'Error loading race data'
+      message: 'Error loading race data',
+      error: error.message
     });
   }
 });

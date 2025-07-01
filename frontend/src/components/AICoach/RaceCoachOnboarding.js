@@ -24,28 +24,63 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingRaces, setLoadingRaces] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const navigate = useNavigate();
+
+  // Ensure client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Load races on mount
   useEffect(() => {
     const loadRaces = async () => {
       try {
+        console.log('Loading races from API...');
         const response = await api.get('/races/race-files');
-        if (response.data.success) {
+        console.log('API response:', response.data);
+        
+        if (response.data.success && response.data.races) {
           setRaces(response.data.races);
           setFilteredRaces(response.data.races);
+          console.log(`Loaded ${response.data.races.length} races`);
+        } else {
+          console.error('API response missing success or races:', response.data);
         }
       } catch (error) {
         console.error('Error loading races:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        
+        // Fallback data if API fails
+        const fallbackRaces = [
+          {
+            id: 'boston-marathon',
+            name: 'Boston Marathon',
+            location: 'Boston, USA',
+            distance: '42.195 km',
+            difficulty: 'Advanced',
+            ranking: 1
+          },
+          {
+            id: 'stockholm-marathon',
+            name: 'Stockholm Marathon',
+            location: 'Stockholm, Sweden',
+            distance: '42.195 km',
+            difficulty: 'Intermediate',
+            ranking: 2
+          }
+        ];
+        setRaces(fallbackRaces);
+        setFilteredRaces(fallbackRaces);
       } finally {
         setLoadingRaces(false);
       }
     };
     
-    if (isOpen) {
+    if (isOpen && isClient) {
       loadRaces();
     }
-  }, [isOpen]);
+  }, [isOpen, isClient]);
 
   // Filter races based on search
   useEffect(() => {
@@ -666,7 +701,7 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !isClient) return null;
 
   if (isLoading) {
     return <AILoadingScreen onComplete={() => {}} />;

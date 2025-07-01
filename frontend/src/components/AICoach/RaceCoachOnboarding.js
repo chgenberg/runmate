@@ -13,7 +13,8 @@ import {
   Check,
   Activity,
   Heart,
-  Sparkles
+  Sparkles,
+  Trophy
 } from 'lucide-react';
 import api from '../../services/api';
 import AILoadingScreen from './AILoadingScreen';
@@ -147,485 +148,510 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
   };
 
   const questions = [
-    // 1. Loppet du satsar på
+    // 1. Race selection (standalone)
     {
       id: 'race_picker',
       type: 'race_picker',
       category: 'race_info',
-      question: 'Vilket lopp tränar du inför?',
-      description: '🔍 Sök eller välj bland topp 50-loppen'
+      question: 'Vilket lopp siktar du på?',
+      description: 'Välj från vår lista med världens bästa lopp'
     },
+    
+    // 2. Race details - Date & Location type
     {
-      id: 'race_location_type',
-      type: 'single',
+      id: 'race_details',
+      type: 'multi_question',
       category: 'race_info',
-      question: 'Var hålls loppet?',
-      options: [
-        { value: 'city', label: '🏙️ Stad', icon: '🏙️' },
-        { value: 'trail', label: '🌳 Skog/Trail', icon: '🌳' },
-        { value: 'altitude', label: '🏔️ Höjd (>1 500 m)', icon: '🏔️' }
+      questions: [
+        {
+          id: 'race_date',
+          type: 'date_picker',
+          question: 'När går startskottet?',
+          description: '📅 Ange exakt datum → appen visar automatiskt X veckor kvar'
+        },
+        {
+          id: 'race_location_type',
+          type: 'single',
+          question: 'Var hålls loppet?',
+          options: [
+            { value: 'city', label: 'Stad', icon: '🏙️' },
+            { value: 'trail', label: 'Skog/Trail', icon: '🌳' },
+            { value: 'altitude', label: 'Höjd (>1 500 m)', icon: '🏔️' }
+          ]
+        }
       ]
-    },
-    {
-      id: 'race_date',
-      type: 'date_picker',
-      category: 'race_info',
-      question: 'När går startskottet?',
-      description: '📅 Ange exakt datum → appen visar automatiskt X veckor kvar'
     },
 
-    // 2. Mål & motivation
+    // 3. Goals - Main goal & Motivation
     {
-      id: 'main_goal',
-      type: 'single',
+      id: 'goals_motivation',
+      type: 'multi_question',
       category: 'goals',
-      question: 'Vad är ditt huvudmål?',
-      options: [
-        { value: 'finish', label: '🎯 Bara gå i mål', icon: '🎯' },
-        { value: 'enjoy', label: '😊 Njuta', icon: '😊' },
-        { value: 'pb', label: '⚡️ Personbästa', icon: '⚡' },
-        { value: 'qualify', label: '🚀 Kvala till större lopp', icon: '🚀' }
+      questions: [
+        {
+          id: 'main_goal',
+          type: 'single',
+          question: 'Vad är ditt huvudmål?',
+          options: [
+            { value: 'finish', label: 'Bara gå i mål', icon: '🎯' },
+            { value: 'enjoy', label: 'Njuta', icon: '😊' },
+            { value: 'pb', label: 'Personbästa', icon: '⚡' },
+            { value: 'qualify', label: 'Kvala till större lopp', icon: '🚀' }
+          ]
+        },
+        {
+          id: 'motivation',
+          type: 'single',
+          question: 'Vad motiverar dig mest?',
+          options: [
+            { value: 'times', label: 'Tider & medaljer', icon: '🏅' },
+            { value: 'community', label: 'Gemenskap', icon: '👯‍♀️' },
+            { value: 'mental', label: 'Mental hälsa', icon: '🧠' },
+            { value: 'experience', label: 'Upplevelsen', icon: '🌍' }
+          ]
+        }
       ]
     },
-    {
-      id: 'motivation',
-      type: 'single',
-      category: 'goals',
-      question: 'Vad motiverar dig mest?',
-      options: [
-        { value: 'times', label: '🏅 Tider & medaljer', icon: '🏅' },
-        { value: 'community', label: '👯‍♀️ Gemenskap', icon: '👯‍♀️' },
-        { value: 'mental', label: '🧠 Mental hälsa', icon: '🧠' },
-        { value: 'experience', label: '🌍 Upplevelsen', icon: '🌍' }
-      ]
-    },
+
+    // 4. Coaching style (standalone - important)
     {
       id: 'coaching_style',
       type: 'single',
       category: 'goals',
       question: 'Hur vill du att coachen peppar dig?',
       options: [
-        { value: 'data', label: '📈 Datadrivet', icon: '📈' },
-        { value: 'positive', label: '🤗 Positiv boost', icon: '🤗' },
-        { value: 'gamification', label: '🎮 Gamification', icon: '🎮' },
-        { value: 'mindful', label: '🧘‍♂️ Mindful ton', icon: '🧘‍♂️' }
+        { value: 'data', label: 'Datadrivet', icon: '📈' },
+        { value: 'positive', label: 'Positiv boost', icon: '🤗' },
+        { value: 'gamification', label: 'Gamification', icon: '🎮' },
+        { value: 'mindful', label: 'Mindful ton', icon: '🧘‍♂️' }
       ]
     },
 
-    // 3. Din nuvarande kondition
+    // 5. Current fitness - Level & Recent run
     {
-      id: 'current_fitness',
-      type: 'single',
+      id: 'fitness_level',
+      type: 'multi_question',
       category: 'fitness',
-      question: 'Hur skulle du beskriva din form just nu?',
-      options: [
-        { value: 'beginner', label: '🌱 Nybörjare (kan springa 5 km)', icon: '🌱' },
-        { value: 'recreational', label: '🏃 Motionär', icon: '🏃' },
-        { value: 'experienced', label: '💪 Erfaren', icon: '💪' },
-        { value: 'elite', label: '🐐 Elitnära', icon: '🐐' }
-      ]
-    },
-    {
-      id: 'longest_recent_run',
-      type: 'single',
-      category: 'fitness',
-      question: 'Din längsta löptur senaste månaden?',
-      options: [
-        { value: '<5', label: '🏁 <5 km', icon: '🏁' },
-        { value: '5-10', label: '5–10 km', icon: '🏃‍♂️' },
-        { value: '10-15', label: '10–15 km', icon: '🏃‍♀️' },
-        { value: '15-21', label: '15–21 km', icon: '🏅' },
-        { value: '>21', label: '🏆 >21 km', icon: '🏆' }
-      ]
-    },
-    {
-      id: 'average_pace',
-      type: 'single',
-      category: 'fitness',
-      question: 'Snittfart på distanspass (min/km)?',
-      options: [
-        { value: '>7:00', label: '🐢 >7:00', icon: '🐢' },
-        { value: '6:00-7:00', label: '🙂 6:00–7:00', icon: '🙂' },
-        { value: '5:00-6:00', label: '😎 5:00–6:00', icon: '😎' },
-        { value: '<5:00', label: '⚡ <5:00', icon: '⚡' }
+      questions: [
+        {
+          id: 'current_fitness',
+          type: 'single',
+          question: 'Hur skulle du beskriva din form just nu?',
+          options: [
+            { value: 'beginner', label: 'Nybörjare (kan springa 5 km)', icon: '🌱' },
+            { value: 'recreational', label: 'Motionär', icon: '🏃' },
+            { value: 'experienced', label: 'Erfaren', icon: '💪' },
+            { value: 'elite', label: 'Elitnära', icon: '🐐' }
+          ]
+        },
+        {
+          id: 'longest_recent_run',
+          type: 'single',
+          question: 'Din längsta löptur senaste månaden?',
+          options: [
+            { value: '<5', label: '<5 km', icon: '🏁' },
+            { value: '5-10', label: '5–10 km', icon: '🏃‍♂️' },
+            { value: '10-15', label: '10–15 km', icon: '🏃‍♀️' },
+            { value: '15-21', label: '15–21 km', icon: '🏅' },
+            { value: '>21', label: '>21 km', icon: '🏆' }
+          ]
+        }
       ]
     },
 
-    // 4. Tillgänglig träningstid
+    // 6. Pace & Training time
     {
-      id: 'weekly_runs',
-      type: 'single',
-      category: 'training_time',
-      question: 'Hur många löppass kan du lägga per vecka?',
-      options: [
-        { value: '3', label: '📅 3', icon: '📅' },
-        { value: '4', label: '📆 4', icon: '📆' },
-        { value: '5', label: '🗓️ 5', icon: '🗓️' },
-        { value: '6+', label: '🚀 6+', icon: '🚀' }
-      ]
-    },
-    {
-      id: 'long_run_duration',
-      type: 'single',
-      category: 'training_time',
-      question: 'Hur långa får långpassen bli?',
-      options: [
-        { value: '<60', label: '⌛ <60 min', icon: '⌛' },
-        { value: '60-90', label: '60–90 min', icon: '⏰' },
-        { value: '90-120', label: '90–120 min', icon: '⏱️' },
-        { value: '>120', label: '🕒 >120 min', icon: '🕒' }
-      ]
-    },
-    {
-      id: 'preferred_time',
-      type: 'multiple',
-      category: 'training_time',
-      question: 'Vilka tider på dygnet föredrar du att träna?',
-      options: [
-        { value: 'morning', label: '🌅 Morgon', icon: '🌅' },
-        { value: 'lunch', label: '🕛 Lunch', icon: '🕛' },
-        { value: 'afternoon', label: '🌆 Eftermiddag', icon: '🌆' },
-        { value: 'evening', label: '🌙 Kväll', icon: '🌙' },
-        { value: 'flexible', label: '🎲 Flexibelt', icon: '🎲' }
+      id: 'pace_training',
+      type: 'multi_question',
+      category: 'fitness',
+      questions: [
+        {
+          id: 'average_pace',
+          type: 'single',
+          question: 'Snittfart på distanspass (min/km)?',
+          options: [
+            { value: '>7:00', label: '>7:00', icon: '🐢' },
+            { value: '6:00-7:00', label: '6:00–7:00', icon: '🙂' },
+            { value: '5:00-6:00', label: '5:00–6:00', icon: '😎' },
+            { value: '<5:00', label: '<5:00', icon: '⚡' }
+          ]
+        },
+        {
+          id: 'weekly_runs',
+          type: 'single',
+          question: 'Hur många löppass kan du lägga per vecka?',
+          options: [
+            { value: '3', label: '3', icon: '📅' },
+            { value: '4', label: '4', icon: '📆' },
+            { value: '5', label: '5', icon: '🗓️' },
+            { value: '6+', label: '6+', icon: '🚀' }
+          ]
+        }
       ]
     },
 
-    // 5. Tränings- & skadehistoria
+    // 7. Long runs & Preferred times
     {
-      id: 'running_experience',
-      type: 'single',
+      id: 'training_schedule',
+      type: 'multi_question',
+      category: 'training_time',
+      questions: [
+        {
+          id: 'long_run_duration',
+          type: 'single',
+          question: 'Hur långa får långpassen bli?',
+          options: [
+            { value: '<60', label: '<60 min', icon: '⌛' },
+            { value: '60-90', label: '60–90 min', icon: '⏰' },
+            { value: '90-120', label: '90–120 min', icon: '⏱️' },
+            { value: '>120', label: '>120 min', icon: '🕒' }
+          ]
+        },
+        {
+          id: 'preferred_time',
+          type: 'multiple',
+          question: 'Vilka tider på dygnet föredrar du att träna?',
+          options: [
+            { value: 'morning', label: 'Morgon', icon: '🌅' },
+            { value: 'lunch', label: 'Lunch', icon: '🕛' },
+            { value: 'afternoon', label: 'Eftermiddag', icon: '🌆' },
+            { value: 'evening', label: 'Kväll', icon: '🌙' },
+            { value: 'flexible', label: 'Flexibelt', icon: '🎲' }
+          ]
+        }
+      ]
+    },
+
+    // 8. Experience & Injuries
+    {
+      id: 'history_injuries',
+      type: 'multi_question',
       category: 'history',
-      question: 'Hur länge har du löptränat regelbundet?',
-      options: [
-        { value: '<6m', label: '⏳ <6 mån', icon: '⏳' },
-        { value: '6-12m', label: '6–12 mån', icon: '📅' },
-        { value: '1-3y', label: '1–3 år', icon: '📆' },
-        { value: '3y+', label: '3+ år', icon: '🏆' }
+      questions: [
+        {
+          id: 'running_experience',
+          type: 'single',
+          question: 'Hur länge har du löptränat regelbundet?',
+          options: [
+            { value: '<6m', label: '<6 mån', icon: '⏳' },
+            { value: '6-12m', label: '6–12 mån', icon: '📅' },
+            { value: '1-3y', label: '1–3 år', icon: '📆' },
+            { value: '3y+', label: '3+ år', icon: '🏆' }
+          ]
+        },
+        {
+          id: 'injury_count',
+          type: 'single',
+          question: 'Antal skador senaste året?',
+          options: [
+            { value: '0', label: '0', icon: '🌟' },
+            { value: '1', label: '1', icon: '😅' },
+            { value: '2-3', label: '2–3', icon: '😬' },
+            { value: '4+', label: '4+', icon: '😖' }
+          ]
+        }
       ]
     },
-    {
-      id: 'injury_count',
-      type: 'single',
-      category: 'history',
-      question: 'Antal skador senaste året?',
-      options: [
-        { value: '0', label: '🌟 0', icon: '🌟' },
-        { value: '1', label: '😅 1', icon: '😅' },
-        { value: '2-3', label: '😬 2–3', icon: '😬' },
-        { value: '4+', label: '😖 4+', icon: '😖' }
-      ]
-    },
+
+    // 9. Current injuries (standalone - important)
     {
       id: 'current_injuries',
       type: 'multiple',
       category: 'history',
       question: 'Aktuella skador eller besvär?',
       options: [
-        { value: 'none', label: '🚫 Inga', icon: '🚫' },
-        { value: 'knee', label: '🤕 Knä', icon: '🤕' },
-        { value: 'foot', label: '🦶 Fot/ankel', icon: '🦶' },
-        { value: 'muscle', label: '🦵 Muskel', icon: '🦵' },
+        { value: 'none', label: 'Inga', icon: '🚫' },
+        { value: 'knee', label: 'Knä', icon: '🤕' },
+        { value: 'foot', label: 'Fot/ankel', icon: '🦶' },
+        { value: 'muscle', label: 'Muskel', icon: '🦵' },
         { value: 'other', label: 'Annat', icon: '🩹' }
       ]
     },
 
-    // 6. Hälsa & återhämtning
+    // 10. Sleep & Stress
     {
-      id: 'sleep_hours',
-      type: 'single',
+      id: 'health_recovery',
+      type: 'multi_question',
       category: 'health',
-      question: 'Sömn per natt i snitt?',
-      options: [
-        { value: '<6', label: '💤 <6 h', icon: '💤' },
-        { value: '6-7', label: '😌 6–7 h', icon: '😌' },
-        { value: '7-8', label: '😴 7–8 h', icon: '😴' },
-        { value: '>8', label: '😇 >8 h', icon: '😇' }
+      questions: [
+        {
+          id: 'sleep_hours',
+          type: 'single',
+          question: 'Sömn per natt i snitt?',
+          options: [
+            { value: '<6', label: '<6 h', icon: '💤' },
+            { value: '6-7', label: '6–7 h', icon: '😌' },
+            { value: '7-8', label: '7–8 h', icon: '😴' },
+            { value: '>8', label: '>8 h', icon: '😇' }
+          ]
+        },
+        {
+          id: 'stress_level',
+          type: 'single',
+          question: 'Stressnivå i vardagen?',
+          options: [
+            { value: 'low', label: 'Låg', icon: '🧘' },
+            { value: 'medium', label: 'Medel', icon: '🙂' },
+            { value: 'high', label: 'Hög', icon: '😰' },
+            { value: 'extreme', label: 'Extrem', icon: '😱' }
+          ]
+        }
       ]
     },
-    {
-      id: 'stress_level',
-      type: 'single',
-      category: 'health',
-      question: 'Stressnivå i vardagen?',
-      options: [
-        { value: 'low', label: '🧘 Låg', icon: '🧘' },
-        { value: 'medium', label: '🙂 Medel', icon: '🙂' },
-        { value: 'high', label: '😰 Hög', icon: '😰' },
-        { value: 'extreme', label: '😱 Extrem', icon: '😱' }
-      ]
-    },
+
+    // 11. Medical clearance (standalone - important)
     {
       id: 'medical_clearance',
       type: 'single',
       category: 'health',
       question: 'Har läkare godkänt hård träning?',
       options: [
-        { value: 'yes', label: '✅ Ja', icon: '✅' },
-        { value: 'pending', label: '❓ Under utredning', icon: '❓' },
-        { value: 'no', label: '🚫 Nej', icon: '🚫' }
+        { value: 'yes', label: 'Ja', icon: '✅' },
+        { value: 'pending', label: 'Under utredning', icon: '❓' },
+        { value: 'no', label: 'Nej', icon: '🚫' }
       ]
     },
 
-    // 7. Crossträning & styrka
+    // 12. Strength & Flexibility
     {
-      id: 'strength_training',
-      type: 'single',
+      id: 'cross_training',
+      type: 'multi_question',
       category: 'cross_training',
-      question: 'Styrkepass per vecka?',
-      options: [
-        { value: '0', label: '🏋️ 0', icon: '🏋️' },
-        { value: '1', label: '1', icon: '💪' },
-        { value: '2', label: '2', icon: '💪' },
-        { value: '3+', label: '3+', icon: '🦾' }
+      questions: [
+        {
+          id: 'strength_training',
+          type: 'single',
+          question: 'Styrkepass per vecka?',
+          options: [
+            { value: '0', label: '0', icon: '🏋️' },
+            { value: '1', label: '1', icon: '💪' },
+            { value: '2', label: '2', icon: '💪' },
+            { value: '3+', label: '3+', icon: '🦾' }
+          ]
+        },
+        {
+          id: 'flexibility_yoga',
+          type: 'single',
+          question: 'Rörlighet/yoga?',
+          options: [
+            { value: 'never', label: 'Aldrig', icon: '🧘' },
+            { value: 'sometimes', label: 'Ibland', icon: '🤸' },
+            { value: '1x', label: '1×/vecka', icon: '🧘‍♀️' },
+            { value: '2x+', label: '2+×/vecka', icon: '🧘‍♂️' }
+          ]
+        }
       ]
     },
-    {
-      id: 'flexibility_yoga',
-      type: 'single',
-      category: 'cross_training',
-      question: 'Rörlighet/yoga?',
-      options: [
-        { value: 'never', label: '🧘 Aldrig', icon: '🧘' },
-        { value: 'sometimes', label: 'Ibland', icon: '🤸' },
-        { value: '1x', label: '1×/vecka', icon: '🧘‍♀️' },
-        { value: '2x+', label: '2+×/vecka', icon: '🧘‍♂️' }
-      ]
-    },
+
+    // 13. Other cardio (standalone - can be multiple)
     {
       id: 'other_cardio',
       type: 'multiple',
       category: 'cross_training',
       question: 'Övrig uthållighetsträning?',
       options: [
-        { value: 'cycling', label: '🚴 Cykel', icon: '🚴' },
-        { value: 'swimming', label: '🏊‍♂️ Simning', icon: '🏊‍♂️' },
-        { value: 'skiing', label: '⛷️ Längdskidor', icon: '⛷️' },
-        { value: 'none', label: '🚫 Inget', icon: '🚫' }
+        { value: 'cycling', label: 'Cykel', icon: '🚴' },
+        { value: 'swimming', label: 'Simning', icon: '🏊‍♂️' },
+        { value: 'skiing', label: 'Längdskidor', icon: '⛷️' },
+        { value: 'none', label: 'Inget', icon: '🚫' }
       ]
     },
 
-    // 8. Miljö & underlag
+    // 14. Environment - Surface & Climate
     {
-      id: 'training_surface',
-      type: 'single',
+      id: 'environment_conditions',
+      type: 'multi_question',
       category: 'environment',
-      question: 'Vanligaste underlaget i träning?',
-      options: [
-        { value: 'asphalt', label: '🏙️ Asfalt', icon: '🏙️' },
-        { value: 'gravel', label: '🌳 Grus/skog', icon: '🌳' },
-        { value: 'mountain', label: '🏔️ Berg', icon: '🏔️' },
-        { value: 'mix', label: '⚖️ Mix', icon: '⚖️' }
+      questions: [
+        {
+          id: 'training_surface',
+          type: 'single',
+          question: 'Vanligaste underlaget i träning?',
+          options: [
+            { value: 'asphalt', label: 'Asfalt', icon: '🏙️' },
+            { value: 'gravel', label: 'Grus/skog', icon: '🌳' },
+            { value: 'mountain', label: 'Berg', icon: '🏔️' },
+            { value: 'mix', label: 'Mix', icon: '⚖️' }
+          ]
+        },
+        {
+          id: 'climate',
+          type: 'single',
+          question: 'Klimat där du tränar mest?',
+          options: [
+            { value: '<5', label: '<5 °C', icon: '❄️' },
+            { value: '5-15', label: '5–15 °C', icon: '🌤️' },
+            { value: '15-25', label: '15–25 °C', icon: '☀️' },
+            { value: '>25', label: '>25 °C', icon: '🔥' }
+          ]
+        }
       ]
     },
-    {
-      id: 'climate',
-      type: 'single',
-      category: 'environment',
-      question: 'Klimat där du tränar mest?',
-      options: [
-        { value: '<5', label: '❄️ <5 °C', icon: '❄️' },
-        { value: '5-15', label: '🌤️ 5–15 °C', icon: '🌤️' },
-        { value: '15-25', label: '☀️ 15–25 °C', icon: '☀️' },
-        { value: '>25', label: '🔥 >25 °C', icon: '🔥' }
-      ]
-    },
+
+    // 15. Terrain (standalone)
     {
       id: 'terrain_hilliness',
       type: 'single',
       category: 'environment',
       question: 'Hur kuperad är din standardrunda?',
       options: [
-        { value: 'flat', label: '🏖️ Platt', icon: '🏖️' },
-        { value: 'rolling', label: '🚶‍♂️ Lätt backigt', icon: '🚶‍♂️' },
-        { value: 'hilly', label: '⛰️ Backigt', icon: '⛰️' }
+        { value: 'flat', label: 'Platt', icon: '🏖️' },
+        { value: 'rolling', label: 'Lätt backigt', icon: '🚶‍♂️' },
+        { value: 'hilly', label: 'Backigt', icon: '⛰️' }
       ]
     },
 
-    // 9. Utrustning
+    // 16. Equipment - Shoes & Tracking
     {
-      id: 'shoe_type',
-      type: 'single',
+      id: 'equipment_tracking',
+      type: 'multi_question',
       category: 'equipment',
-      question: 'Vilka skor springer du oftast i?',
-      options: [
-        { value: 'cushioned', label: '👟 Vägdämpade', icon: '👟' },
-        { value: 'racing', label: '🏃‍♀️ Lätta tävlingsskor', icon: '🏃‍♀️' },
-        { value: 'trail', label: '⛰️ Trailsko', icon: '⛰️' },
-        { value: 'unknown', label: '❓ Vet ej', icon: '❓' }
-      ]
-    },
-    {
-      id: 'shoe_budget',
-      type: 'single',
-      category: 'equipment',
-      question: 'Budget för nya skor?',
-      options: [
-        { value: '<1000', label: '💸 <1 000 kr', icon: '💸' },
-        { value: '1000-1500', label: '💶 1 000–1 500 kr', icon: '💶' },
-        { value: '1500-2500', label: '💰 1 500–2 500 kr', icon: '💰' },
-        { value: '>2500', label: '💎 >2 500 kr', icon: '💎' }
-      ]
-    },
-    {
-      id: 'tracking_device',
-      type: 'single',
-      category: 'equipment',
-      question: 'Använder du löparklocka/GPS?',
-      options: [
-        { value: 'watch_hr', label: '⌚ Klocka + pulsband', icon: '⌚' },
-        { value: 'watch', label: '⌚ Klocka (handledpuls)', icon: '⌚' },
-        { value: 'phone', label: '📱 Mobil-app', icon: '📱' },
-        { value: 'none', label: '🚫 Nej', icon: '🚫' }
+      questions: [
+        {
+          id: 'shoe_type',
+          type: 'single',
+          question: 'Vilka skor springer du oftast i?',
+          options: [
+            { value: 'cushioned', label: 'Vägdämpade', icon: '👟' },
+            { value: 'racing', label: 'Lätta tävlingsskor', icon: '🏃‍♀️' },
+            { value: 'trail', label: 'Trailsko', icon: '⛰️' },
+            { value: 'unknown', label: 'Vet ej', icon: '❓' }
+          ]
+        },
+        {
+          id: 'tracking_device',
+          type: 'single',
+          question: 'Använder du löparklocka/GPS?',
+          options: [
+            { value: 'watch_hr', label: 'Klocka + pulsband', icon: '⌚' },
+            { value: 'watch', label: 'Klocka (handledpuls)', icon: '⌚' },
+            { value: 'phone', label: 'Mobil-app', icon: '📱' },
+            { value: 'none', label: 'Nej', icon: '🚫' }
+          ]
+        }
       ]
     },
 
-    // 10. Kost & nutrition
+    // 17. Nutrition basics
     {
-      id: 'diet_type',
-      type: 'single',
+      id: 'nutrition_basics',
+      type: 'multi_question',
       category: 'nutrition',
-      question: 'Kosthållning/restriktioner?',
-      options: [
-        { value: 'omnivore', label: '🥩 Omnivor', icon: '🥩' },
-        { value: 'vegetarian', label: '🌱 Veggie', icon: '🌱' },
-        { value: 'vegan', label: '🌿 Vegan', icon: '🌿' },
-        { value: 'pescatarian', label: '🐟 Pesc', icon: '🐟' },
-        { value: 'allergies', label: '🚫 Allergier', icon: '🚫' }
-      ]
-    },
-    {
-      id: 'sports_nutrition',
-      type: 'single',
-      category: 'nutrition',
-      question: 'Hur ofta använder du sportdryck/gels?',
-      options: [
-        { value: 'never', label: '💧 Aldrig', icon: '💧' },
-        { value: 'long_runs', label: '🥤 På långpass', icon: '🥤' },
-        { value: 'every_run', label: '⚡ Varje pass', icon: '⚡' }
-      ]
-    },
-    {
-      id: 'meals_per_day',
-      type: 'single',
-      category: 'nutrition',
-      question: 'Antal måltider per dag?',
-      options: [
-        { value: '2', label: '🍽️ 2', icon: '🍽️' },
-        { value: '3', label: '3', icon: '🍽️' },
-        { value: '4', label: '4', icon: '🍽️' },
-        { value: '>4', label: '>4', icon: '🍽️' }
+      questions: [
+        {
+          id: 'diet_type',
+          type: 'single',
+          question: 'Kosthållning/restriktioner?',
+          options: [
+            { value: 'omnivore', label: 'Omnivor', icon: '🥩' },
+            { value: 'vegetarian', label: 'Veggie', icon: '🌱' },
+            { value: 'vegan', label: 'Vegan', icon: '🌿' },
+            { value: 'pescatarian', label: 'Pesc', icon: '🐟' },
+            { value: 'allergies', label: 'Allergier', icon: '🚫' }
+          ]
+        },
+        {
+          id: 'sports_nutrition',
+          type: 'single',
+          question: 'Hur ofta använder du sportdryck/gels?',
+          options: [
+            { value: 'never', label: 'Aldrig', icon: '💧' },
+            { value: 'long_runs', label: 'På långpass', icon: '🥤' },
+            { value: 'every_run', label: 'Varje pass', icon: '⚡' }
+          ]
+        }
       ]
     },
 
-    // 11. Resa & tävlingslogistik
+    // 18. Travel & Experience
     {
-      id: 'travel_required',
-      type: 'single',
+      id: 'race_logistics',
+      type: 'multi_question',
       category: 'logistics',
-      question: 'Behöver du resa till loppet?',
-      options: [
-        { value: 'local', label: '🚶‍♂️ Lokal', icon: '🚶‍♂️' },
-        { value: 'domestic', label: '🚆 Inrikes', icon: '🚆' },
-        { value: 'international', label: '✈️ Internationellt', icon: '✈️' }
-      ]
-    },
-    {
-      id: 'arrival_days',
-      type: 'single',
-      category: 'logistics',
-      question: 'Hur många dagar före start anländer du?',
-      options: [
-        { value: '0', label: '📅 Samma dag', icon: '📅' },
-        { value: '1', label: '1 dag', icon: '📅' },
-        { value: '2-3', label: '2–3 dagar', icon: '📅' },
-        { value: '4+', label: '4+ dagar', icon: '📅' }
-      ]
-    },
-    {
-      id: 'heat_altitude_experience',
-      type: 'single',
-      category: 'logistics',
-      question: 'Erfarenhet av tävling i värme/höjd?',
-      options: [
-        { value: 'none', label: '🔴 Ingen', icon: '🔴' },
-        { value: 'some', label: '🟡 Lite', icon: '🟡' },
-        { value: 'experienced', label: '🟢 Ja, flera gånger', icon: '🟢' }
+      questions: [
+        {
+          id: 'travel_required',
+          type: 'single',
+          question: 'Behöver du resa till loppet?',
+          options: [
+            { value: 'local', label: 'Lokal', icon: '🚶‍♂️' },
+            { value: 'domestic', label: 'Inrikes', icon: '🚆' },
+            { value: 'international', label: 'Internationellt', icon: '✈️' }
+          ]
+        },
+        {
+          id: 'heat_altitude_experience',
+          type: 'single',
+          question: 'Erfarenhet av tävling i värme/höjd?',
+          options: [
+            { value: 'none', label: 'Ingen', icon: '🔴' },
+            { value: 'some', label: 'Lite', icon: '🟡' },
+            { value: 'experienced', label: 'Ja, flera gånger', icon: '🟢' }
+          ]
+        }
       ]
     },
 
-    // 12. Teknik & löpform
+    // 19. Technique & Cadence
     {
-      id: 'technique_analysis',
-      type: 'single',
+      id: 'running_technique',
+      type: 'multi_question',
       category: 'technique',
-      question: 'Har du gjort löpteknik-analys?',
-      options: [
-        { value: 'video', label: '🎥 Video', icon: '🎥' },
-        { value: 'coach', label: '👁️ Coach live', icon: '👁️' },
-        { value: 'no', label: '❌ Nej', icon: '❌' }
-      ]
-    },
-    {
-      id: 'cadence',
-      type: 'single',
-      category: 'technique',
-      question: 'Känner du din kadens (steg/min)?',
-      options: [
-        { value: '<160', label: '👟 <160', icon: '👟' },
-        { value: '160-170', label: '160–170', icon: '👟' },
-        { value: '170-180', label: '170–180', icon: '👟' },
-        { value: '>180', label: '>180', icon: '👟' },
-        { value: 'unknown', label: '❓ Vet ej', icon: '❓' }
-      ]
-    },
-    {
-      id: 'pronation',
-      type: 'single',
-      category: 'technique',
-      question: 'Över- eller underpronation?',
-      options: [
-        { value: 'yes', label: '✅ Ja', icon: '✅' },
-        { value: 'no', label: '❌ Nej', icon: '❌' },
-        { value: 'unknown', label: '❓ Vet ej', icon: '❓' }
+      questions: [
+        {
+          id: 'technique_analysis',
+          type: 'single',
+          question: 'Har du gjort löpteknik-analys?',
+          options: [
+            { value: 'video', label: 'Video', icon: '🎥' },
+            { value: 'coach', label: 'Coach live', icon: '👁️' },
+            { value: 'no', label: 'Nej', icon: '❌' }
+          ]
+        },
+        {
+          id: 'cadence',
+          type: 'single',
+          question: 'Känner du din kadens (steg/min)?',
+          options: [
+            { value: '<160', label: '<160', icon: '👟' },
+            { value: '160-170', label: '160–170', icon: '👟' },
+            { value: '170-180', label: '170–180', icon: '👟' },
+            { value: '>180', label: '>180', icon: '👟' },
+            { value: 'unknown', label: 'Vet ej', icon: '❓' }
+          ]
+        }
       ]
     },
 
-    // 13. Coachning-preferenser & feedback
+    // 20. Delivery preferences
     {
-      id: 'delivery_method',
-      type: 'single',
+      id: 'coaching_preferences',
+      type: 'multi_question',
       category: 'preferences',
-      question: 'Hur vill du få träningspassen levererade?',
-      options: [
-        { value: 'push', label: '📲 Push-notiser', icon: '📲' },
-        { value: 'email', label: '📧 Mail', icon: '📧' },
-        { value: 'calendar', label: '🗓️ Kalender-sync', icon: '🗓️' }
-      ]
-    },
-    {
-      id: 'report_frequency',
-      type: 'single',
-      category: 'preferences',
-      question: 'Hur ofta vill du ha statistikrapporter?',
-      options: [
-        { value: 'per_session', label: '🕑 Varje pass', icon: '🕑' },
-        { value: 'weekly', label: '📅 Veckovis', icon: '📅' },
-        { value: 'monthly', label: '🗓️ Månadsvis', icon: '🗓️' },
-        { value: 'never', label: '🚫 Aldrig', icon: '🚫' }
-      ]
-    },
-    {
-      id: 'auto_adjust',
-      type: 'single',
-      category: 'preferences',
-      question: 'Vill du ha automatiska justeringar vid missade pass?',
-      options: [
-        { value: 'yes', label: '🤖 Ja, anpassa', icon: '🤖' },
-        { value: 'no', label: '✋ Nej, jag planerar själv', icon: '✋' }
+      questions: [
+        {
+          id: 'delivery_method',
+          type: 'single',
+          question: 'Hur vill du få träningspassen levererade?',
+          options: [
+            { value: 'push', label: 'Push-notiser', icon: '📲' },
+            { value: 'email', label: 'Mail', icon: '📧' },
+            { value: 'calendar', label: 'Kalender-sync', icon: '🗓️' }
+          ]
+        },
+        {
+          id: 'auto_adjust',
+          type: 'single',
+          question: 'Vill du ha automatiska justeringar vid missade pass?',
+          options: [
+            { value: 'yes', label: 'Ja, anpassa', icon: '🤖' },
+            { value: 'no', label: 'Nej, jag planerar själv', icon: '✋' }
+          ]
+        }
       ]
     },
 
-    // Apple Health Integration Check (last question)
+    // 21. Apple Health Integration (standalone - final)
     {
       id: 'apple_health_check',
       type: 'apple_health',
@@ -893,143 +919,191 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
     switch (currentQuestion.type) {
       case 'race_picker':
         return (
-          <div className="space-y-4">
-            {/* Filter buttons */}
-            <div className="space-y-3">
+          <div className="space-y-6">
+            {/* Beautiful header section */}
+            <div className="text-center mb-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl mb-4 shadow-lg"
+              >
+                <Trophy className="w-8 h-8 text-white" />
+              </motion.div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Välj ditt mållopp</h3>
+              <p className="text-gray-600">Bläddra bland världens mest prestigefyllda lopp</p>
+            </div>
+
+            {/* Filter pills with gradient backgrounds */}
+            <div className="space-y-4">
               {/* Type filters */}
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Filtrera efter typ:</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Filtrera efter typ</p>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchTerm('')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                       searchTerm === '' 
-                        ? 'bg-purple-600 text-white' 
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25' 
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    🌍 Alla lopp ({races.length})
-                  </button>
-                  <button
+                    <span className="flex items-center gap-2">
+                      <span>🌍</span>
+                      <span>Alla lopp</span>
+                      <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">{races.length}</span>
+                    </span>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchTerm('Marathon')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                       searchTerm.toLowerCase() === 'marathon' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/25' 
+                        : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                     }`}
                   >
-                    🏃‍♂️ Marathon ({countRacesByType('marathon')})
-                  </button>
-                  <button
-                    onClick={() => setSearchTerm('Halvmarathon')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      searchTerm.toLowerCase() === 'halvmarathon' 
-                        ? 'bg-green-600 text-white' 
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                    }`}
-                  >
-                    🏃 Halvmarathon ({countRacesByType('halvmarathon')})
-                  </button>
-                  <button
+                    <span className="flex items-center gap-2">
+                      <span>🏃‍♂️</span>
+                      <span>Marathon</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        searchTerm.toLowerCase() === 'marathon' ? 'bg-white/20' : 'bg-blue-200'
+                      }`}>{countRacesByType('marathon')}</span>
+                    </span>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchTerm('Ultra')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                       searchTerm.toLowerCase() === 'ultra' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25' 
+                        : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
                     }`}
                   >
-                    🏔️ Ultramarathon ({countRacesByType('ultra')})
-                  </button>
-                  <button
+                    <span className="flex items-center gap-2">
+                      <span>🏔️</span>
+                      <span>Ultramarathon</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        searchTerm.toLowerCase() === 'ultra' ? 'bg-white/20' : 'bg-purple-200'
+                      }`}>{countRacesByType('ultra')}</span>
+                    </span>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchTerm('Trail')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                       searchTerm.toLowerCase() === 'trail' 
-                        ? 'bg-orange-600 text-white' 
-                        : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/25' 
+                        : 'bg-green-50 text-green-700 hover:bg-green-100'
                     }`}
                   >
-                    🌲 Trail ({countRacesByType('trail')})
-                  </button>
+                    <span className="flex items-center gap-2">
+                      <span>🌲</span>
+                      <span>Trail</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        searchTerm.toLowerCase() === 'trail' ? 'bg-white/20' : 'bg-green-200'
+                      }`}>{countRacesByType('trail')}</span>
+                    </span>
+                  </motion.button>
                 </div>
               </div>
 
               {/* Location filters */}
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Populära platser:</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Populära destinationer</p>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchTerm('Sverige')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                       searchTerm.toLowerCase() === 'sverige' 
-                        ? 'bg-yellow-600 text-white' 
-                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                        ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-lg shadow-yellow-500/25' 
+                        : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
                     }`}
                   >
-                    🇸🇪 Sverige ({countRacesByLocation('sverige')})
-                  </button>
-                  <button
+                    <span className="flex items-center gap-2">
+                      <span>🇸🇪</span>
+                      <span>Sverige</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        searchTerm.toLowerCase() === 'sverige' ? 'bg-white/20' : 'bg-yellow-200'
+                      }`}>{countRacesByLocation('sverige')}</span>
+                    </span>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchTerm('USA')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                       searchTerm.toLowerCase() === 'usa' 
-                        ? 'bg-red-600 text-white' 
-                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-500/25' 
+                        : 'bg-red-50 text-red-700 hover:bg-red-100'
                     }`}
                   >
-                    🇺🇸 USA ({countRacesByLocation('usa')})
-                  </button>
-                  <button
-                    onClick={() => setSearchTerm('Europa')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      searchTerm.toLowerCase() === 'europa' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
-                  >
-                    🇪🇺 Europa ({countRacesByLocation('europa')})
-                  </button>
-                  <button
-                    onClick={() => setSearchTerm('Asien')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      searchTerm.toLowerCase() === 'asien' 
-                        ? 'bg-pink-600 text-white' 
-                        : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
-                    }`}
-                  >
-                    🌏 Asien ({countRacesByLocation('asien')})
-                  </button>
+                    <span className="flex items-center gap-2">
+                      <span>🇺🇸</span>
+                      <span>USA</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        searchTerm.toLowerCase() === 'usa' ? 'bg-white/20' : 'bg-red-200'
+                      }`}>{countRacesByLocation('usa')}</span>
+                    </span>
+                  </motion.button>
                 </div>
               </div>
             </div>
             
+            {/* Beautiful search bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Sök lopp, plats eller distans..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-700 placeholder-gray-400"
-              />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20"></div>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Sök lopp, plats eller distans..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-gray-700 placeholder-gray-400 shadow-sm"
+                />
+              </div>
             </div>
             
-            <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
+            {/* Race cards with beautiful design */}
+            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
               {loadingRaces ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Laddar lopp...</p>
+                <div className="text-center py-12">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="inline-block"
+                  >
+                    <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full"></div>
+                  </motion.div>
+                  <p className="text-gray-500 mt-4">Laddar världens bästa lopp...</p>
                 </div>
               ) : filteredRaces.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">Inga lopp hittades</p>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-2xl mb-4">
+                    <Search className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 mb-2">Inga lopp hittades</p>
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="text-purple-600 hover:text-purple-700 text-sm mt-2"
+                    className="text-purple-600 hover:text-purple-700 text-sm font-medium"
                   >
-                    Rensa sökning
+                    Visa alla lopp →
                   </button>
                 </div>
               ) : (
-                filteredRaces.map((race) => {
+                filteredRaces.map((race, index) => {
                   const distanceStr = String(race.distance || '');
                   const terrainStr = String(race.terrain || '');
                   
@@ -1040,62 +1114,104 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                   return (
                     <motion.div
                       key={race.id}
-                      whileHover={{ scale: 1.02 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleRaceSelect(race)}
-                      className={`p-4 rounded-xl cursor-pointer transition-all ${
+                      className={`relative p-5 rounded-2xl cursor-pointer transition-all ${
                         selectedRace?.id === race.id
-                          ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-500 shadow-lg'
-                          : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-md'
+                          ? 'bg-gradient-to-r from-purple-50 via-pink-50 to-purple-50 border-2 border-purple-500 shadow-xl shadow-purple-500/10'
+                          : 'bg-white border border-gray-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/5'
                       }`}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                              #{race.ranking}
-                            </span>
-                            <h3 className="font-bold text-gray-900 text-lg">{race.name}</h3>
-                            {isMarathon && (
-                              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                                Marathon
-                              </span>
-                            )}
-                            {isUltra && (
-                              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
-                                Ultra
-                              </span>
-                            )}
-                            {isTrail && (
-                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                                Trail
-                              </span>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
-                            <span className="flex items-center gap-1 text-sm text-gray-600">
-                              <MapPin className="w-4 h-4 text-gray-400" />
-                              <span className="truncate">{race.location}</span>
-                            </span>
-                            <span className="flex items-center gap-1 text-sm text-gray-600">
-                              <Activity className="w-4 h-4 text-gray-400" />
-                              <span className="font-medium">{race.distance}</span>
-                            </span>
-                            {race.terrain && (
-                              <span className="flex items-center gap-1 text-sm text-gray-600">
-                                <Mountain className="w-4 h-4 text-gray-400" />
-                                <span className="truncate">{race.terrain}</span>
-                              </span>
-                            )}
-                          </div>
+                      {/* Ranking badge */}
+                      <div className="absolute -top-2 -left-2">
+                        <motion.div
+                          animate={selectedRace?.id === race.id ? { rotate: [0, -10, 10, -10, 0] } : {}}
+                          transition={{ duration: 0.5 }}
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${
+                            race.ranking <= 3
+                              ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg shadow-yellow-500/30'
+                              : race.ranking <= 10
+                              ? 'bg-gradient-to-br from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-500/30'
+                              : 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                          }`}
+                        >
+                          #{race.ranking}
+                        </motion.div>
+                      </div>
 
-                        </div>
-                        {selectedRace?.id === race.id && (
-                          <div className="flex-shrink-0 ml-3">
-                            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                              <Check className="w-5 h-5 text-white" />
+                      <div className="flex items-start justify-between pl-8">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-3">
+                            <h3 className="font-bold text-gray-900 text-lg">{race.name}</h3>
+                            <div className="flex gap-2">
+                              {isMarathon && (
+                                <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                  Marathon
+                                </span>
+                              )}
+                              {isUltra && (
+                                <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                                  Ultra
+                                </span>
+                              )}
+                              {isTrail && (
+                                <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                                  Trail
+                                </span>
+                              )}
                             </div>
                           </div>
+                          
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <MapPin className="w-4 h-4 text-gray-600" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Plats</p>
+                                <p className="text-sm font-medium text-gray-900 truncate">{race.location}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Activity className="w-4 h-4 text-gray-600" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Distans</p>
+                                <p className="text-sm font-medium text-gray-900">{race.distance}</p>
+                              </div>
+                            </div>
+                            
+                            {race.terrain && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                  <Mountain className="w-4 h-4 text-gray-600" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500">Terräng</p>
+                                  <p className="text-sm font-medium text-gray-900 truncate">{race.terrain}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {selectedRace?.id === race.id && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                            className="flex-shrink-0 ml-4"
+                          >
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+                              <Check className="w-6 h-6 text-white" />
+                            </div>
+                          </motion.div>
                         )}
                       </div>
                     </motion.div>
@@ -1103,6 +1219,153 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                 })
               )}
             </div>
+          </div>
+        );
+
+      case 'multi_question':
+        // Render multiple questions on the same page
+        const multiQuestions = currentQuestion.questions;
+        return (
+          <div className="space-y-8">
+            {multiQuestions.map((question, qIndex) => (
+              <motion.div
+                key={question.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: qIndex * 0.2 }}
+                className="space-y-4"
+              >
+                {/* Question header */}
+                <div className="flex items-start gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
+                    qIndex === 0 ? 'bg-purple-100 text-purple-600' : 'bg-pink-100 text-pink-600'
+                  }`}>
+                    {qIndex + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">{question.question}</h4>
+                    {question.description && (
+                      <p className="text-sm text-gray-500 mt-1">{question.description}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Question content based on type */}
+                {question.type === 'date_picker' ? (
+                  <div className="pl-11">
+                    <input
+                      type="date"
+                      value={answers[question.id] || ''}
+                      onChange={(e) => setAnswers({ ...answers, [question.id]: e.target.value })}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-700"
+                    />
+                    {answers[question.id] && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        {Math.floor((new Date(answers[question.id]) - new Date()) / (1000 * 60 * 60 * 24 * 7))} veckor till loppet
+                      </p>
+                    )}
+                  </div>
+                ) : question.type === 'single' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-11">
+                    {question.options.map((option, index) => {
+                      const isSelected = answers[question.id] === option.value;
+                      return (
+                        <motion.button
+                          key={option.value}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setAnswers({ ...answers, [question.id]: option.value })}
+                          className={`relative p-4 rounded-xl text-left transition-all ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-500 shadow-md'
+                              : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-sm'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{option.icon}</span>
+                            <span className={`font-medium ${
+                              isSelected ? 'text-purple-900' : 'text-gray-700'
+                            }`}>
+                              {option.label}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute top-2 right-2"
+                            >
+                              <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                                <Check className="w-4 h-4 text-white" />
+                              </div>
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                ) : question.type === 'multiple' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-11">
+                    {question.options.map((option, index) => {
+                      const currentAnswers = answers[question.id] || [];
+                      const isSelected = currentAnswers.includes(option.value);
+                      return (
+                        <motion.button
+                          key={option.value}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            const updated = isSelected
+                              ? currentAnswers.filter(v => v !== option.value)
+                              : [...currentAnswers, option.value];
+                            setAnswers({ ...answers, [question.id]: updated });
+                          }}
+                          className={`relative p-4 rounded-xl text-left transition-all ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-500 shadow-md'
+                              : 'bg-white border-2 border-gray-200 hover:border-purple-300 hover:shadow-sm'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{option.icon}</span>
+                            <span className={`font-medium ${
+                              isSelected ? 'text-purple-900' : 'text-gray-700'
+                            }`}>
+                              {option.label}
+                            </span>
+                          </div>
+                          <div className="absolute top-2 right-2">
+                            <div className={`w-6 h-6 rounded-md border-2 transition-all ${
+                              isSelected
+                                ? 'bg-purple-600 border-purple-600'
+                                : 'bg-white border-gray-300'
+                            }`}>
+                              {isSelected && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="w-full h-full flex items-center justify-center"
+                                >
+                                  <Check className="w-4 h-4 text-white" />
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+
+                {/* Divider between questions */}
+                {qIndex < multiQuestions.length - 1 && (
+                  <div className="pt-4">
+                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                  </div>
+                )}
+              </motion.div>
+            ))}
           </div>
         );
 
@@ -1374,6 +1637,14 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
         return !!selectedRace;
       case 'date_picker':
         return !!selectedDate;
+      case 'multi_question':
+        // All sub-questions must be answered
+        return currentQuestion.questions.every(q => {
+          if (q.type === 'multiple') {
+            return (answers[q.id] || []).length > 0;
+          }
+          return !!answers[q.id];
+        });
       case 'text':
         return currentQuestion.validation ? 
           currentQuestion.validation(answers[currentQuestion.id]) : 
@@ -1427,8 +1698,12 @@ const RaceCoachOnboarding = ({ isOpen, onClose }) => {
                   <Sparkles className="w-6 h-6 text-white" />
                 </motion.div>
                 <div>
-                  <h2 className="text-2xl font-bold">AI Race Coach</h2>
-                  <p className="text-sm opacity-90">Din personliga träningsassistent</p>
+                  <h2 className="text-base md:text-lg font-bold text-white">
+                    AI Race Coach
+                  </h2>
+                  <p className="text-white/80 text-xs md:text-sm">
+                    Steg {currentStep + 1} av {questions.length} • {Math.round(progress)}% klart
+                  </p>
                 </div>
               </div>
               <motion.button

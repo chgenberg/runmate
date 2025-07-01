@@ -41,6 +41,8 @@ const ChatConversationPage = () => {
   const loadChatInfo = useCallback(async () => {
     try {
       const response = await api.get(`/chat/conversations/${chatId}`);
+      console.log('Chat info loaded:', response.data.conversation);
+      console.log('Current user:', user);
       setChatInfo(response.data.conversation);
     } catch (error) {
       console.error('Error loading chat info:', error);
@@ -352,8 +354,18 @@ const ChatConversationPage = () => {
     if (chatInfo.type === 'challenge') {
       return chatInfo.name;
     } else {
-      const otherParticipant = chatInfo.participants.find(p => p._id !== user?._id);
-      return `${otherParticipant?.firstName} ${otherParticipant?.lastName}`;
+      // Use both _id and id to ensure we find the correct participant
+      const otherParticipant = chatInfo.participants.find(p => 
+        p._id !== user?._id && p._id !== user?.id && 
+        p.id !== user?._id && p.id !== user?.id
+      );
+      
+      if (!otherParticipant) {
+        console.error('Could not find other participant in chat:', chatInfo);
+        return 'Okänd användare';
+      }
+      
+      return `${otherParticipant?.firstName || ''} ${otherParticipant?.lastName || ''}`.trim() || 'Anonym';
     }
   };
 
@@ -363,7 +375,11 @@ const ChatConversationPage = () => {
     if (chatInfo.type === 'challenge') {
       return `${chatInfo.participants.length} deltagare`;
     } else {
-      const otherParticipant = chatInfo.participants.find(p => p._id !== user?._id);
+      // Use both _id and id to ensure we find the correct participant
+      const otherParticipant = chatInfo.participants.find(p => 
+        p._id !== user?._id && p._id !== user?.id && 
+        p.id !== user?._id && p.id !== user?.id
+      );
       return otherParticipant?.isOnline ? 'Aktiv nu' : 'Senast aktiv för en stund sedan';
     }
   };
@@ -378,7 +394,11 @@ const ChatConversationPage = () => {
         </div>
       );
     } else {
-      const otherParticipant = chatInfo.participants.find(p => p._id !== user?._id);
+      // Use both _id and id to ensure we find the correct participant
+      const otherParticipant = chatInfo.participants.find(p => 
+        p._id !== user?._id && p._id !== user?.id && 
+        p.id !== user?._id && p.id !== user?.id
+      );
       return (
         <ProfileAvatar 
           user={otherParticipant} 
@@ -419,9 +439,12 @@ const ChatConversationPage = () => {
           <div
             className="flex items-center space-x-2 md:space-x-3 cursor-pointer group"
             onClick={() => {
-              const other = chatInfo?.participants?.find(p => p._id !== user?._id);
-              if (other?._id) {
-                navigate(`/profile/${other._id}`);
+              const other = chatInfo?.participants?.find(p => 
+                p._id !== user?._id && p._id !== user?.id && 
+                p.id !== user?._id && p.id !== user?.id
+              );
+              if (other?._id || other?.id) {
+                navigate(`/profile/${other._id || other.id}`);
               }
             }}
           >
@@ -513,7 +536,10 @@ const ChatConversationPage = () => {
         ) : (
           <AnimatePresence>
             {messages.map((message, index) => {
-              const isOwnMessage = message.sender._id === (user._id || user.id);
+              const isOwnMessage = message.sender._id === user?._id || 
+                                   message.sender._id === user?.id ||
+                                   message.sender.id === user?._id ||
+                                   message.sender.id === user?.id;
               const showAvatar = index === 0 || messages[index - 1].sender._id !== message.sender._id;
               
               return (

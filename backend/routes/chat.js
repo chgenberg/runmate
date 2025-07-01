@@ -134,6 +134,9 @@ router.post('/direct/:userId', auth, async (req, res) => {
     
     const chat = await Chat.findOrCreateDirectChat(req.user._id, otherUserId);
     
+    // Populate participants to get their info
+    await chat.populate('participants', 'firstName lastName profilePhoto email');
+    
     res.json({
       success: true,
       chat: {

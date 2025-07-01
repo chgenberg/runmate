@@ -672,7 +672,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
           )}
 
           {question.type === 'single' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto">
               {question.options.map((option, index) => (
                 <motion.button
                   key={option.value}
@@ -684,7 +684,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
                     setValidationError('');
                     handleNext();
                   }}
-                  className={`p-3 rounded-xl border-2 transition-all transform hover:scale-105 ${
+                  className={`p-4 rounded-xl border-2 transition-all transform hover:scale-105 ${
                     answers[question.id] === option.value
                       ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 shadow-lg'
                       : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md'
@@ -692,9 +692,9 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{option.icon}</span>
-                    <span className="font-medium text-gray-900 text-left text-sm">{option.label}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{option.icon}</span>
+                    <span className="font-medium text-gray-900 text-left text-base">{option.label}</span>
                   </div>
                 </motion.button>
               ))}
@@ -704,7 +704,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
           {question.type === 'multiple' && (
             <div>
               <p className="text-sm text-gray-600 mb-3 text-center">Välj alla som passar</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto">
                 {question.options.map((option, index) => (
                   <motion.button
                     key={option.value}
@@ -719,7 +719,7 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
                       setAnswers({ ...answers, [question.id]: newValue });
                       setValidationError('');
                     }}
-                    className={`p-3 rounded-xl border-2 transition-all transform ${
+                    className={`p-4 rounded-xl border-2 transition-all transform ${
                       (answers[question.id] || []).includes(option.value)
                         ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 shadow-lg'
                         : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md'
@@ -727,9 +727,9 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{option.icon}</span>
-                      <span className="font-medium text-gray-900 text-left text-sm">{option.label}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{option.icon}</span>
+                      <span className="font-medium text-gray-900 text-left text-base">{option.label}</span>
                     </div>
                   </motion.button>
                 ))}
@@ -777,9 +777,9 @@ const AICoachOnboarding = ({ isOpen, onClose }) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4"
             >
-              <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+              <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Header with better design */}
                 <div className="relative bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
                   {/* Progress bar */}

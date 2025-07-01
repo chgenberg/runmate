@@ -23,6 +23,7 @@ import SuggestedRoutesPage from './pages/Routes/SuggestedRoutesPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import AICoachResultsPage from './pages/AICoach/AICoachResultsPage';
 import RaceCoachCalendarPage from './pages/AICoach/RaceCoachCalendarPage';
+import TestRacePlanPage from './pages/AICoach/TestRacePlanPage';
 import ActivitiesPage from './pages/Activity/ActivitiesPage';
 import LogActivityPage from './pages/Activity/LogActivityPage';
 import ChatPage from './pages/Chat/ChatPage';
@@ -118,6 +119,9 @@ function App() {
               
               {/* Race Coach Calendar */}
               <Route path="race-coach-calendar" element={<RaceCoachCalendarPage />} />
+              
+              {/* Test Race Plan (Development only) */}
+              <Route path="test-race-plan" element={<TestRacePlanPage />} />
               
               {/* Matches Page */}
               <Route path="matches" element={<MatchesPage />} />

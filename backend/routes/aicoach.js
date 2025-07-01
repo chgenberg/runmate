@@ -3153,7 +3153,7 @@ function generateWeatherPrep(race) {
   };
 }
 
-function generateRaceWeekSchedule(race, data) {
+function generateRaceWeekScheduleOld(race, data) {
   return {
     sevenDaysBefore: {
       training: 'Sista kvalitetspasset - 30 min tempopass',
@@ -3863,5 +3863,141 @@ const generateRaceDescriptionNew = async (raceInfo, userAnswers, appleHealthCont
     return `${raceInfo.name} är ett fantastiskt lopp i ${raceInfo.location} som kommer utmana dig på bästa sätt. Med ${raceInfo.distance} av löpning genom ${raceInfo.terrain || 'varierad'} terräng blir detta en minnesvärd upplevelse.${healthInsight}`;
   }
 };
+
+// Test endpoint for generating dummy race plan data
+router.get('/test-race-plan', (req, res) => {
+  const dummyPlan = {
+    race: {
+      name: 'Stockholm Marathon',
+      location: 'Stockholm, Sverige',
+      distance: '42.195 km',
+      date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) // 90 days from now
+    },
+    raceDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    raceDescription: `
+      <p><strong>Stockholm Marathon</strong> är ett av Nordens mest prestigefyllda marathonlopp och erbjuder en unik upplevelse genom Sveriges vackra huvudstad.</p>
+      
+      <p>Banan sträcker sig genom Stockholms mest ikoniska områden, inklusive Gamla Stan, Östermalm och Södermalm. Löparna får uppleva stadens rika historia medan de springer förbi kungliga slott, pittoreska broar och vackra parker.</p>
+      
+      <p>Med över 20 000 deltagare årligen är detta ett lopp som kombinerar utmaning med en fantastisk atmosfär. Publikstödet är enastående, särskilt genom de centrala delarna av staden.</p>
+      
+      <p><strong>Banprofil:</strong> Relativt platt med några utmanande backar, perfekt för både nybörjare och erfarna löpare som siktar på personbästa.</p>
+    `,
+    training: {
+      weeklySchedule: {
+        monday: { type: 'Vila', duration: '-' },
+        tuesday: { type: 'Intervaller', duration: '45 min' },
+        wednesday: { type: 'Lätt jogg', duration: '30 min' },
+        thursday: { type: 'Tempopass', duration: '40 min' },
+        friday: { type: 'Vila', duration: '-' },
+        saturday: { type: 'Långpass', duration: '90 min' },
+        sunday: { type: 'Återhämtning', duration: '25 min' }
+      },
+      currentFitnessAssessment: {
+        weeklyFrequency: 4,
+        avgDistance: 8.5,
+        longestRun: 18,
+        avgPace: 330 // 5:30 per km in seconds
+      }
+    },
+    nutrition: {
+      dailyCalories: 2600,
+      hydration: {
+        daily: '3.5L'
+      },
+      raceWeek: {
+        carbLoading: 'Öka kolhydratintaget till 70% av totala kalorier de sista 3 dagarna',
+        breakfast: 'Havregrynsgröt med banan och honung 3 timmar före start',
+        during: 'Energigel var 45:e minut, vatten vid varje vätskestration'
+      }
+    },
+    equipment: [
+      {
+        item: 'Löparskor (insprungna)',
+        reason: 'Samma skor som du tränat i - inga experiment på racedagen',
+        priority: 'Kritisk'
+      },
+      {
+        item: 'GPS-klocka',
+        reason: 'För att hålla rätt pace och spåra prestationen',
+        priority: 'Hög'
+      },
+      {
+        item: 'Energigels (6 st)',
+        reason: 'Behövs för att upprätthålla energinivåerna under loppet',
+        priority: 'Hög'
+      },
+      {
+        item: 'Löparbyxor/shorts',
+        reason: 'Bekväma och testade under långa träningspass',
+        priority: 'Kritisk'
+      },
+      {
+        item: 'Teknisk t-shirt',
+        reason: 'Fukttransporterande material för komfort',
+        priority: 'Medel'
+      },
+      {
+        item: 'Solglasögon',
+        reason: 'Skydd mot sol och vind, särskilt på öppna sträckor',
+        priority: 'Medel'
+      }
+    ],
+    raceStrategy: {
+      pacing: 'Starta 10-15 sekunder per km långsammare än målpace. Håll jämnt tempo till km 30, sedan kan du öka om du känner dig stark.',
+      mentalStrategy: [
+        'Dela upp loppet i 4 delar à 10.5 km - fokusera på en del i taget',
+        'Använd publikens energi för att hålla motivationen uppe',
+        'Ha en positiv mantra redo: "Jag är stark, jag är redo, jag klarar detta"',
+        'Visualisera målgången redan från start'
+      ],
+      contingencyPlan: [
+        'Om du får kramper - sakta ner tempot och stretcha lätt',
+        'Vid magproblem - hoppa över nästa energigel och drick bara vatten',
+        'Om tempot känns för hårt efter km 20 - sänk med 15-20 sek/km'
+      ]
+    },
+    recoveryProtocol: {
+      immediate: {
+        hydration: 'Drick 500ml vätskeersättning inom 30 minuter',
+        nutrition: 'Ät något med kolhydrater och protein inom 1 timme',
+        movement: 'Promenera 10-15 minuter för att förhindra stelhet'
+      },
+      weekly: {
+        day1: 'Vila eller lätt promenad',
+        day2: 'Lätt jogging 20-30 min',
+        day3: 'Vila eller yoga',
+        day4: 'Lätt löpning 30-40 min',
+        day5: 'Vila',
+        day6: 'Längre lugn löpning 45-60 min',
+        day7: 'Vila eller lätt aktivitet'
+      },
+      sleep: {
+        target: '8-9 timmar per natt under återhämtningsveckan',
+        tips: [
+          'Gå till sängs 30 minuter tidigare än vanligt',
+          'Undvik skärmar 1 timme före sänggåendet',
+          'Håll sovrummet svalt (16-18°C)',
+          'Använd öronproppar om det är bullrigt'
+        ]
+      }
+    },
+    appleHealthIntegration: {
+      hasData: true,
+      summary: {
+        totalActivities: 47,
+        avgWeeklyDistance: 32,
+        currentFitnessLevel: 'Avancerad'
+      }
+    }
+  };
+
+  res.json({
+    success: true,
+    plan: dummyPlan,
+    message: 'Dummy race plan generated for testing',
+    timestamp: new Date()
+  });
+});
 
 module.exports = router;

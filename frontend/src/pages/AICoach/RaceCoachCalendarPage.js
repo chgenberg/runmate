@@ -417,51 +417,346 @@ const RaceCoachCalendarPage = () => {
           </motion.div>
         )}
 
-        {/* Comprehensive Race Information Tabs */}
-        {plan.comprehensiveRaceInfo && (
-          <div className="bg-white rounded-2xl shadow-sm mb-8">
-            {/* Tab Navigation */}
-            <div className="border-b border-gray-200 px-6">
-              <div className="flex gap-8 overflow-x-auto">
-                {[
-                  { id: 'overview', label: 'Översikt', icon: Info },
-                  { id: 'training', label: 'Träning', icon: Activity },
-                  { id: 'nutrition', label: 'Nutrition', icon: Utensils },
-                  { id: 'equipment', label: 'Utrustning', icon: Target },
-                  { id: 'strategy', label: 'Strategi', icon: TrendingUp },
-                  { id: 'recovery', label: 'Återhämtning', icon: Heart }
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`py-4 px-2 border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-purple-600 text-purple-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-6">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="prose prose-lg max-w-none"
-                  dangerouslySetInnerHTML={{ __html: plan.comprehensiveRaceInfo }}
-                />
-              </AnimatePresence>
+        {/* Comprehensive Race Information Tabs - Always show */}
+        <div className="bg-white rounded-2xl shadow-lg mb-8">
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200 px-6">
+            <div className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-hide">
+              {[
+                { id: 'overview', label: 'Översikt', icon: Info, color: 'purple' },
+                { id: 'training', label: 'Träning', icon: Activity, color: 'blue' },
+                { id: 'nutrition', label: 'Nutrition', icon: Utensils, color: 'green' },
+                { id: 'equipment', label: 'Utrustning', icon: Target, color: 'indigo' },
+                { id: 'strategy', label: 'Strategi', icon: TrendingUp, color: 'red' },
+                { id: 'recovery', label: 'Återhämtning', icon: Heart, color: 'pink' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-4 px-3 sm:px-4 border-b-3 transition-all flex items-center gap-2 whitespace-nowrap font-medium ${
+                    activeTab === tab.id
+                      ? `border-${tab.color}-600 text-${tab.color}-600 bg-${tab.color}-50`
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              ))}
             </div>
           </div>
-        )}
+
+          {/* Tab Content */}
+          <div className="p-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="min-h-[400px]"
+              >
+                {/* If we have comprehensive AI-generated content, show it */}
+                {plan.comprehensiveRaceInfo ? (
+                  <div 
+                    className="prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{ __html: plan.comprehensiveRaceInfo }}
+                  />
+                ) : (
+                  /* Otherwise show structured content based on active tab */
+                  <div>
+                    {activeTab === 'overview' && (
+                      <div className="space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                          {plan.race?.name || 'Ditt Lopp'} - Komplett Guide
+                        </h3>
+                        
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+                          <h4 className="text-lg font-semibold text-purple-900 mb-3">Om Loppet</h4>
+                          <p className="text-gray-700 mb-4">
+                            {plan.raceDescription || `${plan.race?.name} är ett fantastiskt lopp som erbjuder en unik upplevelse för alla deltagare.`}
+                          </p>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div className="bg-white rounded-lg p-4">
+                              <MapPin className="w-6 h-6 text-purple-600 mb-2" />
+                              <p className="font-semibold">Plats</p>
+                              <p className="text-sm text-gray-600">{plan.race?.location}</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4">
+                              <Activity className="w-6 h-6 text-purple-600 mb-2" />
+                              <p className="font-semibold">Distans</p>
+                              <p className="text-sm text-gray-600">{plan.race?.distance}</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4">
+                              <Calendar className="w-6 h-6 text-purple-600 mb-2" />
+                              <p className="font-semibold">Datum</p>
+                              <p className="text-sm text-gray-600">{new Date(plan.raceDate).toLocaleDateString('sv-SE')}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {plan.trainingPhases && (
+                          <div className="bg-blue-50 rounded-xl p-6">
+                            <h4 className="text-lg font-semibold text-blue-900 mb-3">Träningsfaser</h4>
+                            <div className="space-y-3">
+                              {plan.trainingPhases.map((phase, idx) => (
+                                <div key={idx} className="border-l-4 border-blue-500 pl-4">
+                                  <h5 className="font-semibold">{phase.name}</h5>
+                                  <p className="text-sm text-gray-600">{phase.focus}</p>
+                                  <p className="text-xs text-gray-500 mt-1">{phase.weeks} veckor</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === 'training' && (
+                      <div className="space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Träningsplan</h3>
+                        
+                        {plan.training?.phases && (
+                          <div className="space-y-4">
+                            {plan.training.phases.map((phase, idx) => (
+                              <div key={idx} className="bg-blue-50 rounded-xl p-6">
+                                <h4 className="text-lg font-semibold text-blue-900 mb-2">{phase.name}</h4>
+                                <p className="text-gray-700 mb-3">{phase.focus}</p>
+                                <div className="bg-white rounded-lg p-4">
+                                  <p className="font-medium text-gray-900 mb-2">Veckovolym: {phase.weeklyDistance}</p>
+                                  <ul className="space-y-1">
+                                    {phase.keyWorkouts.map((workout, widx) => (
+                                      <li key={widx} className="text-sm text-gray-600 flex items-start">
+                                        <span className="text-blue-500 mr-2">•</span>
+                                        {workout}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {plan.training?.detailedWorkouts && (
+                          <div className="bg-gray-50 rounded-xl p-6">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-3">Nyckelpass</h4>
+                            <div className="space-y-3">
+                              {plan.training.detailedWorkouts.map((workout, idx) => (
+                                <div key={idx} className="bg-white rounded-lg p-4">
+                                  <p className="font-medium">Vecka {workout.week}: {workout.keyWorkout.type}</p>
+                                  <p className="text-sm text-gray-600">{workout.keyWorkout.distance} km</p>
+                                  <p className="text-sm text-gray-500">{workout.keyWorkout.tips}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === 'nutrition' && (
+                      <div className="space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Nutritionsplan</h3>
+                        
+                        {plan.nutritionPlan && (
+                          <div className="space-y-4">
+                            <div className="bg-green-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-green-900 mb-3">Dagligt Intag</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-white rounded-lg p-4">
+                                  <p className="text-2xl font-bold text-green-600">{plan.nutritionPlan.dailyCalories}</p>
+                                  <p className="text-sm text-gray-600">Kalorier per dag</p>
+                                </div>
+                                <div className="bg-white rounded-lg p-4">
+                                  <p className="text-lg font-semibold text-green-600">{plan.nutritionPlan.hydration.daily}</p>
+                                  <p className="text-sm text-gray-600">Vätskeintag</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-yellow-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-yellow-900 mb-3">Carb-Loading</h4>
+                              <p className="text-gray-700 mb-2">{plan.nutritionPlan.carbLoading.when}</p>
+                              <p className="text-sm text-gray-600">{plan.nutritionPlan.carbLoading.how}</p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {plan.nutritionPlan.carbLoading.foods.map((food, idx) => (
+                                  <span key={idx} className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm">
+                                    {food}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="bg-orange-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-orange-900 mb-3">Racedagen</h4>
+                              <div className="space-y-3">
+                                <div>
+                                  <p className="font-medium text-gray-900">Frukost</p>
+                                  <p className="text-sm text-gray-600">{plan.nutritionPlan.raceDay.breakfast}</p>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">Under loppet</p>
+                                  <p className="text-sm text-gray-600">{plan.nutritionPlan.raceDay.during}</p>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">Efter målgång</p>
+                                  <p className="text-sm text-gray-600">{plan.nutritionPlan.raceDay.postRace}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === 'equipment' && (
+                      <div className="space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Utrustningsguide</h3>
+                        
+                        {plan.equipment && (
+                          <div className="space-y-4">
+                            {plan.equipment.map((item, idx) => (
+                              <div key={idx} className="bg-indigo-50 rounded-xl p-6">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <h4 className="text-lg font-semibold text-indigo-900">{item.item}</h4>
+                                    <p className="text-gray-700 mt-1">{item.reason}</p>
+                                  </div>
+                                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                    item.priority === 'Kritisk' ? 'bg-red-100 text-red-700' :
+                                    item.priority === 'Hög' ? 'bg-orange-100 text-orange-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                    {item.priority}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="bg-gray-50 rounded-xl p-6">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-3">Checklista</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            {['GPS-klocka', 'Löparskor (insprungna)', 'Tävlingskläder', 'Energigels', 
+                              'Solglasögon', 'Keps/pannband', 'Plåster', 'Vaselin'].map((item, idx) => (
+                              <label key={idx} className="flex items-center gap-2 text-sm">
+                                <input type="checkbox" className="rounded text-purple-600" />
+                                <span>{item}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'strategy' && (
+                      <div className="space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Racedagsstrategi</h3>
+                        
+                        {plan.raceStrategy && (
+                          <div className="space-y-4">
+                            <div className="bg-red-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-red-900 mb-3">Pacing</h4>
+                              <p className="text-gray-700">{plan.raceStrategy.pacing}</p>
+                            </div>
+
+                            <div className="bg-purple-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-purple-900 mb-3">Mental Strategi</h4>
+                              <ul className="space-y-2">
+                                {plan.raceStrategy.mentalStrategy.map((strategy, idx) => (
+                                  <li key={idx} className="flex items-start">
+                                    <span className="text-purple-500 mr-2">•</span>
+                                    <span className="text-gray-700">{strategy}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="bg-yellow-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-yellow-900 mb-3">Om något går fel</h4>
+                              <ul className="space-y-2">
+                                {plan.raceStrategy.contingencyPlan.map((plan, idx) => (
+                                  <li key={idx} className="flex items-start">
+                                    <span className="text-yellow-600 mr-2">⚠️</span>
+                                    <span className="text-gray-700 text-sm">{plan}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+
+                        {plan.raceWeekSchedule && (
+                          <div className="bg-gray-50 rounded-xl p-6">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-3">Race Week</h4>
+                            <div className="space-y-3">
+                              {Object.entries(plan.raceWeekSchedule).map(([day, schedule]) => (
+                                <div key={day} className="border-l-4 border-gray-400 pl-4">
+                                  <p className="font-medium capitalize">{day.replace(/([A-Z])/g, ' $1').trim()}</p>
+                                  <p className="text-sm text-gray-600">{schedule.training}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === 'recovery' && (
+                      <div className="space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Återhämtningsplan</h3>
+                        
+                        {plan.recoveryProtocol && (
+                          <div className="space-y-4">
+                            <div className="bg-pink-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-pink-900 mb-3">Direkt Efter Loppet</h4>
+                              <div className="space-y-3">
+                                {Object.entries(plan.recoveryProtocol.immediate).map(([key, value]) => (
+                                  <div key={key}>
+                                    <p className="font-medium text-gray-900 capitalize">{key}</p>
+                                    <p className="text-sm text-gray-600">{value}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="bg-teal-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-teal-900 mb-3">Veckoplan</h4>
+                              <div className="space-y-3">
+                                {Object.entries(plan.recoveryProtocol.weekly).map(([key, value]) => (
+                                  <div key={key}>
+                                    <p className="font-medium text-gray-900 capitalize">{key}</p>
+                                    <p className="text-sm text-gray-600">{value}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="bg-blue-50 rounded-xl p-6">
+                              <h4 className="text-lg font-semibold text-blue-900 mb-3">Sömn</h4>
+                              <p className="text-gray-700 mb-3">{plan.recoveryProtocol.sleep.target}</p>
+                              <ul className="space-y-2">
+                                {plan.recoveryProtocol.sleep.tips.map((tip, idx) => (
+                                  <li key={idx} className="flex items-start">
+                                    <span className="text-blue-500 mr-2">•</span>
+                                    <span className="text-sm text-gray-600">{tip}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Calendar Area */}

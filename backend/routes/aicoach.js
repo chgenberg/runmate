@@ -2281,38 +2281,254 @@ async function generateComprehensiveRaceInfo(race, userData) {
 }
 
 function generateFallbackRaceInfo(race, userData) {
+  const fitnessLevel = userData.current_fitness || 'recreational';
+  const weeklyRuns = userData.weekly_runs || '3-4';
+  const goal = userData.race_goal || 'finish';
+  
+  // Generate comprehensive HTML content with all sections
   return `
-    <h3>🏃‍♂️ ${race.name} - Din Kompletta Guide</h3>
-    
-    <h4>Loppöversikt</h4>
-    <p>${race.name} i ${race.location} är ett ${race.distance}-lopp som lockar löpare från hela världen. Detta lopp erbjuder en unik kombination av utmaning och upplevelse.</p>
-    
-    <h4>Träningsplan</h4>
-    <p>Med ${userData.weeksUntilRace} veckor kvar har du gott om tid att förbereda dig. Fokusera på:</p>
-    <ul>
-      <li>Gradvis ökning av distans</li>
-      <li>Tempopass i racefart</li>
-      <li>Långpass för uthållighet</li>
-    </ul>
-    
-    <h4>Nutritionsstrategi</h4>
-    <p>En genomtänkt nutritionsplan är avgörande för framgång:</p>
-    <ul>
-      <li><strong>Veckan före:</strong> Öka kolhydratintaget gradvis</li>
-      <li><strong>Racedagen:</strong> Frukost 3h före start</li>
-      <li><strong>Under loppet:</strong> Energi var 45:e minut</li>
-    </ul>
-    
-    <h4>Mental Förberedelse</h4>
-    <p>Visualisera din framgång och förbered dig mentalt på utmaningen. Dela upp loppet i mindre segment för att göra det mer hanterbart.</p>
-    
-    <h4>Racedagsstrategi</h4>
-    <ul>
-      <li>Vakna 3-4 timmar före start</li>
-      <li>Ät frukost direkt</li>
-      <li>Ankom till startområdet 1 timme före</li>
-      <li>Värm upp 20 minuter före start</li>
-    </ul>
+    <div class="comprehensive-race-guide">
+      <h2 class="text-3xl font-bold mb-6 text-gray-900">🏃‍♂️ ${race.name} - Din Kompletta Guide</h2>
+      
+      <!-- Loppöversikt -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-purple-600">📍 Loppöversikt</h3>
+        <div class="bg-purple-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Om ${race.name}</h4>
+          <p class="mb-4">${race.name} i ${race.location} är ett av världens mest prestigefyllda ${race.distance}-lopp. Med sin ${race.terrain || 'varierande'} terräng och ${race.difficulty || 'utmanande'} svårighetsgrad lockar det löpare från hela världen.</p>
+          
+          <div class="grid grid-cols-2 gap-4 mt-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-purple-700">Banprofil</h5>
+              <p>Banan bjuder på ${race.terrain === 'Flat' ? 'platt och snabb löpning' : race.terrain === 'Hilly' ? 'kuperad terräng med utmanande backar' : 'varierande terräng'}. Höjdskillnaden är ${race.elevation || 'måttlig'}.</p>
+            </div>
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-purple-700">Väder & Klimat</h5>
+              <p>Typiskt väder under loppperioden är ${getTypicalWeather(race.location)}. Förbered dig på temperaturer mellan 10-20°C.</p>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-4 bg-yellow-50 rounded">
+            <h5 class="font-semibold text-yellow-800">🎯 Publikstöd & Atmosfär</h5>
+            <p>Loppet är känt för sitt fantastiska publikstöd med över ${race.spectators || '100,000'} åskådare längs banan. Speciellt vid ${getKeySpectatorPoints(race.name)}.</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Träningsplan Översikt -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-blue-600">🏋️ Träningsplan Översikt</h3>
+        <div class="bg-blue-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Specifik Träning för ${race.name}</h4>
+          <p class="mb-4">Med ${userData.weeksUntilRace} veckor kvar och din nuvarande kondition som "${fitnessLevel}", här är din anpassade träningsstrategi:</p>
+          
+          <div class="space-y-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-blue-700 mb-2">🎯 Nyckelfokus för Ditt Lopp</h5>
+              <ul class="space-y-2">
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  <span><strong>Distansträning:</strong> Progressiv ökning till ${getTargetLongRun(race.distance, fitnessLevel)} som längsta pass</span>
+                </li>
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  <span><strong>Tempoträning:</strong> ${getTempoWorkouts(goal, fitnessLevel)}</span>
+                </li>
+                <li class="flex items-start">
+                  <span class="text-blue-500 mr-2">•</span>
+                  <span><strong>Terrängspecifik träning:</strong> ${getTerrainTraining(race.terrain)}</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-blue-700 mb-2">📅 Träningsfaser</h5>
+              <div class="space-y-3">
+                ${generateTrainingPhasesHTML(userData.weeksUntilRace, fitnessLevel)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Nutritionsstrategi -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-green-600">🥗 Nutritionsstrategi</h3>
+        <div class="bg-green-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Komplett Nutritionsplan</h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-green-700 mb-2">📅 Veckan Före Loppet</h5>
+              <ul class="space-y-2 text-sm">
+                <li><strong>7 dagar före:</strong> Normal kost, öka vätska</li>
+                <li><strong>5 dagar före:</strong> Börja öka kolhydrater (60%)</li>
+                <li><strong>3 dagar före:</strong> Carb-loading (70% kolhydrater)</li>
+                <li><strong>1 dag före:</strong> Lätt smältbar mat, undvik fiber</li>
+              </ul>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-green-700 mb-2">🏃 Racedagens Nutrition</h5>
+              <ul class="space-y-2 text-sm">
+                <li><strong>3h före:</strong> ${getRaceBreakfast(race.distance)}</li>
+                <li><strong>1h före:</strong> Banan + 500ml sportdryck</li>
+                <li><strong>Under loppet:</strong> ${getRaceFueling(race.distance)}</li>
+                <li><strong>Efter:</strong> Protein + kolhydrater inom 30 min</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-4 bg-orange-50 rounded">
+            <h5 class="font-semibold text-orange-800">💧 Vätskestrategi</h5>
+            <p>${getHydrationStrategy(race.distance, race.location)}</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Utrustningsguide -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-indigo-600">👟 Utrustningsguide</h3>
+        <div class="bg-indigo-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Rekommenderad Utrustning för ${race.name}</h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-indigo-700 mb-2">👟 Skor</h5>
+              <p class="text-sm mb-2">${getShoeRecommendation(race.terrain, race.distance)}</p>
+              <p class="text-xs text-gray-600">Tips: Använd skor som du sprungit minst 50 km i</p>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-indigo-700 mb-2">👕 Kläder</h5>
+              <p class="text-sm mb-2">${getClothingRecommendation(race.location)}</p>
+              <p class="text-xs text-gray-600">Undvik bomull, välj tekniska material</p>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-indigo-700 mb-2">🎒 Tillbehör</h5>
+              <ul class="text-sm space-y-1">
+                <li>• GPS-klocka</li>
+                <li>• Energigels/bars</li>
+                <li>• ${race.distance.includes('Ultra') ? 'Vätskebälte' : 'Handhållen flaska (valfritt)'}</li>
+                <li>• Solglasögon & keps</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Mental Förberedelse -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-pink-600">🧠 Mental Förberedelse</h3>
+        <div class="bg-pink-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Psykologiska Strategier</h4>
+          
+          <div class="space-y-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-pink-700 mb-2">🎯 Visualisering</h5>
+              <p>Ägna 10 minuter varje dag åt att visualisera:</p>
+              <ul class="mt-2 space-y-1 text-sm">
+                <li>• Starten och de första kilometrarna</li>
+                <li>• Svåra delar av banan (${getChallengingParts(race.name)})</li>
+                <li>• Din starka finish över mållinjen</li>
+              </ul>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-pink-700 mb-2">💪 Mantran & Affirmationer</h5>
+              <ul class="space-y-2 text-sm">
+                <li>"Jag är stark, jag är redo"</li>
+                <li>"Ett steg i taget tar mig till målet"</li>
+                <li>"Jag har tränat för detta"</li>
+                <li>${getPersonalizedMantra(goal)}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Racedagsstrategi -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-red-600">🏁 Racedagsstrategi</h3>
+        <div class="bg-red-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Din Kompletta Racedagsplan</h4>
+          
+          <div class="space-y-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-red-700 mb-2">⏰ Tidsschema</h5>
+              <div class="space-y-2 text-sm">
+                ${generateRaceDaySchedule(race.startTime || '09:00')}
+              </div>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-red-700 mb-2">📊 Pacing-strategi</h5>
+              <p class="mb-2">${getPacingStrategy(goal, race.distance, fitnessLevel)}</p>
+              <div class="bg-gray-100 rounded p-3 mt-2">
+                <p class="text-sm"><strong>Måltempo:</strong> ${getTargetPace(goal, race.distance, fitnessLevel)}</p>
+              </div>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-red-700 mb-2">🚰 Vätskestationer</h5>
+              <p>${getAidStationStrategy(race.distance)}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Vanliga Misstag -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-yellow-600">⚠️ Vanliga Misstag att Undvika</h3>
+        <div class="bg-yellow-50 rounded-lg p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${generateCommonMistakesHTML(race, fitnessLevel)}
+          </div>
+        </div>
+      </section>
+      
+      <!-- Återhämtningsplan -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-teal-600">🔄 Återhämtningsplan</h3>
+        <div class="bg-teal-50 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Efter Loppet</h4>
+          
+          <div class="space-y-4">
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-teal-700 mb-2">🕐 Första 24 timmarna</h5>
+              <ul class="space-y-2 text-sm">
+                <li>• Direkt: Vätska, protein & kolhydrater</li>
+                <li>• 2h: Lätt promenad, stretching</li>
+                <li>• 4h: Riktig måltid, fortsätt dricka</li>
+                <li>• Kväll: Foam rolling, tidigt till sängs</li>
+              </ul>
+            </div>
+            
+            <div class="bg-white rounded p-4">
+              <h5 class="font-semibold text-teal-700 mb-2">📅 Första veckan</h5>
+              <ul class="space-y-2 text-sm">
+                <li>• Dag 1-3: Vila eller lätt promenad</li>
+                <li>• Dag 4-5: Lätt cykling eller simning</li>
+                <li>• Dag 6-7: Första lätta joggen (20-30 min)</li>
+                <li>• Fokus: Sömn, nutrition, stretching</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Personliga Tips -->
+      <section class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 text-purple-600">💜 Personliga Tips för Dig</h3>
+        <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-6">
+          <h4 class="font-bold text-lg mb-2">Baserat på Din Profil</h4>
+          <div class="space-y-3">
+            ${generatePersonalizedTips(userData)}
+          </div>
+        </div>
+      </section>
+    </div>
   `;
 }
 
@@ -2959,6 +3175,258 @@ function calculateRequiredVO2Max(targetPace) {
 function calculatePeakMileage(data) {
   const base = parseInt(data.weekly_runs?.split('-')[0] || '3') * 10;
   return Math.round(base * 1.5);
+}
+
+// Helper functions for comprehensive race guide
+function getTypicalWeather(location) {
+  const weatherMap = {
+    'Boston': 'svalt och klart, 10-15°C',
+    'Berlin': 'milt och stabilt, 12-18°C',
+    'Stockholm': 'växlande med risk för regn, 10-20°C',
+    'New York': 'kyligt på morgonen, 8-15°C',
+    'London': 'mulet med risk för regn, 10-16°C'
+  };
+  
+  for (const [city, weather] of Object.entries(weatherMap)) {
+    if (location.includes(city)) return weather;
+  }
+  return 'varierande väder, 10-20°C';
+}
+
+function getKeySpectatorPoints(raceName) {
+  const points = {
+    'Boston Marathon': 'Wellesley College och Heartbreak Hill',
+    'Stockholm Marathon': 'Gamla Stan och Östermalm',
+    'Berlin Marathon': 'Brandenburg Gate och Potsdamer Platz',
+    'New York Marathon': 'Brooklyn och Central Park'
+  };
+  return points[raceName] || 'start- och målområdet';
+}
+
+function getTargetLongRun(distance, fitness) {
+  if (distance.includes('Marathon')) {
+    const targets = {
+      'beginner': '28-30 km',
+      'recreational': '30-32 km',
+      'experienced': '32-35 km',
+      'competitive': '35-38 km'
+    };
+    return targets[fitness] || '30 km';
+  }
+  return '80% av loppdistansen';
+}
+
+function getTempoWorkouts(goal, fitness) {
+  if (goal === 'pb') {
+    return 'Tempopass på måltempo, intervaller för hastighet';
+  } else if (goal === 'finish') {
+    return 'Lugna tempopass för att bygga uthållighet';
+  }
+  return 'Varierade tempopass för allsidig utveckling';
+}
+
+function getTerrainTraining(terrain) {
+  if (terrain === 'Hilly') {
+    return 'Backträning 1-2 ggr/vecka, styrka för quadriceps';
+  } else if (terrain === 'Trail') {
+    return 'Terrängløpning, balans- och stabilitetsövningar';
+  }
+  return 'Varierad träning på olika underlag';
+}
+
+function generateTrainingPhasesHTML(weeks, fitness) {
+  const phases = [];
+  
+  if (weeks > 12) {
+    phases.push(`
+      <div class="border-l-4 border-blue-500 pl-4">
+        <h6 class="font-semibold">Vecka 1-${Math.floor(weeks * 0.3)}: Basbyggande</h6>
+        <p class="text-sm text-gray-600">Fokus på volym och aerob kapacitet</p>
+      </div>
+    `);
+  }
+  
+  phases.push(`
+    <div class="border-l-4 border-green-500 pl-4">
+      <h6 class="font-semibold">Vecka ${Math.floor(weeks * 0.3)}-${Math.floor(weeks * 0.7)}: Uppbyggnad</h6>
+      <p class="text-sm text-gray-600">Öka intensitet och specifik träning</p>
+    </div>
+  `);
+  
+  phases.push(`
+    <div class="border-l-4 border-orange-500 pl-4">
+      <h6 class="font-semibold">Vecka ${Math.floor(weeks * 0.7)}-${weeks - 2}: Toppning</h6>
+      <p class="text-sm text-gray-600">Racefart och mental förberedelse</p>
+    </div>
+  `);
+  
+  phases.push(`
+    <div class="border-l-4 border-purple-500 pl-4">
+      <h6 class="font-semibold">Sista 2 veckorna: Nedtrappning</h6>
+      <p class="text-sm text-gray-600">Minska volym, behåll intensitet</p>
+    </div>
+  `);
+  
+  return phases.join('');
+}
+
+function getRaceBreakfast(distance) {
+  if (distance.includes('Ultra')) {
+    return 'Stor portion havregrynsgröt med banan, bröd med honung, kaffe';
+  } else if (distance.includes('Marathon')) {
+    return 'Havregrynsgröt med banan, vitt bröd med sylt, sportdryck';
+  }
+  return 'Lätt frukost: banan, toast, sportdryck';
+}
+
+function getRaceFueling(distance) {
+  if (distance.includes('Ultra')) {
+    return 'Energi var 30 min, växla mellan gels, bars och riktig mat';
+  } else if (distance.includes('Marathon')) {
+    return 'Energigel var 45 min från 60 min, totalt 4-6 gels';
+  }
+  return 'Sportdryck vid vätskestationer';
+}
+
+function getHydrationStrategy(distance, location) {
+  const base = 'Drick vid alla vätskestationer, lyssna på törsten.';
+  if (location.includes('hot') || location.includes('humid')) {
+    return base + ' Extra fokus på elektrolyter i varmt väder.';
+  }
+  return base + ' Växla mellan vatten och sportdryck.';
+}
+
+function getShoeRecommendation(terrain, distance) {
+  if (terrain === 'Trail') {
+    return 'Terrängskor med bra grepp och skydd';
+  } else if (distance.includes('Ultra')) {
+    return 'Maximalt dämpade skor för lång distans';
+  }
+  return 'Välbeprövade löparskor med 50+ km användning';
+}
+
+function getClothingRecommendation(location) {
+  return 'Tekniskt material, shorts/tights, singlet/t-shirt beroende på väder';
+}
+
+function getChallengingParts(raceName) {
+  const challenges = {
+    'Boston Marathon': 'Newton Hills och Heartbreak Hill',
+    'Stockholm Marathon': 'Västerbron och slutet',
+    'Berlin Marathon': 'km 30-35 när energin tar slut'
+  };
+  return challenges[raceName] || 'de sista 10 kilometrarna';
+}
+
+function getPersonalizedMantra(goal) {
+  const mantras = {
+    'finish': '"Jag klarar detta, ett steg i taget"',
+    'pb': '"Jag är snabb, jag är stark"',
+    'enjoy': '"Njut av resan, le och spring"',
+    'podium': '"Detta är min dag att glänsa"'
+  };
+  return mantras[goal] || '"Jag är redo för denna utmaning"';
+}
+
+function generateRaceDaySchedule(startTime) {
+  const start = parseInt(startTime.split(':')[0]);
+  return `
+    <p><strong>${start - 4}:00</strong> - Vakna, drick vatten</p>
+    <p><strong>${start - 3}:30</strong> - Frukost</p>
+    <p><strong>${start - 2}:00</strong> - Klä om, packa väska</p>
+    <p><strong>${start - 1}:30</strong> - Avresa till start</p>
+    <p><strong>${start - 1}:00</strong> - Lämna väska, toalett</p>
+    <p><strong>${start - 0.5}:00</strong> - Uppvärmning</p>
+    <p><strong>${startTime}</strong> - START! 🎯</p>
+  `;
+}
+
+function getPacingStrategy(goal, distance, fitness) {
+  if (goal === 'finish') {
+    return 'Starta konservativt, håll jämn fart, spara energi till slutet';
+  } else if (goal === 'pb') {
+    return 'Negativ split - något långsammare första halvan, öka andra halvan';
+  }
+  return 'Jämn fart enligt måltempo, lyssna på kroppen';
+}
+
+function getTargetPace(goal, distance, fitness) {
+  // Simplified pace calculation
+  if (distance.includes('Marathon')) {
+    const paces = {
+      'beginner': '6:00-6:30/km',
+      'recreational': '5:00-5:30/km',
+      'experienced': '4:30-5:00/km',
+      'competitive': '3:30-4:30/km'
+    };
+    return paces[fitness] || '5:30/km';
+  }
+  return 'Anpassat efter din förmåga';
+}
+
+function getAidStationStrategy(distance) {
+  if (distance.includes('Ultra')) {
+    return 'Stanna vid varje station, ät och drick ordentligt';
+  } else if (distance.includes('Marathon')) {
+    return 'Drick i farten, gå eventuellt genom stationen för säkerhet';
+  }
+  return 'Ta vatten vid behov';
+}
+
+function generateCommonMistakesHTML(race, fitness) {
+  const mistakes = [
+    {
+      title: '🏃 För snabb start',
+      description: 'Adrenalinet får många att starta för snabbt. Håll dig till din plan!'
+    },
+    {
+      title: '💧 Otillräcklig vätska',
+      description: 'Börja dricka tidigt, vänta inte tills du är törstig'
+    },
+    {
+      title: '👟 Nya skor/kläder',
+      description: 'Använd ALDRIG oprövad utrustning på racedagen'
+    },
+    {
+      title: '🍝 Experimentera med mat',
+      description: 'Ät samma frukost som du testat på långpassen'
+    },
+    {
+      title: '😰 Panik vid motgång',
+      description: 'Ha en plan B - alla har svåra stunder i ett lopp'
+    }
+  ];
+  
+  return mistakes.map(mistake => `
+    <div class="bg-white rounded p-4">
+      <h5 class="font-semibold text-yellow-700 mb-1">${mistake.title}</h5>
+      <p class="text-sm">${mistake.description}</p>
+    </div>
+  `).join('');
+}
+
+function generatePersonalizedTips(userData) {
+  const tips = [];
+  
+  if (userData.current_fitness === 'beginner') {
+    tips.push('<p>🌟 <strong>För dig som nybörjare:</strong> Fokusera på att fullfölja, inte på tiden. Detta är din första stora prestation!</p>');
+  }
+  
+  if (userData.weekly_runs && userData.weekly_runs.includes('2-3')) {
+    tips.push('<p>💪 <strong>Träningsfrekvens:</strong> Med 2-3 pass/vecka är kvalitet viktigare än kvantitet. Gör varje pass meningsfullt.</p>');
+  }
+  
+  if (userData.race_goal === 'pb') {
+    tips.push('<p>⚡ <strong>För ditt PB-mål:</strong> Disciplin med tempo är nyckeln. Motstå frestelsen att köra för hårt tidigt.</p>');
+  }
+  
+  if (userData.recovery_priority === 'low') {
+    tips.push('<p>🔄 <strong>Återhämtning:</strong> Du har angett låg prioritet på återhämtning - detta är din svaga punkt. Fokusera extra på vila!</p>');
+  }
+  
+  tips.push('<p>❤️ <strong>Kom ihåg:</strong> Du har förberett dig väl. Lita på träningen och njut av upplevelsen!</p>');
+  
+  return tips.join('');
 }
 
 module.exports = router;
